@@ -4,6 +4,21 @@ var path = require('path');
 var app = express();
 
 
+// *******  if need to server side rendering *********
+
+// View engine setup  (needs "views" directory )
+app.set('views', path.join(__dirname, 'views'));
+
+// choose one
+app.set('view engine', 'ejs'); // option-1 
+app.set('view engine', 'pug'); // option-2
+
+// if need to sent any static file to client (needs "public" directory )
+app.use(express.static(path.join(__dirname, 'public')));
+
+// *********************************************
+
+
 // parse JSON (parse application/json)
 app.use(express.json());
 
