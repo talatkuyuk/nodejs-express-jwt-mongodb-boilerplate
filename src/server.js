@@ -1,6 +1,8 @@
 var express = require('express');
 var path = require('path');
 
+require('dotenv').config({example: __dirname + '/.env.example'});
+
 var app = express();
 
 
@@ -30,8 +32,7 @@ app.get('/', (req, res, next) => {
     res.send("Hello");
 })
 
-var port = 3000;
 
-app.listen(port, function () {
-    console.log('Server started on port ' + port);
+app.listen(process.env.PORT, function () {
+    console.log('Server started on port ' + process.env.PORT);
 });
