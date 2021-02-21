@@ -19,6 +19,7 @@
   "homepage": "https://github.com/talatkuyuk/node-express-mongo-boilerplate-tk#readme",
   "dependencies": {
     "dotenv-safe": "^8.2.0",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "express-validator": "^6.9.2"
   }
 }

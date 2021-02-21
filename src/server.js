@@ -32,6 +32,25 @@ app.get('/', (req, res, next) => {
     res.send("Hello");
 })
 
+const { loginValidationRules, signupValidationRules, validate } = require('./validations')
+
+app.post('/login', loginValidationRules(), validate, (req, res) => {
+  var login = {
+    username: req.body.username,
+    password: req.body.password,
+  };
+  res.json(login);
+})
+
+app.post('/signup', signupValidationRules(), validate, (req, res) => {
+  var login = {
+    username: req.body.username,
+    password: req.body.password,
+    passwordConfirmation: req.body.password,
+  };
+  res.json(login);
+})
+
 
 app.listen(process.env.PORT, function () {
     console.log('Server started on port ' + process.env.PORT);
