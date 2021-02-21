@@ -17,7 +17,6 @@ const signupValidationRules = [
 
     body('password').isLength({ min: 5 }),
 
-    // passwordConfirmation must matched with password
     body('passwordConfirmation').custom((value, { req }) => {
       if (value !== req.body.password) {
         throw new Error('Password confirmation does not match password');
@@ -25,7 +24,7 @@ const signupValidationRules = [
       return true; // Indicates the success
     }),
 
-    // check E-mail already in use
+    // check E-mail is already in use
     body('email').custom( (value) => {
       try {
         return User.findUserByEmail(value).then(user => {
