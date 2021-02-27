@@ -2,6 +2,7 @@ var express     = require('express');
 var path        = require('path');
 let helmet 			= require("helmet");
 let crossdomain = require("helmet-crossdomain");
+let noCache 			= require("nocache");
 
 const routes = require('../routes');
 const config = require('../config');
@@ -26,7 +27,7 @@ function initViewEngine(app) {
 
 		// Disable views cache
 		app.set("view cache", false);
-		app.use(helmet.noCache());
+		app.use(noCache());
 
 		// Jade options: Don't minify html, debug intrumentation
 		app.locals.pretty = true;
@@ -34,7 +35,7 @@ function initViewEngine(app) {
 
 	} else {
 		app.locals.cache = "memory";
-		app.set("view cache", true);
+		app.set("view cache", true); // it is default in production
 	}
 }
 // *******************************************************************
