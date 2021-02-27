@@ -1,7 +1,8 @@
 
 const config = require('./config');
 const app = require('./core/express');
+const logger = require('./core/logger')
 
 app.listen(config.port, function () {
-    console.log('Server started on port ' + config.port);
+    logger.info('Server started on port ' + config.port);
 });
