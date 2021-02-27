@@ -2,7 +2,8 @@ var express     = require('express');
 var path        = require('path');
 let helmet 			= require("helmet");
 let crossdomain = require("helmet-crossdomain");
-let noCache 			= require("nocache");
+let noCache 		= require("nocache");
+let cors        = require("cors");
 
 const routes = require('../routes');
 const config = require('../config');
@@ -56,6 +57,10 @@ app.use(express.json());
 
 // parse urlencoded bodies (parse application/x-www-form-urlencoded)
 app.use(express.urlencoded({ extended: true }));
+
+// enable cors
+app.use(cors());
+app.options('*', cors());
 
 // limit repeated failed requests to auth endpoints
 if (config.env === 'production') {
