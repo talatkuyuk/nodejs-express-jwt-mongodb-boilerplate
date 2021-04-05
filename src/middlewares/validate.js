@@ -1,32 +1,51 @@
+const httpStatus = require('http-status');
+const ApiError = require('../utils/ApiError');
 const { validationResult } = require('express-validator')
+
 
 const validate = (rulesSchema) => async (req, res, next) => {
 
-  await Promise.all(rulesSchema.map((rulesSchema) => rulesSchema.run(req)));
+  	await Promise.all(rulesSchema.map((rulesSchema) => rulesSchema.run(req)));
 
-  const errors = validationResult(req)
-  if (errors.isEmpty()) {
-    return next();
-  }
+  	const errors = validationResult(req)
+  	if (errors.isEmpty()) {
+    	return next();
+ 	}
   
-  const extractedErrors = [];
-  const extactedErrorObject = {};
+  	const xerrors = {};
   
-  errors.array().map(err => {
-      // check if a param's error already exists. (only first error will be pushed for a spesific param)
-      let bool = extractedErrors.some(item => item.hasOwnProperty(err.param));
-      if (!bool) {
-        extractedErrors.push({ [err.param]: err.msg });
-        extactedErrorObject[err.param] = err.msg;
-      } 
-  })
-  
+  	errors.array().map(err => {
+		xerrors[err.param] = xerrors[err.param] ? [...xerrors[err.param], err.msg] : [err.msg];
+  	});
 
-  return res.status(422).json({
-    errors: errors.array(), // { "Errors": [ { value, msg, param, location }, { ... } ]}
-    extractedErrors, // { "Errors": [ { param: msg }, { ... } ]}
-    extactedErrorObject, // { param: msg, ... }
-  })
+	const error = new ApiError(
+		httpStatus.UNPROCESSABLE_ENTITY, // statusCode: 422
+		"Validation Error", // message
+		xerrors, // errors
+		true // isOperaional
+	); 
+  
+	next(error);
+	
+	// return res.status(422).json({
+	// 	errors: xerrors
+	// })
 }
 
 module.exports = validate;
+
+// {
+//     "errors": {
+//         "param1": [
+//             "message"
+//         ],
+//         "param2": [
+//             "message"
+//         ],
+//         "param3": [
+//             "message1",
+//             "message2"
+//         ]
+//     }
+// }
+

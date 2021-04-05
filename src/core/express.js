@@ -1,13 +1,17 @@
-var express     = require('express');
-var path        = require('path');
-let helmet 			= require("helmet");
-let crossdomain = require("helmet-crossdomain");
-let noCache 		= require("nocache");
-let cors        = require("cors");
+var express      = require('express');
+var path         = require('path');
+let helmet 		 = require("helmet");
+let crossdomain  = require("helmet-crossdomain");
+let noCache 	 = require("nocache");
+let cors         = require("cors");
+const httpStatus = require('http-status');
 
-const routes = require('../routes');
-const config = require('../config');
+const routes     = require('../routes');
+const config     = require('../config');
+const morgan     = require('./morgan');
+const ApiError   = require('../utils/ApiError');
 
+const { errorConverter, errorHandler } = require('../middlewares/error');
 const { authLimiter } = require('../middlewares/rateLimiter');
 
 
@@ -43,31 +47,50 @@ function initViewEngine(app) {
 
 var app = express();
 
+// log requests via morgan handler
+if (config.env !== 'test') {
+  app.use(morgan.successHandler);
+  app.use(morgan.errorHandler);
+}
+
 // set security HTTP headers
 app.use(helmet());
 
 // Sets X-Permitted-Cross-Domain-Policies: none
 app.use(crossdomain())
 
-// if need to server side rendering 
+// if need to server side rendering (optional)
 initViewEngine(app)
 
-// parse JSON (parse application/json)
+// parse JSON bodies (application/json)
 app.use(express.json());
 
-// parse urlencoded bodies (parse application/x-www-form-urlencoded)
+// parse urlencoded bodies (application/x-www-form-urlencoded)
 app.use(express.urlencoded({ extended: true }));
 
 // enable cors
 app.use(cors());
 app.options('*', cors());
 
+app.set('strict mode', true);
+
 // limit repeated failed requests to auth endpoints
 if (config.env === 'production') {
     app.use('/auth', authLimiter);
-  }
+}
   
 // routes
 app.use('/', routes);
+
+// send back a 404 error for any unknown api request
+app.use((req, res, next) => {
+  next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
+});
+
+// convert error to ApiError
+app.use(errorConverter);
+
+// handle error
+app.use(errorHandler);
 
 module.exports = app;
