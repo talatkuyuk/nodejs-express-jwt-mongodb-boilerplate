@@ -26,7 +26,7 @@ const errorConverter = (err, req, res, next) => {
       message = httpStatus[httpStatus.INTERNAL_SERVER_ERROR];
     }
   
-	// morgan uses the errorMessage in res.locals to tokenize
+	// morgan handler uses the errorMessage in res.locals to tokenize
     res.locals.errorMessage = message;
   
     const response = {
