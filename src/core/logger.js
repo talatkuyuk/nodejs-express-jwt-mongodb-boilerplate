@@ -1,6 +1,7 @@
 const winston = require('winston');
 const config = require('../config');
 
+// if it is Error object, get error stack as a message
 const enumerateErrorFormat = winston.format((info) => {
   if (info instanceof Error) {
     Object.assign(info, { message: info.stack });

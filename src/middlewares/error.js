@@ -18,20 +18,22 @@ const errorConverter = (err, req, res, next) => {
 
   // eslint-disable-next-line no-unused-vars
   const errorHandler = (err, req, res, next) => {
-    let { statusCode, message, errors } = err;
+
+    let { statusCode, message, errors, stack } = err;
 
     if (config.env === 'production' && !err.isOperational) {
       statusCode = httpStatus.INTERNAL_SERVER_ERROR;
       message = httpStatus[httpStatus.INTERNAL_SERVER_ERROR];
     }
   
-    res.locals.errorMessage = err.message;
+	// morgan uses the errorMessage in res.locals to tokenize
+    res.locals.errorMessage = message;
   
     const response = {
       code: statusCode,
       message,
-	  ...(errors && { errors: errors }),
-      ...(config.env === 'development' && { stack: err.stack }),
+	  ...(errors && { errors }), // { errors: errors }
+      ...(config.env === 'development' && { stack }) // { stack: stack }
     };
   
 	// shows the error object (error message and error stack) in terminal
