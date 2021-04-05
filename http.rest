@@ -1,0 +1,35 @@
+### Hello
+GET http://localhost:3000/
+
+
+### Not Found Request
+GET http://localhost:3000/comments
+
+
+### LOGIN SUCCESS
+POST http://localhost:3000/auth/login
+Content-Type: application/x-www-form-urlencoded
+Authorization: token xxx
+
+&username=tt@tt.net
+&password=x12345
+
+
+### LOGIN FAILED
+POST http://localhost:3000/auth/login
+Content-Type: application/x-www-form-urlencoded
+Authorization: token xxx
+
+&username=tt@tt
+&password=x12
+
+
+### REGISTER FAILED
+POST http://localhost:3000/auth/signup
+Content-Type: application/x-www-form-urlencoded
+Authorization: token xxx
+
+&username=
+&password=123456
+&passwordConfirmation=123456
+&email=tt@tt.net

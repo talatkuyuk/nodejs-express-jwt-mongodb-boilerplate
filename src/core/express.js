@@ -83,9 +83,7 @@ if (config.env === 'production') {
 app.use('/', routes);
 
 // send back a 404 error for any unknown api request
-app.use((req, res, next) => {
-  next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
-});
+app.use((req, res, next) => next(ApiError.notFound()));
 
 // convert error to ApiError
 app.use(errorConverter);

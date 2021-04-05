@@ -1,3 +1,5 @@
+const httpStatus = require('http-status');
+
 // For information
 // interface Error {
 //     name: string;
@@ -17,6 +19,10 @@ class ApiError extends Error {
         Error.captureStackTrace(this, this.constructor);
       }
     }
+
+	static notFound() {
+		return new ApiError(httpStatus.NOT_FOUND, 'Not found');
+	}
 }
   
 module.exports = ApiError;
