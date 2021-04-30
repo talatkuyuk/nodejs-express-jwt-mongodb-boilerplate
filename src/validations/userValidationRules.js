@@ -47,9 +47,9 @@ const addUser = [
 	...check_body_profiles,
 
 	body().custom( (body, { req }) => {
-        const validKeys = ['email', 'password', 'role', 'name', 'gender', 'country'];
-        return Object.keys(req.body).every(key => validKeys.includes(key));
-    }).withMessage('Any extra parameter is not allowed'),
+		const validKeys = ['email', 'password', 'role', 'name', 'gender', 'country'];
+		return Object.keys(req.body).every(key => validKeys.includes(key));
+	}).withMessage('Any extra parameter is not allowed'),
 
 	// check E-mail is already in use
     body('email').custom(async (value) => {
@@ -72,13 +72,22 @@ const updateUser = [
 	...check_body_profiles,
 
 	body().custom( (body, { req }) => {
-        const validKeys = ['name', 'gender', 'country'];
-        return Object.keys(req.body).every(key => validKeys.includes(key));
-    }).withMessage('Any extra parameter is not allowed'),
+		const validKeys = ['name', 'gender', 'country'];
+		return Object.keys(req.body).every(key => validKeys.includes(key));
+	}).withMessage('Any extra parameter is not allowed'),
 ];
 
 const deleteUser = [
 	...check_param_id,
+];
+
+const changeRole = [
+	...check_param_id,
+	body('role', `role could be one of ${roles}`).isIn(roles),
+	body().custom( (body, { req }) => {
+		const validKey = 'role';
+		return Object.keys(req.body).every(key => validKey === key);
+	}).withMessage('Any extra parameter is not allowed'),
 ];
 
 module.exports = {
@@ -87,4 +96,5 @@ module.exports = {
 	addUser,
 	updateUser,
 	deleteUser,
+	changeRole
 };

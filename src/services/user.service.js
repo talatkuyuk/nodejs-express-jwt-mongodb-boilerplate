@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
 
 const { User } = require('../models');
+const authuserService = require('./authuser.service');
 
 const mongodb = require('../core/mongodb');
 const ObjectId = require('mongodb').ObjectId;
@@ -114,11 +115,46 @@ const createUser = async (id, email) => {
 	}
 };
 
+/**
+ * Change user role
+ * @param {string} id
+ * @param {string} role
+ * @returns {Promise}
+ */
+ const changeUserRole = async (id, role) => {
+	try {
+		await authuserService.updateAuthUserById(ObjectId(id), {role}); 
+		
+	} catch (error) {
+		throw error;
+	}
+};
+
+
+/**
+ * Toggle (Enable or Disable) user
+ * @param {string} id
+ * @param {string} role
+ * @returns {Promise}
+ */
+ const toggleAbilityOfUser = async (id) => {
+	try {
+		const user = await authuserService.getAuthUserById(ObjectId(id));
+		const ability = user.disabled;
+		await authuserService.updateAuthUserById(ObjectId(id), {disabled: !ability}); 
+		
+	} catch (error) {
+		throw error;
+	}
+};
+
 
 module.exports = {
 	createUser,
 	getUserById,
 	updateUserById,
 	deleteUserById,
-	addUserToDeletedUsers
+	addUserToDeletedUsers,
+	changeUserRole,
+	toggleAbilityOfUser
 };

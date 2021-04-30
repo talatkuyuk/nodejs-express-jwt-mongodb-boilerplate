@@ -44,6 +44,9 @@ const loginWithEmailAndPassword = async (email, password) => {
   if (!user || !(await user.isPasswordMatch(password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
   }
+  if (user.disabled) {
+	throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
+  }
   return user;
 };
 
@@ -120,6 +123,28 @@ const refreshAuth = async (refreshToken) => {
   }
 };
 
+
+/**
+ * Change password
+ * @param {User} user
+ * @param {string} currentPassword
+ * @param {string} newPassword
+ * @returns {Promise}
+ */
+const changePassword = async (user, currentPassword, newPassword) => {
+	try {
+		if (!(await user.isPasswordMatch(currentPassword))) {
+			throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect password');
+		}
+
+		const password = await bcrypt.hash(newPassword, 8);
+    	await authuserService.updateAuthUserById(user.id, { password });
+
+	} catch (error) {
+		throw error;
+	}
+}
+
 /**
  * Reset password
  * @param {string} resetPasswordToken
@@ -171,6 +196,7 @@ module.exports = {
   logout,
   signout,
   refreshAuth,
+  changePassword,
   resetPassword,
   verifyEmail,
 };

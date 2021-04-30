@@ -34,6 +34,14 @@ const refreshTokens = asyncHandler(async (req, res) => {
   res.send({ ...tokens });
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+	const currentPassword = req.body.currentPassword;
+	const newPassword = req.body.password;
+
+	await authService.changePassword(req.user, currentPassword, newPassword);
+	res.status(httpStatus.NO_CONTENT).send();
+});
+
 const forgotPassword = asyncHandler(async (req, res) => {
   const resetPasswordToken = await tokenService.generateResetPasswordToken(req.body.email);
   await emailService.sendResetPasswordEmail(req.body.email, resetPasswordToken);
@@ -67,6 +75,7 @@ module.exports = {
 	logout,
 	signout,
 	refreshTokens,
+	changePassword,
 	forgotPassword,
 	resetPassword,
 	sendVerificationEmail,

@@ -1,6 +1,6 @@
 ### GET USER BY ID
-GET http://localhost:3000/user/608a751a975a0a44b018c912
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk3NzUxOTUsImV4cCI6MTYxOTc4MjM5NSwidHlwZSI6ImFjY2VzcyJ9.3uExrrM6a9B-ENrXg_UhHckMOLFAbYqh4AaVAgLfigY
+GET http://localhost:3000/user/608c6b3315e6e3194be49df3
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4MTUwNDQsImV4cCI6MTYxOTgyMjI0NCwidHlwZSI6ImFjY2VzcyJ9.nzI4R_luIHcMdgeSrg1k1j7oYWIXdje6RTroRyOBrMc
 
 ### UPDATE USER BY ID
 PATCH http://localhost:3000/user/608a751a975a0a44b018c912
@@ -30,11 +30,23 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxY
 ### ADD USER
 POST http://localhost:3000/user/
 Content-Type: application/x-www-form-urlencoded
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk3NzUxOTUsImV4cCI6MTYxOTc4MjM5NSwidHlwZSI6ImFjY2VzcyJ9.3uExrrM6a9B-ENrXg_UhHckMOLFAbYqh4AaVAgLfigY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4MTUwNDQsImV4cCI6MTYxOTgyMjI0NCwidHlwZSI6ImFjY2VzcyJ9.nzI4R_luIHcMdgeSrg1k1j7oYWIXdje6RTroRyOBrMc
 
 &email=user@gmail.com
 &password=12345678
-&role=admin
+&role=user
 &name=Talat KÜYÜK
 &gender=male
 &country=TUR
+
+
+### TOGGLE USER ABILITY - enable / disable
+PUT http://localhost:3000/user/608c6b3315e6e3194be49df3/toggle
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4MTUwNDQsImV4cCI6MTYxOTgyMjI0NCwidHlwZSI6ImFjY2VzcyJ9.nzI4R_luIHcMdgeSrg1k1j7oYWIXdje6RTroRyOBrMc
+
+### CHANGE USER ROLE
+PUT http://localhost:3000/user/608c6b3315e6e3194be49df3/role
+Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4MTUwNDQsImV4cCI6MTYxOTgyMjI0NCwidHlwZSI6ImFjY2VzcyJ9.nzI4R_luIHcMdgeSrg1k1j7oYWIXdje6RTroRyOBrMc
+
+&role=user

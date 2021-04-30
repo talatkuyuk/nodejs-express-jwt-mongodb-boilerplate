@@ -2,11 +2,12 @@ const bcrypt = require('bcryptjs');
 
 class User {
 
-	constructor(email, password, role = "user", isEmailVerified = false, createdAt = Date.now()) {
+	constructor(email, password, role = "user", isEmailVerified = false, disabled = false, createdAt = Date.now()) {
 		this.email = email;
 		this.password = password;
 		this.role = role;
 		this.isEmailVerified = isEmailVerified;
+		this.disabled = disabled;
 		this.createdAt = createdAt;
 	}
 
@@ -26,7 +27,8 @@ class User {
 			doc.password,
 			doc.role,
 			doc.isEmailVerified,
-			doc.createdAt
+			doc.disabled,
+			doc.createdAt,
 		)
 		user.transformId(doc._id);
 		return user;

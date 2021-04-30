@@ -1,7 +1,6 @@
 const { body, query } = require('express-validator');
 const authuserService = require('../services/authuser.service');
 
-const passwordRegex = `/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/`;
 
 const check_body_refreshToken = [
 	body('refreshToken')
@@ -18,25 +17,30 @@ const check_body_email = [
 const check_body_password = [
 	body('password')
 		.isLength({ min: 8 }).withMessage('password must be minimum 8 characters')
-		.matches(passwordRegex, "i").withMessage('password must contain at least one uppercase, one lowercase, one special char.'),
+		.matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W\_])[A-Za-z\d\W\_]{8,}$/)
+		.withMessage('password must contain at least one uppercase, one lowercase, one number and one special char.'),
+];
+
+const check_body_passwordConfirmation = [
+	body('passwordConfirmation').custom((value, { req }) => {
+		if (value !== req.body.password) {
+		  throw new Error('password confirmation does not match with the password');
+		}
+		return true; // Indicates the success
+	}),
 ];
 
 const loginValidationRules = [
 	...check_body_email,
-	...check_body_password,
+	//...check_body_password,
 ];
 
 
 const signupValidationRules = [
 
-    ...loginValidationRules,
-
-    body('passwordConfirmation').custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error('password confirmation does not match with the password');
-      }
-      return true; // Indicates the success
-    }),
+    ...check_body_email,
+	...check_body_password,
+    ...check_body_passwordConfirmation,
 
     // check E-mail is already in use
     body('email').custom(async (value) => {
@@ -66,6 +70,13 @@ const refreshTokensValidationRules = [
 	...check_body_refreshToken,
 ];
 
+const changePasswordValidationRules = [
+	body('currentPassword')
+		.isLength({ min: 8 }).withMessage('current password must be minimum 8 characters'),
+	...check_body_password,
+	...check_body_passwordConfirmation,
+];
+
 const forgotPasswordValidationRules = [
 	...check_body_email,
 ];
@@ -89,6 +100,7 @@ module.exports = {
 	logoutValidationRules,
 	signoutValidationRules,
 	refreshTokensValidationRules,
+	changePasswordValidationRules,
 	forgotPasswordValidationRules,
 	resetPasswordValidationRules,
 	verifyEmailValidationRules

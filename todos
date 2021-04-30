@@ -1,14 +1,14 @@
 //TODO: change-password
-//TODO: change user role
-//TODO: disable or enable user
 //TODO: query users, getUsers
-//TODO: add pagination to query
+//TODO: add pagination to query users
 //TODO: add mechanism for blacklist of access token in-memory iot invalidate or revoke it
 https://blog.indrek.io/articles/invalidate-jwt/
 https://stackoverflow.com/questions/31919067/how-can-i-revoke-a-jwt-token
 //TODO: implement tokenDAO
+//TODO: implement the Schema Versioning pattern, add a schema_version
 //TODO: arrange errors and http status
 //TODO: set schemas for createcollection and create indexes
+//TODO: add sanitization for the request trim() escape() default(value) etc
 //TODO: further arrange schemas
 //TODO: add loggers for mongo ops and add morgan to id/email
 //TODO: add send email api

@@ -36,15 +36,31 @@ const updateUser = asyncHandler(async (req, res) => {
 });
 
 const deleteUser = asyncHandler(async (req, res) => {
-  const userId = req.params.id;
+  const id = req.params.id;
 
-  await tokenService.removeTokens({ user: ObjectId(userId)});
-  const deletedUser = await userService.deleteUserById(userId); //order is matter, first
-  await authuserService.deleteAuthUserById(userId); //order is matter, second
+  await tokenService.removeTokens({ user: ObjectId(id)});
+  const deletedUser = await userService.deleteUserById(id); //order is matter, first
+  await authuserService.deleteAuthUserById(id); //order is matter, second
   await userService.addUserToDeletedUsers(deletedUser);
 
   res.status(httpStatus.NO_CONTENT).send();
 });
+
+const changeRole = asyncHandler(async (req, res) => {
+	const id = req.params.id;
+	const role = req.body.role
+	await userService.changeUserRole(id, role);
+  
+	res.status(httpStatus.NO_CONTENT).send();
+});
+
+const setAbility = asyncHandler(async (req, res) => {
+	const id = req.params.id;
+	await userService.toggleAbilityOfUser(id);
+  
+	res.status(httpStatus.NO_CONTENT).send();
+});
+
 
 module.exports = {
   getUsers,
@@ -52,4 +68,6 @@ module.exports = {
   addUser,
   updateUser,
   deleteUser,
+  changeRole,
+  setAbility
 };
