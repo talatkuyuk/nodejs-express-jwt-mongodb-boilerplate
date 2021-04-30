@@ -5,12 +5,14 @@ let crossdomain  = require("helmet-crossdomain");
 let noCache 	 = require("nocache");
 let cors         = require("cors");
 const httpStatus = require('http-status');
+const passport 	 = require('passport');
 
 const routes     = require('../routes');
 const config     = require('../config');
 const morgan     = require('./morgan');
 const ApiError   = require('../utils/ApiError');
 
+const { jwtStrategy } = require('./passport');
 const { errorConverter, errorHandler } = require('../middlewares/error');
 const { authLimiter } = require('../middlewares/rateLimiter');
 
@@ -73,6 +75,10 @@ app.use(cors());
 app.options('*', cors());
 
 app.set('strict mode', true);
+
+// jwt authentication
+app.use(passport.initialize());
+passport.use('jwt', jwtStrategy);
 
 // limit repeated failed requests to auth endpoints
 if (config.env === 'production') {

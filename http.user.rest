@@ -1,0 +1,40 @@
+### GET USER BY ID
+GET http://localhost:3000/user/608a751a975a0a44b018c912
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk3NzUxOTUsImV4cCI6MTYxOTc4MjM5NSwidHlwZSI6ImFjY2VzcyJ9.3uExrrM6a9B-ENrXg_UhHckMOLFAbYqh4AaVAgLfigY
+
+### UPDATE USER BY ID
+PATCH http://localhost:3000/user/608a751a975a0a44b018c912
+Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk3NzUxOTUsImV4cCI6MTYxOTc4MjM5NSwidHlwZSI6ImFjY2VzcyJ9.3uExrrM6a9B-ENrXg_UhHckMOLFAbYqh4AaVAgLfigY
+
+&name=Talat KÜYÜK
+&gender=male
+&country=TUR
+
+
+### UPDATE USER BY ID
+PATCH http://localhost:3000/user/608b36ef16f66a734e19be9c
+Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhiMzZlZjE2ZjY2YTczNGUxOWJlOWMiLCJpYXQiOjE2MTk3MzYzMDMsImV4cCI6MTYxOTc0MzUwMywidHlwZSI6ImFjY2VzcyJ9.DSd55anpvFp0j3VFXmXMJL-IE0Ete4Uru37_dqJA5Dk
+
+&name=xx KUYUK
+&gender=none
+&country=USA
+
+
+### DELETE USER BY ID
+DELETE http://localhost:3000/user/608bdcd456419f0fd452633b
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk3NzUxOTUsImV4cCI6MTYxOTc4MjM5NSwidHlwZSI6ImFjY2VzcyJ9.3uExrrM6a9B-ENrXg_UhHckMOLFAbYqh4AaVAgLfigY
+
+
+### ADD USER
+POST http://localhost:3000/user/
+Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk3NzUxOTUsImV4cCI6MTYxOTc4MjM5NSwidHlwZSI6ImFjY2VzcyJ9.3uExrrM6a9B-ENrXg_UhHckMOLFAbYqh4AaVAgLfigY
+
+&email=user@gmail.com
+&password=12345678
+&role=admin
+&name=Talat KÜYÜK
+&gender=male
+&country=TUR

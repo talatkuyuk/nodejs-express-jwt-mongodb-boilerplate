@@ -17,7 +17,8 @@ const validate = (rulesSchema) => async (req, res, next) => {
   
 	// convert errors object to xerrors object as structured below commented.
   	errors.array().map(err => {
-		xerrors[err.param] = xerrors[err.param] ? [...xerrors[err.param], err.msg] : [err.msg];
+		const param = err.param !== "" ? err.param : "body";
+		xerrors[param] = xerrors[param] ? [...xerrors[param], err.msg] : [err.msg];
   	});
 
 	// instead of sending errors directly to the client, we use error handling mechanism below

@@ -3,7 +3,7 @@ const Joi = require('joi');
 
 require('dotenv-safe').config({ example: path.join(__dirname , '../../.env.example') });
 
-// dotenv.config({ path: path.join(__dirname, '../../.env') });
+//dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const envVarsSchema = Joi.object()
   .keys({
@@ -30,24 +30,19 @@ if (error) {
 module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
-  mongoose: {
-    url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
-    options: {
-      useCreateIndex: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    },
-  },
+  mongodb_url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
   jwt: {
     secret: envVars.JWT_SECRET,
     accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
     refreshExpirationDays: envVars.JWT_REFRESH_EXPIRATION_DAYS,
-    resetPasswordExpirationMinutes: 10,
+    resetPasswordExpirationMinutes: envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
+	verifyEmailExpirationMinutes: envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
   },
   email: {
     smtp: {
       host: envVars.SMTP_HOST,
       port: envVars.SMTP_PORT,
+	  secure: false,
       auth: {
         user: envVars.SMTP_USERNAME,
         pass: envVars.SMTP_PASSWORD,

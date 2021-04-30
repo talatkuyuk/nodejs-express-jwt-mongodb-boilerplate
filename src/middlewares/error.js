@@ -1,4 +1,4 @@
-//const mongoose = require('mongoose');
+const mongodb = require('mongodb');
 const httpStatus = require('http-status');
 const config = require('../config');
 const logger = require('../core/logger');
@@ -8,7 +8,8 @@ const ApiError = require('../utils/ApiError');
 const errorConverter = (err, req, res, next) => {
     let error = err;
     if (!(error instanceof ApiError)) {
-      const statusCode = error.statusCode //|| error instanceof mongoose.Error ? httpStatus.BAD_REQUEST : httpStatus.INTERNAL_SERVER_ERROR;
+      const statusCode = error.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
+	  if (error instanceof mongodb.MongoError) statusCode = httpStatus.BAD_REQUEST; //TODO 
       const message = error.message || httpStatus[statusCode];
       error = new ApiError(statusCode, message, null, false, err.stack);
     }
