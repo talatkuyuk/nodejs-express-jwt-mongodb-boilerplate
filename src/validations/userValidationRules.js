@@ -22,9 +22,15 @@ const check_param_id = [
 ];
 
 const check_body_profiles = [
-	body('name', 'name must be minimum 3 characters').isLength({ min: 3 }),
-	body('gender', 'gender could be male, female or none').isIn(["male", "female", "none"]),
+	body('name', 'name must be minimum 2 characters')
+		.isLength({ min: 2 }).escape().trim(),
+
+	body('gender', 'gender could be male, female or none')
+		.trim().toLowerCase().isIn(["male", "female", "none"]),
+
 	body('country')
+		.trim()
+		.toUpperCase()
 		.matches(iso_3166_alpha_3).withMessage("country code must be in the form of iso_3166_alpha_3")
 		.isLength({ max: 3 }).withMessage("country code can't exceed 3 characters")
 		.isLength({ min: 3 }).withMessage("country code can't less than 3 characters"),
@@ -32,6 +38,9 @@ const check_body_profiles = [
 
 const getUsers = [
 	// I don't want to check query string, let it as it is.
+	param("country").toUpperCase(),
+	param("page").default(1),
+	param("size").default(20),
 ];
 
 const getUser = [
@@ -42,7 +51,7 @@ const getUser = [
 const addUser = [
 	...loginValidationRules,
 
-	body('role', `role could be one of ${roles}`).isIn(roles),
+	body('role', `role could be one of ${roles}`).trim().isIn(roles),
 
 	...check_body_profiles,
 
@@ -83,7 +92,7 @@ const deleteUser = [
 
 const changeRole = [
 	...check_param_id,
-	body('role', `role could be one of ${roles}`).isIn(roles),
+	body('role', `role could be one of ${roles}`).trim().isIn(roles),
 	body().custom( (body, { req }) => {
 		const validKey = 'role';
 		return Object.keys(req.body).every(key => validKey === key);

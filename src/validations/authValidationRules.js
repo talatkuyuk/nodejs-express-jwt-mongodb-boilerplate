@@ -9,16 +9,20 @@ const check_body_refreshToken = [
 
 const check_body_email = [
 	body('email')
+	  .trim()
       .exists({checkFalsy: true}).withMessage('email must not be empty or falsy value')
 	  .bail()
-      .isEmail().withMessage('email must be in valid form'),
+      .isEmail().withMessage('email must be in valid form')
+	  .toLowerCase()
 ];
 
 const check_body_password = [
 	body('password')
 		.isLength({ min: 8 }).withMessage('password must be minimum 8 characters')
 		.matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W\_])[A-Za-z\d\W\_]{8,}$/)
-		.withMessage('password must contain at least one uppercase, one lowercase, one number and one special char.'),
+		.withMessage('password must contain at least one uppercase, one lowercase, one number and one special char.')
+		.escape()
+	  	.trim(),
 ];
 
 const check_body_passwordConfirmation = [

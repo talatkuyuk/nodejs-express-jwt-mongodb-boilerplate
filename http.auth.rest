@@ -49,12 +49,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhiMmY2O
 POST http://localhost:3000/auth/refresh-tokens
 Content-Type: application/x-www-form-urlencoded
 
-&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4OTIxNTMsImV4cCI6MTYyMjQ4NDE1MywidHlwZSI6InJlZnJlc2gifQ.CU7f0iXoiwpfJSvO3gd0Mzr1MjvOWnHYvloXVp7LMIw
+&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4OTk0MTYsImV4cCI6MTYyMjQ5MTQxNiwidHlwZSI6InJlZnJlc2gifQ.TVJa9UOQSEcGZ8GkG_Xuf4YkhOoxtrXjTJRYVcA933w
 
 ### SEND VERIFICATION EMAIL
 POST http://localhost:3000/auth/send-verification-email
 Content-Type: application/x-www-form-urlencoded
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk3MzQ1ODksImV4cCI6MTYxOTc0MTc4OSwidHlwZSI6ImFjY2VzcyJ9.-gCW7CX6VA_uVV2m2QPgWSuBdtf5aEtZcarLcaP2qLM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk5NTM4NjMsImV4cCI6MTYxOTk3NTQ2MywidHlwZSI6ImFjY2VzcyJ9.kIEODecH62gWadyqR2IfVIjouxsLej2K5It4WzGpTzY
 
 ### VERIFY EMAIL
 POST http://localhost:3000/auth/verify-email?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk3MzUxNjUsImV4cCI6MTYxOTk1MTE2NSwidHlwZSI6InZlcmlmeUVtYWlsIn0.7JUPOp5L_12Pq2785TJXRnSuu-JmbsPvvFQvlPpsHi8
@@ -76,7 +76,7 @@ Content-Type: application/x-www-form-urlencoded
 ### CHANGE PASSWORD
 POST http://localhost:3000/auth/change-password
 Content-Type: application/x-www-form-urlencoded
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4MjE4MDIsImV4cCI6MTYxOTgyOTAwMiwidHlwZSI6ImFjY2VzcyJ9.-wUJSsSQQ4oztvLRYrwmmihx0LxlfHDY-z1ZFkBi-ss
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk5NTM4NjMsImV4cCI6MTYxOTk3NTQ2MywidHlwZSI6ImFjY2VzcyJ9.kIEODecH62gWadyqR2IfVIjouxsLej2K5It4WzGpTzY
 
 &currentPassword=12345678
 &password=password
@@ -93,12 +93,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxY
   },
   "tokens": {
 	"access": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4OTk0MTYsImV4cCI6MTYxOTkyMTAxNiwidHlwZSI6ImFjY2VzcyJ9.t2SdSt6o00ZfXLa9IXb4wSdasVjYpmJc1xKWLbF8TZ0",
-    "expires": "2021-05-02T02:03:36.273Z"
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk5NTM4NjMsImV4cCI6MTYxOTk3NTQ2MywidHlwZSI6ImFjY2VzcyJ9.kIEODecH62gWadyqR2IfVIjouxsLej2K5It4WzGpTzY",
+    "expires": "2021-05-02T17:11:03.028Z"
   },
   "refresh": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4OTk0MTYsImV4cCI6MTYyMjQ5MTQxNiwidHlwZSI6InJlZnJlc2gifQ.TVJa9UOQSEcGZ8GkG_Xuf4YkhOoxtrXjTJRYVcA933w",
-    "expires": "2021-05-31T20:03:36.275Z"
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk5NTM4NjMsImV4cCI6MTYyMjU0NTg2MywidHlwZSI6InJlZnJlc2gifQ.rhIgHr002mhUJbrkeMfKWVl4bWSHtC_GJ4RZ40CQtpU",
+    "expires": "2021-06-01T11:11:03.031Z"
   }
   }
 }

@@ -5,7 +5,6 @@ https://stackoverflow.com/questions/31919067/how-can-i-revoke-a-jwt-token
 //TODO: implement the Schema Versioning pattern, add a schema_version
 //TODO: arrange errors and http status
 //TODO: set schemas for createcollection and create indexes
-//TODO: add sanitization for the request trim() escape() default(value) etc
 //TODO: further arrange schemas
 //TODO: add loggers for mongo ops and add morgan to id/email
 //TODO: add send email api
