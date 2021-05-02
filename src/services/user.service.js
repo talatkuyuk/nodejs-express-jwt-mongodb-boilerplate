@@ -9,6 +9,87 @@ const ObjectId = require('mongodb').ObjectId;
 
 
 /**
+ * Query for users
+ * @param {Object} filterLeft - Mongo filter for authusers
+ * @param {Object} filterRight - Mongo filter for users
+ * @param {Object} sort - Sort option in the format: { field1: 1, field2: -1}
+ * @param {number} limit - Maximum number of results per page (default = 20)
+ * @param {number} page - Current page (default = 1)
+ * @returns {Promise<QueryResult>}
+ */
+ const queryUsers = async (filterLeft, filterRight, sort, skip, limit) => {
+	 try {
+		 const db = mongodb.getDatabase();
+	 
+		 const pipeline = [
+			 {
+				$match: filterLeft
+			 },
+			 { 
+				 $lookup: {
+					 from: 'users',
+					 localField: '_id',
+					 foreignField: '_id',
+					 as: 'details',
+				 }
+			 },
+			 {
+				$unwind: "$details"
+			 },
+			 {
+				 $project:{
+					 email:1,
+					 role:1,
+					 isEmailVerified:1,
+					 disabled:1,
+					 createdAt:1,
+					 name: "$details.name",
+					 gender: "$details.gender",
+					 country: "$details.country",
+				 }
+			 },
+			 {
+				$match: filterRight
+			 },
+			 {
+				 $sort: sort
+			 },
+			 {
+				$facet:{
+					users: [{ $skip: skip }, { $limit: limit}],
+					totalCount: [
+						{
+							$count: 'count'
+						}
+					]
+			  	}
+			 }
+		 ]
+
+		 const total_pipeline = [
+			{ 
+				"$count": "count",
+			},
+		 ]
+
+		 const currentPage = 2;
+		 const RESULTS_PER_PAGE = 10;
+
+		
+
+		//   db.collection.aggregate( [
+		// 	{ $group: { _id: null, myCount: { $sum: 1 } } },
+		// 	{ $project: { _id: 0 } }
+		//  ] )
+	 
+		return await db.collection("authusers").aggregate(pipeline).toArray();
+		 
+	 } catch (error) {
+		 throw error;
+	 }
+};
+
+/**
  * Create a user with the same id of the authuser
  * @param {ObjectId} id
  * @param {string} email
@@ -150,6 +231,7 @@ const createUser = async (id, email) => {
 
 
 module.exports = {
+	queryUsers,
 	createUser,
 	getUserById,
 	updateUserById,

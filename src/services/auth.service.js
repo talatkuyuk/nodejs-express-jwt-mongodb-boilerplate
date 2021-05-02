@@ -114,6 +114,10 @@ const refreshAuth = async (refreshToken) => {
 
     const user = await authuserService.getAuthUserById(refreshTokenDoc.user);
     if (!user) throw new Error("User not found");
+
+	if (user.disabled) {
+		throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
+	}
     
 	await tokenService.removeToken(refreshTokenDoc._id);
     return tokenService.generateAuthTokens(user);

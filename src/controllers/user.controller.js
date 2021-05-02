@@ -2,17 +2,39 @@ const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler');
 const ObjectId = require('mongodb').ObjectId;
 
-const pick = require('../utils/pick');
+const Utils = require('../utils/Utils');
 const ApiError = require('../utils/ApiError');
 
 const { tokenService, authService, authuserService, userService } = require('../services');
 
 
 const getUsers = asyncHandler(async (req, res) => {
-  const filter = pick(req.query, ['name', 'role']);
-  const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await userService.queryUsers(filter, options);
-  res.send(result);
+  const DEFAULT_PAGE_SIZE = 20;
+  const DEFAULT_PAGE = 1;
+
+  const filter = Utils.pick(req.query, ['email', 'role', 'isEmailVerified', 'disabled']);
+  const filterLeft = Utils.parseBooleans(filter, ['isEmailVerified', 'disabled']);
+
+  const filterRight = Utils.pick(req.query, ['name', 'country', 'gender']);
+
+  const currentPage = parseInt(req.query.page) || DEFAULT_PAGE;
+  const sort = Utils.pickSort(req.query);
+  const limit = parseInt(req.query.size) || DEFAULT_PAGE_SIZE;
+  const skip = (currentPage - 1) * limit; 
+  
+  console.log(filterLeft, filterRight, sort, skip, limit);
+  const result = await userService.queryUsers(filterLeft, filterRight, sort, skip, limit);
+
+  let totalCount;
+  if (result[0]["totalCount"].length > 0)
+  	totalCount = result[0]["totalCount"] = result[0]["totalCount"][0]["count"];
+  else
+  	totalCount = result[0]["totalCount"] = 0;
+
+  const totalPages = Math.ceil(totalCount / limit);
+  result[0]["pagination"] = { perPage: limit, currentPage, totalPages};
+
+  res.send(result[0]);
 });
 
 const getUser = asyncHandler(async (req, res) => {

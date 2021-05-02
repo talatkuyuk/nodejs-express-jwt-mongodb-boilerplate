@@ -31,7 +31,7 @@ const check_body_profiles = [
 ];
 
 const getUsers = [
-	
+	// I don't want to check query string, let it as it is.
 ];
 
 const getUser = [

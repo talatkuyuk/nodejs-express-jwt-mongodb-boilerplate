@@ -49,7 +49,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhiMmY2O
 POST http://localhost:3000/auth/refresh-tokens
 Content-Type: application/x-www-form-urlencoded
 
-&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4MTUwNDQsImV4cCI6MTYyMjQwNzA0NCwidHlwZSI6InJlZnJlc2gifQ.QgcFNPyMZJ9miiqAvo9rIeV4Wfp8HRvKyp2GSqLa5Po
+&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4OTIxNTMsImV4cCI6MTYyMjQ4NDE1MywidHlwZSI6InJlZnJlc2gifQ.CU7f0iXoiwpfJSvO3gd0Mzr1MjvOWnHYvloXVp7LMIw
 
 ### SEND VERIFICATION EMAIL
 POST http://localhost:3000/auth/send-verification-email
@@ -93,12 +93,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxY
   },
   "tokens": {
 	"access": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4MjE4MDIsImV4cCI6MTYxOTgyOTAwMiwidHlwZSI6ImFjY2VzcyJ9.-wUJSsSQQ4oztvLRYrwmmihx0LxlfHDY-z1ZFkBi-ss",
-    "expires": "2021-05-01T00:30:02.030Z"
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4OTk0MTYsImV4cCI6MTYxOTkyMTAxNiwidHlwZSI6ImFjY2VzcyJ9.t2SdSt6o00ZfXLa9IXb4wSdasVjYpmJc1xKWLbF8TZ0",
+    "expires": "2021-05-02T02:03:36.273Z"
   },
   "refresh": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4MjE4MDIsImV4cCI6MTYyMjQxMzgwMiwidHlwZSI6InJlZnJlc2gifQ.TmEM102-qMmrYthXmpx-cbKBHOiWvpxuyl0tSVztrlQ",
-    "expires": "2021-05-30T22:30:02.033Z"
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4OTk0MTYsImV4cCI6MTYyMjQ5MTQxNiwidHlwZSI6InJlZnJlc2gifQ.TVJa9UOQSEcGZ8GkG_Xuf4YkhOoxtrXjTJRYVcA933w",
+    "expires": "2021-05-31T20:03:36.275Z"
   }
   }
 }
