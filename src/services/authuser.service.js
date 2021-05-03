@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
 
-const { User } = require('../models');
+const { AuthUser } = require('../models');
 
 const mongodb = require('../core/mongodb');
 const ObjectId = require('mongodb').ObjectId;
@@ -14,8 +14,8 @@ const ApiError = require('../utils/ApiError');
  */
  const isValidUser = async function (id) {
 	var db = mongodb.getDatabase();
-	const user = await db.collection("authusers").findOne({ _id: ObjectId(id) });
-	return !!user;
+	const authuser = await db.collection("authusers").findOne({ _id: ObjectId(id) });
+	return !!authuser;
 };
 
 /**
@@ -25,8 +25,8 @@ const ApiError = require('../utils/ApiError');
  */
 const isEmailTaken = async function (email) {
 	var db = mongodb.getDatabase();
-	const user = await db.collection("authusers").findOne({ email });
-	return !!user;
+	const authuser = await db.collection("authusers").findOne({ email });
+	return !!authuser;
 };
 
 /**
@@ -37,28 +37,28 @@ const isEmailTaken = async function (email) {
  */
 const isEmailTakenOf = async function (email, excludeUserId) {
 	var db = mongodb.getDatabase();
-	const user = await db.collection("authusers").findOne({ email, _id: { $ne: ObjectId(excludeUserId) } });
-	return !!user;
+	const authuser = await db.collection("authusers").findOne({ email, _id: { $ne: ObjectId(excludeUserId) } });
+	return !!authuser;
 };
 
 /**
  * Create a authuser
  * @param {string} email
  * @param {string} password
- * @returns {Promise<User>}
+ * @returns {Promise<AuthUser>}
  */
 const createAuthUser = async (email, password) => {
 	try {
+		const authuser = new AuthUser(email, password);
 
 		const db = mongodb.getDatabase();
-
-		const user = new User(email, password);
-		const result = await db.collection("authusers").insertOne(user);
-		user.transformId(result.insertedId);
+		const result = await db.collection("authusers").insertOne(authuser);
+		
+		authuser.transformId(result.insertedId);
 
 		console.log(`${result.insertedCount} record is created in authusers.`)
 		
-		return user;
+		return authuser;
 
 	} catch (error) {
 		throw error;
@@ -75,7 +75,8 @@ const getAuthUserById = async (id) => {
 	try {
 		const db = mongodb.getDatabase();
 		const doc = await db.collection("authusers").findOne({_id: ObjectId(id)});
-		return User.fromDoc(doc);
+
+		return AuthUser.fromDoc(doc);
 		
 	} catch (error) {
 		throw error
@@ -91,7 +92,8 @@ const getAuthUserByEmail = async (email) => {
 	try {
 		const db = mongodb.getDatabase();
 		const doc = await db.collection("authusers").findOne({email});
-		return User.fromDoc(doc);
+
+		return AuthUser.fromDoc(doc);
 		
 	} catch (error) {
 		throw error
@@ -102,23 +104,33 @@ const getAuthUserByEmail = async (email) => {
  * Update authuser by id
  * @param {ObjectId} id
  * @param {Object} updateBody
- * @returns {Promise<User>}
+ * @returns {Promise<AuthUser>}
  */
 const updateAuthUserById = async (id, updateBody) => {
+	try {
+		if (updateBody.email && (await isEmailTakenOf(updateBody.email, id))) {
+		  throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+		}
+	  
+		console.log(updateBody);
+	  
+		const db = mongodb.getDatabase();
+	  
+		const result = await db.collection("authusers").findOneAndUpdate(
+		  { _id: ObjectId(id) },
+		  { $set: {...updateBody, updatedAt: Date.now()} },
+		  { returnOriginal: false }
+		);
+	  
+		console.log(`${result.ok} record is updated in users`);
+	  
+		const authuser = AuthUser.fromDoc(result.value);
+		return authuser;
+		
+	} catch (error) {
+		throw error
+	}
   
-  if (updateBody.email && (await isEmailTakenOf(updateBody.email, id))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-  }
-
-  console.log(updateBody);
-
-  const db = mongodb.getDatabase();
-  const result = await db.collection("authusers").updateOne({_id: ObjectId(id)}, { $set: {...updateBody, updatedAt: Date.now()} });
-
-  console.log(`${result.modifiedCount} record is updated in authusers`);
-  
-  let user = await getAuthUserById(id);
-  return user;
 };
 
 /**
@@ -129,8 +141,11 @@ const updateAuthUserById = async (id, updateBody) => {
 const deleteAuthUserById = async (id) => {
 	try {
 		const db = mongodb.getDatabase();
-		const result = await db.collection("authusers").deleteOne({_id: ObjectId(id)});
-		console.log(`${result.deletedCount} record is deleted in authusers`);
+		const result = await db.collection("authusers").findOneAndDelete({_id: ObjectId(id)});
+
+		console.log(`${result.ok} record is deleted in authusers`);
+
+		return AuthUser.fromDoc(result.value);
 		
 	} catch (error) {
 		throw error;

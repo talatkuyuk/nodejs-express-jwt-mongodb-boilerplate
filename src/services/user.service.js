@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
 
-const { User } = require('../models');
+const { AuthUser, User } = require('../models');
 const authuserService = require('./authuser.service');
 
 const mongodb = require('../core/mongodb');
@@ -38,21 +38,21 @@ const ObjectId = require('mongodb').ObjectId;
 			 },
 			 {
 				 $project:{
-					 email:1,
-					 isEmailVerified:1,
-					 disabled:1,
-					 createdAt:1,
-					 name: "$details.name",
+					 email: "$details.email",
+					 isEmailVerified: 1,
+					 disabled: 1,
 					 role: "$details.role",
+					 name: "$details.name",
 					 gender: "$details.gender",
 					 country: "$details.country",
+					 createdAt: 1,
 				 }
 			 },
 			 {
 				$match: filterRight
 			 },
 			 {
-				 $sort: sort
+				$sort: sort
 			 },
 			 {
 				$facet:{
@@ -65,12 +65,6 @@ const ObjectId = require('mongodb').ObjectId;
 			  	}
 			 }
 		 ]
-
-		 const total_pipeline = [
-			{ 
-				"$count": "count",
-			},
-		 ]
 	 
 		return await db.collection("authusers").aggregate(pipeline).toArray();
 		 
@@ -81,14 +75,16 @@ const ObjectId = require('mongodb').ObjectId;
 
 /**
  * Create a user with the same id of the authuser
- * @param {ObjectId} id
- * @param {string} email
+ * @param {AuthUser} authuser
  * @returns {Promise}
  */
-const createUser = async (id, email, role) => {
+const createUser = async (authuser) => {
 	try {
+		const {id, email, createdAt} = authuser;
+
 		const db = mongodb.getDatabase();
-		const result = await db.collection("users").insertOne({_id: id, email, role});
+		const result = await db.collection("users").insertOne({_id: id, email, role: "user", createdAt});
+
 		console.log(`${result.insertedCount} record is created in users.`)
 		
 	} catch (error) {
@@ -104,16 +100,9 @@ const createUser = async (id, email, role) => {
  const getUserById = async (id) => {
 	try {
 		const db = mongodb.getDatabase();
+		const doc = await db.collection("users").findOne({_id: ObjectId(id)});
 
-		const authuserDoc = await db.collection("authusers").findOne({_id: ObjectId(id)});
-		if(!authuserDoc) throw Error("user not found");
-		const user = User.fromDoc(authuserDoc);
-
-		const userDoc = await db.collection("users").findOne({_id: ObjectId(id)});
-		if(!userDoc) throw Error("user not found");
-		user.extendWith(userDoc);
-
-		return user;
+		return User.fromDoc(doc);
 		
 	} catch (error) {
 		throw error
@@ -138,10 +127,9 @@ const createUser = async (id, email, role) => {
 			{ returnOriginal: false }
 		 );
 
-		 console.log(result.value);
 		 console.log(`${result.ok} record is updated in users`);
 
-		 const user = await getUserById(id);
+		 const user = User.fromDoc(result.value);
 		 return user;
 		 
 	 } catch (error) {
@@ -158,11 +146,12 @@ const createUser = async (id, email, role) => {
  */
  const deleteUserById = async (id) => {
 	try {
-		const user = await getUserById(id);
 		const db = mongodb.getDatabase();
-		const result = await db.collection("users").deleteOne({_id: ObjectId(id)});
-		console.log(`${result.deletedCount} record is deleted in users`);
-		return user; // in order to add it to deletedusers
+		const result = await db.collection("users").findOneAndDelete({_id: ObjectId(id)});
+
+		console.log(`${result.ok} record is deleted in users`);
+
+		return User.fromDoc(result.value);
 		
 	} catch (error) {
 		throw error;

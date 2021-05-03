@@ -2,11 +2,12 @@ const bcrypt = require('bcryptjs');
 
 class User {
 
-	constructor(email, password, isEmailVerified = false, disabled = false, createdAt = Date.now()) {
+	constructor(email, role, name, gender, country, createdAt) {
 		this.email = email;
-		this.password = password;
-		this.isEmailVerified = isEmailVerified;
-		this.disabled = disabled;
+		this.role = role;
+		this.name = name;
+		this.gender = gender;
+		this.country = country;
 		this.createdAt = createdAt;
 	}
 
@@ -15,46 +16,24 @@ class User {
 		delete this._id;
 	}
 
-	async isPasswordMatch(password) {
-		return await bcrypt.compare(password, this.password);
-	};
-
 	static fromDoc(doc){
 		if (!doc) return null;
 		const user = new User(
 			doc.email,
-			doc.password,
-			doc.isEmailVerified,
-			doc.disabled,
+			doc.role,
+			doc.name,
+			doc.gender,
+			doc.country,
 			doc.createdAt,
 		)
 		user.transformId(doc._id);
 		return user;
 	}
 
-	// update instance with profile attributes: name, gender, country
-	extendWith(doc) {
-		const excludedKeys = ["_id", "email"];
-		for (const key of Object.keys(doc)) {
-			if (!excludedKeys.includes(key)) this[key] = doc[key];
-		}
-	}
-
-	// allows specific keys for success auth result
-	authfilter(){
-		const user = {};
-		const allowedKeys = ["id", "email", "isEmailVerified"];
-		for (const key of Object.keys(this)) {
-			if (allowedKeys.includes(key)) user[key] = this[key];
-		}
-		user["isAuthorized"] = true;
-		return user;
-	}
-
-	// eleminates private keys like password
+	// eleminates private keys
 	userfilter() {
 		const user = Object.assign({}, this);
-		const notAllowedKeys = ["password", "updatedAt"];
+		const notAllowedKeys = ["updatedAt"];
 		for (const key of Object.keys(user)) {
 			if (notAllowedKeys.includes(key)) delete user[key];
 		}

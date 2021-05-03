@@ -8,10 +8,10 @@ const getUsers = asyncHandler(async (req, res) => {
   const DEFAULT_PAGE_SIZE = 20;
   const DEFAULT_PAGE = 1;
 
-  const filter = Utils.pick(req.query, ['email', 'isEmailVerified', 'disabled']);
+  const filter = Utils.pick(req.query, ['isEmailVerified', 'disabled']);
   const filterLeft = Utils.parseBooleans(filter, ['isEmailVerified', 'disabled']);
 
-  const filterRight = Utils.pick(req.query, ['name', 'role', 'country', 'gender']);
+  const filterRight = Utils.pick(req.query, ['email', 'role', 'name', 'country', 'gender']);
 
   const currentPage = parseInt(req.query.page) || DEFAULT_PAGE;
   const sort = Utils.pickSort(req.query);
@@ -36,35 +36,39 @@ const getUsers = asyncHandler(async (req, res) => {
 
 const getUser = asyncHandler(async (req, res) => {
   const user = await userService.getUserById(req.params.id);
+  
   res.status(httpStatus.OK).send(user.userfilter());
 });
 
 
 const addUser = asyncHandler(async (req, res) => {
 	const {email, password, role, name, gender, country} = req.body;
-	let user = await authService.signupWithEmailAndPassword(email, password);
-	await userService.updateUserById(user.id, {name, role, gender, country});
-	
-	user = await userService.getUserById(user.id);
-	res.send(user.userfilter());
+	const authuser = await authService.signupWithEmailAndPassword(email, password);
+	const user = await userService.updateUserById(authuser.id, {role, name, gender, country});
+
+	res.status(httpStatus.CREATED).send({...authuser.authfilter(), ...user.userfilter()});
 });
 
 
 const updateUser = asyncHandler(async (req, res) => {
-  const user = await userService.updateUserById(req.params.id, req.body);
-  res.send(user.userfilter());
+	const id = req.params.id;
+  	const {name, gender, country} = req.body;
+
+  	const user = await userService.updateUserById(id, {name, gender, country});
+
+  	res.status(httpStatus.OK).send(user.userfilter());
 });
 
 
 const deleteUser = asyncHandler(async (req, res) => {
-  const id = req.params.id;
+	const id = req.params.id;
 
-  await tokenService.removeTokens({ user: id});
-  const deletedUser = await userService.deleteUserById(id); //order is matter, first
-  await authuserService.deleteAuthUserById(id); //order is matter, second
-  await userService.addUserToDeletedUsers(deletedUser);
+	await tokenService.removeTokens({ user: id});
+	const user = await userService.deleteUserById(id);
+	const authuser = await authuserService.deleteAuthUserById(id);
+	await userService.addUserToDeletedUsers({...authuser, ...user});
 
-  res.status(httpStatus.NO_CONTENT).send();
+	res.status(httpStatus.NO_CONTENT).send();
 });
 
 
@@ -73,7 +77,7 @@ const changeRole = asyncHandler(async (req, res) => {
 	const role = req.body.role
 
 	await userService.updateUserById(id, {role});
-  
+
 	res.status(httpStatus.NO_CONTENT).send();
 });
 

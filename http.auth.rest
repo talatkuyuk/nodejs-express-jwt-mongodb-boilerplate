@@ -28,7 +28,7 @@ Content-Type: application/x-www-form-urlencoded
 POST http://localhost:3000/auth/signup
 Content-Type: application/x-www-form-urlencoded
 
-&email=talat@gmail.com
+&email=user1@gmail.com
 &password=Tk3231tK.
 &passwordConfirmation=Tk3231tK.
 
@@ -41,9 +41,9 @@ Content-Type: application/x-www-form-urlencoded
 ### SIGNOUT
 POST http://localhost:3000/auth/signout
 Content-Type: application/x-www-form-urlencoded
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhiMmY2OTFhNjEwMzZiMGQwYjZjZDMiLCJpYXQiOjE2MTk3MzQzNzcsImV4cCI6MTYxOTc0MTU3NywidHlwZSI6ImFjY2VzcyJ9.dY6T5GrITVrJdU15SkAJYfez_DiPAl46PxzZrSaBuQ8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwMWM4ZmU3NmNmYTUzMTViZmYyOTAiLCJpYXQiOjE2MjAwNTcyMzEsImV4cCI6MTYyMDA3ODgzMSwidHlwZSI6ImFjY2VzcyJ9.H41WGElw49uKRpHfdMla2GsMDxNC7OgQZhCMsyOYz_g
 
-&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhiMmY2OTFhNjEwMzZiMGQwYjZjZDMiLCJpYXQiOjE2MTk3MzQzNzcsImV4cCI6MTYyMjMyNjM3NywidHlwZSI6InJlZnJlc2gifQ.GFPw_B3O1ILfFQtH3BoxyZn9k80uqUte_g-qxsmyuAA
+&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwMWM4ZmU3NmNmYTUzMTViZmYyOTAiLCJpYXQiOjE2MjAwNTcyMzEsImV4cCI6MTYyMjY0OTIzMSwidHlwZSI6InJlZnJlc2gifQ.MymdgRrkV47IHZZvX-v25galJGyKtQUBCmTmGnvBPuY
 
 ### REFRESH TOKENS
 POST http://localhost:3000/auth/refresh-tokens
@@ -87,17 +87,17 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhmZDBkN
   "user": {
     "email": "talat@gmail.com",
     "isEmailVerified": false,
-    "id": "60901c8fe76cfa5315bff290",
+    "id": "609057f38b7b7659dc0cdef9",
     "isAuthorized": true
   },
   "tokens": {
     "access": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwMWM4ZmU3NmNmYTUzMTViZmYyOTAiLCJpYXQiOjE2MjAwNTcyMzEsImV4cCI6MTYyMDA3ODgzMSwidHlwZSI6ImFjY2VzcyJ9.H41WGElw49uKRpHfdMla2GsMDxNC7OgQZhCMsyOYz_g",
-      "expires": "2021-05-03T21:53:51.959Z"
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwNTdmMzhiN2I3NjU5ZGMwY2RlZjkiLCJpYXQiOjE2MjAwNzI0MzUsImV4cCI6MTYyMDA5NDAzNSwidHlwZSI6ImFjY2VzcyJ9.ERzxqN8JtNCYFmK6ZHS_Tb1a5tGvgPLDlGcuJjWCBnI",
+      "expires": "2021-05-04T02:07:15.429Z"
     },
     "refresh": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwMWM4ZmU3NmNmYTUzMTViZmYyOTAiLCJpYXQiOjE2MjAwNTcyMzEsImV4cCI6MTYyMjY0OTIzMSwidHlwZSI6InJlZnJlc2gifQ.MymdgRrkV47IHZZvX-v25galJGyKtQUBCmTmGnvBPuY",
-      "expires": "2021-06-02T15:53:51.962Z"
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwNTdmMzhiN2I3NjU5ZGMwY2RlZjkiLCJpYXQiOjE2MjAwNzI0MzUsImV4cCI6MTYyMjY2NDQzNSwidHlwZSI6InJlZnJlc2gifQ.aWBx7QyuoxwspTcRmORtVUfG3cuqwJje4yL4_pYU_Sc",
+      "expires": "2021-06-02T20:07:15.432Z"
     }
   }
 }
@@ -106,17 +106,17 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhmZDBkN
   "user": {
     "email": "user1@gmail.com",
     "isEmailVerified": false,
-    "id": "60901f95bfd7e653b8c9e8c2",
+    "id": "609058268b7b7659dc0cdefb",
     "isAuthorized": true
   },
   "tokens": {
     "access": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwMWY5NWJmZDdlNjUzYjhjOWU4YzIiLCJpYXQiOjE2MjAwNTgzNTksImV4cCI6MTYyMDA3OTk1OSwidHlwZSI6ImFjY2VzcyJ9.bjbSQg9AxdUReX-4eh1TkihrWr9PTRFy730zIZRjT3w",
-      "expires": "2021-05-03T22:12:39.939Z"
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwNTgyNjhiN2I3NjU5ZGMwY2RlZmIiLCJpYXQiOjE2MjAwNzI0ODYsImV4cCI6MTYyMDA5NDA4NiwidHlwZSI6ImFjY2VzcyJ9.hVh4aPGF3kzt1l_Hle_LAm0ZrDmNpnUhxnb2_Zvb6-o",
+      "expires": "2021-05-04T02:08:06.475Z"
     },
     "refresh": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwMWY5NWJmZDdlNjUzYjhjOWU4YzIiLCJpYXQiOjE2MjAwNTgzNTksImV4cCI6MTYyMjY1MDM1OSwidHlwZSI6InJlZnJlc2gifQ.Z_gcKxoBR6B7fpC_uSSF9XeXRl_n3PF_zve38Bf6PmQ",
-      "expires": "2021-06-02T16:12:39.941Z"
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwNTgyNjhiN2I3NjU5ZGMwY2RlZmIiLCJpYXQiOjE2MjAwNzI0ODYsImV4cCI6MTYyMjY2NDQ4NiwidHlwZSI6InJlZnJlc2gifQ.vn_y50kV2v5NZi1gIYMRI_Pc8CwYzKttZHZAGX511Vo",
+      "expires": "2021-06-02T20:08:06.475Z"
     }
   }
 }

@@ -2,25 +2,31 @@ const passport = require('passport');
 const httpStatus = require('http-status');
 
 const ApiError = require('../utils/ApiError');
+const userService = require('../services/user.service');
 const { roleRights } = require('../config/roles');
 
-const verifyCallback = (req, resolve, reject, requiredRights) => async (err, user, info) => {
-  const errorMessage = (err ? err.message : "") + (info ? info : "");
+const verifyCallback = (req, resolve, reject, requiredRights) => async (err, authuser, info) => {
+  //TODO: syntax error was not catched by error handling? let-const
+
+  let errorMessage = (err ? err.message : "") + (info ? info : "");
 
   // if no errormessage
-  if (!user && errorMessage === "") errorMessage = "user not found";
+  if (!authuser && errorMessage === "") errorMessage = "Access token does not refer any user.";
 
-  if (err || info || !user) {
+  if (err || info || !authuser) {
     return reject(new ApiError(httpStatus.UNAUTHORIZED, errorMessage));
   }
 
-  if (user.disabled) {
+  if (authuser.disabled) {
 	return reject(new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`));
   }
 
-  req.user = user;
+  req.user = authuser;
   
   if (requiredRights.length) {
+
+	const user = await userService.getUserById(authuser.id);
+
 	const userRights = roleRights[user.role];
 	const userRightsWithoutSelf = roleRights[user.role].map(right => right.split("@")[0]);
 
@@ -31,7 +37,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
 			return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden. (has no rights)'));
 
 		if (userRights[index].includes("self")) 
-			if (req.params.id && req.params.id !== user.id.toString()) 
+			if (req.params.id && req.params.id !== authuser.id.toString()) 
 				return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden. (only self-data)'));
 	});
   }

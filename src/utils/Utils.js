@@ -22,7 +22,6 @@ class Utils {
 	 */
 	 static pickSort (object) {
 		return ["sort"].reduce((obj, key) => {
-			console.log(typeof(object[key]));
 
 			if (typeof(object[key]) === "object") {
 				object[key].map( item => {
