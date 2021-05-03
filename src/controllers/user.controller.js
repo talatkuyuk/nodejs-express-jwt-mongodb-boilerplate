@@ -1,10 +1,6 @@
 const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler');
-const ObjectId = require('mongodb').ObjectId;
-
 const Utils = require('../utils/Utils');
-const ApiError = require('../utils/ApiError');
-
 const { tokenService, authService, authuserService, userService } = require('../services');
 
 
@@ -34,13 +30,15 @@ const getUsers = asyncHandler(async (req, res) => {
   const totalPages = Math.ceil(totalCount / limit);
   result[0]["pagination"] = { perPage: limit, currentPage, totalPages};
 
-  res.send(result[0]);
+  res.status(httpStatus.OK).send(result[0]);
 });
+
 
 const getUser = asyncHandler(async (req, res) => {
   const user = await userService.getUserById(req.params.id);
-  res.send(user.filter());
+  res.status(httpStatus.OK).send(user.userfilter());
 });
+
 
 const addUser = asyncHandler(async (req, res) => {
 	const {email, password, role, name, gender, country} = req.body;
@@ -49,24 +47,27 @@ const addUser = asyncHandler(async (req, res) => {
 	await userService.updateUserById(user.id, {name, gender, country});
 	
 	user = await userService.getUserById(user.id);
-	res.send(user.filter());
+	res.send(user.userfilter());
 });
+
 
 const updateUser = asyncHandler(async (req, res) => {
   const user = await userService.updateUserById(req.params.id, req.body);
-  res.send(user.filter());
+  res.send(user.userfilter());
 });
+
 
 const deleteUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
 
-  await tokenService.removeTokens({ user: ObjectId(id)});
+  await tokenService.removeTokens({ user: id});
   const deletedUser = await userService.deleteUserById(id); //order is matter, first
   await authuserService.deleteAuthUserById(id); //order is matter, second
   await userService.addUserToDeletedUsers(deletedUser);
 
   res.status(httpStatus.NO_CONTENT).send();
 });
+
 
 const changeRole = asyncHandler(async (req, res) => {
 	const id = req.params.id;
@@ -75,6 +76,7 @@ const changeRole = asyncHandler(async (req, res) => {
   
 	res.status(httpStatus.NO_CONTENT).send();
 });
+
 
 const setAbility = asyncHandler(async (req, res) => {
 	const id = req.params.id;

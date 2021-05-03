@@ -12,23 +12,23 @@ GET http://localhost:3000/comments
 POST http://localhost:3000/auth/login
 Content-Type: application/x-www-form-urlencoded
 
-&email=talatkuyuk@gmail.com
-&password=password
+&email=user5@gmail.com
+&password=Tk3231tK.
 
 
 ### LOGIN FAILED
 POST http://localhost:3000/auth/login
 Content-Type: application/x-www-form-urlencoded
 
-&email=talatkuyuk@gmail.co
-&password=12345678
+&email=user5@gmail.com
+&password=Tk3231tK.
 
 
 ### REGISTER SUCCESS
 POST http://localhost:3000/auth/signup
 Content-Type: application/x-www-form-urlencoded
 
-&email=user4@gmail.com
+&email=user5@gmail.com
 &password=Tk3231tK.
 &passwordConfirmation=Tk3231tK.
 
@@ -49,22 +49,22 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhiMmY2O
 POST http://localhost:3000/auth/refresh-tokens
 Content-Type: application/x-www-form-urlencoded
 
-&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk4OTk0MTYsImV4cCI6MTYyMjQ5MTQxNiwidHlwZSI6InJlZnJlc2gifQ.TVJa9UOQSEcGZ8GkG_Xuf4YkhOoxtrXjTJRYVcA933w
+&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhmZDBkNjY3MmIwODQwM2I5OGM4OTYiLCJpYXQiOjE2MjAwNDE2NzYsImV4cCI6MTYyMjYzMzY3NiwidHlwZSI6InJlZnJlc2gifQ.HyAgjLSXpMU5tFA56w8MsuBG22M0Yjv_De9cLpBcki8
 
 ### SEND VERIFICATION EMAIL
 POST http://localhost:3000/auth/send-verification-email
 Content-Type: application/x-www-form-urlencoded
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk5NTM4NjMsImV4cCI6MTYxOTk3NTQ2MywidHlwZSI6ImFjY2VzcyJ9.kIEODecH62gWadyqR2IfVIjouxsLej2K5It4WzGpTzY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhmZDBkNjY3MmIwODQwM2I5OGM4OTYiLCJpYXQiOjE2MjAwNDE3NDQsImV4cCI6MTYyMDA2MzM0NCwidHlwZSI6ImFjY2VzcyJ9.h7xkyqrwmtgJblUYSisY9o_oCcip5ijTd6LVKL6ejng
 
 ### VERIFY EMAIL
 POST http://localhost:3000/auth/verify-email?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk3MzUxNjUsImV4cCI6MTYxOTk1MTE2NSwidHlwZSI6InZlcmlmeUVtYWlsIn0.7JUPOp5L_12Pq2785TJXRnSuu-JmbsPvvFQvlPpsHi8
 
 
-### FORGOT PASSWORD
+### FORGOT PASSWORD (SEND EMAIL RESET TOKEN)
 POST http://localhost:3000/auth/forgot-password
 Content-Type: application/x-www-form-urlencoded
 
-&email=talatkuyuk@gmail.com
+&email=user5@gmail.com
 
 ### RESET PASSWORD
 POST http://localhost:3000/auth/reset-password?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDg5YWFmMzFhMTI1YmVkZGRjMTFhNTgiLCJpYXQiOjE2MTk2MzU1ODYsImV4cCI6MTYxOTYzNjE4NiwidHlwZSI6InJlc2V0UGFzc3dvcmQifQ.mwrmfYXh63iRaTJgueKJCZvtdwlRZARZZuUxwDicZeM
@@ -76,11 +76,11 @@ Content-Type: application/x-www-form-urlencoded
 ### CHANGE PASSWORD
 POST http://localhost:3000/auth/change-password
 Content-Type: application/x-www-form-urlencoded
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk5NTM4NjMsImV4cCI6MTYxOTk3NTQ2MywidHlwZSI6ImFjY2VzcyJ9.kIEODecH62gWadyqR2IfVIjouxsLej2K5It4WzGpTzY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhmZDBkNjY3MmIwODQwM2I5OGM4OTYiLCJpYXQiOjE2MjAwNDE3NDQsImV4cCI6MTYyMDA2MzM0NCwidHlwZSI6ImFjY2VzcyJ9.h7xkyqrwmtgJblUYSisY9o_oCcip5ijTd6LVKL6ejng
 
-&currentPassword=12345678
-&password=password
-&passwordConfirmation=password
+&currentPassword=Tk3231tK.
+&password=Tk3231tK.
+&passwordConfirmation=Tk3231tK.
 
 ### TOKENS
 {  
@@ -99,6 +99,26 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxY
   "refresh": {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk5NTM4NjMsImV4cCI6MTYyMjU0NTg2MywidHlwZSI6InJlZnJlc2gifQ.rhIgHr002mhUJbrkeMfKWVl4bWSHtC_GJ4RZ40CQtpU",
     "expires": "2021-06-01T11:11:03.031Z"
+  }
+  }
+}
+
+
+{
+  "user": {
+    "email": "user5@gmail.com",
+    "isEmailVerified": false,
+    "id": "608fd0d6672b08403b98c896",
+    "isAuthorized": true
+  },
+  "tokens": {
+    "access": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhmZDBkNjY3MmIwODQwM2I5OGM4OTYiLCJpYXQiOjE2MjAwNDE3NDQsImV4cCI6MTYyMDA2MzM0NCwidHlwZSI6ImFjY2VzcyJ9.h7xkyqrwmtgJblUYSisY9o_oCcip5ijTd6LVKL6ejng",
+    "expires": "2021-05-03T17:35:44.315Z"
+  },
+  "refresh": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhmZDBkNjY3MmIwODQwM2I5OGM4OTYiLCJpYXQiOjE2MjAwNDE3NDQsImV4cCI6MTYyMjYzMzc0NCwidHlwZSI6InJlZnJlc2gifQ.Hm6u7Y5LvacifPNgKY2cgou0UVYvpXgzTQk206SS-qw",
+    "expires": "2021-06-02T11:35:44.316Z"
   }
   }
 }

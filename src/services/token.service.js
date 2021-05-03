@@ -89,6 +89,7 @@ const removeToken = async (id) => {
 const removeTokens = async (query) => {
 	try {
 		const db = mongodb.getDatabase();
+		if (query.user && typeof(query.user) === "string") query.user = ObjectId(query.user);
 		return await db.collection("tokens").deleteMany(query);
 		
 	} catch (error) {
@@ -147,7 +148,7 @@ const generateAuthTokens = async (user) => {
  * @returns {Promise<string>}
  */
 const generateResetPasswordToken = async (email) => {
-  const user = await authuserService.getUserByEmail(email);
+  const user = await authuserService.getAuthUserByEmail(email);
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'No users found with this email');
   }

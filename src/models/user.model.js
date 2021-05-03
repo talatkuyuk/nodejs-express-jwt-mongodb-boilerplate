@@ -42,14 +42,26 @@ class User {
 		}
 	}
 
-	// eleminates private keys like password
-	filter() {
-		const user = Object.assign({}, this);
-		delete user.password;
-		delete user.updatedAt;
+	// allows specific keys for success auth result
+	authfilter(){
+		const user = {};
+		const allowedKeys = ["id", "email", "isEmailVerified"];
+		for (const key of Object.keys(this)) {
+			if (allowedKeys.includes(key)) user[key] = this[key];
+		}
+		user["isAuthorized"] = true;
 		return user;
 	}
 
+	// eleminates private keys like password
+	userfilter() {
+		const user = Object.assign({}, this);
+		const notAllowedKeys = ["password", "updatedAt"];
+		for (const key of Object.keys(user)) {
+			if (notAllowedKeys.includes(key)) delete user[key];
+		}
+		return user;
+	}
 }
 
 module.exports = User;

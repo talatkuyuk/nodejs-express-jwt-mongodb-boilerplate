@@ -138,7 +138,7 @@ const refreshAuth = async (refreshToken) => {
 const changePassword = async (user, currentPassword, newPassword) => {
 	try {
 		if (!(await user.isPasswordMatch(currentPassword))) {
-			throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect password');
+			throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect current password');
 		}
 
 		const password = await bcrypt.hash(newPassword, 8);
@@ -166,7 +166,7 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
 	const password = await bcrypt.hash(newPassword, 8);
     
     await authuserService.updateAuthUserById(user.id, { password });
-	await tokenService.removeTokens({ user: ObjectId(user.id), type: tokenTypes.RESET_PASSWORD });
+	await tokenService.removeTokens({ user: user.id, type: tokenTypes.RESET_PASSWORD });
 
   } catch (error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message} and reset password failed`);
@@ -187,7 +187,7 @@ const verifyEmail = async (verifyEmailToken) => {
     if (!user) throw new Error("User not found");
     
     await authuserService.updateAuthUserById(user.id, { isEmailVerified: true });
-	await tokenService.removeTokens({ user: ObjectId(user.id), type: tokenTypes.VERIFY_EMAIL });
+	await tokenService.removeTokens({ user: user.id, type: tokenTypes.VERIFY_EMAIL });
 
   } catch (error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message} and email verification failed` );

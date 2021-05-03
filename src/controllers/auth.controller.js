@@ -9,14 +9,14 @@ const signup = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await authService.signupWithEmailAndPassword(email, password);
   const tokens = await tokenService.generateAuthTokens(user);
-  res.status(httpStatus.CREATED).send({ user: user.filter(), tokens });
+  res.status(httpStatus.CREATED).send({ user: user.authfilter(), tokens });
 });
 
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await authService.loginWithEmailAndPassword(email, password);
   const tokens = await tokenService.generateAuthTokens(user);
-  res.send({ user: user.filter(), tokens });
+  res.status(httpStatus.OK).send({ user: user.authfilter(), tokens });
 });
 
 const logout = asyncHandler(async (req, res) => {
@@ -31,7 +31,7 @@ const signout = asyncHandler(async (req, res) => {
 
 const refreshTokens = asyncHandler(async (req, res) => {
   const tokens = await authService.refreshAuth(req.body.refreshToken);
-  res.send({ ...tokens });
+  res.status(httpStatus.OK).send({ ...tokens });
 });
 
 const changePassword = asyncHandler(async (req, res) => {
@@ -53,13 +53,15 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
-const sendVerificationEmail = asyncHandler(async (req, res) => {
+const sendVerificationEmail = asyncHandler(async (req, res, next) => {
 	if (req.user.isEmailVerified) {
 		throw new ApiError(httpStatus.BAD_REQUEST, "Email is already verified");
 	} else {
 		const verifyEmailToken = await tokenService.generateVerifyEmailToken(req.user);
-		await emailService.sendVerificationEmail(req.user.email, verifyEmailToken);
-		res.status(httpStatus.NO_CONTENT).send();
+
+		emailService.sendVerificationEmail(req.user.email, verifyEmailToken)
+		.then(() => {res.status(httpStatus.NO_CONTENT).send()})
+		.catch((err) => {next(err)});
 	}
 });
 

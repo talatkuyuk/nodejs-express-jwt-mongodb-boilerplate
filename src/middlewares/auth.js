@@ -15,7 +15,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
   }
 
   if (user.disabled) {
-	throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
+	return reject(new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`));
   }
 
   req.user = user;
@@ -31,7 +31,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
 			return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden. (has no rights)'));
 
 		if (userRights[index].includes("self")) 
-			if (req.params.id !== user.id.toString()) 
+			if (req.params.id && req.params.id !== user.id.toString()) 
 				return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden. (only self-data)'));
 	});
   }
