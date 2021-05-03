@@ -39,11 +39,11 @@ const ObjectId = require('mongodb').ObjectId;
 			 {
 				 $project:{
 					 email:1,
-					 role:1,
 					 isEmailVerified:1,
 					 disabled:1,
 					 createdAt:1,
 					 name: "$details.name",
+					 role: "$details.role",
 					 gender: "$details.gender",
 					 country: "$details.country",
 				 }
@@ -71,16 +71,6 @@ const ObjectId = require('mongodb').ObjectId;
 				"$count": "count",
 			},
 		 ]
-
-		 const currentPage = 2;
-		 const RESULTS_PER_PAGE = 10;
-
-		
-
-		//   db.collection.aggregate( [
-		// 	{ $group: { _id: null, myCount: { $sum: 1 } } },
-		// 	{ $project: { _id: 0 } }
-		//  ] )
 	 
 		return await db.collection("authusers").aggregate(pipeline).toArray();
 		 
@@ -95,10 +85,10 @@ const ObjectId = require('mongodb').ObjectId;
  * @param {string} email
  * @returns {Promise}
  */
-const createUser = async (id, email) => {
+const createUser = async (id, email, role) => {
 	try {
 		const db = mongodb.getDatabase();
-		const result = await db.collection("users").insertOne({_id: id, email});
+		const result = await db.collection("users").insertOne({_id: id, email, role});
 		console.log(`${result.insertedCount} record is created in users.`)
 		
 	} catch (error) {
@@ -141,10 +131,16 @@ const createUser = async (id, email) => {
 		 console.log(updateBody);
 	   
 		 const db = mongodb.getDatabase();
-		 const result = await db.collection("users").updateOne({_id: ObjectId(id)}, { $set: {...updateBody, updatedAt: Date.now()} });
-	   
-		 console.log(`${result.modifiedCount} record is updated in users`);
-		 
+
+		 const result = await db.collection("users").findOneAndUpdate(
+			{ _id: ObjectId(id) },
+			{ $set: {...updateBody, updatedAt: Date.now()} },
+			{ returnOriginal: false }
+		 );
+
+		 console.log(result.value);
+		 console.log(`${result.ok} record is updated in users`);
+
 		 const user = await getUserById(id);
 		 return user;
 		 
@@ -196,38 +192,7 @@ const createUser = async (id, email) => {
 	}
 };
 
-/**
- * Change user role
- * @param {string} id
- * @param {string} role
- * @returns {Promise}
- */
- const changeUserRole = async (id, role) => {
-	try {
-		await authuserService.updateAuthUserById(ObjectId(id), {role}); 
-		
-	} catch (error) {
-		throw error;
-	}
-};
 
-
-/**
- * Toggle (Enable or Disable) user
- * @param {string} id
- * @param {string} role
- * @returns {Promise}
- */
- const toggleAbilityOfUser = async (id) => {
-	try {
-		const user = await authuserService.getAuthUserById(ObjectId(id));
-		const ability = user.disabled;
-		await authuserService.updateAuthUserById(ObjectId(id), {disabled: !ability}); 
-		
-	} catch (error) {
-		throw error;
-	}
-};
 
 
 module.exports = {
@@ -237,6 +202,4 @@ module.exports = {
 	updateUserById,
 	deleteUserById,
 	addUserToDeletedUsers,
-	changeUserRole,
-	toggleAbilityOfUser
 };

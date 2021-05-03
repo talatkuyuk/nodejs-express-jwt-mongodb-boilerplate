@@ -24,7 +24,7 @@ const { User } = require('../models');
 		
 		const hashedPassword = await bcrypt.hash(password, 8);
 		const user = await authuserService.createAuthUser(email, hashedPassword);
-		await userService.createUser(user.id, user.email);
+		await userService.createUser(user.id, user.email, "user");
 
 		return user;
 

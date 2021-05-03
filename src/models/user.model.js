@@ -2,10 +2,9 @@ const bcrypt = require('bcryptjs');
 
 class User {
 
-	constructor(email, password, role = "user", isEmailVerified = false, disabled = false, createdAt = Date.now()) {
+	constructor(email, password, isEmailVerified = false, disabled = false, createdAt = Date.now()) {
 		this.email = email;
 		this.password = password;
-		this.role = role;
 		this.isEmailVerified = isEmailVerified;
 		this.disabled = disabled;
 		this.createdAt = createdAt;
@@ -25,7 +24,6 @@ class User {
 		const user = new User(
 			doc.email,
 			doc.password,
-			doc.role,
 			doc.isEmailVerified,
 			doc.disabled,
 			doc.createdAt,
