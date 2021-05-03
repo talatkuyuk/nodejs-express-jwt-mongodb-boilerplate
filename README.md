@@ -2,9 +2,9 @@
 
 I created **model-controller-service** structure.  
 I use **joi** to validate Environment Variables.  
-I use **express-validator** to validate requests.
-I use **winston** as a logger
-I use **morgan** handler to log api requests.
+I use **express-validator** to validate requests.  
+I use **winston** as a logger.  
+I use **morgan** handler to log api requests.  
 
 # to run
 
