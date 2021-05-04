@@ -1,13 +1,11 @@
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
-const httpStatus = require('http-status');
+
+const mongodb = require('../core/mongodb');
 const ObjectId = require('mongodb').ObjectId;
 
 const config = require('../config');
-const mongodb = require('../core/mongodb');
-const authuserService = require('./authuser.service');
 const { Token } = require('../models');
-const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
 
 
@@ -118,7 +116,7 @@ const verifyToken = async (token, type) => {
 
 /**
  * Generate auth tokens
- * @param {User} user
+ * @param {AuthUser} user
  * @returns {Promise<Object>}
  */
 const generateAuthTokens = async (user) => {
@@ -144,14 +142,10 @@ const generateAuthTokens = async (user) => {
 
 /**
  * Generate reset password token
- * @param {string} email
+ * @param {AuthUser} user
  * @returns {Promise<string>}
  */
-const generateResetPasswordToken = async (email) => {
-  const user = await authuserService.getAuthUserByEmail(email);
-  if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'No users found with this email');
-  }
+const generateResetPasswordToken = async (user) => {
   const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
   const resetPasswordToken = generateToken(user.id, expires, tokenTypes.RESET_PASSWORD);
   await saveToken(resetPasswordToken, user.id, expires, tokenTypes.RESET_PASSWORD);
@@ -160,7 +154,7 @@ const generateResetPasswordToken = async (email) => {
 
 /**
  * Generate verify email token
- * @param {string} email
+ * @param {AuthUser} user
  * @returns {Promise<string>}
  */
 const generateVerifyEmailToken = async (user) => {

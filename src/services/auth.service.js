@@ -1,9 +1,8 @@
 const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
-const ObjectId = require('mongodb').ObjectId;
 
 const tokenService = require('./token.service');
-const userService = require('./user.service');
+const userService = require('./user.service'); //signout
 const authuserService = require('./authuser.service');
 
 const ApiError = require('../utils/ApiError');
@@ -24,7 +23,6 @@ const { AuthUser } = require('../models');
 		
 		const hashedPassword = await bcrypt.hash(password, 8);
 		const authuser = await authuserService.createAuthUser(email, hashedPassword);
-		await userService.createUser(authuser);
 
 		return authuser;
 

@@ -1,8 +1,4 @@
-const httpStatus = require('http-status');
-const bcrypt = require('bcryptjs');
-
-const { AuthUser, User } = require('../models');
-const authuserService = require('./authuser.service');
+const { User } = require('../models');
 
 const mongodb = require('../core/mongodb');
 const ObjectId = require('mongodb').ObjectId;

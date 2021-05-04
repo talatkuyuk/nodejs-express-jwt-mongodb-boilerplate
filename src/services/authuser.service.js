@@ -1,11 +1,7 @@
-const httpStatus = require('http-status');
-const bcrypt = require('bcryptjs');
-
-const { AuthUser } = require('../models');
-
 const mongodb = require('../core/mongodb');
 const ObjectId = require('mongodb').ObjectId;
-const ApiError = require('../utils/ApiError');
+
+const { AuthUser } = require('../models');
 
 /**
  * Check if the user exists
@@ -26,18 +22,6 @@ const ApiError = require('../utils/ApiError');
 const isEmailTaken = async function (email) {
 	var db = mongodb.getDatabase();
 	const authuser = await db.collection("authusers").findOne({ email });
-	return !!authuser;
-};
-
-/**
- * Check if the email is already taken except that user
- * @param {String} email
- * @param {String} excludeUserId
- * @returns {Promise<Boolean>}
- */
-const isEmailTakenOf = async function (email, excludeUserId) {
-	var db = mongodb.getDatabase();
-	const authuser = await db.collection("authusers").findOne({ email, _id: { $ne: ObjectId(excludeUserId) } });
 	return !!authuser;
 };
 
@@ -108,10 +92,6 @@ const getAuthUserByEmail = async (email) => {
  */
 const updateAuthUserById = async (id, updateBody) => {
 	try {
-		if (updateBody.email && (await isEmailTakenOf(updateBody.email, id))) {
-		  throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-		}
-	  
 		console.log(updateBody);
 	  
 		const db = mongodb.getDatabase();

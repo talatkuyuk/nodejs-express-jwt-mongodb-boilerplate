@@ -1,17 +1,24 @@
 const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler')
 
-const { authService, tokenService, emailService } = require('../services');
 const ApiError = require('../utils/ApiError');
+
+const { 
+	authService, 
+	tokenService, // forgotPassword sendVerificationEmail signup login
+	emailService  // forgotPassword sendVerificationEmail
+} = require('../services');
+
 
 
 const signup = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
 
-	const user = await authService.signupWithEmailAndPassword(email, password);
-	const tokens = await tokenService.generateAuthTokens(user);
+	const authuser = await authService.signupWithEmailAndPassword(email, password);
+	const tokens = await tokenService.generateAuthTokens(authuser);
+	await userService.createUser(authuser);
 
-	res.status(httpStatus.CREATED).send({ user: user.authfilter(), tokens });
+	res.status(httpStatus.CREATED).send({ user: authuser.authfilter(), tokens });
 });
 
 const login = asyncHandler(async (req, res) => {
@@ -60,7 +67,12 @@ const changePassword = asyncHandler(async (req, res) => {
 const forgotPassword = asyncHandler(async (req, res) => {
 	const email = req.body.email;
 
-	const resetPasswordToken = await tokenService.generateResetPasswordToken(email);
+	const authuser = await authuserService.getAuthUserByEmail(email);
+	if (!authuser) {
+		throw new ApiError(httpStatus.NOT_FOUND, 'No users found with this email');
+	}
+
+	const resetPasswordToken = await tokenService.generateResetPasswordToken(authuser);
 	await emailService.sendResetPasswordEmail(email, resetPasswordToken);
 
 	res.status(httpStatus.NO_CONTENT).send();

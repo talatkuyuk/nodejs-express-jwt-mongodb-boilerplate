@@ -1,7 +1,13 @@
 const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler');
 const Utils = require('../utils/Utils');
-const { tokenService, authService, authuserService, userService } = require('../services');
+
+const { 
+	tokenService, // deleteUser
+	authService, // addUser
+	authuserService, // deleteUser setAbility
+	userService 
+} = require('../services');
 
 
 const getUsers = asyncHandler(async (req, res) => {
@@ -43,8 +49,9 @@ const getUser = asyncHandler(async (req, res) => {
 
 const addUser = asyncHandler(async (req, res) => {
 	const {email, password, role, name, gender, country} = req.body;
-	
+
 	const authuser = await authService.signupWithEmailAndPassword(email, password);
+	await userService.createUser(authuser);
 	const user = await userService.updateUserById(authuser.id, {role, name, gender, country});
 
 	res.status(httpStatus.CREATED).send({...authuser.authfilter(), ...user.userfilter()});
