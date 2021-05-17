@@ -1,12 +1,11 @@
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
 
-const mongodb = require('../core/mongodb');
-const ObjectId = require('mongodb').ObjectId;
-
 const config = require('../config');
 const { Token } = require('../models');
 const { tokenTypes } = require('../config/tokens');
+
+const tokenDbService = require('./token.db.service');
 
 
 // When you do log in, send 2 tokens (Access token, Refresh token) in response to the client.
@@ -34,66 +33,6 @@ const generateToken = (userId, expires, type, secret = config.jwt.secret) => {
   return jwt.sign(payload, secret);
 };
 
-/**
- * Save a token
- * @param {string} token
- * @param {ObjectId} userId
- * @param {Moment} expires
- * @param {string} type
- * @param {boolean} [blacklisted]
- * @returns {Promise<Token>}
- */
-const saveToken = async (token, userId, expires, type, blacklisted = false) => {
-	try {
-		const tokenDoc = new Token(
-			token,
-			userId,
-			expires.toDate(),
-			type,
-			blacklisted,
-		);
-	
-		const db = mongodb.getDatabase();
-		await db.collection("tokens").insertOne(tokenDoc);
-		return tokenDoc;
-		
-	} catch (error) {
-		throw error;
-	}
-};
-
-
-const findToken = async (query) => {
-	try {
-		const db = mongodb.getDatabase();
-		return await db.collection("tokens").findOne(query);
-
-	} catch (error) {
-		throw error;
-	}
-	
-}
-
-const removeToken = async (id) => {
-	try {
-		const db = mongodb.getDatabase();
-		return await db.collection("tokens").deleteOne({_id: id});
-		
-	} catch (error) {
-		throw error;
-	}
-}
-
-const removeTokens = async (query) => {
-	try {
-		const db = mongodb.getDatabase();
-		if (query.user && typeof(query.user) === "string") query.user = ObjectId(query.user);
-		return await db.collection("tokens").deleteMany(query);
-		
-	} catch (error) {
-		throw error;
-	}
-}
 
 /**
  * Verify token and return token doc (or throw an error if it is not valid)
@@ -104,8 +43,10 @@ const removeTokens = async (query) => {
 const verifyToken = async (token, type) => {
 	try {
 		const payload = jwt.verify(token, config.jwt.secret);
-		const tokenDoc = await findToken({ token, type, user: ObjectId(payload.sub), blacklisted: false });
-		if (!tokenDoc) throw new Error('Token not found');
+
+		const tokenDoc = await tokenDbService.findToken({ token, type, user: payload.sub, blacklisted: false });
+
+		if (!tokenDoc) throw new Error(`${type} token is not valid`);
 		
 		return tokenDoc;
 		
@@ -113,6 +54,7 @@ const verifyToken = async (token, type) => {
 		throw error;
 	}
 };
+
 
 /**
  * Generate auth tokens
@@ -126,7 +68,7 @@ const generateAuthTokens = async (user) => {
   const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
   const refreshToken = generateToken(user.id, refreshTokenExpires, tokenTypes.REFRESH);
   
-  await saveToken(refreshToken, user.id, refreshTokenExpires, tokenTypes.REFRESH);
+  await tokenDbService.saveToken(refreshToken, user.id, refreshTokenExpires, tokenTypes.REFRESH);
 
   return {
     access: {
@@ -140,6 +82,7 @@ const generateAuthTokens = async (user) => {
   };
 };
 
+
 /**
  * Generate reset password token
  * @param {AuthUser} user
@@ -148,9 +91,12 @@ const generateAuthTokens = async (user) => {
 const generateResetPasswordToken = async (user) => {
   const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
   const resetPasswordToken = generateToken(user.id, expires, tokenTypes.RESET_PASSWORD);
-  await saveToken(resetPasswordToken, user.id, expires, tokenTypes.RESET_PASSWORD);
+
+  await tokenDbService.saveToken(resetPasswordToken, user.id, expires, tokenTypes.RESET_PASSWORD);
+  
   return resetPasswordToken;
 };
+
 
 /**
  * Generate verify email token
@@ -160,15 +106,23 @@ const generateResetPasswordToken = async (user) => {
 const generateVerifyEmailToken = async (user) => {
   const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
   const verifyEmailToken = generateToken(user.id, expires, tokenTypes.VERIFY_EMAIL);
-  await saveToken(verifyEmailToken, user.id, expires, tokenTypes.VERIFY_EMAIL);
+
+  await tokenDbService.saveToken(verifyEmailToken, user.id, expires, tokenTypes.VERIFY_EMAIL);
+
   return verifyEmailToken;
 };
 
+
+const removeToken = async (id) => tokenDbService.removeToken(id);
+
+const removeTokens = async (query) => tokenDbService.removeTokens(query);
+
+
 module.exports = {
   verifyToken,
-  removeToken,
-  removeTokens,
   generateAuthTokens,
   generateResetPasswordToken,
   generateVerifyEmailToken,
+  removeToken,
+  removeTokens
 };

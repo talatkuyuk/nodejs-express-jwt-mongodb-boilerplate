@@ -1,13 +1,17 @@
 const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
 
-const tokenService = require('./token.service');
-const userService = require('./user.service'); //signout
-const authuserService = require('./authuser.service');
-
 const ApiError = require('../utils/ApiError');
-const { tokenTypes } = require('../config/tokens');
+
+//for database operations for authusers
+const authuserService = require('./authuser.service');
 const { AuthUser } = require('../models');
+
+//for verifying and removing token(s)
+const tokenService = require('./token.service'); 
+const { tokenTypes } = require('../config/tokens');
+
+
 
 /**
  * Signup with username and password
@@ -31,6 +35,7 @@ const { AuthUser } = require('../models');
 	}
 };
 
+
 /**
  * Login with username and password
  * @param {string} email
@@ -48,6 +53,7 @@ const loginWithEmailAndPassword = async (email, password) => {
   return authuser;
 };
 
+
 /**
  * Logout
  * @param {string} refreshToken
@@ -56,12 +62,13 @@ const loginWithEmailAndPassword = async (email, password) => {
 const logout = async (refreshToken) => {
 	try {
 		const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
-		if (!refreshTokenDoc) throw new Error('refresh token is not valid');
 
-		//TODO: cancel access token
-		//TODO: logout with refresh token? or access token?
-		
+		// delete that token
 		await tokenService.removeToken(refreshTokenDoc._id);
+
+		// TODO: cancel access token
+		// TODO: logout with refresh token? or access token?
+		
 		
 	} catch (error) {
 		throw error;
@@ -77,23 +84,10 @@ const logout = async (refreshToken) => {
  const signout = async (refreshToken) => {
 	try {
 		const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
-		if (!refreshTokenDoc) throw new Error('refresh token is not valid');
 
 		const id = refreshTokenDoc.user;
 		
-		//delete all tokens,
-		await tokenService.removeTokens({ user: id});
-
-		//TODO: cancel access token
-
-		//delete user by id
-		const user = await userService.deleteUserById(id);
-
-		//delete authuser by id
-		const authuser = await authuserService.deleteAuthUserById(id);
-		
-		//add the user to deletedusers
-		await userService.addUserToDeletedUsers({...authuser, ...user});
+		await deleteAuthUser(id);
 		
 	} catch (error) {
 		throw error;
@@ -103,12 +97,11 @@ const logout = async (refreshToken) => {
 /**
  * Refresh auth tokens
  * @param {string} refreshToken
- * @returns {Promise<Object>}
+ * @returns {Promise<AuthUser>}
  */
 const refreshAuth = async (refreshToken) => {
   try {
     const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
-	if (!refreshTokenDoc) throw new Error("refresh token is not valid");
 
     const authuser = await authuserService.getAuthUserById(refreshTokenDoc.user);
     if (!authuser) throw new Error("User not found");
@@ -118,7 +111,8 @@ const refreshAuth = async (refreshToken) => {
 	}
     
 	await tokenService.removeToken(refreshTokenDoc._id);
-    return tokenService.generateAuthTokens(authuser);
+
+    return authuser;
 
   } catch (error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message} and refreshing token failed`);
@@ -128,7 +122,7 @@ const refreshAuth = async (refreshToken) => {
 
 /**
  * Change password
- * @param {AuthUser} user
+ * @param {AuthUser} authuser
  * @param {string} currentPassword
  * @param {string} newPassword
  * @returns {Promise}
@@ -140,7 +134,7 @@ const changePassword = async (authuser, currentPassword, newPassword) => {
 		}
 
 		const password = await bcrypt.hash(newPassword, 8);
-    	await authuserService.updateAuthUserById(authuser.id, { password });
+    	await authuserService.updateAuthUser(authuser.id, { password });
 
 	} catch (error) {
 		throw error;
@@ -156,18 +150,17 @@ const changePassword = async (authuser, currentPassword, newPassword) => {
 const resetPassword = async (resetPasswordToken, newPassword) => {
   try {
     const resetPasswordTokenDoc = await tokenService.verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
-	if (!resetPasswordTokenDoc) throw new Error("reset password token is not valid");
 
     const authuser = await authuserService.getAuthUserById(resetPasswordTokenDoc.user);
     if (!authuser) throw new Error("User not found");
 
 	const password = await bcrypt.hash(newPassword, 8);
     
-    await authuserService.updateAuthUserById(authuser.id, { password });
+    await authuserService.updateAuthUser(authuser.id, { password });
 	await tokenService.removeTokens({ user: authuser.id, type: tokenTypes.RESET_PASSWORD });
 
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message} and reset password failed`);
+    throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}. Reset password failed.`);
   }
 };
 
@@ -179,18 +172,78 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
 const verifyEmail = async (verifyEmailToken) => {
   try {
     const verifyEmailTokenDoc = await tokenService.verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
-	if (!verifyEmailTokenDoc) throw new Error("email verification token is not valid");
 
     const authuser = await authuserService.getAuthUserById(verifyEmailTokenDoc.user);
     if (!authuser) throw new Error("User not found");
     
-    await authuserService.updateAuthUserById(authuser.id, { isEmailVerified: true });
+    await authuserService.updateAuthUser(authuser.id, { isEmailVerified: true });
 	await tokenService.removeTokens({ user: authuser.id, type: tokenTypes.VERIFY_EMAIL });
 
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message} and email verification failed` );
+    throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}. Email verification failed.` );
   }
 };
+
+
+/**
+ * Get AuthUser by email
+ * @param {string} email
+ * @returns {Promise<AuthUser?>}
+ */
+ const getAuthUser = async (email) => {
+	try {
+		const authuser = await authuserService.getAuthUserByEmail(email);
+		
+		if (!authuser) {
+			throw new ApiError(httpStatus.NOT_FOUND, 'No users found with this email');
+			// or fake message for security
+			throw new ApiError(httpStatus.OK, 'An email has been sent for reseting password.');
+		}
+
+		return authuser;
+  
+	} catch (error) {
+	  throw error;
+	}
+};
+
+
+/**
+ * Enable & Disable AuthUser
+ * @param {string} id
+ * @returns {Promise}
+ */
+ const toggleAbility = async (id) => {
+	try {
+		const authuser = await authuserService.getAuthUserById(id);
+		await authuserService.updateAuthUser(id, {disabled: !authuser.disabled}); 
+  
+	} catch (error) {
+	  throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}. Enabling/disabling authuser failed.` );
+	}
+};
+
+
+/**
+ * Delete authuser from the system
+ * @param {string | ObjectId} id
+ * @returns {Promise}
+ */
+ const deleteAuthUser = async (id) => {
+	try {
+		// delete all tokens,
+		await tokenService.removeTokens({ user: id });
+
+		// TODO: cancel access token
+
+		// delete authuser by id
+		await authuserService.deleteAuthUser(id);
+		
+	} catch (error) {
+		throw error;
+	}
+};
+
 
 module.exports = {
   signupWithEmailAndPassword,
@@ -201,4 +254,7 @@ module.exports = {
   changePassword,
   resetPassword,
   verifyEmail,
+  getAuthUser,
+  toggleAbility,
+  deleteAuthUser,
 };

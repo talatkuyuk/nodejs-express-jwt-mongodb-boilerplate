@@ -1,30 +1,16 @@
 ### Hello
 GET http://localhost:3000/
 
-### insert talatkuyuk@gmail.com
-GET http://localhost:3000/t1
+### Status
+GET http://localhost:3000/status
 
 ### Not Found Request
 GET http://localhost:3000/comments
 
 
-### LOGIN SUCCESS
-POST http://localhost:3000/auth/login
-Content-Type: application/x-www-form-urlencoded
-
-&email=user1@gmail.com
-&password=12345678
 
 
-### LOGIN FAILED
-POST http://localhost:3000/auth/login
-Content-Type: application/x-www-form-urlencoded
-
-&email=user5@gmail.com
-&password=Tk3231tK.
-
-
-### REGISTER SUCCESS
+### REGISTER
 POST http://localhost:3000/auth/signup
 Content-Type: application/x-www-form-urlencoded
 
@@ -32,91 +18,139 @@ Content-Type: application/x-www-form-urlencoded
 &password=Tk3231tK.
 &passwordConfirmation=Tk3231tK.
 
+### ADD USER AFTER REGISTRATION
+POST http://localhost:3000/user
+Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEyMzYzMjcsImV4cCI6MTYyMTI1NzkyNywidHlwZSI6ImFjY2VzcyJ9.jqVbdzOuwY4g6ceJzYDNIZH2Sx6DI4JZIz4ohygxRIY
+
+&id=60a22596aa27ca0976352527
+&email=user1@gmail.com
+&role=user
+&gender=male
+
+
+
+
+### LOGIN
+POST http://localhost:3000/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+&email=talatkuyuk@gmail.com
+&password=Tk3231tK.
+
 ### LOGOUT
 POST http://localhost:3000/auth/logout
 Content-Type: application/x-www-form-urlencoded
 
-&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDg5YWFmMzFhMTI1YmVkZGRjMTFhNTgiLCJpYXQiOjE2MTk2MzQ5MzEsImV4cCI6MTYyMjIyNjkzMSwidHlwZSI6InJlZnJlc2gifQ.FUHFFk58TkUQG80sHOeyTqcOJQcMHTSZl2KXq-OZJE4
+&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExMmNlNTk0NDdkYjczMGFjNWI2NmEiLCJpYXQiOjE2MjExOTU0NDksImV4cCI6MTYyMzc4NzQ0OSwidHlwZSI6InJlZnJlc2gifQ.edj9I8ampckugPD30A0U5qFEyODolOCp5v9dH3O04ZI
+
+
+
+
+### DELETE USER BEFORE SIGNOUT
+DELETE http://localhost:3000/user/60a194c871fb130881b266a1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTRjODcxZmIxMzA4ODFiMjY2YTEiLCJpYXQiOjE2MjEyMDIxMjAsImV4cCI6MTYyMTIyMzcyMCwidHlwZSI6ImFjY2VzcyJ9.RD_eCawgXa08rElht4no0owzdk9VZNgLYUlJc67yXJU
 
 ### SIGNOUT
 POST http://localhost:3000/auth/signout
 Content-Type: application/x-www-form-urlencoded
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwMWM4ZmU3NmNmYTUzMTViZmYyOTAiLCJpYXQiOjE2MjAwNTcyMzEsImV4cCI6MTYyMDA3ODgzMSwidHlwZSI6ImFjY2VzcyJ9.H41WGElw49uKRpHfdMla2GsMDxNC7OgQZhCMsyOYz_g
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTRjODcxZmIxMzA4ODFiMjY2YTEiLCJpYXQiOjE2MjEyMDIxMjAsImV4cCI6MTYyMTIyMzcyMCwidHlwZSI6ImFjY2VzcyJ9.RD_eCawgXa08rElht4no0owzdk9VZNgLYUlJc67yXJU
 
-&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwMWM4ZmU3NmNmYTUzMTViZmYyOTAiLCJpYXQiOjE2MjAwNTcyMzEsImV4cCI6MTYyMjY0OTIzMSwidHlwZSI6InJlZnJlc2gifQ.MymdgRrkV47IHZZvX-v25galJGyKtQUBCmTmGnvBPuY
+&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTRjODcxZmIxMzA4ODFiMjY2YTEiLCJpYXQiOjE2MjEyMDIxMjAsImV4cCI6MTYyMzc5NDEyMCwidHlwZSI6InJlZnJlc2gifQ.IPHwtICIYo6Ts2tP47lWSchOA8KP9T1OxhYN4BBoMf8
+
+
+
 
 ### REFRESH TOKENS
 POST http://localhost:3000/auth/refresh-tokens
 Content-Type: application/x-www-form-urlencoded
 
-&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk5NTM4NjMsImV4cCI6MTYyMjU0NTg2MywidHlwZSI6InJlZnJlc2gifQ.rhIgHr002mhUJbrkeMfKWVl4bWSHtC_GJ4RZ40CQtpU
+&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEyMDMyNTMsImV4cCI6MTYyMzc5NTI1MywidHlwZSI6InJlZnJlc2gifQ.emdXYYvuXtEPrY27ZVnhg7OgNg_lzGNIg9MMgJpwuPI
+
+
+
 
 ### SEND VERIFICATION EMAIL
 POST http://localhost:3000/auth/send-verification-email
 Content-Type: application/x-www-form-urlencoded
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhmZDBkNjY3MmIwODQwM2I5OGM4OTYiLCJpYXQiOjE2MjAwNDE3NDQsImV4cCI6MTYyMDA2MzM0NCwidHlwZSI6ImFjY2VzcyJ9.h7xkyqrwmtgJblUYSisY9o_oCcip5ijTd6LVKL6ejng
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExMmNlNTk0NDdkYjczMGFjNWI2NmEiLCJpYXQiOjE2MjExNzU1MjUsImV4cCI6MTYyMTE5NzEyNSwidHlwZSI6ImFjY2VzcyJ9.R1vy15F0dz9BB6UiBvq_4nQVOaAHARz1DH6Q4AZr4WA
 
 ### VERIFY EMAIL
-POST http://localhost:3000/auth/verify-email?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MTk3MzUxNjUsImV4cCI6MTYxOTk1MTE2NSwidHlwZSI6InZlcmlmeUVtYWlsIn0.7JUPOp5L_12Pq2785TJXRnSuu-JmbsPvvFQvlPpsHi8
+POST http://localhost:3000/auth/verify-email?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExMmNlNTk0NDdkYjczMGFjNWI2NmEiLCJpYXQiOjE2MjExOTQwMzEsImV4cCI6MTYyMTQxMDAzMSwidHlwZSI6InZlcmlmeUVtYWlsIn0.BQHeuyv_d6P1FG8cXMSv30uvKGXEyxDnDWoTRzyw4bw
 
 
-### FORGOT PASSWORD (SEND EMAIL RESET TOKEN)
+
+
+### FORGOT PASSWORD (SEND EMAIL FOR PASSWORD RESET TOKEN)
 POST http://localhost:3000/auth/forgot-password
 Content-Type: application/x-www-form-urlencoded
 
 &email=talatkuyuk@gmail.com
 
 ### RESET PASSWORD
-POST http://localhost:3000/auth/reset-password?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhhNzUxYTk3NWEwYTQ0YjAxOGM5MTIiLCJpYXQiOjE2MjAwNTU2NjcsImV4cCI6MTYyMDA1OTI2NywidHlwZSI6InJlc2V0UGFzc3dvcmQifQ.ODWFaXlAd17DHn4PUkLKdiC6SPSdwm2iTxN5iDa_mVY
+POST http://localhost:3000/auth/reset-password?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTRjODcxZmIxMzA4ODFiMjY2YTEiLCJpYXQiOjE2MjEyMDI3MTUsImV4cCI6MTYyMTIwNjMxNSwidHlwZSI6InJlc2V0UGFzc3dvcmQifQ.3y6PbhKncd-wu0uUweN8xrykmUHUSX2t57VEz2CS-0I
 Content-Type: application/x-www-form-urlencoded
 
 &password=Tk3231tK.
+
+
 
 
 ### CHANGE PASSWORD
 POST http://localhost:3000/auth/change-password
 Content-Type: application/x-www-form-urlencoded
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDhmZDBkNjY3MmIwODQwM2I5OGM4OTYiLCJpYXQiOjE2MjAwNDE3NDQsImV4cCI6MTYyMDA2MzM0NCwidHlwZSI6ImFjY2VzcyJ9.h7xkyqrwmtgJblUYSisY9o_oCcip5ijTd6LVKL6ejng
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEyMDMyNTMsImV4cCI6MTYyMTIyNDg1MywidHlwZSI6ImFjY2VzcyJ9.u58z11ox6FiyzRyJEKmvopu2UbjfNPYhVSNBWhY1VHE
 
 &currentPassword=Tk3231tK.
-&password=Tk3231tK.
-&passwordConfirmation=Tk3231tK.
+&password=Tk3231tK+
+&passwordConfirmation=Tk3231tK+
+
+
+
+
+### TOGGLE USER ABILITY - enable / disable
+PUT http://localhost:3000/auth/60a19934aa27ca0976352523
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEyMDMyNTMsImV4cCI6MTYyMTIyNDg1MywidHlwZSI6ImFjY2VzcyJ9.u58z11ox6FiyzRyJEKmvopu2UbjfNPYhVSNBWhY1VHE
+
+
+
 
 ### TOKENS
 {
   "user": {
-    "email": "talat@gmail.com",
+    "email": "talatkuyuk@gmail.com",
     "isEmailVerified": false,
-    "id": "609057f38b7b7659dc0cdef9",
-    "isAuthorized": true
+    "createdAt": 1621203252921,
+    "id": "60a19934aa27ca0976352523"
   },
   "tokens": {
-    "access": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwNTdmMzhiN2I3NjU5ZGMwY2RlZjkiLCJpYXQiOjE2MjAwNzI0MzUsImV4cCI6MTYyMDA5NDAzNSwidHlwZSI6ImFjY2VzcyJ9.ERzxqN8JtNCYFmK6ZHS_Tb1a5tGvgPLDlGcuJjWCBnI",
-      "expires": "2021-05-04T02:07:15.429Z"
-    },
-    "refresh": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwNTdmMzhiN2I3NjU5ZGMwY2RlZjkiLCJpYXQiOjE2MjAwNzI0MzUsImV4cCI6MTYyMjY2NDQzNSwidHlwZSI6InJlZnJlc2gifQ.aWBx7QyuoxwspTcRmORtVUfG3cuqwJje4yL4_pYU_Sc",
-      "expires": "2021-06-02T20:07:15.432Z"
-    }
+	"access": {
+		"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEyMzYzMjcsImV4cCI6MTYyMTI1NzkyNywidHlwZSI6ImFjY2VzcyJ9.jqVbdzOuwY4g6ceJzYDNIZH2Sx6DI4JZIz4ohygxRIY",
+		"expires": "2021-05-17T13:25:27.176Z"
+	},
+	"refresh": {
+	 "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEyMzYzMjcsImV4cCI6MTYyMzgyODMyNywidHlwZSI6InJlZnJlc2gifQ.RNaf2Iz46yJNKZUSEY0ED5mx3jaFrvjo3Ki13VWgFgY",
+		"expires": "2021-06-16T07:25:27.179Z"
+	}
   }
 }
+
 
 {
   "user": {
     "email": "user1@gmail.com",
     "isEmailVerified": false,
-    "id": "609058268b7b7659dc0cdefb",
-    "isAuthorized": true
+    "createdAt": 1621239190112,
+    "id": "60a22596aa27ca0976352527"
   },
   "tokens": {
     "access": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwNTgyNjhiN2I3NjU5ZGMwY2RlZmIiLCJpYXQiOjE2MjAwNzI0ODYsImV4cCI6MTYyMDA5NDA4NiwidHlwZSI6ImFjY2VzcyJ9.hVh4aPGF3kzt1l_Hle_LAm0ZrDmNpnUhxnb2_Zvb6-o",
-      "expires": "2021-05-04T02:08:06.475Z"
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGEyMjU5NmFhMjdjYTA5NzYzNTI1MjciLCJpYXQiOjE2MjEyMzkxOTAsImV4cCI6MTYyMTI2MDc5MCwidHlwZSI6ImFjY2VzcyJ9.k_nWasKtLtOzqf9bm9jrYR4CqViR-khcLJCgEU8EkpA",
+      "expires": "2021-05-17T14:13:10.629Z"
     },
     "refresh": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDkwNTgyNjhiN2I3NjU5ZGMwY2RlZmIiLCJpYXQiOjE2MjAwNzI0ODYsImV4cCI6MTYyMjY2NDQ4NiwidHlwZSI6InJlZnJlc2gifQ.vn_y50kV2v5NZi1gIYMRI_Pc8CwYzKttZHZAGX511Vo",
-      "expires": "2021-06-02T20:08:06.475Z"
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGEyMjU5NmFhMjdjYTA5NzYzNTI1MjciLCJpYXQiOjE2MjEyMzkxOTAsImV4cCI6MTYyMzgzMTE5MCwidHlwZSI6InJlZnJlc2gifQ.KVOnjg9-ewKXODUisOWYGOinHpkkyuBKgxN6bEWrdx4",
+      "expires": "2021-06-16T08:13:10.631Z"
     }
   }
 }

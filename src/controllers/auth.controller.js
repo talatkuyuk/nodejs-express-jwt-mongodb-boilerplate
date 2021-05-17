@@ -4,11 +4,15 @@ const asyncHandler = require('express-async-handler')
 const ApiError = require('../utils/ApiError');
 
 const { 
-	authService, 
-	tokenService, // forgotPassword sendVerificationEmail signup login
-	emailService  // forgotPassword sendVerificationEmail
-} = require('../services');
+	authService,
 
+	//generate token(s): signup login refreshAuth forgotPassword sendVerificationEmail
+	tokenService,
+	
+	//send email: forgotPassword sendVerificationEmail
+	emailService,
+
+} = require('../services');
 
 
 const signup = asyncHandler(async (req, res) => {
@@ -16,10 +20,10 @@ const signup = asyncHandler(async (req, res) => {
 
 	const authuser = await authService.signupWithEmailAndPassword(email, password);
 	const tokens = await tokenService.generateAuthTokens(authuser);
-	await userService.createUser(authuser);
 
 	res.status(httpStatus.CREATED).send({ user: authuser.authfilter(), tokens });
 });
+
 
 const login = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
@@ -30,6 +34,7 @@ const login = asyncHandler(async (req, res) => {
 	res.status(httpStatus.OK).send({ user: user.authfilter(), tokens });
 });
 
+
 const logout = asyncHandler(async (req, res) => {
 	const refreshtoken = req.body.refreshToken;
 
@@ -37,6 +42,7 @@ const logout = asyncHandler(async (req, res) => {
 
 	res.status(httpStatus.NO_CONTENT).send();
 });
+
 
 const signout = asyncHandler(async (req, res) => {
 	const refreshtoken = req.body.refreshToken;
@@ -46,13 +52,16 @@ const signout = asyncHandler(async (req, res) => {
 	res.status(httpStatus.NO_CONTENT).send();
 });
 
+
 const refreshTokens = asyncHandler(async (req, res) => {
 	const refreshtoken = req.body.refreshToken;
 
-	const tokens = await authService.refreshAuth(refreshtoken);
+	const authuser = await authService.refreshAuth(refreshtoken);
+	const tokens = await tokenService.generateAuthTokens(authuser);
 
 	res.status(httpStatus.OK).send({ ...tokens });
 });
+
 
 const changePassword = asyncHandler(async (req, res) => {
 	const currentPassword = req.body.currentPassword;
@@ -64,19 +73,17 @@ const changePassword = asyncHandler(async (req, res) => {
 	res.status(httpStatus.NO_CONTENT).send();
 });
 
+
 const forgotPassword = asyncHandler(async (req, res) => {
 	const email = req.body.email;
-
-	const authuser = await authuserService.getAuthUserByEmail(email);
-	if (!authuser) {
-		throw new ApiError(httpStatus.NOT_FOUND, 'No users found with this email');
-	}
-
+	
+	const authuser = await authService.getAuthUser(email);
 	const resetPasswordToken = await tokenService.generateResetPasswordToken(authuser);
 	await emailService.sendResetPasswordEmail(email, resetPasswordToken);
 
 	res.status(httpStatus.NO_CONTENT).send();
 });
+
 
 const resetPassword = asyncHandler(async (req, res) => {
 	const token = req.query.token;
@@ -86,6 +93,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 
 	res.status(httpStatus.NO_CONTENT).send();
 });
+
 
 const sendVerificationEmail = asyncHandler(async (req, res, next) => {
 	const authuser = req.user;
@@ -101,6 +109,7 @@ const sendVerificationEmail = asyncHandler(async (req, res, next) => {
 	}
 });
 
+
 const verifyEmail = asyncHandler(async (req, res) => {
 	const token = req.query.token;
 
@@ -110,15 +119,39 @@ const verifyEmail = asyncHandler(async (req, res) => {
 });
 
 
+const toggleAbility = asyncHandler(async (req, res) => {
+	const id = req.params.id;
+
+	await authService.toggleAbility(id);
+  
+	res.status(httpStatus.NO_CONTENT).send();
+});
+
+
+const deleteAuthUser = asyncHandler(async (req, res) => {
+	const id = req.params.id;
+
+	await authService.deleteAuthUser(id);
+  
+	res.status(httpStatus.NO_CONTENT).send();
+});
+
+
 module.exports = {
 	signup,
 	login,
 	logout,
 	signout,
+
 	refreshTokens,
+
 	changePassword,
 	forgotPassword,
 	resetPassword,
+
 	sendVerificationEmail,
 	verifyEmail,
+
+	toggleAbility,
+	deleteAuthUser,
 };

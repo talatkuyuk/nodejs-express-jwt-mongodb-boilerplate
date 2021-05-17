@@ -3,16 +3,6 @@ const ObjectId = require('mongodb').ObjectId;
 
 const { AuthUser } = require('../models');
 
-/**
- * Check if the user exists
- * @param {String} id
- * @returns {Promise<Boolean>}
- */
- const isValidUser = async function (id) {
-	var db = mongodb.getDatabase();
-	const authuser = await db.collection("authusers").findOne({ _id: ObjectId(id) });
-	return !!authuser;
-};
 
 /**
  * Check if the email is already taken
@@ -24,6 +14,32 @@ const isEmailTaken = async function (email) {
 	const authuser = await db.collection("authusers").findOne({ email });
 	return !!authuser;
 };
+
+
+/**
+ * Check if the authuser exists
+ * @param {String} id
+ * @returns {Promise<Boolean>}
+ */
+ const isValidUser = async function (id) {
+	var db = mongodb.getDatabase();
+	const authuser = await db.collection("authusers").findOne({ _id: ObjectId(id) });
+	return !!authuser;
+};
+
+
+/**
+ * Check if the email and the id matches
+ * @param {String} id
+ * @param {String} email
+ * @returns {Promise<Boolean>}
+ */
+const isPair_EmailAndId = async function (id, email) {
+	var db = mongodb.getDatabase();
+	const authuser = await db.collection("authusers").findOne({_id: ObjectId(id), email });
+	return !!authuser;
+};
+
 
 /**
  * Create a authuser
@@ -90,7 +106,7 @@ const getAuthUserByEmail = async (email) => {
  * @param {Object} updateBody
  * @returns {Promise<AuthUser>}
  */
-const updateAuthUserById = async (id, updateBody) => {
+const updateAuthUser = async (id, updateBody) => {
 	try {
 		console.log(updateBody);
 	  
@@ -116,16 +132,48 @@ const updateAuthUserById = async (id, updateBody) => {
 /**
  * Delete authuser by id
  * @param {ObjectId} id
- * @returns {Promise}
+ * @returns {Promise<AuthUser?>}
  */
-const deleteAuthUserById = async (id) => {
+const deleteAuthUser = async (id) => {
 	try {
 		const db = mongodb.getDatabase();
 		const result = await db.collection("authusers").findOneAndDelete({_id: ObjectId(id)});
 
-		console.log(`${result.ok} record is deleted in authusers`);
+		if (result.ok === 1) {
+			console.log(`The authuser ${id} is deleted in authusers`);
+			
+			const authuser = AuthUser.fromDoc(result.value);
 
-		return AuthUser.fromDoc(result.value);
+			await toDeletedAuthUsers(authuser);
+
+			return authuser;
+
+		} else {
+			console.log(`The authuser is not deleted.`);
+
+			return null;
+		}
+		
+	} catch (error) {
+		throw error;
+	}
+};
+
+/**
+ * Add the deleted authuser to the deletedauthusers
+ * @param {AuthUser} deletedAuthUser
+ * @returns {Promise}
+ */
+ const toDeletedAuthUsers = async (deletedAuthUser) => {
+	try {
+		const db = mongodb.getDatabase();
+
+		deletedAuthUser["_id"] = deletedAuthUser.id;
+		delete deletedAuthUser.id;
+		deletedAuthUser["deletedAt"] = Date.now();
+
+		const result = await db.collection("deletedauthusers").insertOne(deletedAuthUser);
+		console.log(`${result.insertedCount} record is created in deletedauthusers.`)
 		
 	} catch (error) {
 		throw error;
@@ -136,8 +184,9 @@ module.exports = {
   createAuthUser,
   getAuthUserById,
   getAuthUserByEmail,
-  updateAuthUserById,
-  deleteAuthUserById,
+  updateAuthUser,
+  deleteAuthUser,
   isEmailTaken,
-  isValidUser
+  isValidUser,
+  isPair_EmailAndId
 };

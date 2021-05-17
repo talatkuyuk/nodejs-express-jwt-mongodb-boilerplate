@@ -2,18 +2,26 @@ module.exports.roles = ["user", "admin"];
 
 module.exports.roleRights = {
 	"user": [
+		//user related
 		"get-user@self", 
+		"add-user@self",
 		"update-user@self",
+		"delete-user@self",
+		//authuser related
 		"change-password@self"
 	],
 	"admin": [
-		"query-users", 
+		//user related
 		"get-user", 
 		"add-user", 
-		"update-user", 
+		"update-user",
 		"delete-user", 
+		"query-users",
 		"change-role", 
-		"set-ability",
+		//authuser related
+		"toggle-ability",
+		"delete-authuser",
+		//self related
 		"change-password@self"
 	]
 }

@@ -2,12 +2,7 @@ const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler');
 const Utils = require('../utils/Utils');
 
-const { 
-	tokenService, // deleteUser
-	authService, // addUser
-	authuserService, // deleteUser setAbility
-	userService 
-} = require('../services');
+const { userService } = require('../services');
 
 
 const getUsers = asyncHandler(async (req, res) => {
@@ -41,20 +36,20 @@ const getUsers = asyncHandler(async (req, res) => {
 
 
 const getUser = asyncHandler(async (req, res) => {
-	const user = await userService.getUserById(req.params.id);
+	const id = req.params.id
+
+	const user = await userService.getUser(id);
 	
 	res.status(httpStatus.OK).send(user.userfilter());
 });
 
 
 const addUser = asyncHandler(async (req, res) => {
-	const {email, password, role, name, gender, country} = req.body;
+	const {id, ...addBody} = req.body;
 
-	const authuser = await authService.signupWithEmailAndPassword(email, password);
-	await userService.createUser(authuser);
-	const user = await userService.updateUserById(authuser.id, {role, name, gender, country});
+	const user = await userService.addUser(id, addBody);
 
-	res.status(httpStatus.CREATED).send({...authuser.authfilter(), ...user.userfilter()});
+	res.status(httpStatus.CREATED).send(user.userfilter());
 });
 
 
@@ -62,7 +57,7 @@ const updateUser = asyncHandler(async (req, res) => {
 	const id = req.params.id;
   	const {name, gender, country} = req.body;
 
-  	const user = await userService.updateUserById(id, {name, gender, country});
+  	const user = await userService.updateUser(id, {name, gender, country});
 
   	res.status(httpStatus.OK).send(user.userfilter());
 });
@@ -71,10 +66,7 @@ const updateUser = asyncHandler(async (req, res) => {
 const deleteUser = asyncHandler(async (req, res) => {
 	const id = req.params.id;
 
-	await tokenService.removeTokens({ user: id});
-	const user = await userService.deleteUserById(id);
-	const authuser = await authuserService.deleteAuthUserById(id);
-	await userService.addUserToDeletedUsers({...authuser, ...user});
+	await userService.deleteUser(id);
 
 	res.status(httpStatus.NO_CONTENT).send();
 });
@@ -84,21 +76,11 @@ const changeRole = asyncHandler(async (req, res) => {
 	const id = req.params.id;
 	const role = req.body.role
 
-	await userService.updateUserById(id, {role});
+	await userService.updateUser(id, {role});
 
 	res.status(httpStatus.NO_CONTENT).send();
 });
 
-
-const setAbility = asyncHandler(async (req, res) => {
-	const id = req.params.id;
-
-	const authuser = await authuserService.getAuthUserById(id);
-	const ability = authuser.disabled;
-	await authuserService.updateAuthUserById(id, {disabled: !ability}); 
-  
-	res.status(httpStatus.NO_CONTENT).send();
-});
 
 
 module.exports = {
@@ -107,6 +89,5 @@ module.exports = {
 	addUser,
 	updateUser,
 	deleteUser,
-	changeRole,
-	setAbility
+	changeRole
 };

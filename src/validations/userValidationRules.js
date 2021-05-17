@@ -1,5 +1,5 @@
-const { body, query, param } = require('express-validator');
-const authuserService = require('../services/authuser.service');
+const { body, param } = require('express-validator');
+const {authuserService, userService} = require('../services');
 const { roles } = require('../config/roles');
 
 
@@ -11,7 +11,7 @@ const check_param_id = [
 		.bail()
 		.custom(async (value) => {
 			try {
-				if (await authuserService.isValidUser(value)) 
+				if (await userService.isValidUser(value)) 
 					return true; // indicates validation is success: the id is valid
 				throw new Error('param id does not refer any user. (User not found)');
 				
@@ -21,83 +21,128 @@ const check_param_id = [
 	}),
 ];
 
-const check_body_profiles = [
-	body('name', 'name must be minimum 2 characters')
-		.isLength({ min: 2 }).escape().trim(),
+const check_body_name = [
+	body('name')
+		.trim()
+		.escape()
+		.isLength({ min: 2 })
+		.withMessage('name must be minimum 2 characters')
+];
 
-	body('gender', 'gender could be male, female or none')
-		.trim().toLowerCase().isIn(["male", "female", "none"]),
+const check_body_gender = [
+	body('gender')
+		.trim()
+		.toLowerCase()
+		.isIn(["male", "female", "none"])
+		.withMessage('gender could be male, female or none')
+];
 
+const check_body_country = [
 	body('country')
 		.trim()
 		.toUpperCase()
 		.matches(iso_3166_alpha_3).withMessage("country code must be in the form of iso_3166_alpha_3")
 		.isLength({ max: 3 }).withMessage("country code can't exceed 3 characters")
-		.isLength({ min: 3 }).withMessage("country code can't less than 3 characters"),
+		.isLength({ min: 3 }).withMessage("country code can't less than 3 characters")
 ];
 
-const check_body_password = [
-	body('password')
-		.isLength({ min: 8 }).withMessage('password must be minimum 8 characters')
-		.matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W\_])[A-Za-z\d\W\_]{8,}$/)
-		.withMessage('password must contain at least one uppercase, one lowercase, one number and one special char.')
-		.escape()
-	  	.trim(),
-];
+////////////////////////////////////////////////////////////////////////
+
 
 const getUsers = [
-	// I don't want to check query string, let it as it is.
 	param("country").toUpperCase(),
 	param("page").default(1),
 	param("size").default(20),
 ];
+
+
 
 const getUser = [
 	...check_param_id,
 ];
 
 
+
 const addUser = [
-	...check_body_password,
 
-	body('role', `role could be one of ${roles}`).trim().isIn(roles),
+	// check there is an authenticated user with that id, and there is no user with the same id.
+	body("id")
+		.exists({checkFalsy: true}).withMessage('id must not be empty or falsy value')
+		.bail()
+		.isLength({ min: 24, max: 24}).withMessage('id is wrong')
+		.bail()
+		.custom(async (value) => {
+			try {
+				if (!await authuserService.isValidUser(value)) 
+					throw new Error('Id does not match with any authenticated user');
 
-	...check_body_profiles,
+				if (await userService.isValidUser(value)) 
+					throw new Error('There is another user with the same id.');
+
+				return true;
+				
+			} catch (error) {
+				throw error;
+			}
+	}),
+
+	// check e-mail is valid and is matched with the id in authenticated users
+	body('email')
+		.trim()
+		.exists({checkFalsy: true}).withMessage('email must not be empty or falsy value')
+		.bail()
+		.isEmail().withMessage('email must be in valid form')
+		.toLowerCase()
+		.custom(async (value, { req }) => {
+			try {
+				if (!await authuserService.isPair_EmailAndId(req.body.id, value))
+					throw new Error('Email does not match with the auth id.');
+				
+				return true; // Indicates the success
+
+			} catch (error) {
+				throw error;
+			}
+		}),
+
+	body('role')
+		.trim()
+		.toLowerCase()
+		.equals('user')
+		.withMessage("The role must be setted as 'user' while creating."),
+
+	check_body_name[0].optional(),
+	check_body_gender[0].optional(),
+	check_body_country[0].optional(),
 
 	body().custom( (body, { req }) => {
-		const validKeys = ['email', 'password', 'role', 'name', 'gender', 'country'];
+		const validKeys = ['id', 'email', 'role', 'name', 'gender', 'country'];
 		return Object.keys(req.body).every(key => validKeys.includes(key));
-	}).withMessage('Any extra parameter is not allowed'),
+	}).withMessage(`Any extra parameter is not allowed other than ${['id', 'email', 'role', 'name', 'gender', 'country']}`),
 
-	// check E-mail is already in use
-    body('email').custom(async (value) => {
-		try {
-			if (await authuserService.isEmailTaken(value)) {
-				throw new Error('email is already taken.');
-			} else {
-				return true;
-			}
-
-		} catch (error) {
-			throw error;
-		}
-    }),
 ];
+
 
 
 const updateUser = [
 	...check_param_id,
-	...check_body_profiles,
+	...check_body_name,
+	...check_body_gender,
+	...check_body_country,
 
 	body().custom( (body, { req }) => {
 		const validKeys = ['name', 'gender', 'country'];
 		return Object.keys(req.body).every(key => validKeys.includes(key));
-	}).withMessage('Any extra parameter is not allowed'),
+	}).withMessage(`Any extra parameter is not allowed other than ${['name', 'gender', 'country']}`),
 ];
+
+
 
 const deleteUser = [
 	...check_param_id,
 ];
+
+
 
 const changeRole = [
 	...check_param_id,
@@ -105,8 +150,10 @@ const changeRole = [
 	body().custom( (body, { req }) => {
 		const validKey = 'role';
 		return Object.keys(req.body).every(key => validKey === key);
-	}).withMessage('Any extra parameter is not allowed'),
+	}).withMessage(`Any extra parameter is not allowed other than 'role'`),
 ];
+
+
 
 module.exports = {
 	getUsers,

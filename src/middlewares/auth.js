@@ -25,10 +25,13 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, aut
 	
 	if (requiredRights.length) {
 
-		const user = await userService.getUserById(authuser.id);
+		const user = await userService.getUser(authuser.id);
+		const role = user?.role ?? "user"; // there is no role yet while adding a user
 
-		const userRights = roleRights[user.role];
-		const userRightsWithoutSelf = roleRights[user.role].map(right => right.split("@")[0]);
+		console.log("role: ", role);
+
+		const userRights = roleRights[role];
+		const userRightsWithoutSelf = roleRights[role].map(right => right.split("@")[0]);
 
 		requiredRights.forEach((requiredRight) => {
 			const index = userRightsWithoutSelf.findIndex(right => right === requiredRight);

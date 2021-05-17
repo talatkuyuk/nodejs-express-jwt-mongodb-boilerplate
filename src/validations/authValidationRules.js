@@ -1,6 +1,22 @@
-const { body, query } = require('express-validator');
+const { body, query, param } = require('express-validator');
 const authuserService = require('../services/authuser.service');
 
+
+const check_param_id = [
+	param("id")
+		.isLength({ min: 24, max: 24}).withMessage('param id is wrong')
+		.bail()
+		.custom(async (value) => {
+			try {
+				if (await authuserService.isValidUser(value)) 
+					return true; // indicates validation is success: the id is valid
+				throw new Error('param id does not refer any user. (AuthUser not found)');
+				
+			} catch (error) {
+				throw error;
+			}
+	}),
+];
 
 const check_body_refreshToken = [
 	body('refreshToken')
@@ -10,6 +26,7 @@ const check_body_refreshToken = [
 const check_body_email = [
 	body('email')
 	  .trim()
+	  //.normalizeEmail()
       .exists({checkFalsy: true}).withMessage('email must not be empty or falsy value')
 	  .bail()
       .isEmail().withMessage('email must be in valid form')
@@ -18,7 +35,10 @@ const check_body_email = [
 
 const check_body_password = [
 	body('password')
+		.exists({checkFalsy: true}).withMessage('password must not be empty or falsy value')
+		.bail()
 		.isLength({ min: 8 }).withMessage('password must be minimum 8 characters')
+		.bail()
 		.matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W\_])[A-Za-z\d\W\_]{8,}$/)
 		.withMessage('password must contain at least one uppercase, one lowercase, one number and one special char.')
 		.escape()
@@ -34,10 +54,15 @@ const check_body_passwordConfirmation = [
 	}),
 ];
 
+////////////////////////////////////////////////////////////////////////
+
+
 const loginValidationRules = [
 	...check_body_email,
-	//...check_body_password,
+	body('password')
+		.exists({checkFalsy: true}).withMessage('password must not be empty or falsy value')
 ];
+
 
 
 const signupValidationRules = [
@@ -62,17 +87,25 @@ const signupValidationRules = [
     
 ];
 
+
+
 const logoutValidationRules = [
 	...check_body_refreshToken,
 ];
+
+
 
 const signoutValidationRules = [
 	...check_body_refreshToken,
 ];
 
+
+
 const refreshTokensValidationRules = [
 	...check_body_refreshToken,
 ];
+
+
 
 const changePasswordValidationRules = [
 	body('currentPassword')
@@ -81,9 +114,13 @@ const changePasswordValidationRules = [
 	...check_body_passwordConfirmation,
 ];
 
+
+
 const forgotPasswordValidationRules = [
 	...check_body_email,
 ];
+
+
 
 const resetPasswordValidationRules = [
 	...check_body_password,
@@ -92,10 +129,25 @@ const resetPasswordValidationRules = [
       .notEmpty().withMessage('reset password token must not be empty'),
 ];
 
+
+
 const verifyEmailValidationRules = [
 	query('token')
       .notEmpty().withMessage('email verification token must not be empty'),
 ];
+
+
+
+const toggleValidationRules = [
+	...check_param_id
+];
+
+
+
+const deleteValidationRules = [
+	...check_param_id
+];
+
 
 
 module.exports = { 
@@ -107,5 +159,7 @@ module.exports = {
 	changePasswordValidationRules,
 	forgotPasswordValidationRules,
 	resetPasswordValidationRules,
-	verifyEmailValidationRules
+	verifyEmailValidationRules,
+	toggleValidationRules,
+	deleteValidationRules
 };

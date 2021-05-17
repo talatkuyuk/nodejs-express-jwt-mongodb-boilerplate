@@ -12,7 +12,6 @@ router.post('/', auth('add-user'), validate(userValidation.addUser), userControl
 router.get('/:id', auth('get-user'), validate(userValidation.getUser), userController.getUser);
 router.patch('/:id', auth('update-user'), validate(userValidation.updateUser), userController.updateUser);
 router.put('/:id/role', auth('change-role'), validate(userValidation.changeRole), userController.changeRole);
-router.put('/:id/toggle', auth('set-ability'), userController.setAbility);
 router.delete('/:id', auth('delete-user'), validate(userValidation.deleteUser), userController.deleteUser);
 
 module.exports = router;

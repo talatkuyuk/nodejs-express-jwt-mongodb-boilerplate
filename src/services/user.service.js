@@ -1,7 +1,19 @@
-const { User } = require('../models');
-
 const mongodb = require('../core/mongodb');
 const ObjectId = require('mongodb').ObjectId;
+
+const { User } = require('../models');
+
+
+/**
+ * Check if the user exists
+ * @param {String} id
+ * @returns {Promise<Boolean>}
+ */
+ const isValidUser = async function (id) {
+	var db = mongodb.getDatabase();
+	const user = await db.collection("users").findOne({ _id: ObjectId(id) });
+	return !!user;
+};
 
 
 /**
@@ -71,17 +83,29 @@ const ObjectId = require('mongodb').ObjectId;
 
 /**
  * Create a user with the same id of the authuser
- * @param {AuthUser} authuser
+ * @param {String} id
+ * @param {Object} addBody
  * @returns {Promise}
  */
-const createUser = async (authuser) => {
+const addUser = async (id, addBody) => {
 	try {
-		const {id, email, createdAt} = authuser;
-
 		const db = mongodb.getDatabase();
-		const result = await db.collection("users").insertOne({_id: id, email, role: "user", createdAt});
 
-		console.log(`${result.insertedCount} record is created in users.`)
+		const {email, role, name, gender, country} = addBody;
+
+		const user = new User(email, role, name, gender, country);
+
+		const result = await db.collection("users").insertOne({
+			_id: ObjectId(id), 
+			...user
+		});
+
+		console.log(`${result.insertedCount} record is created in users.`);
+
+		if (result.result.ok === 1) 
+			return User.fromDoc(result.ops[0]); // inserted document
+		else
+			return null;
 		
 	} catch (error) {
 		throw error;
@@ -93,7 +117,7 @@ const createUser = async (authuser) => {
  * @param {ObjectId} id
  * @returns {Promise<User>}
  */
- const getUserById = async (id) => {
+ const getUser = async (id) => {
 	try {
 		const db = mongodb.getDatabase();
 		const doc = await db.collection("users").findOne({_id: ObjectId(id)});
@@ -111,7 +135,7 @@ const createUser = async (authuser) => {
  * @param {Object} updateBody
  * @returns {Promise<User>}
  */
- const updateUserById = async (id, updateBody) => {
+ const updateUser = async (id, updateBody) => {
 	 try {
 		 console.log(updateBody);
 	   
@@ -138,17 +162,27 @@ const createUser = async (authuser) => {
 /**
  * Delete user by id
  * @param {ObjectId} id
- * @returns {Promise<User>}
+ * @returns {Promise<User?>}
  */
- const deleteUserById = async (id) => {
+ const deleteUser = async (id) => {
 	try {
 		const db = mongodb.getDatabase();
 		const result = await db.collection("users").findOneAndDelete({_id: ObjectId(id)});
 
-		console.log(`${result.ok} record is deleted in users`);
+		if (result.ok === 1) {
+			console.log(`The user ${id} is deleted in users`);
+			const user = User.fromDoc(result.value);
 
-		return User.fromDoc(result.value);
-		
+			await toDeletedUsers(user);
+
+			return user;
+
+		} else {
+			console.log(`The user is not deleted.`);
+
+			return null;
+		}
+
 	} catch (error) {
 		throw error;
 	}
@@ -156,12 +190,11 @@ const createUser = async (authuser) => {
 
 
 /**
- * Add the deleted user to the deleteusers
- * @param {ObjectId} id
- * @param {string} email
+ * Add the deleted user to the deletedusers
+ * @param {User} deletedUser
  * @returns {Promise}
  */
- const addUserToDeletedUsers = async (deletedUser) => {
+ const toDeletedUsers = async (deletedUser) => {
 	try {
 		const db = mongodb.getDatabase();
 
@@ -179,12 +212,12 @@ const createUser = async (authuser) => {
 
 
 
-
 module.exports = {
+	addUser,
+	getUser,
+	//getUsers,
 	queryUsers,
-	createUser,
-	getUserById,
-	updateUserById,
-	deleteUserById,
-	addUserToDeletedUsers,
+	updateUser,
+	deleteUser,
+	isValidUser
 };
