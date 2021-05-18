@@ -4,6 +4,8 @@ const ObjectId = require('mongodb').ObjectId;
 const { User } = require('../models');
 
 
+/////////////////////////  UTILS  ///////////////////////////////////////
+
 /**
  * Check if the user exists
  * @param {String} id
@@ -16,6 +18,115 @@ const { User } = require('../models');
 };
 
 
+/////////////////////////////////////////////////////////////////////
+
+
+
+/**
+ * Create a user with the same id of the authuser
+ * @param {String} id
+ * @param {Object} addBody
+ * @returns {Promise}
+ */
+ const addUser = async (id, addBody) => {
+	try {
+		const db = mongodb.getDatabase();
+
+		const {email, role, name, gender, country} = addBody;
+
+		const user = new User(email, role, name, gender, country);
+
+		const result = await db.collection("users").insertOne({
+			_id: ObjectId(id), 
+			...user
+		});
+
+		console.log(`${result.insertedCount} record is created in users.`);
+
+		if (result.result.ok === 1) 
+			return User.fromDoc(result.ops[0]); // inserted document
+		else
+			return null;
+		
+	} catch (error) {
+		throw error;
+	}
+};
+
+
+
+
+/**
+ * Get user by id
+ * @param {ObjectId} id
+ * @returns {Promise<User>}
+ */
+ const getUser = async (id) => {
+	try {
+		const db = mongodb.getDatabase();
+		const doc = await db.collection("users").findOne({_id: ObjectId(id)});
+
+		return User.fromDoc(doc);
+		
+	} catch (error) {
+		throw error
+	}
+};
+
+
+
+
+/**
+ * Query for users
+ * @param {Object} filter - Mongo filter for users
+ * @param {Object} sort - Sort option in the format: { field1: 1, field2: -1}
+ * @param {number} limit - Maximum number of results per page (default = 20)
+ * @param {number} page - Current page (default = 1)
+ * @returns {Promise<QueryResult>}
+ */
+ const getUsers = async (filter, sort, skip, limit) => {
+	try {
+		const db = mongodb.getDatabase();
+	
+		const pipeline = [
+			{
+			   $match: filter
+			},
+			{
+				$project:{
+					email: 1,
+					role: 1,
+					name: 1,
+					gender: 1,
+					country: 1,
+					createdAt: 1,
+				}
+			},
+			{
+			   $sort: sort
+			},
+			{
+			   $facet:{
+				   users: [{ $skip: skip }, { $limit: limit}],
+				   totalCount: [
+					   {
+						   $count: 'count'
+					   }
+				   ]
+				 }
+			}
+		]
+	
+	   return await db.collection("users").aggregate(pipeline).toArray();
+		
+	} catch (error) {
+		throw error;
+	}
+};
+
+
+
+
 /**
  * Query for users
  * @param {Object} filterLeft - Mongo filter for authusers
@@ -25,7 +136,7 @@ const { User } = require('../models');
  * @param {number} page - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
- const queryUsers = async (filterLeft, filterRight, sort, skip, limit) => {
+ const getUsersJoined = async (filterLeft, filterRight, sort, skip, limit) => {
 	 try {
 		 const db = mongodb.getDatabase();
 	 
@@ -81,53 +192,8 @@ const { User } = require('../models');
 	 }
 };
 
-/**
- * Create a user with the same id of the authuser
- * @param {String} id
- * @param {Object} addBody
- * @returns {Promise}
- */
-const addUser = async (id, addBody) => {
-	try {
-		const db = mongodb.getDatabase();
 
-		const {email, role, name, gender, country} = addBody;
 
-		const user = new User(email, role, name, gender, country);
-
-		const result = await db.collection("users").insertOne({
-			_id: ObjectId(id), 
-			...user
-		});
-
-		console.log(`${result.insertedCount} record is created in users.`);
-
-		if (result.result.ok === 1) 
-			return User.fromDoc(result.ops[0]); // inserted document
-		else
-			return null;
-		
-	} catch (error) {
-		throw error;
-	}
-};
-
-/**
- * Get user by id
- * @param {ObjectId} id
- * @returns {Promise<User>}
- */
- const getUser = async (id) => {
-	try {
-		const db = mongodb.getDatabase();
-		const doc = await db.collection("users").findOne({_id: ObjectId(id)});
-
-		return User.fromDoc(doc);
-		
-	} catch (error) {
-		throw error
-	}
-};
 
 /**
  * Update user by id
@@ -157,6 +223,8 @@ const addUser = async (id, addBody) => {
 	 }
 
 };
+
+
 
 
 /**
@@ -189,6 +257,8 @@ const addUser = async (id, addBody) => {
 };
 
 
+
+
 /**
  * Add the deleted user to the deletedusers
  * @param {User} deletedUser
@@ -215,9 +285,12 @@ const addUser = async (id, addBody) => {
 module.exports = {
 	addUser,
 	getUser,
-	//getUsers,
-	queryUsers,
+	getUsers,
+	getUsersJoined,
 	updateUser,
 	deleteUser,
-	isValidUser
 };
+
+module.exports.utils = {
+	isValidUser,
+}

@@ -1,6 +1,7 @@
 const express = require('express');
 
 const authRoute = require('./auth.route');
+const authuserRoute = require('./authuser.route');
 const userRoute = require('./user.route');
 const docsRoute = require('./docs.route');
 
@@ -8,6 +9,8 @@ const config = require('../config');
 const mongodb = require('../core/mongodb');
 
 const router = express.Router();
+
+
 
 function getOneDocumentInCollection(database, collection) {
 
@@ -32,6 +35,7 @@ function listAllCollections(database) {
     });
 }
 
+
 function listAllDocumentsInCollection(database, collection) {
 	var cursor = database.collection(collection).find();
 
@@ -48,22 +52,29 @@ function listAllDocumentsInCollection(database, collection) {
 	});
 }
 
+
 router.get('/', (req, res) => {
 
 	var db = mongodb.getDatabase();
 
 	listAllCollections(db);
+
+});
+
+
+router.get('/list', (req, res) => {
+
+	var db = mongodb.getDatabase();
+	
 	getOneDocumentInCollection(db, "users");
 	listAllDocumentsInCollection(db, "users");
 
 });
 
-
-
-
 router.get('/status', (req, res) => res.send('OK'));
 
 router.use('/auth', authRoute);
+router.use('/authuser', authuserRoute);
 router.use('/user', userRoute);
 
 /* istanbul ignore next */

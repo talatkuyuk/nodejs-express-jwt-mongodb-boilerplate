@@ -1,71 +1,42 @@
-### GET USER
-GET http://localhost:3000/user/60a22596aa27ca0976352527
+### GET AUTH USER
+GET http://localhost:3000/authuser/60a22596aa27ca0976352527
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTcwMTgsImV4cCI6MTYyMTMzODYxOCwidHlwZSI6ImFjY2VzcyJ9.j2yI81XR0_IbK1JEIBISg4qal6hAM9GMhkn8OA8MLg0
+
+
+### GET AUTH USERS
+GET http://localhost:3000/authuser?size=3&page=2
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTcwMTgsImV4cCI6MTYyMTMzODYxOCwidHlwZSI6ImFjY2VzcyJ9.j2yI81XR0_IbK1JEIBISg4qal6hAM9GMhkn8OA8MLg0
 
 
 
-### GET USERS
-GET http://localhost:3000/user/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTcwMTgsImV4cCI6MTYyMTMzODYxOCwidHlwZSI6ImFjY2VzcyJ9.j2yI81XR0_IbK1JEIBISg4qal6hAM9GMhkn8OA8MLg0
 
-
-
-### GET USERS JOINED
-GET http://localhost:3000/user/joined/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTcwMTgsImV4cCI6MTYyMTMzODYxOCwidHlwZSI6ImFjY2VzcyJ9.j2yI81XR0_IbK1JEIBISg4qal6hAM9GMhkn8OA8MLg0
-
-
-
-### UPDATE USER
-PATCH http://localhost:3000/user/60a19934aa27ca0976352523
+### CHANGE PASSWORD
+PATCH http://localhost:3000/authuser/
 Content-Type: application/x-www-form-urlencoded
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTcwMTgsImV4cCI6MTYyMTMzODYxOCwidHlwZSI6ImFjY2VzcyJ9.j2yI81XR0_IbK1JEIBISg4qal6hAM9GMhkn8OA8MLg0
 
-&name=Talat
-&gender=male
-&country=USA
+&currentPassword=Tk3231tK
+&password=Tk3231tK.
+&passwordConfirmation=Tk3231tK.
+
+
+### TOGGLE USER ABILITY - enable / disable
+PUT http://localhost:3000/authuser/60a22596aa27ca0976352527
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTcwMTgsImV4cCI6MTYyMTMzODYxOCwidHlwZSI6ImFjY2VzcyJ9.j2yI81XR0_IbK1JEIBISg4qal6hAM9GMhkn8OA8MLg0
 
 
 
-### UPDATE USER
-PATCH http://localhost:3000/user/60a22596aa27ca0976352527
+
+
+### DELETE AUTH USER
+DELETE http://localhost:3000/authuser/60a37e19f65f4031dbe942ba
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTcwMTgsImV4cCI6MTYyMTMzODYxOCwidHlwZSI6ImFjY2VzcyJ9.j2yI81XR0_IbK1JEIBISg4qal6hAM9GMhkn8OA8MLg0
+
+
+### ADD AUTH USER
+POST http://localhost:3000/authuser/
 Content-Type: application/x-www-form-urlencoded
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTcwMTgsImV4cCI6MTYyMTMzODYxOCwidHlwZSI6ImFjY2VzcyJ9.j2yI81XR0_IbK1JEIBISg4qal6hAM9GMhkn8OA8MLg0
 
-&name=Selda&
-&gender=female
-&country=TUR
-
-
-
-
-
-
-### DELETE USER
-DELETE http://localhost:3000/user/60a37e19f65f4031dbe942ba
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTcwMTgsImV4cCI6MTYyMTMzODYxOCwidHlwZSI6ImFjY2VzcyJ9.j2yI81XR0_IbK1JEIBISg4qal6hAM9GMhkn8OA8MLg0
-
-
-### ADD USER
-POST http://localhost:3000/user/
-Content-Type: application/x-www-form-urlencoded
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTcwMTgsImV4cCI6MTYyMTMzODYxOCwidHlwZSI6ImFjY2VzcyJ9.j2yI81XR0_IbK1JEIBISg4qal6hAM9GMhkn8OA8MLg0
-
-&id=60a37e19f65f4031dbe942ba
 &email=user3@gmail.com
-&role=user
-&name=Talha
-&gender=male
-&country=TUR
-
-
-
-
-
-
-### CHANGE USER ROLE
-PUT http://localhost:3000/user/60a22596aa27ca0976352527
-Content-Type: application/x-www-form-urlencoded
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEyMzYzMjcsImV4cCI6MTYyMTI1NzkyNywidHlwZSI6ImFjY2VzcyJ9.jqVbdzOuwY4g6ceJzYDNIZH2Sx6DI4JZIz4ohygxRIY
-
-&role=user
+&password=Tk3231tK.

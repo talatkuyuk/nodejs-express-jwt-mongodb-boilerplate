@@ -15,7 +15,7 @@ const jwtVerify = async (payload, done) => {
 			throw new Error('Invalid token type');
 		}
 
-		const authuser = await authuserService.getAuthUserById(payload.sub);
+		const authuser = await authuserService.getAuthUser({id: payload.sub});
 
 		if (!authuser) return done(null, false);
 		

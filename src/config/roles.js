@@ -17,9 +17,13 @@ module.exports.roleRights = {
 		"update-user",
 		"delete-user", 
 		"query-users",
+		"query-users-joined",
 		"change-role", 
 		//authuser related
-		"toggle-ability",
+		"add-authuser",
+		"get-authuser",
+		"query-authusers",
+		"toggle-authuser",
 		"delete-authuser",
 		//self related
 		"change-password@self"

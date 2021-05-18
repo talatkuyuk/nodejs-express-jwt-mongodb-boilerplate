@@ -50,6 +50,16 @@ class AuthUser {
 		return authuser;
 	}
 
+	// eleminates private password
+	passwordfilter(){
+		const authuser = Object.assign({}, this);
+		const notAllowedKeys = ["password"];
+		for (const key of Object.keys(authuser)) {
+			if (notAllowedKeys.includes(key)) delete authuser[key];
+		}
+		return authuser;
+	}
+
 }
 
 module.exports = AuthUser;

@@ -12,7 +12,12 @@ const {
 	//send email: forgotPassword sendVerificationEmail
 	emailService,
 
+	//get auth user by email: forgotPassword
+	authuserService,
+
 } = require('../services');
+
+
 
 
 const signup = asyncHandler(async (req, res) => {
@@ -25,6 +30,7 @@ const signup = asyncHandler(async (req, res) => {
 });
 
 
+
 const login = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
 
@@ -33,6 +39,7 @@ const login = asyncHandler(async (req, res) => {
 
 	res.status(httpStatus.OK).send({ user: user.authfilter(), tokens });
 });
+
 
 
 const logout = asyncHandler(async (req, res) => {
@@ -44,6 +51,7 @@ const logout = asyncHandler(async (req, res) => {
 });
 
 
+
 const signout = asyncHandler(async (req, res) => {
 	const refreshtoken = req.body.refreshToken;
 
@@ -51,6 +59,7 @@ const signout = asyncHandler(async (req, res) => {
 
 	res.status(httpStatus.NO_CONTENT).send();
 });
+
 
 
 const refreshTokens = asyncHandler(async (req, res) => {
@@ -63,26 +72,17 @@ const refreshTokens = asyncHandler(async (req, res) => {
 });
 
 
-const changePassword = asyncHandler(async (req, res) => {
-	const currentPassword = req.body.currentPassword;
-	const newPassword = req.body.password;
-	const authuser = req.user;
-
-	await authService.changePassword(authuser, currentPassword, newPassword);
-
-	res.status(httpStatus.NO_CONTENT).send();
-});
-
 
 const forgotPassword = asyncHandler(async (req, res) => {
 	const email = req.body.email;
 	
-	const authuser = await authService.getAuthUser(email);
+	const authuser = await authuserService.getAuthUserByEmail(email);
 	const resetPasswordToken = await tokenService.generateResetPasswordToken(authuser);
 	await emailService.sendResetPasswordEmail(email, resetPasswordToken);
 
 	res.status(httpStatus.NO_CONTENT).send();
 });
+
 
 
 const resetPassword = asyncHandler(async (req, res) => {
@@ -93,6 +93,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 
 	res.status(httpStatus.NO_CONTENT).send();
 });
+
 
 
 const sendVerificationEmail = asyncHandler(async (req, res, next) => {
@@ -110,6 +111,7 @@ const sendVerificationEmail = asyncHandler(async (req, res, next) => {
 });
 
 
+
 const verifyEmail = asyncHandler(async (req, res) => {
 	const token = req.query.token;
 
@@ -119,22 +121,6 @@ const verifyEmail = asyncHandler(async (req, res) => {
 });
 
 
-const toggleAbility = asyncHandler(async (req, res) => {
-	const id = req.params.id;
-
-	await authService.toggleAbility(id);
-  
-	res.status(httpStatus.NO_CONTENT).send();
-});
-
-
-const deleteAuthUser = asyncHandler(async (req, res) => {
-	const id = req.params.id;
-
-	await authService.deleteAuthUser(id);
-  
-	res.status(httpStatus.NO_CONTENT).send();
-});
 
 
 module.exports = {
@@ -142,16 +128,9 @@ module.exports = {
 	login,
 	logout,
 	signout,
-
 	refreshTokens,
-
-	changePassword,
 	forgotPassword,
 	resetPassword,
-
 	sendVerificationEmail,
 	verifyEmail,
-
-	toggleAbility,
-	deleteAuthUser,
 };

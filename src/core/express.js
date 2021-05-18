@@ -74,7 +74,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.options('*', cors());
 
-app.set('strict mode', true);
+app.set('strict routing', true);
 
 // jwt authentication
 app.use(passport.initialize());

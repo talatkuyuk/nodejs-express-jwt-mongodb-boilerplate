@@ -8,10 +8,10 @@ const iso_3166_alpha_3 = `/^A(BW|FG|GO|IA|L[AB]|ND|R[EGM]|SM|T[AFG]|U[ST]|ZE)|B(
 const check_param_id = [
 	param("id")
 		.isLength({ min: 24, max: 24}).withMessage('param id is wrong')
-		.bail()
 		.custom(async (value) => {
 			try {
-				if (await userService.isValidUser(value)) 
+				console.log("value:", value);
+				if (await userService.utils.isValidUser(value)) 
 					return true; // indicates validation is success: the id is valid
 				throw new Error('param id does not refer any user. (User not found)');
 				
@@ -73,10 +73,10 @@ const addUser = [
 		.bail()
 		.custom(async (value) => {
 			try {
-				if (!await authuserService.isValidUser(value)) 
+				if (!await authuserService.utils.isValidAuthUser(value)) 
 					throw new Error('Id does not match with any authenticated user');
 
-				if (await userService.isValidUser(value)) 
+				if (await userService.utils.isValidUser(value)) 
 					throw new Error('There is another user with the same id.');
 
 				return true;
@@ -95,7 +95,7 @@ const addUser = [
 		.toLowerCase()
 		.custom(async (value, { req }) => {
 			try {
-				if (!await authuserService.isPair_EmailAndId(req.body.id, value))
+				if (!await authuserService.utils.isPair_EmailAndId(req.body.id, value))
 					throw new Error('Email does not match with the auth id.');
 				
 				return true; // Indicates the success
@@ -146,7 +146,9 @@ const deleteUser = [
 
 const changeRole = [
 	...check_param_id,
+
 	body('role', `role could be one of ${roles}`).trim().isIn(roles),
+
 	body().custom( (body, { req }) => {
 		const validKey = 'role';
 		return Object.keys(req.body).every(key => validKey === key);
