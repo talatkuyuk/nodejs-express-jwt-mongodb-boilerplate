@@ -5,6 +5,7 @@ const ApiError = require('../utils/ApiError');
 const userService = require('../services/user.service');
 const { roleRights } = require('../config/roles');
 
+
 const verifyCallback = (req, resolve, reject, requiredRights) => async (err, authuser, info) => {
 	//TODO: syntax error was not catched by error handling? let-const
 

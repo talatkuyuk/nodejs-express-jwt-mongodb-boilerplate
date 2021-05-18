@@ -51,7 +51,7 @@ const logout = async (refreshToken) => {
 		const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
 
 		// delete that token
-		await tokenService.removeToken(refreshTokenDoc._id);
+		await tokenService.removeToken(refreshTokenDoc.id);
 
 		// TODO: cancel access token
 		// TODO: logout with refresh token? or access token?
@@ -72,10 +72,10 @@ const logout = async (refreshToken) => {
 	try {
 		const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
 
-		const id = refreshTokenDoc.user;
+		const user = refreshTokenDoc.user;
 		
 		// delete all tokens,
-		await tokenService.removeTokens({ user: id });
+		await tokenService.removeTokens({ user });
 
 		// TODO: cancel access token
 
@@ -103,7 +103,7 @@ const refreshAuth = async (refreshToken) => {
 		throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
 	}
     
-	await tokenService.removeToken(refreshTokenDoc._id);
+	await tokenService.removeToken(refreshTokenDoc.id);
 
     return authuser;
 

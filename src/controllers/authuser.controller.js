@@ -2,11 +2,15 @@ const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler')
 
 const Utils = require('../utils/Utils');
-const { authuserService, tokenService } = require('../services');
+
+const { 
+	authuserService, 
+	tokenService // addAuthUser, deleteAuthUser
+} = require('../services');
 
 
 
-
+// depend on tokenService because of token generate operation
 const addAuthUser = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
 

@@ -14,7 +14,7 @@ GET http://localhost:3000/comments
 POST http://localhost:3000/auth/signup
 Content-Type: application/x-www-form-urlencoded
 
-&email=user3@gmail.com
+&email=talatkuyuk@gmail.com
 &password=Tk3231tK.
 &passwordConfirmation=Tk3231tK.
 
@@ -65,7 +65,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzN
 POST http://localhost:3000/auth/refresh-tokens
 Content-Type: application/x-www-form-urlencoded
 
-&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGEyMjU5NmFhMjdjYTA5NzYzNTI1MjciLCJpYXQiOjE2MjEyNzkxNTIsImV4cCI6MTYyMzg3MTE1MiwidHlwZSI6InJlZnJlc2gifQ.wAN6kYKSuGdeGxjIChoWpt2aNrsoKi7cw0XhX2XGmec
+&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGEzY2IyY2E1YTI1ZTM3ZWU1Y2VmN2MiLCJpYXQiOjE2MjEzNDcxODUsImV4cCI6MTYyMzkzOTE4NSwidHlwZSI6InJlZnJlc2gifQ.RimIBQFQ2hW1MiR-wtwBWL4UI2HAEjfyaoQdzeBM6fU
 
 
 
@@ -102,17 +102,17 @@ Content-Type: application/x-www-form-urlencoded
   "user": {
     "email": "talatkuyuk@gmail.com",
     "isEmailVerified": false,
-    "createdAt": 1621203252921,
-    "id": "60a19934aa27ca0976352523"
+    "createdAt": 1621347116780,
+    "id": "60a3cb2ca5a25e37ee5cef7c"
   },
   "tokens": {
-	"access": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTcwMTgsImV4cCI6MTYyMTMzODYxOCwidHlwZSI6ImFjY2VzcyJ9.j2yI81XR0_IbK1JEIBISg4qal6hAM9GMhkn8OA8MLg0",
-    "expires": "2021-05-18T11:50:18.050Z"
+    "access": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGEzY2IyY2E1YTI1ZTM3ZWU1Y2VmN2MiLCJpYXQiOjE2MjEzNDcxODUsImV4cCI6MTYyMTM2ODc4NSwidHlwZSI6ImFjY2VzcyJ9.-v9usuM_1mQpGjwilt8BU-4vAOzSehxICdEH0dEAfro",
+    "expires": "2021-05-18T20:13:05.616Z"
   },
   "refresh": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTcwMTgsImV4cCI6MTYyMzkwOTAxOCwidHlwZSI6InJlZnJlc2gifQ.A7dpie8-zqloB8IUV_VfFVIkM8zwsJjqKg6CWT-zHiw",
-    "expires": "2021-06-17T05:50:18.053Z"
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGEzY2IyY2E1YTI1ZTM3ZWU1Y2VmN2MiLCJpYXQiOjE2MjEzNDcxODUsImV4cCI6MTYyMzkzOTE4NSwidHlwZSI6InJlZnJlc2gifQ.RimIBQFQ2hW1MiR-wtwBWL4UI2HAEjfyaoQdzeBM6fU",
+    "expires": "2021-06-17T14:13:05.617Z"
   }
   }
 }

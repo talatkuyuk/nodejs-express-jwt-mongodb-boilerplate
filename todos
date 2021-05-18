@@ -1,8 +1,6 @@
-//TODO: reduce service dependencies
 //TODO: add mechanism for blacklist of access token in-memory iot invalidate or revoke it
 https://blog.indrek.io/articles/invalidate-jwt/
 https://stackoverflow.com/questions/31919067/how-can-i-revoke-a-jwt-token
-//TODO: take Token into account in Token service
 //TODO: Make Auth middleware to handle errors for syntax or null/undefined
 //TODO: implement tokenDAO
 //TODO: implement the Schema Versioning pattern, add a schema_version
