@@ -38,8 +38,8 @@ const getAuthUsers = asyncHandler(async (req, res) => {
 
 	const filterX = Utils.pick(req.query, ['email']);
 
-	const filter0 = Utils.pick(req.query, ['isEmailVerified', 'disabled']);
-	const filterY = Utils.parseBooleans(filter0, ['isEmailVerified', 'disabled']);
+	const filter0 = Utils.pick(req.query, ['isEmailVerified', 'isDisabled']);
+	const filterY = Utils.parseBooleans(filter0, ['isEmailVerified', 'isDisabled']);
 
 	const filter = {...filterX, ...filterY};
 

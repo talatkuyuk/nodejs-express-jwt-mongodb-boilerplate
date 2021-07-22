@@ -18,7 +18,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, aut
 		return reject(new ApiError(httpStatus.UNAUTHORIZED, errorMessage));
 	}
 
-	if (authuser.disabled) {
+	if (authuser.isDisabled) {
 		return reject(new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`));
 	}
 

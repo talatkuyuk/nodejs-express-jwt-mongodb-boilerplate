@@ -23,7 +23,7 @@ const check_param_id = [
 
 
 const getAuthUsers = [
-	param("disabled")
+	param("isDisabled")
 		.isBoolean()
 		.withMessage("The query param disabled must be boolean value")
 		.optional(),

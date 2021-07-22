@@ -2,11 +2,11 @@ const bcrypt = require('bcryptjs');
 
 class AuthUser {
 
-	constructor(email, password, isEmailVerified = false, disabled = false, createdAt = Date.now()) {
+	constructor(email, password, isEmailVerified = false, isDisabled = false, createdAt = Date.now()) {
 		this.email = email;
 		this.password = password;
 		this.isEmailVerified = isEmailVerified;
-		this.disabled = disabled;
+		this.isDisabled = isDisabled;
 		this.createdAt = createdAt;
 	}
 
@@ -21,7 +21,7 @@ class AuthUser {
 			doc.email,
 			doc.password,
 			doc.isEmailVerified,
-			doc.disabled,
+			doc.isDisabled,
 			doc.createdAt,
 		)
 		authuser.transformId(doc._id);
@@ -43,7 +43,7 @@ class AuthUser {
 	// eleminates private keys
 	authfilter(){
 		const authuser = Object.assign({}, this);
-		const notAllowedKeys = ["password", "disabled"];
+		const notAllowedKeys = ["password", "isDisabled"];
 		for (const key of Object.keys(authuser)) {
 			if (notAllowedKeys.includes(key)) delete authuser[key];
 		}

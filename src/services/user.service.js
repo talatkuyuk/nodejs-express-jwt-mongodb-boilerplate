@@ -159,7 +159,7 @@ const { User } = require('../models');
 				 $project:{
 					 email: "$details.email",
 					 isEmailVerified: 1,
-					 disabled: 1,
+					 isDisabled: 1,
 					 role: "$details.role",
 					 name: "$details.name",
 					 gender: "$details.gender",

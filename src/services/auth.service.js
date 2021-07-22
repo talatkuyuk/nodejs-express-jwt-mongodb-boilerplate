@@ -34,7 +34,7 @@ const loginWithEmailAndPassword = async (email, password) => {
   if (!authuser || !(await authuser.isPasswordMatch(password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
   }
-  if (authuser.disabled) {
+  if (authuser.isDisabled) {
 	throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
   }
   return authuser;
@@ -99,7 +99,7 @@ const refreshAuth = async (refreshToken) => {
     const authuser = await authuserService.getAuthUser({ id: refreshTokenDoc.user });
     if (!authuser) throw new Error("User not found");
 
-	if (authuser.disabled) {
+	if (authuser.isDisabled) {
 		throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
 	}
     

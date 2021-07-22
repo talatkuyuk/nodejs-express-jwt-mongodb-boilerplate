@@ -125,7 +125,7 @@ const getAuthUser = async (query) => {
 				$project:{
 					email: 1,
 					isEmailVerified: 1,
-					disabled: 1,
+					isDisabled: 1,
 					createdAt: 1,
 				}
 			},
@@ -252,7 +252,7 @@ const deleteAuthUser = async (id) => {
 		const authuser = await getAuthUser({id});
 		if (!authuser) throw new Error("User not found");
 
-		await updateAuthUser(id, {disabled: !authuser.disabled});
+		await updateAuthUser(id, {isDisabled: !authuser.isDisabled});
   
 	} catch (error) {
 	  throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}. Enabling/disabling authuser failed.` );

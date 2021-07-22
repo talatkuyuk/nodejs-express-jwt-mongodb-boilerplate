@@ -60,8 +60,8 @@ const getUsersJoined = asyncHandler(async (req, res) => {
 	const DEFAULT_PAGE_SIZE = 20;
 	const DEFAULT_PAGE = 1;
 
-	const filter = Utils.pick(req.query, ['isEmailVerified', 'disabled']);
-	const filterLeft = Utils.parseBooleans(filter, ['isEmailVerified', 'disabled']);
+	const filter = Utils.pick(req.query, ['isEmailVerified', 'isDisabled']);
+	const filterLeft = Utils.parseBooleans(filter, ['isEmailVerified', 'isDisabled']);
 
 	const filterRight = Utils.pick(req.query, ['email', 'role', 'name', 'country', 'gender']);
 

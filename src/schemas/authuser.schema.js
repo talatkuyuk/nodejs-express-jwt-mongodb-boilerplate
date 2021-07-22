@@ -5,6 +5,7 @@ module.exports.authuserSchema = {
 		email: { bsonType: "string", /* pattern: */ },
 		password: { bsonType: "string", /* pattern: */ },
 		isEmailVerified: { bsonType: "bool" },
+		isDisabled: { bsonType: "bool" },
 		createdAt: { bsonType: "date" },
 		updatedAt: { bsonType: "date" },
 	}
