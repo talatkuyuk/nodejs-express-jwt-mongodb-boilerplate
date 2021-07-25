@@ -21,14 +21,11 @@ const { authLimiter } = require('../middlewares/rateLimiter');
 // *****************************************************************
 function initViewEngine(app) {
 	// View engine setup  (needs "views" directory )
-  app.set('views', path.join(__dirname, '../views'));
+	app.set('views', path.join(__dirname, '../views'));
 
-  // choose one
-  app.set('view engine', 'ejs'); // option-1 
-  app.set('view engine', 'pug'); // option-2
-
-  // if need to sent any static file to client (needs "public" directory )
-  app.use(express.static(path.join(__dirname, 'public')));
+	// choose one
+	app.set('view engine', 'ejs'); // option-1 
+	app.set('view engine', 'pug'); // option-2
 
 	// Environment dependent middleware
 	if (config.env === "development") {
@@ -64,6 +61,9 @@ app.use(crossdomain())
 
 // if need to server side rendering (optional)
 initViewEngine(app)
+
+// if need to sent any static file to client (needs "public" directory and optional)
+app.use(express.static(path.join(__dirname, 'public')));
 
 // parse JSON bodies (application/json)
 app.use(express.json());
