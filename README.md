@@ -11,6 +11,9 @@ I use **morgan** handler to log api requests.
 npm install
 
 Create .env file considering the .env.example.  
-Set MongoDB URL in that .env file.  
+Set MongoDB URL in that .env file. 
+Set mail server in that .env file.  
 
-nodemon src/server.js
+Choose one of below commands  
+> nodemon src/server.js  
+> npm run dev  

@@ -42,7 +42,7 @@ Content-Type: application/x-www-form-urlencoded
 POST http://localhost:3000/auth/logout
 Content-Type: application/x-www-form-urlencoded
 
-&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExMmNlNTk0NDdkYjczMGFjNWI2NmEiLCJpYXQiOjE2MjExOTU0NDksImV4cCI6MTYyMzc4NzQ0OSwidHlwZSI6InJlZnJlc2gifQ.edj9I8ampckugPD30A0U5qFEyODolOCp5v9dH3O04ZI
+&refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGZjNzNlYmJhMGM3NDU2NzUyYmJjNjEiLCJpYXQiOjE2MjcxNTc2OTEsImV4cCI6MTYyOTc0OTY5MSwidHlwZSI6InJlZnJlc2gifQ.LxaII4inzP1aFPWnt9Vvlo8aSwXFJxkb2WWaGtXXSFA
 
 
 
@@ -102,37 +102,36 @@ Content-Type: application/x-www-form-urlencoded
   "user": {
     "email": "talatkuyuk@gmail.com",
     "isEmailVerified": false,
-    "createdAt": 1621347116780,
-    "id": "60a3cb2ca5a25e37ee5cef7c"
+    "createdAt": 1627157483264,
+    "id": "60fc73ebba0c7456752bbc61"
   },
   "tokens": {
     "access": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGEzY2IyY2E1YTI1ZTM3ZWU1Y2VmN2MiLCJpYXQiOjE2MjEzNDcxODUsImV4cCI6MTYyMTM2ODc4NSwidHlwZSI6ImFjY2VzcyJ9.-v9usuM_1mQpGjwilt8BU-4vAOzSehxICdEH0dEAfro",
-    "expires": "2021-05-18T20:13:05.616Z"
-  },
-  "refresh": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGEzY2IyY2E1YTI1ZTM3ZWU1Y2VmN2MiLCJpYXQiOjE2MjEzNDcxODUsImV4cCI6MTYyMzkzOTE4NSwidHlwZSI6InJlZnJlc2gifQ.RimIBQFQ2hW1MiR-wtwBWL4UI2HAEjfyaoQdzeBM6fU",
-    "expires": "2021-06-17T14:13:05.617Z"
-  }
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGZjNzNlYmJhMGM3NDU2NzUyYmJjNjEiLCJpYXQiOjE2MjcxNTc0ODMsImV4cCI6MTYyNzE3OTA4MywidHlwZSI6ImFjY2VzcyJ9.kIMgnCvsS8J2c_bnbzlS4Nxq5OrLDAS3QH-xYt2NYEI",
+      "expires": "2021-07-25T02:11:23.372Z"
+    },
+    "refresh": {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGZjNzNlYmJhMGM3NDU2NzUyYmJjNjEiLCJpYXQiOjE2MjcxNTc0ODMsImV4cCI6MTYyOTc0OTQ4MywidHlwZSI6InJlZnJlc2gifQ.ls7HnOw550Ih-oogOez4a7GZE1hojre9qkLqOcTCWu0",
+      "expires": "2021-08-23T20:11:23.376Z"
+    }
   }
 }
 
-
 {
   "user": {
-    "email": "user1@gmail.com",
+    "email": "talatkuyuk@gmail.com",
     "isEmailVerified": false,
-    "createdAt": 1621239190112,
-    "id": "60a22596aa27ca0976352527"
+    "createdAt": 1627157483264,
+    "id": "60fc73ebba0c7456752bbc61"
   },
   "tokens": {
     "access": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGEyMjU5NmFhMjdjYTA5NzYzNTI1MjciLCJpYXQiOjE2MjEzMTcwNTksImV4cCI6MTYyMTMzODY1OSwidHlwZSI6ImFjY2VzcyJ9.hDU1aj0defjUY_1cx2bJsG4zARuyaC5KNo4FWoSbKkQ",
-    "expires": "2021-05-18T11:50:59.598Z"
-  },
-  "refresh": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGEyMjU5NmFhMjdjYTA5NzYzNTI1MjciLCJpYXQiOjE2MjEzMTcwNTksImV4cCI6MTYyMzkwOTA1OSwidHlwZSI6InJlZnJlc2gifQ.XDSfaeu-p1sDJUIfRQmeur9OgxyFOtWsu4dH4_kESzc",
-    "expires": "2021-06-17T05:50:59.599Z"
-  }
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGZjNzNlYmJhMGM3NDU2NzUyYmJjNjEiLCJpYXQiOjE2MjcxNTc2OTEsImV4cCI6MTYyNzE3OTI5MSwidHlwZSI6ImFjY2VzcyJ9.YhHIWUqoyYL38m5XfiGMQyyP1-5OI3-RSGzsS_AIWEo",
+      "expires": "2021-07-25T02:14:51.833Z"
+    },
+    "refresh": {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGZjNzNlYmJhMGM3NDU2NzUyYmJjNjEiLCJpYXQiOjE2MjcxNTc2OTEsImV4cCI6MTYyOTc0OTY5MSwidHlwZSI6InJlZnJlc2gifQ.LxaII4inzP1aFPWnt9Vvlo8aSwXFJxkb2WWaGtXXSFA",
+      "expires": "2021-08-23T20:14:51.833Z"
+    }
   }
 }

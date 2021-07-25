@@ -49,10 +49,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzN
 ### ADD USER
 POST http://localhost:3000/user/
 Content-Type: application/x-www-form-urlencoded
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTcwMTgsImV4cCI6MTYyMTMzODYxOCwidHlwZSI6ImFjY2VzcyJ9.j2yI81XR0_IbK1JEIBISg4qal6hAM9GMhkn8OA8MLg0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGZjNzNlYmJhMGM3NDU2NzUyYmJjNjEiLCJpYXQiOjE2MjcxNTc0ODMsImV4cCI6MTYyNzE3OTA4MywidHlwZSI6ImFjY2VzcyJ9.kIMgnCvsS8J2c_bnbzlS4Nxq5OrLDAS3QH-xYt2NYEI
 
-&id=60a37e19f65f4031dbe942ba
-&email=user3@gmail.com
+&id=60fc73ebba0c7456752bbc61
+&email=talatkuyuk@gmail.com
 &role=user
 &name=Talha
 &gender=male

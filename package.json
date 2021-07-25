@@ -4,11 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/talatkuyuk/node-express-mongo-boilerplate-tk.git"
+    "dev": "nodemon src/server.js"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +20,7 @@
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
     "express-rate-limit": "^5.2.6",
+    "express-useragent": "^1.0.15",
     "express-validator": "^6.9.2",
     "helmet": "^4.4.1",
     "helmet-crossdomain": "^0.5.0",

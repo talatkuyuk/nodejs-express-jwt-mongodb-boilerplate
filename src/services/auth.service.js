@@ -81,6 +81,8 @@ const logout = async (refreshToken) => {
 
 		// delete authuser by id
 		await authuserService.deleteAuthUser(id);
+
+		// TODO: delete user data or keep it done via another request
 		
 	} catch (error) {
 		throw error;

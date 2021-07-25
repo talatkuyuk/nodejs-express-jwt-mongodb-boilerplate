@@ -6,6 +6,7 @@ let noCache 	 = require("nocache");
 let cors         = require("cors");
 const httpStatus = require('http-status');
 const passport 	 = require('passport');
+const useragent	 = require('express-useragent');
 
 const routes     = require('../routes');
 const config     = require('../config');
@@ -84,6 +85,9 @@ passport.use('jwt', jwtStrategy);
 if (config.env === 'production') {
     app.use('/auth', authLimiter);
 }
+
+// get the device of request
+app.use(useragent.express());
   
 // routes
 app.use('/', routes);
