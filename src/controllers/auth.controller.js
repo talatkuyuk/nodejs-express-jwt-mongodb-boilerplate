@@ -22,9 +22,10 @@ const {
 
 const signup = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
+	const userAgent = req.useragent.source;
 
 	const authuser = await authService.signupWithEmailAndPassword(email, password);
-	const tokens = await tokenService.generateAuthTokens(authuser);
+	const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
 
 	res.status(httpStatus.CREATED).send({ user: authuser.authfilter(), tokens });
 });
@@ -33,9 +34,10 @@ const signup = asyncHandler(async (req, res) => {
 
 const login = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
+	const userAgent = req.useragent.source;
 
 	const user = await authService.loginWithEmailAndPassword(email, password);
-	const tokens = await tokenService.generateAuthTokens(user);
+	const tokens = await tokenService.generateAuthTokens(user, userAgent);
 
 	res.status(httpStatus.OK).send({ user: user.authfilter(), tokens });
 });
@@ -43,9 +45,11 @@ const login = asyncHandler(async (req, res) => {
 
 
 const logout = asyncHandler(async (req, res) => {
+	//const accessToken = req.header('Authorization').replace('Bearer ', '');
+	const accessToken = req.headers.authorization.split(' ')[1];
 	const refreshtoken = req.body.refreshToken;
 
-	await authService.logout(refreshtoken);
+	await authService.logout(accessToken, refreshtoken);
 
 	res.status(httpStatus.NO_CONTENT).send();
 });
@@ -53,9 +57,10 @@ const logout = asyncHandler(async (req, res) => {
 
 
 const signout = asyncHandler(async (req, res) => {
+	const accessToken = req.headers.authorization.split(' ')[1];
 	const refreshtoken = req.body.refreshToken;
 
-	await authService.signout(refreshtoken);
+	await authService.signout(accessToken, refreshtoken);
 
 	res.status(httpStatus.NO_CONTENT).send();
 });
@@ -64,9 +69,10 @@ const signout = asyncHandler(async (req, res) => {
 
 const refreshTokens = asyncHandler(async (req, res) => {
 	const refreshtoken = req.body.refreshToken;
+	const userAgent = req.useragent.source;
 
-	const authuser = await authService.refreshAuth(refreshtoken);
-	const tokens = await tokenService.generateAuthTokens(authuser);
+	const authuser = await authService.refreshAuth(refreshtoken, userAgent);
+	const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
 
 	res.status(httpStatus.OK).send({ ...tokens });
 });

@@ -1,11 +1,15 @@
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
+const crypto = require('crypto');
+const httpStatus = require('http-status');
 
 const config = require('../config');
+const ApiError = require('../utils/ApiError');
 const { Token } = require('../models');
 const { tokenTypes } = require('../config/tokens');
 
 const tokenDbService = require('./token.db.service');
+
 
 // TOKEN MECHANIZM
 // When log in, send 2 tokens (Access token, Refresh token) in response to the client.
@@ -20,14 +24,18 @@ const tokenDbService = require('./token.db.service');
  * Generate token
  * @param {ObjectId} userId
  * @param {Moment} expires
+ * @param {tokenTypes} type
+ * @param {string} userAgent
  * @param {string} [secret]
  * @returns {string}
  */
-const generateToken = (userId, expires, type, secret = config.jwt.secret) => {
+const generateToken = (userId, expires, type, userAgent = "n/a", secret = config.jwt.secret) => {
   const payload = {
     sub: userId,
     iat: moment().unix(),
     exp: expires.unix(),
+	jti: crypto.randomBytes(16).toString('hex'),
+	ua: userAgent,
     type,
   };
   return jwt.sign(payload, secret);
@@ -40,9 +48,16 @@ const generateToken = (userId, expires, type, secret = config.jwt.secret) => {
  * @param {string} type
  * @returns {Promise<Token>}
  */
-const verifyToken = async (token, type) => {
+const verifyToken = async (token, type, userAgent = "n/a") => {
 	try {
 		const payload = jwt.verify(token, config.jwt.secret);
+
+		if (type === tokenTypes.REFRESH) {
+			// control if the refresh token request is coming from the same useragent - for preventing mitm
+			if (userAgent !== payload.ua) {
+				throw new ApiError(httpStatus.UNAUTHORIZED, `Your browser/agent seems changed or updated, you have to re-login to get authentication.`);
+			}
+		}
 
 		const result = await tokenDbService.findToken({ token, type, user: payload.sub, blacklisted: false });
 
@@ -61,14 +76,15 @@ const verifyToken = async (token, type) => {
 /**
  * Generate auth tokens
  * @param {AuthUser} user
+ * @param {string} userAgent
  * @returns {Promise<Object>}
  */
-const generateAuthTokens = async (user) => {
+const generateAuthTokens = async (user, userAgent) => {
   const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
-  const accessToken = generateToken(user.id, accessTokenExpires, tokenTypes.ACCESS);
+  const accessToken = generateToken(user.id, accessTokenExpires, tokenTypes.ACCESS, userAgent);
 
   const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
-  const refreshToken = generateToken(user.id, refreshTokenExpires, tokenTypes.REFRESH);
+  const refreshToken = generateToken(user.id, refreshTokenExpires, tokenTypes.REFRESH, userAgent);
 
   const tokenDoc = new Token(
 	refreshToken,

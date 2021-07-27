@@ -1,7 +1,10 @@
 const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const ApiError = require('../utils/ApiError');
+const config = require('../config');
+const redisClient = require('../utils/cache');
 
 //for database operations for authusers
 const authuserService = require('./authuser.service');
@@ -10,7 +13,6 @@ const { AuthUser } = require('../models');
 //for verifying and removing token(s)
 const tokenService = require('./token.service'); 
 const { tokenTypes } = require('../config/tokens');
-
 
 
 /**
@@ -46,16 +48,17 @@ const loginWithEmailAndPassword = async (email, password) => {
  * @param {string} refreshToken
  * @returns {Promise}
  */
-const logout = async (refreshToken) => {
+const logout = async (accessToken, refreshToken) => {
 	try {
 		const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
 
-		// delete that token
+		// delete the refresh token from db
 		await tokenService.removeToken(refreshTokenDoc.id);
 
-		// TODO: cancel access token
-		// TODO: logout with refresh token? or access token?
-		
+		const { jti } = jwt.verify(accessToken, config.jwt.secret);
+
+		// put the access token in blacklist (key, timeout, value)
+		await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);		
 		
 	} catch (error) {
 		throw error;
@@ -68,21 +71,22 @@ const logout = async (refreshToken) => {
  * @param {string} refreshToken
  * @returns {Promise}
  */
- const signout = async (refreshToken) => {
+ const signout = async (accessToken, refreshToken) => {
 	try {
 		const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
-
-		const user = refreshTokenDoc.user;
 		
-		// delete all tokens,
-		await tokenService.removeTokens({ user });
+		// delete all tokens of the user
+		await tokenService.removeTokens({ user: refreshTokenDoc.user });
 
-		// TODO: cancel access token
+		const { jti } = jwt.verify(accessToken, config.jwt.secret);
+
+		// put the access token in blacklist (key, timeout-seconds, value)
+		await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);		
 
 		// delete authuser by id
 		await authuserService.deleteAuthUser(id);
 
-		// TODO: delete user data or keep it done via another request
+		// TODO: delete user data or do it via another request
 		
 	} catch (error) {
 		throw error;
@@ -94,9 +98,9 @@ const logout = async (refreshToken) => {
  * @param {string} refreshToken
  * @returns {Promise<AuthUser>}
  */
-const refreshAuth = async (refreshToken) => {
+const refreshAuth = async (refreshToken, userAgent) => {
   try {
-    const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
+    const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH, userAgent);
 
     const authuser = await authuserService.getAuthUser({ id: refreshTokenDoc.user });
     if (!authuser) throw new Error("User not found");
@@ -110,7 +114,7 @@ const refreshAuth = async (refreshToken) => {
     return authuser;
 
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message} and refreshing token failed`);
+    throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}`);
   }
 };
 

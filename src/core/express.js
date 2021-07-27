@@ -77,6 +77,9 @@ app.options('*', cors());
 
 app.set('strict routing', true);
 
+// get the device of request
+app.use(useragent.express());
+
 // jwt authentication
 app.use(passport.initialize());
 passport.use('jwt', jwtStrategy);
@@ -85,9 +88,6 @@ passport.use('jwt', jwtStrategy);
 if (config.env === 'production') {
     app.use('/auth', authLimiter);
 }
-
-// get the device of request
-app.use(useragent.express());
   
 // routes
 app.use('/', routes);

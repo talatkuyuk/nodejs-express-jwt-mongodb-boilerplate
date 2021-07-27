@@ -4,15 +4,18 @@ const httpStatus = require('http-status');
 const ApiError = require('../utils/ApiError');
 const userService = require('../services/user.service');
 const { roleRights } = require('../config/roles');
+const redisClient = require('../utils/cache');
 
 
-const verifyCallback = (req, resolve, reject, requiredRights) => async (err, authuser, info) => {
+const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pass, info) => {
 	//TODO: syntax error was not catched by error handling? let-const
 
+	const {authuser, payload} = pass;
+	
 	let errorMessage = (err ? err.message : "") + (info ? info : "");
 
-	// if no errormessage
-	if (!authuser && errorMessage === "") errorMessage = "Access token does not refer any user.";
+	// if no error message and no AuthUser
+	if (errorMessage === "" && !authuser) errorMessage = "Access token does not refer any user.";
 
 	if (err || info || !authuser) {
 		return reject(new ApiError(httpStatus.UNAUTHORIZED, errorMessage));
@@ -21,6 +24,15 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, aut
 	if (authuser.isDisabled) {
 		return reject(new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`));
 	}
+
+	// control if the request is coming from the same useragent - for preventing mitm
+	if (req.useragent.source !== payload.ua) {
+		return reject(new ApiError(httpStatus.UNAUTHORIZED, `Your browser/agent seems changed or updated, you have to re-login to get authentication.`));
+	}
+
+	// control if the token is in blacklist
+	if (await redisClient.get(`blacklist_${payload.jti}`))
+		return reject(new ApiError(httpStatus.FORBIDDEN, `The token is in the blacklist during TTL`));
 
 	req.user = authuser;
 	

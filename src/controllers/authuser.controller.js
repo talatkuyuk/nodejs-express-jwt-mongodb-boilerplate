@@ -13,9 +13,10 @@ const {
 // depend on tokenService because of token generate operation
 const addAuthUser = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
+	const userAgent = req.useragent.source;
 
 	const authuser = await authuserService.createAuthUser(email, password);
-	const tokens = await tokenService.generateAuthTokens(authuser);
+	const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
 
 	res.status(httpStatus.CREATED).send({ user: authuser.passwordfilter(), tokens });
 });
