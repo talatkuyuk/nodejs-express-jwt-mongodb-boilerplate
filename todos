@@ -1,13 +1,18 @@
-//TODO: add mechanism for blacklist of access token in-memory iot invalidate or revoke it
-https://blog.indrek.io/articles/invalidate-jwt/
-https://stackoverflow.com/questions/31919067/how-can-i-revoke-a-jwt-token
-//TODO: Google authentication
-//TODO: Make Auth middleware to handle errors for syntax or null/undefined
-//TODO: implement tokenDAO
-//TODO: arrange errors and http status
-//TODO: add loggers for mongo ops and add morgan to id/email
-//TODO: add todo part
-//TODO: add socket io
+//TODO: Refresh Auth - don't remove refresh token from db but establish refresh token rotation RTR instead  
+
+//TODO: Refresh Auth - if blacklisted refresh token is received, say that refresh token is used more than once, it assumes that something is wrong. As a result, the refresh token should be immediately revoked. Additionally, every descendant refresh token should also be revoked, to ensure that this chain of tokens is no longer valid.
+
+//TODO: Refresh Auth - set a field for NOT VALID BEFORE (until access token expires), if it is used before access token does not expire, it means it is abused, then immediately put it into the blacklist.
+
+//TODO: Refresh Auth - establish relation between access token and refresh token, put the same jit into access token and refresh token both, if refresh token is blacklisted then access token also.
+
+//TODO: Google authentication  
+//TODO: Make Auth middleware to handle errors for syntax or null/undefined  
+//TODO: implement tokenDAO  
+//TODO: arrange errors and http status  
+//TODO: add loggers for mongo ops and add morgan to id/email  
+//TODO: add todo part  
+//TODO: add socket io  
 
 //TODO: implement the Schema Versioning pattern, add a schema_version
 //TODO: set schemas for createcollection and create indexes and further arrange schemas

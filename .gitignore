@@ -17,6 +17,7 @@ pids
 
 # Privates
 doc/
+*.rest
 
 # Dependency directories
 node_modules/
