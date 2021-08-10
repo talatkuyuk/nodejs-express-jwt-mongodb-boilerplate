@@ -17,7 +17,9 @@ pids
 
 # Privates
 doc/
-*.rest
+http.auth.rest
+http.authuser.rest
+http.user.rest
 
 # Dependency directories
 node_modules/

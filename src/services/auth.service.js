@@ -57,7 +57,7 @@ const logout = async (accessToken, refreshToken) => {
 
 		const { jti } = jwt.verify(accessToken, config.jwt.secret);
 
-		// put the access token in blacklist (key, timeout, value)
+		// put the access token into the blacklist (key, timeout, value)
 		await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);		
 		
 	} catch (error) {
@@ -96,11 +96,12 @@ const logout = async (accessToken, refreshToken) => {
 /**
  * Refresh auth tokens
  * @param {string} refreshToken
- * @returns {Promise<AuthUser>}
+ * @param {string} userAgent
+ * @returns {Promise<Object>}
  */
 const refreshAuth = async (refreshToken, userAgent) => {
   try {
-    const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH, userAgent);
+    const refreshTokenDoc = await tokenService.refreshTokenRotation(refreshToken, userAgent);
 
     const authuser = await authuserService.getAuthUser({ id: refreshTokenDoc.user });
     if (!authuser) throw new Error("User not found");
@@ -108,10 +109,10 @@ const refreshAuth = async (refreshToken, userAgent) => {
 	if (authuser.isDisabled) {
 		throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
 	}
-    
-	await tokenService.removeToken(refreshTokenDoc.id);
 
-    return authuser;
+	const newTokens = await tokenService.generateAuthTokens(authuser, userAgent, refreshTokenDoc.family);
+    
+    return newTokens;
 
   } catch (error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}`);

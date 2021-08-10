@@ -71,9 +71,8 @@ const refreshTokens = asyncHandler(async (req, res) => {
 	const refreshtoken = req.body.refreshToken;
 	const userAgent = req.useragent.source;
 
-	const authuser = await authService.refreshAuth(refreshtoken, userAgent);
-	const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
-
+	const tokens = await authService.refreshAuth(refreshtoken, userAgent);
+	
 	res.status(httpStatus.OK).send({ ...tokens });
 });
 

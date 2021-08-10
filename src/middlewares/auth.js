@@ -31,8 +31,8 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 	}
 
 	// control if the token is in blacklist
-	if (await redisClient.get(`blacklist_${payload.jti}`))
-		return reject(new ApiError(httpStatus.FORBIDDEN, `The token is in the blacklist during TTL`));
+	if (redisClient.get(`blacklist_${payload.jti}`))
+		return reject(new ApiError(httpStatus.FORBIDDEN, `The token is in the blacklist.`));
 
 	req.user = authuser;
 	
