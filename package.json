@@ -36,6 +36,7 @@
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "redis": "^3.1.2",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "xss-clean": "^0.1.1"
   }
 }

@@ -6,6 +6,7 @@ let noCache 	 = require("nocache");
 let cors         = require("cors");
 const httpStatus = require('http-status');
 const passport 	 = require('passport');
+var xss 		 = require('xss-clean');
 const useragent	 = require('express-useragent');
 
 const routes     = require('../routes');
@@ -88,6 +89,9 @@ passport.use('jwt', jwtStrategy);
 if (config.env === 'production') {
     app.use('/auth', authLimiter);
 }
+
+// sanitize the requests against XSS attacks
+app.use(xss());
   
 // routes
 app.use('/', routes);
