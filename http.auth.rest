@@ -36,7 +36,7 @@ POST http://localhost:3000/auth/login
 Content-Type: application/x-www-form-urlencoded
 
 &email=talatkuyuk@gmail.com
-&password=Tk3231tK.
+&password=
 
 ### LOGOUT
 POST http://localhost:3000/auth/logout
@@ -89,7 +89,7 @@ Content-Type: application/x-www-form-urlencoded
 &email=talatkuyuk@gmail.com
 
 ### RESET PASSWORD
-POST http://localhost:3000/auth/reset-password?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGExOTkzNGFhMjdjYTA5NzYzNTI1MjMiLCJpYXQiOjE2MjEzMTkyODUsImV4cCI6MTYyMTMyMjg4NSwidHlwZSI6InJlc2V0UGFzc3dvcmQifQ.C0h8JJDn3GFm0ZgUUKC0AdJtwyHl8zDHD2XYLobsQLc
+POST http://localhost:3000/auth/reset-password?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MTNiNDNjYTc2YzQ0NGZkYzQ1ZGQ5OTEiLCJpYXQiOjE2MzEyNzQwNDksImV4cCI6MTYzMTI3NzY0OSwianRpIjoiODJmMjY0ZTYzZjJkMDMzYzc1ZjA0Yjg2Yzk2NjU4ZWYiLCJ1YSI6Im4vYSIsInR5cGUiOiJyZXNldFBhc3N3b3JkIiwibmJmIjoxNjMxMjc0MDQ5fQ.NTGkmT88FSjQsXvEWzbNnA4uV0zlJye_dNKxkI_d4wA
 Content-Type: application/x-www-form-urlencoded
 
 &password=Tk3231tK.
@@ -99,22 +99,24 @@ Content-Type: application/x-www-form-urlencoded
 
 
 ### TOKENS
-
 {
   "user": {
     "email": "talatkuyuk@gmail.com",
     "isEmailVerified": false,
-    "createdAt": 1628620090823,
-    "id": "6112c53a8e37aa4807070744"
+    "createdAt": 1631273336301,
+    "services": {
+      "emailpassword": "registered"
+    },
+    "id": "613b417848981bfd6e91c662"
   },
   "tokens": {
     "access": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MTEyYzUzYThlMzdhYTQ4MDcwNzA3NDQiLCJpYXQiOjE2Mjg2MjAwOTAsImV4cCI6MTYyODY0MTY5MCwianRpIjoiMjgyZTYxNmQ0ZjAxYjQ2YmUxN2RlYTBiZmI2MWU1NGQiLCJ1YSI6InZzY29kZS1yZXN0Y2xpZW50IiwidHlwZSI6ImFjY2VzcyIsIm5iZiI6MTYyODYyMDA5MH0.4k4vFfJ6EBPDSxmnnqNtj3r8fCw9fWjzCJyOnHyc3U8",
-      "expires": "2021-08-11T00:28:10.928Z"
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MTNiNDE3ODQ4OTgxYmZkNmU5MWM2NjIiLCJpYXQiOjE2MzEyNzMzMzYsImV4cCI6MTYzMTI5NDkzNiwianRpIjoiYWZiMjcyZDZhNmFjZDI4ZDI1MTRkODczOTBjNGI0YjgiLCJ1YSI6InZzY29kZS1yZXN0Y2xpZW50IiwidHlwZSI6ImFjY2VzcyIsIm5iZiI6MTYzMTI3MzMzNn0.3U_EMzb1S-exXz9BaOTpp4EQaec0oZLQePO-PVKzxIg",
+      "expires": "2021-09-10T17:28:56.368Z"
     },
     "refresh": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MTEyYzUzYThlMzdhYTQ4MDcwNzA3NDQiLCJpYXQiOjE2Mjg2MjAwOTAsImV4cCI6MTYzMTIxMjA5MCwianRpIjoiMjgyZTYxNmQ0ZjAxYjQ2YmUxN2RlYTBiZmI2MWU1NGQiLCJ1YSI6InZzY29kZS1yZXN0Y2xpZW50IiwidHlwZSI6InJlZnJlc2giLCJuYmYiOjE2Mjg2MjAzOTB9.VgYFAK8RgcVpq73H-B1fJGSf1x9gBIA-PEDZ07PR_9Q",
-      "expires": "2021-09-09T18:28:10.928Z"
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MTNiNDE3ODQ4OTgxYmZkNmU5MWM2NjIiLCJpYXQiOjE2MzEyNzMzMzYsImV4cCI6MTYzMzg2NTMzNiwianRpIjoiYWZiMjcyZDZhNmFjZDI4ZDI1MTRkODczOTBjNGI0YjgiLCJ1YSI6InZzY29kZS1yZXN0Y2xpZW50IiwidHlwZSI6InJlZnJlc2giLCJuYmYiOjE2MzEyOTQ5MzZ9.qVhBXZKA-UvR61tClBoc7xnpaea9cHJX3lfBS3DsAC0",
+      "expires": "2021-10-10T11:28:56.371Z"
     }
   }
 }

@@ -324,7 +324,7 @@ const removeToken = async (id) => {
 }
 
 const removeTokens = async (query) => {
-	const isDeleted = tokenDbService.removeTokens(query);
+	const {isDeleted, deletedCount} = await tokenDbService.removeTokens(query);
 	
 	isDeleted ? console.log(`${deletedCount} token(s) deleted.`) 
 			  : console.log("No token is deleted.");

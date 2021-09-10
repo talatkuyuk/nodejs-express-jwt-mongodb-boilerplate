@@ -111,6 +111,12 @@ const verifyEmailValidationRules = [
 ];
 
 
+const oAuthValidationRules = [
+	body('idToken')
+		.exists({checkFalsy: true}).withMessage('idToken must not be empty or falsy value')
+];
+
+
 
 module.exports = { 
 	loginValidationRules, 
@@ -120,7 +126,8 @@ module.exports = {
 	refreshTokensValidationRules,
 	forgotPasswordValidationRules,
 	resetPasswordValidationRules,
-	verifyEmailValidationRules
+	verifyEmailValidationRules,
+	oAuthValidationRules
 };
 
 

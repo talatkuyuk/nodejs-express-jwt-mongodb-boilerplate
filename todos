@@ -1,10 +1,12 @@
 //TODO: Google authentication  
+//TODO: Facebook authentication  
+//TODO: Change Password 
 //TODO: Make Auth middleware to handle errors for syntax or null/undefined  
 //TODO: implement tokenDAO  
 //TODO: arrange errors and http status  
 //TODO: add loggers for mongo ops and add morgan to id/email  
-//TODO: add todo part  
-//TODO: add socket io  
+//TODO: add todo part
+//TODO: add socket io
 
 //TODO: implement the Schema Versioning pattern, add a schema_version
 //TODO: set schemas for createcollection and create indexes and further arrange schemas

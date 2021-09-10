@@ -36,10 +36,10 @@ const login = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
 	const userAgent = req.useragent.source;
 
-	const user = await authService.loginWithEmailAndPassword(email, password);
-	const tokens = await tokenService.generateAuthTokens(user, userAgent);
+	const authuser = await authService.loginWithEmailAndPassword(email, password);
+	const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
 
-	res.status(httpStatus.OK).send({ user: user.authfilter(), tokens });
+	res.status(httpStatus.OK).send({ user: authuser.authfilter(), tokens });
 });
 
 
@@ -126,6 +126,15 @@ const verifyEmail = asyncHandler(async (req, res) => {
 });
 
 
+const oAuth = asyncHandler(async (req, res) => {
+	const { sub: id, email} = req.oAuth.payload;
+	const oAuthProvider = req.oAuth.provider;
+	const userAgent = req.useragent.source;
+
+	const authuser = await authService.loginWith_oAuth(oAuthProvider, id, email);
+	const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+	res.status(httpStatus.OK).send({ user: authuser.authfilter(), tokens });
+});
 
 
 module.exports = {
@@ -138,4 +147,5 @@ module.exports = {
 	resetPassword,
 	sendVerificationEmail,
 	verifyEmail,
+	oAuth
 };

@@ -17,8 +17,7 @@ const { AuthUser } = require('../models');
  * @returns {Promise<Boolean>}
  */
 const isEmailTaken = async function (email) {
-	var db = mongodb.getDatabase();
-	const authuser = await db.collection("authusers").findOne({ email });
+	const authuser = await getAuthUser({ email });
 	return !!authuser;
 };
 
@@ -29,8 +28,7 @@ const isEmailTaken = async function (email) {
  * @returns {Promise<Boolean>}
  */
  const isValidAuthUser = async function (id) {
-	var db = mongodb.getDatabase();
-	const authuser = await db.collection("authusers").findOne({ _id: ObjectId(id) });
+	const authuser = await getAuthUser({ _id: ObjectId(id) });
 	return !!authuser;
 };
 
@@ -42,8 +40,7 @@ const isEmailTaken = async function (email) {
  * @returns {Promise<Boolean>}
  */
 const isPair_EmailAndId = async function (id, email) {
-	var db = mongodb.getDatabase();
-	const authuser = await db.collection("authusers").findOne({_id: ObjectId(id), email });
+	const authuser = await getAuthUser({_id: ObjectId(id), email });
 	return !!authuser;
 };
 
@@ -54,19 +51,11 @@ const isPair_EmailAndId = async function (id, email) {
 
 /**
  * Create a authuser
- * @param {string} email
- * @param {string} password
+ * @param {AuthUser} authuser
  * @returns {Promise<AuthUser>}
  */
-const createAuthUser = async (email, password) => {
+const createAuthUser = async (authuser) => {
 	try {
-		if (await isEmailTaken(email)) {
-			throw new ApiError(httpStatus.BAD_REQUEST, 'Email is already taken.');
-		}
-		
-		const hashedPassword = await bcrypt.hash(password, 8);
-		const authuser = new AuthUser(email, hashedPassword);
-
 		const db = mongodb.getDatabase();
 		const result = await db.collection("authusers").insertOne(authuser);
 		
@@ -83,11 +72,42 @@ const createAuthUser = async (email, password) => {
 
 
 
+/**
+ * Get authuser logged in with oAuth
+ * @param {String} service
+ * @param {String} id
+ * @param {String} email
+ * @returns {Promise<AuthUser>}
+ */
+ const get_oAuthUser = async (service, id, email) => {
+	try {
+		
+		const db = mongodb.getDatabase();
+		const doc = await db.collection("authusers").findOne({ 
+			$or: [
+				{ email },
+				{ [`services.${service}`]: id }
+			] 
+		});
+
+		if (!doc) return;
+
+		if (doc?.services?.[`${service}`] !== id)
+			return await updateAuthUser(doc._id, { services: { ...doc.services, [service]: id }, isEmailVerified: true });
+
+
+		return AuthUser.fromDoc(doc);
+		
+	} catch (error) {
+		throw error
+	}
+};
+
 
 /**
  * Get authuser
  * @param {Object} query {id | email}
- * @returns {Promise<User>}
+ * @returns {Promise<AuthUser>}
  */
 const getAuthUser = async (query) => {
 	try {
@@ -340,6 +360,7 @@ const deleteAuthUser = async (id) => {
 
 module.exports = {
 	createAuthUser,
+	get_oAuthUser,
 	getAuthUser,
 	getAuthUsers,
 	updateAuthUser,

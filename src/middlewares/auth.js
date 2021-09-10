@@ -1,6 +1,9 @@
 const passport = require('passport');
 const httpStatus = require('http-status');
 
+const {OAuth2Client} = require('google-auth-library');
+
+const config = require('../config');
 const ApiError = require('../utils/ApiError');
 const userService = require('../services/user.service');
 const { roleRights } = require('../config/roles');
@@ -69,4 +72,39 @@ const auth = (...requiredRights) => async (req, res, next) => {
 	.catch((err) => next(err));
 };
 
-module.exports = auth;
+
+const oAuth = (service) => (req, res, next) => passport.authenticate(
+	service, 
+	{ session: false },
+	function(err, payload, info) {
+		if (err) { return next(err); }
+
+		//passport-authentication error
+        if (!payload) { return  next(new Error('Invalid-Formed Bearer Token. ' + (info ?? ""))); }
+        
+		next()
+	}
+)(req, res, next);
+
+
+const google_oAuth = async (req, res, next) => {
+	try {
+		const idToken = req.body.idToken;
+		
+		const client = new OAuth2Client(config.google_client_id);
+
+		const ticket = await client.verifyIdToken({
+			idToken,
+			audience: config.google_client_id, // if multiple clients [id1, id2, ...]
+		});
+
+		req.oAuth = {provider: "google", payload: ticket.getPayload()};
+
+		next();
+	
+	} catch (error) {
+		next(error);
+	}
+}
+
+module.exports = { auth, oAuth, google_oAuth };

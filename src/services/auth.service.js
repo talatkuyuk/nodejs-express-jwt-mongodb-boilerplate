@@ -21,8 +21,21 @@ const { tokenTypes } = require('../config/tokens');
  * @param {string} password
  * @returns {Promise<AuthUser>}
  */
- const signupWithEmailAndPassword = async (email, password) => 
- 			await authuserService.createAuthUser(email, password);
+ const signupWithEmailAndPassword = async (email, password) => {
+	 try {
+
+		const hashedPassword = await bcrypt.hash(password, 8);
+		const authuserx = new AuthUser(email, hashedPassword);
+		authuserx.services = { emailpassword: "registered" };
+
+		return await authuserService.createAuthUser(authuserx);
+
+	 } catch (error) {
+		throw error;
+	 }
+	
+ }
+ 			
 
 			 
 /**
@@ -40,6 +53,29 @@ const loginWithEmailAndPassword = async (email, password) => {
 	throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
   }
   return authuser;
+};
+
+const loginWith_oAuth = async (service, id, email) => {
+
+	let authuser = await authuserService.get_oAuthUser(service, id, email);
+
+	if (authuser?.isDisabled) {
+		throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
+	}
+
+    if (authuser) return authuser;
+    
+	// new user
+	const authuserx = new AuthUser(email);
+	authuserx.isEmailVerified = true;
+	authuserx.services = { 
+		emailpassword: "not registered", 
+		[`${service}`]: id   // { google: 46598364598354983 }
+	};
+
+	authuser = await authuserService.createAuthUser(authuserx);
+
+	return authuser;
 };
 
 
@@ -136,7 +172,11 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
 
 	const password = await bcrypt.hash(newPassword, 8);
     
-    await authuserService.updateAuthUser(authuser.id, { password });
+    await authuserService.updateAuthUser(authuser.id, { 
+		password, 
+		services: { ...authuser.services, emailpassword: "registered" }
+	});
+	
 	await tokenService.removeTokens({ user: authuser.id, type: tokenTypes.RESET_PASSWORD });
 
   } catch (error) {
@@ -169,6 +209,7 @@ const verifyEmail = async (verifyEmailToken) => {
 module.exports = {
   signupWithEmailAndPassword,
   loginWithEmailAndPassword,
+  loginWith_oAuth,
   logout,
   signout,
   refreshAuth,

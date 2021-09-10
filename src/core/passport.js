@@ -1,13 +1,10 @@
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
+const BearerStrategy = require('passport-http-bearer').Strategy;
 
 const config = require('../config');
 const { tokenTypes } = require('../config/tokens');
-const authuserService = require('../services/authuser.service');
+const { authuserService, authProviders } = require('../services');
 
-const jwtOptions = {
-	secretOrKey: config.jwt.secret,
-	jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-};
 
 const jwtVerify = async (payload, done) => {
 	try {
@@ -26,8 +23,41 @@ const jwtVerify = async (payload, done) => {
 	}
 };
 
+const oAuthVerify = (service) => async (req, token, done) => {
+	try {
+	  const oAuth = await authProviders[service](token);
+
+	  if (!oAuth.payload) return done(null, false, { message: `${service} oAuth token error occured.` });
+
+	  req.oAuth = oAuth;
+	  
+	  return done(null, oAuth.payload);
+
+	} catch (err) {
+	  console.log("error: ", err);
+	  return done(err);
+	}
+};
+
+
+const jwtOptions = {
+	secretOrKey: config.jwt.secret,
+	jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
+};
+
 const jwtStrategy = new JwtStrategy(jwtOptions, jwtVerify);
+
+
+
+const oAuthOptions = {
+	passReqToCallback: true
+};
+
+const googleStrategy = new BearerStrategy(oAuthOptions, oAuthVerify('google'));
+
+
 
 module.exports = {
 	jwtStrategy,
+	googleStrategy
 };
