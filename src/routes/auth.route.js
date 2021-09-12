@@ -29,5 +29,6 @@ router.post('/verify-email', validate(verifyEmailValidationRules), authControlle
 router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
 router.post('/google', validate(oAuthValidationRules), google_oAuth, authController.oAuth);
 router.post('/google/passport', oAuth("google"), authController.oAuth);
+router.post('/facebook/passport', oAuth("facebook"), authController.oAuth);
 
 module.exports = router;

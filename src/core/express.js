@@ -14,7 +14,7 @@ const config     = require('../config');
 const morgan     = require('./morgan');
 const ApiError   = require('../utils/ApiError');
 
-const { jwtStrategy, googleStrategy } = require('./passport');
+const { jwtStrategy, googleStrategy, facebookStrategy } = require('./passport');
 const { errorConverter, errorHandler } = require('../middlewares/error');
 const { authLimiter } = require('../middlewares/rateLimiter');
 
@@ -74,7 +74,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // enable cors
 var corsOptions = {
-	origin: 'http://localhost:5500',
+	origin: ['http://localhost:5500', 'https://localhost:5500'],
 	optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true // allow session cookie from browser to pass through
@@ -91,6 +91,7 @@ app.use(useragent.express());
 app.use(passport.initialize());
 passport.use('jwt', jwtStrategy);
 passport.use('google', googleStrategy);
+passport.use('facebook', facebookStrategy);
 
 // limit repeated failed requests to auth endpoints
 if (config.env === 'production') {

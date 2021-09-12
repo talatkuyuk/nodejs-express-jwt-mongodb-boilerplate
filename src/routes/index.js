@@ -1,4 +1,6 @@
 const express = require('express');
+const httpStatus = require('http-status');
+const asyncHandler = require('express-async-handler')
 
 const authRoute = require('./auth.route');
 const authuserRoute = require('./authuser.route');
@@ -26,14 +28,18 @@ function getOneDocumentInCollection(database, collection) {
 }
 
 
-function listAllCollections(database) {
+const listAllCollections = asyncHandler((req, res, next) => {
+	var database = mongodb.getDatabase();
 	database.listCollections({}).toArray(function(err, collections) {
+		let result = "collections: ";
         if (err) throw err;
         collections.forEach(function(collection) {
-            console.log(collection.name);
+			result += ` ${collection.name}`
         });
+		console.log(result);
+		res.status(httpStatus.OK).send(result);
     });
-}
+});
 
 
 function listAllDocumentsInCollection(database, collection) {
@@ -53,13 +59,7 @@ function listAllDocumentsInCollection(database, collection) {
 }
 
 
-router.get('/', (req, res) => {
-
-	var db = mongodb.getDatabase();
-
-	listAllCollections(db);
-
-});
+router.get('/', listAllCollections);
 
 
 router.get('/list', (req, res) => {

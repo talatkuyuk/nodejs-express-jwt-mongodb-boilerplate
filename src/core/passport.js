@@ -27,11 +27,11 @@ const oAuthVerify = (service) => async (req, token, done) => {
 	try {
 	  const oAuth = await authProviders[service](token);
 
-	  if (!oAuth.payload) return done(null, false, { message: `${service} oAuth token error occured.` });
+	  if (!oAuth?.user) return done(null, false, { message: `${service} oAuth token error occured.` });
 
 	  req.oAuth = oAuth;
 	  
-	  return done(null, oAuth.payload);
+	  return done(null, oAuth.user);
 
 	} catch (err) {
 	  console.log("error: ", err);
@@ -54,10 +54,11 @@ const oAuthOptions = {
 };
 
 const googleStrategy = new BearerStrategy(oAuthOptions, oAuthVerify('google'));
-
+const facebookStrategy = new BearerStrategy(oAuthOptions, oAuthVerify('facebook'));
 
 
 module.exports = {
 	jwtStrategy,
-	googleStrategy
+	googleStrategy,
+	facebookStrategy
 };
