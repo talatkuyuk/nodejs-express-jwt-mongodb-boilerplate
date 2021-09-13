@@ -21,6 +21,7 @@
     "dotenv-safe": "^8.2.0",
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
+    "express-mongo-sanitize": "^2.1.0",
     "express-rate-limit": "^5.2.6",
     "express-useragent": "^1.0.15",
     "express-validator": "^6.9.2",

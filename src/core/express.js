@@ -4,10 +4,10 @@ let helmet 		 = require("helmet");
 let crossdomain  = require("helmet-crossdomain");
 let noCache 	 = require("nocache");
 let cors         = require("cors");
-const httpStatus = require('http-status');
 const passport 	 = require('passport');
 var xss 		 = require('xss-clean');
 const useragent	 = require('express-useragent');
+const mongoSanitize = require('express-mongo-sanitize');
 
 const routes     = require('../routes');
 const config     = require('../config');
@@ -84,6 +84,7 @@ app.options('*', cors(corsOptions));
 
 app.set('strict routing', true);
 
+
 // get the device of request
 app.use(useragent.express());
 
@@ -97,6 +98,14 @@ passport.use('facebook', facebookStrategy);
 if (config.env === 'production') {
     app.use('/auth', authLimiter);
 }
+
+// remove dollar sign, and dot operators from the request against malicious mongoDB operations
+app.use(mongoSanitize({ 
+	replaceWith: '_', 
+	onSanitize: ({ req, key }) => {
+		console.warn(`The request[${key}] is sanitized.`);
+	},
+}));
 
 // sanitize the requests against XSS attacks
 app.use(xss());
