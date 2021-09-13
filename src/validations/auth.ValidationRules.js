@@ -92,6 +92,12 @@ const refreshTokensValidationRules = [
 
 const forgotPasswordValidationRules = [
 	...check_body_email,
+
+	body('callbackURL')
+      .notEmpty()
+	  .withMessage('You have to set callback URL (callbackURL) for the further reset password page')
+	  .isURL({require_tld: false}) // for localhost // consider later on .isURL({ protocols: ['https'] })
+	  .withMessage('The callback URL must be valid URL')
 ];
 
 

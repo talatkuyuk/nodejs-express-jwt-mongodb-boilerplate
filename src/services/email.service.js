@@ -46,9 +46,9 @@ const sendEmail = (to, subject, text) => {
  * @param {string} token
  * @returns {Promise}
  */
-const sendResetPasswordEmail = (to, token) => {
+const sendResetPasswordEmail = (to, token, url) => {
 	const subject = 'Reset password';
-	const resetPasswordUrl = `http://localhost:3000/auth/reset-password?token=${token}`;
+	const resetPasswordUrl = `${url}?token=${token}`;
 	const text = `Dear user,\n\nTo reset your password, click on this link: ${resetPasswordUrl}\n\nIf you did not request any password resets, then ignore this email.`;
 
   	return sendEmail(to, subject, text);
