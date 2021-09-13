@@ -1,15 +1,13 @@
-//TODO: Google authentication  
-//TODO: Facebook authentication  
-//TODO: Change Password 
-//TODO: Make Auth middleware to handle errors for syntax or null/undefined  
+//TODO: handle errors for syntax or null/undefined in auth middleware
 //TODO: implement tokenDAO  
-//TODO: arrange errors and http status  
+//TODO: arrange errors and http status 
 //TODO: add loggers for mongo ops and add morgan to id/email  
 //TODO: add todo part
 //TODO: add socket io
 
 //TODO: implement the Schema Versioning pattern, add a schema_version
 //TODO: set schemas for createcollection and create indexes and further arrange schemas
+//TODO: create email templates using email-templates package
 //TODO: add send email api
 //TODO: try sendpulse smtp
 //TODO: documentation
