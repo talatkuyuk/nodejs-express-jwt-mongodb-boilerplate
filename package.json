@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/server.js"
+    "dev": "cross-env NODE_ENV=development nodemon src/server.js"
   },
   "keywords": [],
   "author": "",
@@ -42,5 +42,8 @@
     "redis": "^3.1.2",
     "winston": "^3.3.3",
     "xss-clean": "^0.1.1"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }
