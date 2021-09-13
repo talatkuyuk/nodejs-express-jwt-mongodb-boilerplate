@@ -118,8 +118,8 @@ const verifyEmailValidationRules = [
 
 
 const oAuthValidationRules = [
-	body('idToken')
-		.exists({checkFalsy: true}).withMessage('idToken must not be empty or falsy value')
+	body('token')
+		.exists({checkFalsy: true}).withMessage('oAuth Provider\'s token must not be empty or falsy value')
 ];
 
 

@@ -1,6 +1,8 @@
 const express = require('express');
 
-const { auth, oAuth, google_oAuth } = require('../middlewares/auth');
+const { auth } = require('../middlewares/auth');
+const { oAuth, google_oAuth, facebook_oAuth } = require('../middlewares/oauth');
+
 const validate = require('../middlewares/validate');
 
 const { authController } = require('../controllers');
@@ -27,7 +29,9 @@ router.post('/forgot-password', validate(forgotPasswordValidationRules), authCon
 router.post('/reset-password', validate(resetPasswordValidationRules), authController.resetPassword);
 router.post('/verify-email', validate(verifyEmailValidationRules), authController.verifyEmail);
 router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
+
 router.post('/google', validate(oAuthValidationRules), google_oAuth, authController.oAuth);
+router.post('/facebook', validate(oAuthValidationRules), facebook_oAuth, authController.oAuth);
 router.post('/google/passport', oAuth("google"), authController.oAuth);
 router.post('/facebook/passport', oAuth("facebook"), authController.oAuth);
 

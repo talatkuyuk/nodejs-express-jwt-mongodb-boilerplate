@@ -27,15 +27,15 @@ const oAuthVerify = (service) => async (req, token, done) => {
 	try {
 	  const oAuth = await authProviders[service](token);
 
-	  if (!oAuth?.user) return done(null, false, { message: `${service} oAuth token error occured.` });
+	  if (!oAuth && !oAuth.user) return done(null, false, { message: `${service} oAuth token error occured.` });
+	  if (!oAuth.user.email) return done(null, false, { message: `Check ${service} oAuth scope consists e-mail.` });
 
 	  req.oAuth = oAuth;
 	  
 	  return done(null, oAuth.user);
 
 	} catch (err) {
-	  console.log("error: ", err);
-	  return done(err);
+	  return done(err, false);
 	}
 };
 
