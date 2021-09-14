@@ -7,6 +7,7 @@ class Utils {
 	 * @returns {Object}
 	 */
 	static pick (object, keys) {
+		if (!keys) return {};
 		return keys.reduce((obj, key) => {
 			if (object && Object.prototype.hasOwnProperty.call(object, key)) {
 				obj[key] = object[key];
@@ -21,25 +22,26 @@ class Utils {
 	 * @returns {Object}
 	 */
 	 static pickSort (object) {
-		return ["sort"].reduce((obj, key) => {
+		
+		const key = "sort";
+		const obj = {};
 
-			if (typeof(object[key]) === "object") {
-				object[key].map( item => {
-					const [sort, by] = item.split(".");
-					obj[sort] = by.toLowerCase() === "desc" ? -1 : 1;
-				});
-			}
+		if (typeof(object[key]) === "object") {
+			object[key].map( item => {
+				const [sort, by] = item.split(".");
+				obj[sort] = by?.toLowerCase() === "desc" ? -1 : 1;
+			});
+		}
 
-			else if (typeof(object[key]) === "string") {
-				const [sort, by] = object[key].split(".");
-				obj[sort] = by.toLowerCase() === "desc" ? -1 : 1;
-			}
+		else if (typeof(object[key]) === "string") {
+			const [sort, by] = object[key].split(".");
+			obj[sort] = by?.toLowerCase() === "desc" ? -1 : 1;
+		}
 
-			else
-				obj = { createdAt: -1};
-			
-			return obj;
-		}, {});
+		else
+			obj["createdAt"] = -1 ;
+		
+		return obj;
 	};
 
 	/**
@@ -51,7 +53,10 @@ class Utils {
 	static parseBooleans (object, keys) {
 		keys.forEach( key => {
 			if (object.hasOwnProperty(key)) {
-				if (['true', 'false', true, false].includes(object[key].toLowerCase()))
+				if (typeof object[key] === "string")
+					object[key] = object[key].toLowerCase();
+
+				if (['true', 'false', true, false].includes(object[key]))
 					object[key] =  JSON.parse(object[key]);
 				else
 					delete object[key];

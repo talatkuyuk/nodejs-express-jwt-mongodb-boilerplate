@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon src/server.js"
+    "dev": "cross-env NODE_ENV=development nodemon src/server.js",
+	"test": "cross-env NODE_ENV=test jest --config ./jest.config.json"
   },
   "keywords": [],
   "author": "",
@@ -44,6 +45,7 @@
     "xss-clean": "^0.1.1"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "jest": "^27.2.0"
   }
 }
