@@ -12,7 +12,6 @@ const querystrings = [
 describe('Utils pickSort function', () => {
   it('picks the sort key from the request query', () => {
 	  for (const query of querystrings) {
-		  console.log(query)
 		  const received = query.input;
 		  const expected = query.output;
 		  expect(Utils.parseBooleans(received, ['isEmailVerified', 'isDisabled'])).toEqual(expected);
