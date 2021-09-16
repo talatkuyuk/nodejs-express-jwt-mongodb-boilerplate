@@ -33,7 +33,7 @@ module.exports = {
   env: envVars.NODE_ENV,
   porthttp: envVars.PORT_HTTP,
   porthttps: envVars.PORT_HTTPS,
-  mongodb_url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
+  mongodb_url: envVars.MONGODB_URL,
   jwt: {
     secret: envVars.JWT_SECRET,
     accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,

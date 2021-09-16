@@ -8,7 +8,7 @@ const { tokenSchema } = require('../schemas/token.schema');
 
 let client, db;
 
-const connect = function(callback) {
+const connect = function() {
 
 	const uri = config.mongodb_url;
 	const options = {
@@ -19,31 +19,40 @@ const connect = function(callback) {
 	// Create a new MongoClient
 	client = new MongoClient(uri, options);
 
-	// Connect the client to the server
-    client.connect(function(err, cluster) {
-		if (err) {
-			console.log("MongoClient connection error. tk.")
-			throw err;
-		};
 
-		// for testing: list all databases of the MongoClient in terminal
-		// cluster.db().admin().listDatabases().then(console.log);
+	return new Promise(function (resolve, reject) {
+		client.connect(function(err, cluster) {
+			if (err) {
+				console.log("MongoClient connection error. tk.")
+				reject(err);
+			};
+	
+			// for testing: list all databases of the MongoClient in terminal
+			// cluster.db().admin().listDatabases().then(console.log);
+	
+			// Establish connection
+			const dbName = "apiDB" + (config.env === 'test' ? '-test' : '');
+			db = cluster.db(dbName);
+			
+			// Verify connection
+			cluster.db(dbName).command({ ping: 1 })
+				.then(() => {
+					logger.info("Mongodb connection is established.tk.");
+					resolve();
+				})
+				.catch((err) => {
+					logger.info("Mongodb connection has a problem.tk.");
+					reject(err);
+				});
+	
+			//TODO: set strict rules and chek if the collection exists
+			//db.createCollection("authusers", { validator: { $jsonSchema: authuserSchema } });
+			//db.createCollection("users", { validator: { $jsonSchema: userSchema } });
+			//db.createCollection("tokens", { validator: { $jsonSchema: tokenSchema } });
 
-		// Establish connection
-		db = cluster.db("apiDB");
-		
-		// Verify connection
-		cluster.db("apiDB").command({ ping: 1 }).then(() => {
-			logger.info("Mongodb connection is established.tk.");
-		});
-
-		//TODO: set strict rules and chek if the collection exists
-		//db.createCollection("authusers", { validator: { $jsonSchema: authuserSchema } });
-		//db.createCollection("users", { validator: { $jsonSchema: userSchema } });
-		//db.createCollection("tokens", { validator: { $jsonSchema: tokenSchema } });
-
-      	return callback( err );
-    });     
+		}); 
+	});
+        
 }
 
 const getDatabase = function() {
@@ -52,19 +61,18 @@ const getDatabase = function() {
 
 const disconnect = function() {
 
-	// TODO: revise that part, later
-	if (client.isConnected) {
-		return client.close(true, (err, result) => {
-			if (err) throw err;
-			console.log("Database is closed.tk")
-			client.logout(() => {
-				console.log("logged out from database.tk");
+	return new Promise(function (resolve, reject) {
+		if (client.isConnected) {
+			client.close(true, (err, result) => {
+				if (err) throw reject(err);
+				logger.info("Mongodb connection is closed.tk");
+				resolve();
 			});
-		});
-	} else {
-		console.log("Database is already closed.")
-	}
-    
+		} else {
+			console.log("Mongodb is already disconnected.tk");
+			resolve();
+		}
+	});
 }
       
 module.exports = {

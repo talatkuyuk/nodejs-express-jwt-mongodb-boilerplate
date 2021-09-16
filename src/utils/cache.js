@@ -1,7 +1,11 @@
 const redis = require('redis');
 const { promisify } = require('util');
+const logger = require('..//core/logger')
 
-const redisClient = redis.createClient(process.env.REDIS_URI);
+// Connect to redis at 127.0.0.1 port 6379 no password.
+const redisClient = redis.createClient();
+
+function getRedisClient() { return redisClient; }
 
 redisClient.set = promisify(redisClient.set);
 redisClient.setex = promisify(redisClient.setex);
@@ -10,4 +14,25 @@ redisClient.expire = promisify(redisClient.expire);
 redisClient.del = promisify(redisClient.del);
 redisClient.ttl = promisify(redisClient.ttl);
 
-module.exports = redisClient;
+redisClient.on("error", function(err) {
+    logger.error("Bonk. The worker framework cannot connect to redis, which might be ok on a dev server!");
+    logger.error("Resque error : "+err);
+    client.quit();
+});
+
+redisClient.on("idle", function(err) {
+    logger.error("Redis queue is idle. Shutting down...");
+});
+
+redisClient.on("end", function(err) {
+    logger.error("Redis is shutting down. This might be ok if you chose not to run it in your dev environment");
+});
+
+redisClient.on("ready", function(err) {
+    logger.info("Redis up! Now connecting the worker queue client...");
+});
+
+module.exports = {
+	redisClient,
+	getRedisClient
+};

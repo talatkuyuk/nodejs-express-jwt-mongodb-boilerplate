@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const httpStatus = require('http-status');
 
 const config = require('../config');
-const redisClient = require('../utils/cache');
+const redisClient = require('../utils/cache').getRedisClient();
 
 const ApiError = require('../utils/ApiError');
 const { Token } = require('../models');

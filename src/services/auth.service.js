@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const ApiError = require('../utils/ApiError');
 const config = require('../config');
-const redisClient = require('../utils/cache');
+const redisClient = require('../utils/cache').getRedisClient();
 
 //for database operations for authusers
 const authuserService = require('./authuser.service');

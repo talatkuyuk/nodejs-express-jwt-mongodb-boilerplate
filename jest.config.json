@@ -1,3 +1,4 @@
 {
-	"testRegex": "((\\.|/*.)(spec|test))\\.js?$"
+	"testRegex": "((\\.|/*.)(spec|test))\\.js?$",
+	"testEnvironment": "node"
 }
