@@ -162,7 +162,7 @@ const refreshAuth = async (refreshToken, userAgent) => {
 
 	const newTokens = await tokenService.generateAuthTokens(authuser, userAgent, refreshTokenDoc.family);
     
-    return newTokens;
+    return { newTokens, authuser };
 
   } catch (error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}`);
@@ -175,7 +175,7 @@ const refreshAuth = async (refreshToken, userAgent) => {
  * Reset password
  * @param {string} resetPasswordToken
  * @param {string} newPassword
- * @returns {Promise}
+ * @returns {Promise<AuthUser>}
  */
 const resetPassword = async (resetPasswordToken, newPassword) => {
   try {
@@ -193,6 +193,8 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
 	
 	await tokenService.removeTokens({ user: authuser.id, type: tokenTypes.RESET_PASSWORD });
 
+	return authuser;
+
   } catch (error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}. Reset password failed.`);
   }
@@ -201,7 +203,7 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
 /**
  * Verify email
  * @param {string} verifyEmailToken
- * @returns {Promise}
+ * @returns {Promise<AuthUser>}
  */
 const verifyEmail = async (verifyEmailToken) => {
   try {
@@ -212,6 +214,8 @@ const verifyEmail = async (verifyEmailToken) => {
     
     await authuserService.updateAuthUser(authuser.id, { isEmailVerified: true });
 	await tokenService.removeTokens({ user: authuser.id, type: tokenTypes.VERIFY_EMAIL });
+
+	return authuser;
 
   } catch (error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}. Email verification failed.` );
