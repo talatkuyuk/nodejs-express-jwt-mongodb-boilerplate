@@ -5,7 +5,8 @@ const jwt = require('jsonwebtoken');
 
 const app = require('../../src/core/express');
 const authuserService = require('../../src/services/authuser.service');
-const { AuthUser } = require('../../src/models');
+const tokenDbService = require('../../src/services/token.db.service');
+const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
 const { tokenTypes } = require('../../src/config/tokens');
 
@@ -198,6 +199,7 @@ describe('POST /auth/signup', () => {
 			expect(moment(response.body.tokens.refresh.expires, moment.ISO_8601, true).isValid()).toBe(true);
 			expect(response.body.user.createdAt).toBeGreaterThan(moment().unix());
 
+			// check the whole response body expected
 			expect(response.body).toEqual({
 				"user": {
 					"createdAt": expect.any(Number), // 1631868212022
@@ -220,7 +222,14 @@ describe('POST /auth/signup', () => {
 				},
 			});
 
-			// TODO: check the refresh token is stored into database
+			// check the refresh token is stored into database
+			const result = await tokenDbService.findToken({
+				user: response.body.user.id,
+				token: refreshToken,
+				expires: moment(response.body.tokens.refresh.expires).toDate(),
+				type: tokenTypes.REFRESH,
+			});
+			expect(Token.fromDoc(result)?.id).toBeDefined();
 		});
 	});
 })

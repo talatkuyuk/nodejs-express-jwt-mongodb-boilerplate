@@ -11,8 +11,6 @@ const { Token } = require('../models');
 const { tokenTypes } = require('../config/tokens');
 
 const tokenDbService = require('./token.db.service');
-const { x } = require('joi');
-const { resolve } = require('path');
 
 // TOKEN MECHANIZM
 // When log in, send 2 tokens (Access token, Refresh token) in response to the client.
