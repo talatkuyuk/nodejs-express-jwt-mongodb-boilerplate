@@ -26,14 +26,27 @@ class AuthUser {
 	static fromDoc(doc){
 		if (!doc) return null;
 		const authuser = new AuthUser(
-			doc.email,
-			doc.password,
-			doc.isEmailVerified,
-			doc.isDisabled,
-			doc.createdAt,
-			doc.services
+			doc?.email,
+			doc?.password,
+			doc?.isEmailVerified,
+			doc?.isDisabled,
+			doc?.createdAt,
+			doc?.services
 		)
 		authuser.transformId(doc._id);
+		return authuser;
+	}
+
+	static fromObject(obj){
+		if (!obj) return null;
+		const authuser = new AuthUser(
+			obj?.email,
+			obj?.password,
+			obj?.isEmailVerified,
+			obj?.isDisabled,
+			obj?.createdAt,
+			obj?.services
+		)
 		return authuser;
 	}
 

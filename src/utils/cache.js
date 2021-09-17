@@ -3,7 +3,12 @@ const { promisify } = require('util');
 const logger = require('..//core/logger')
 
 // Connect to redis at 127.0.0.1 port 6379 no password.
-const redisClient = redis.createClient();
+const redisClient = redis.createClient({
+    // For the purpose of killing the client when the connection is lost
+    retry_strategy: function (options) {
+        return undefined;
+    }
+});
 
 function getRedisClient() { return redisClient; }
 

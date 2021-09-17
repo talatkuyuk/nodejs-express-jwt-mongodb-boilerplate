@@ -1,13 +1,19 @@
 const mongodb = require('../../src/core/mongodb');
 
+let database;
+
 const setupTestDatabase = () => {
 
 	beforeAll(async () => {
 		await mongodb.connect();
 	});
 
-	beforeEach(async () => {
-		var database = mongodb.getDatabase();
+	// beforeEach(async () => {
+	// 	jest.useFakeTimers();
+	// });
+
+	afterEach(async () => {
+		database = mongodb.getDatabase();
 		var collections = await database.listCollections().toArray();
 		for (let collection of collections) {
 			await database.collection(collection.name).deleteMany();
@@ -19,12 +25,12 @@ const setupTestDatabase = () => {
 
 		// lets give sometime to all db connections closed.
 		await new Promise(resolve => setTimeout(() => resolve(), 5000));
-
-		//jest.useRealTimers();
-
 	});
-
 };
 
+const getTestDatabase = () => database;
 
-module.exports = setupTestDatabase;
+module.exports = {
+	setupTestDatabase, 
+	getTestDatabase
+};

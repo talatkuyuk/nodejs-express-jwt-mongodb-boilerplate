@@ -17,7 +17,7 @@ const check_body_email_custom_isTaken = [
     body('email').custom(async (value) => {
 		try {
 			if (await authuserService.utils.isEmailTaken(value)) {
-				throw new Error('email is already taken.');
+				throw new Error('email is already taken');
 			} else {
 				return true;
 			}
@@ -35,7 +35,7 @@ const check_body_password = [
 		.isLength({ min: 8 }).withMessage('password must be minimum 8 characters')
 		.bail()
 		.matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W\_])[A-Za-z\d\W\_]{8,}$/)
-		.withMessage('password must contain at least one uppercase, one lowercase, one number and one special char.'),
+		.withMessage('password must contain at least one uppercase, one lowercase, one number and one special char'),
 ];
 
 const check_body_passwordConfirmation = [

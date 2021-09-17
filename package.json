@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon src/server.js",
-    "test": "cross-env NODE_ENV=test jest --detectOpenHandles --config ./jest.config.json"
+    "test": "cross-env NODE_ENV=test jest --verbose --detectOpenHandles --config ./jest.config.json"
   },
   "keywords": [],
   "author": "",
