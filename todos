@@ -1,15 +1,26 @@
 //TODO: handle errors for syntax or null/undefined in auth middleware
-//TODO: implement tokenDAO  
-//TODO: arrange errors and http status 
-//TODO: add loggers for mongo ops and add morgan to id/email  
+
+//TODO: add test for logout/signout/refreshtoken/forgotpassword/resetpassword/verifyemail/sendverificationemail
+//TODO: add test for auth middleware
+//TODO: add test for oAuth routes
+//TODO: add test for authuser routes
+//TODO: add test for user routes
+
+//TODO: implement tokenDAO
+//TODO: implement authuserDAO
+//TODO: implement userDAO
+
+//TODO: arrange errors and add errors object to response like validation errors
+//TODO: arrange http status 
+//TODO: add loggers for mongo ops
+
 //TODO: add todo part
 //TODO: add socket io
+//TODO: swagger documentation
+//TODO: add collection named logs to mongodb
 
 //TODO: implement the Schema Versioning pattern, add a schema_version
 //TODO: set schemas for createcollection and create indexes and further arrange schemas
 //TODO: create email templates using email-templates package
 //TODO: add send email api
 //TODO: try sendpulse smtp
-//TODO: documentation
-//TODO: add logs collection to mongodb
-//TODO: Test

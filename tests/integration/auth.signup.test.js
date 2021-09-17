@@ -230,6 +230,9 @@ describe('POST /auth/signup', () => {
 				type: tokenTypes.REFRESH,
 			});
 			expect(Token.fromDoc(result)?.id).toBeDefined();
+
+			// TODO: check the new auth user is stored into database
+			// TODO: check the new auth user password is hashed in the database
 		});
 	});
 })
