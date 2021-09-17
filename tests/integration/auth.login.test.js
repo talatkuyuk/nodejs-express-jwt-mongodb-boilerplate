@@ -2,6 +2,7 @@ const request = require('supertest');
 const httpStatus = require('http-status');
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 const app = require('../../src/core/express');
 const authuserService = require('../../src/services/authuser.service');
@@ -17,13 +18,13 @@ setupTestDatabase();
 setupRedis();
 
 
-describe('POST /auth/signup', () => {
+describe('POST /auth/login', () => {
 
 	describe('Request Validation Errors', () => {
 
 		jest.setTimeout(50000);
 
-		let registerform;
+		let loginForm;
 
 		function commonExpectations(response) {
 			expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
@@ -33,145 +34,137 @@ describe('POST /auth/signup', () => {
 		}
 
 	  	test('should return 422 Validation Error if email is empty or falsy value', async () => {
-			registerform = {
+			loginForm = {
 				password: 'Pass1word.',
-				passwordConfirmation: 'Pass1word.'
 			};
-			const response = await request(app).post('/auth/signup').send(registerform);
+			const response = await request(app).post('/auth/login').send(loginForm);
 			commonExpectations(response);
 			expect(response.body.errors.email.length).toBe(1); // { ..., email: ["only one error message related with email"] }
 			expect(response.body.errors.email).toEqual(["email must not be empty or falsy value"]); 
 			expect(response.body.errors).not.toHaveProperty("password");
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 	  	});
 
 
 		test('should return 422 Validation Error if email is invalid form', async () => {
-			registerform = {
+			loginForm = {
 				email: 'talat1@com',
 				password: 'Pass1word.',
-				passwordConfirmation: 'Pass1word.'
 			};
-			const response = await request(app).post('/auth/signup').send(registerform);
+			const response = await request(app).post('/auth/login').send(loginForm);
 			commonExpectations(response);
 			expect(response.body.errors.email.length).toBe(1);
 			expect(response.body.errors.email).toEqual(["email must be in valid form"]); 
 			expect(response.body.errors).not.toHaveProperty("password");
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
-		});
-
-
-		test('should return 422 Validation Error if email is already taken', async () => {
-
-			const authuser = AuthUser.fromObject({
-				email: 'talat@google.com',
-				password: 'HashedPass1word.HashedString.HashedPass1word'
-			})
-				
-			await authuserService.createAuthUser(authuser);
-
-			registerform = {
-				email: 'talat@google.com',
-				password: 'Pass1word.',
-				passwordConfirmation: 'Pass1word.'
-			};
-
-			const response = await request(app).post('/auth/signup').send(registerform);
-			commonExpectations(response);
-			expect(response.body.errors.email.length).toBe(1);
-			expect(response.body.errors.email).toEqual(["email is already taken"]); 
-			expect(response.body.errors).not.toHaveProperty("password");
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 		});
 
 		
 		test('should return 422 Validation Error if password is empty or falsy value', async () => {
-			registerform = {
+			loginForm = {
 				email: 'talat@gmail.com',
-				password: '',
-				passwordConfirmation: ''
 			};
-			const response = await request(app).post('/auth/signup').send(registerform);
+			const response = await request(app).post('/auth/login').send(loginForm);
 			commonExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("email");
 			expect(response.body.errors.password.length).toBe(1);
 			expect(response.body.errors.password).toEqual(["password must not be empty or falsy value"]); 
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 		});
 
 
-	  	test('should return 422 Validation Error if password length is less than 8 characters', async () => {
-			registerform = {
-				email: 'talat@gmail.com',
-				password: '12aA',
-				passwordConfirmation: '12aA'
-			};
-			const response = await request(app).post('/auth/signup').send(registerform);
-			commonExpectations(response);
-			expect(response.body.errors).not.toHaveProperty("email");
-			expect(response.body.errors.password.length).toBe(1);
-			expect(response.body.errors.password).toEqual(["password must be minimum 8 characters"]); 
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
-	  	});
-
-
-	  	test('should return 422 Validation Error if password does not contain at least one uppercase, one lowercase, one number and one special char', async () => {
-			registerform = {
-				email: 'talat@gmail.com',
-				password: '11aaAA88',
-				passwordConfirmation: '11aaAA88'
-			};
-			const response = await request(app).post('/auth/signup').send(registerform);
-			commonExpectations(response);
-			expect(response.body.errors).not.toHaveProperty("email");
-			expect(response.body.errors.password.length).toBe(1);
-			expect(response.body.errors.password).toEqual(["password must contain at least one uppercase, one lowercase, one number and one special char"]); 
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
-	  	});
-
-
-		test('should return 422 Validation Error if password confirmation does not match with the password', async () => {
-			registerform = {
-				email: 'talat@gmail.com',
-				password: '11aaAA88+',
-				passwordConfirmation: '11aaAA88$'
-			};
-			const response = await request(app).post('/auth/signup').send(registerform);
-			commonExpectations(response);
-			expect(response.body.errors).not.toHaveProperty("email");
-			expect(response.body.errors).not.toHaveProperty("password");
-			expect(response.body.errors.passwordConfirmation.length).toBe(1);
-			expect(response.body.errors).toHaveProperty("passwordConfirmation");
-		});
-
-
-		test('should return 422 Validation Error if occurs all email, password, confirmation password validation errors', async () => {
-			registerform = {
+		test('should return 422 Validation Error if occurs both email, password validation errors', async () => {
+			loginForm = {
 				email: 'talat@gmail',
-				password: '11aaAA',
-				passwordConfirmation: '11aaAA88$'
+				password: '',
 			};
-			const response = await request(app).post('/auth/signup').send(registerform);
+			const response = await request(app).post('/auth/login').send(loginForm);
 			commonExpectations(response);
 			expect(response.body.errors).toEqual({
 				"email": ["email must be in valid form"],
-				"password": ["password must be minimum 8 characters"],
-				"passwordConfirmation": ["password confirmation does not match with the password"]
+				"password": ["password must not be empty or falsy value"],
 			});
 		});
 	});
 
-	describe('Success registration', () => {
-		test('should return status 201, user and valid tokens in json form; successfully register user if the request is valid', async () => {
-			let registerform = {
+
+	describe('Failed logins', () => {
+
+		function commonExpectations(response) {
+			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
+			expect(response.body.code).toEqual(401);
+		}
+		
+
+		test('should return status 401, if the user is not registered', async () => {
+			let loginForm = {
 				email: 'talat@gmail.com',
 				password: 'Pass1word.',
-				passwordConfirmation: 'Pass1word.'
+			};
+			const response = await request(app).post('/auth/login').send(loginForm);
+			commonExpectations(response);
+			expect(response.body.message).toEqual("You are not registered user");
+		});
+
+
+		test('should return status 401, if the user is disabled', async () => {
+			const hashedPassword = await bcrypt.hash('Pass1word.', 8);
+			const authuser = AuthUser.fromObject({
+				email: 'talat@gmail.com',
+				password: hashedPassword,
+				isDisabled: true
+			});
+			await authuserService.createAuthUser(authuser);
+
+			let loginForm = {
+				email: 'talat@gmail.com',
+				password: 'Pass1word.',
+			};
+			const response = await request(app).post('/auth/login').send(loginForm);
+			commonExpectations(response);
+			expect(response.body.message).toEqual("You are disabled, call the system administrator");
+		});
+
+
+		test('should return status 401, if the password is wrong', async () => {
+			const hashedPassword = await bcrypt.hash('Pass1word.', 8);
+			const authuser = AuthUser.fromObject({
+				email: 'talat@gmail.com',
+				password: hashedPassword,
+			});
+			await authuserService.createAuthUser(authuser);
+
+			let loginForm = {
+				email: 'talat@gmail.com',
+				password: 'Pass1word',
+			};
+			const response = await request(app).post('/auth/login').send(loginForm);
+			commonExpectations(response);
+			expect(response.body.message).toEqual("Incorrect email or password");
+		});
+	});
+
+
+
+	describe('Success login', () => {
+		
+		test('should return status 200, user and valid tokens in json form; successfully login user if the request is valid', async () => {
+			const hashedPassword = await bcrypt.hash('Pass1word.', 8);
+			
+			const authuser = AuthUser.fromObject({
+				email: 'talat@gmail.com',
+				password: hashedPassword,
+				services: { emailpassword: "registered" }
+			});
+				
+			await authuserService.createAuthUser(authuser);
+			
+			let loginForm = {
+				email: 'talat@gmail.com',
+				password: 'Pass1word.',
 			};
 
-			const response = await request(app).post('/auth/signup').send(registerform);
+			const response = await request(app).post('/auth/login').send(loginForm);
 
-			expect(response.status).toBe(httpStatus.CREATED);
+			expect(response.status).toBe(httpStatus.OK);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 
 			expect(response.body).not.toHaveProperty("code");
@@ -219,8 +212,6 @@ describe('POST /auth/signup', () => {
 					},
 				},
 			});
-
-			// TODO: check the refresh token is stored into database
 		});
 	});
 })

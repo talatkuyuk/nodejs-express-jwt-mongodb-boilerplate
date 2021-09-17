@@ -21,8 +21,8 @@ const { tokenTypes } = require('../config/tokens');
  * @param {string} password
  * @returns {Promise<AuthUser>}
  */
- const signupWithEmailAndPassword = async (email, password) => {
-	 try {
+const signupWithEmailAndPassword = async (email, password) => {
+	try {
 
 		const hashedPassword = await bcrypt.hash(password, 8);
 		const authuserx = new AuthUser(email, hashedPassword);
@@ -30,14 +30,12 @@ const { tokenTypes } = require('../config/tokens');
 
 		return await authuserService.createAuthUser(authuserx);
 
-	 } catch (error) {
+	} catch (error) {
 		throw error;
-	 }
-	
- }
+	}
+}
  			
 
-			 
 /**
  * Login with username and password
  * @param {string} email
@@ -45,16 +43,32 @@ const { tokenTypes } = require('../config/tokens');
  * @returns {Promise<AuthUser>}
  */
 const loginWithEmailAndPassword = async (email, password) => {
-  const authuser = await authuserService.getAuthUser({email});
-  if (!authuser || !(await authuser.isPasswordMatch(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
-  }
-  if (authuser.isDisabled) {
-	throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
-  }
-  return authuser;
+
+	const authuser = await authuserService.getAuthUser({email});
+
+	if (!authuser) {
+		throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not registered user');
+	}
+
+	if (authuser.isDisabled) {
+		throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled, call the system administrator`);
+	}
+
+	if (!(await authuser.isPasswordMatch(password))) {
+		throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+	}
+
+	return authuser;
 };
 
+
+/**
+ * Login with oAuth
+ * @param {string} service // "google" | "facebook"
+ * @param {string} id
+ * @param {string} email
+ * @returns {Promise<AuthUser>}
+ */
 const loginWith_oAuth = async (service, id, email) => {
 
 	let authuser = await authuserService.get_oAuthUser(service, id, email);
