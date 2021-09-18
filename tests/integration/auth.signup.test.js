@@ -10,8 +10,8 @@ const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
 const { tokenTypes } = require('../../src/config/tokens');
 
-const { setupTestDatabase } = require('./setupTestDatabase');
-const setupRedis = require('./setupRedis');
+const { setupTestDatabase } = require('../setup/setupTestDatabase');
+const setupRedis = require('../setup/setupRedis');
 
 
 setupTestDatabase();
