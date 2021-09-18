@@ -98,14 +98,14 @@ const loginWith_oAuth = async (service, id, email) => {
  * @param {string} refreshToken
  * @returns {Promise}
  */
-const logout = async (accessToken, refreshToken) => {
+const logout = async (refreshToken) => {
 	try {
 		const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
 
-		// delete the refresh token from db
-		await tokenService.removeToken(refreshTokenDoc.id);
+		// delete the refresh token family from db
+		await tokenService.deleteFamilyRefreshToken(refreshTokenDoc);
 
-		const { jti } = jwt.verify(accessToken, config.jwt.secret);
+		const jti = refreshTokenDoc.family.split("-")[1];
 
 		// put the access token into the blacklist (key, timeout, value)
 		await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);		

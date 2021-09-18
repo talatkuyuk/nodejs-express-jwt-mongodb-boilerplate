@@ -49,11 +49,11 @@ const login = asyncHandler(async (req, res) => {
 
 
 const logout = asyncHandler(async (req, res) => {
-	//const accessToken = req.header('Authorization').replace('Bearer ', '');
-	const accessToken = req.headers.authorization.split(' ')[1];
+	// const accessToken = req.header('Authorization').replace('Bearer ', '');
+	// const accessToken = req.headers.authorization.split(' ')[1];
 	const refreshtoken = req.body.refreshToken;
 
-	await authService.logout(accessToken, refreshtoken);
+	await authService.logout(refreshtoken);
 
 	res.status(httpStatus.NO_CONTENT).send();
 });

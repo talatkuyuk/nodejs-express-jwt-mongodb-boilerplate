@@ -56,7 +56,13 @@ const verifyToken = async (token, type) => {
 	try {
 		const payload = jwt.verify(token, config.jwt.secret);
 
-		const result = await tokenDbService.findToken({ token, type, user: payload.sub, blacklisted: false });
+		const result = await tokenDbService.findToken({ token, type, user: payload.sub });
+
+		if (result?.blacklisted) {
+			// TODO: it is blacklisted, could be malicious attack, so delete the token with whole family
+
+			throw new Error(`${type} token is not valid`);
+		}
 
 		const tokenDoc = Token.fromDoc(result);
 
@@ -336,5 +342,6 @@ module.exports = {
   generateResetPasswordToken,
   generateVerifyEmailToken,
   removeToken,
-  removeTokens
+  removeTokens,
+  deleteFamilyRefreshToken
 };
