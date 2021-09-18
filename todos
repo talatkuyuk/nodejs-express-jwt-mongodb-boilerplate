@@ -2,6 +2,8 @@
 
 //TODO: add test for logout/signout/refreshtoken/forgotpassword/resetpassword/verifyemail/sendverificationemail
 //TODO: add test for auth middleware
+//TODO: add test for token verification service
+//TODO: add test for refresh token rotation process
 //TODO: add test for oAuth routes
 //TODO: add test for authuser routes
 //TODO: add test for user routes
@@ -9,6 +11,8 @@
 //TODO: implement tokenDAO
 //TODO: implement authuserDAO
 //TODO: implement userDAO
+
+//TODO: update mongodb native driver to 4.x.x
 
 //TODO: arrange errors and add errors object to response like validation errors
 //TODO: arrange http status 
