@@ -24,6 +24,7 @@ src/ssl/
 # Dependency directories
 node_modules/
 jspm_packages/
+package-lock.json
 
 
 
@@ -44,4 +45,3 @@ jspm_packages/
 # dotenv environment variables file
 .env
 .env.test
-package-lock.json
