@@ -64,7 +64,29 @@ class Utils {
 			 
 		});
 		return object;
-	};  
+	};
+
+	/**
+	 * Split a string into two parts at the first occurance of the seperator
+	 * @param {string} str
+	 * @param {string} seperator
+	 * @returns Array[string, string]
+	 */
+	static splitTwo (str, seperator) {
+		const [first, ...rest] = str.split(seperator);
+		const second = rest.join(' ');
+		return [first.trim(), second.trim()];
+	}
+
+
+
+	/**
+	 * Extract the specified key from an object
+	 * @param {string} propKey
+	 * @param {Object} 
+	 * @returns {Object}
+	 */  
+	static removeKey = (propKey, { [propKey]: propValue, ...rest }) => rest;
 }
   
 module.exports = Utils;

@@ -3,7 +3,10 @@ const httpStatus = require('http-status');
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-
+const httpMocks = require('node-mocks-http');
+const ApiError = require('../../src/utils/ApiError');
+const {serializeError} = require('serialize-error');
+const { auth } = require('../../src/middlewares/auth');
 const app = require('../../src/core/express');
 const authuserService = require('../../src/services/authuser.service');
 const tokenDbService = require('../../src/services/token.db.service');
@@ -13,6 +16,7 @@ const { tokenTypes } = require('../../src/config/tokens');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const setupRedis = require('../setup/setupRedis');
+const { expectCt } = require('helmet');
 
 
 // setupTestDatabase();
@@ -24,6 +28,20 @@ describe('Auth Middleware', () => {
 	jest.setTimeout(50000);
 
 	describe('Access Token Errors', () => {
+
+		test('should return 400 if Authorization Header is absent', async () => {
+			const req = httpMocks.createRequest();
+			const res = httpMocks.createResponse();
+			const next = jest.fn();
+
+			await auth()(req, res, next);
+			
+			expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+			const expectedApiError = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: No auth token" );
+			expect(next).toHaveBeenCalledWith(expectedApiError);
+		});
+
 
 		test('should return 400 if Authorization Header is bad formed without Bearer', async () => {
 

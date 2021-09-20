@@ -10,15 +10,14 @@ const redisClient = require('../utils/cache').getRedisClient();
 const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pass, info) => {
 	//TODO: syntax error was not catched by error handling? let-const
 
-	const {authuser, payload} = pass;
-	
-	let errorMessage = (err ? err.message : "") + (info ? info : "");
+	if (err || info) {
+		return reject(new ApiError(httpStatus.UNAUTHORIZED, { name: "TokenError", message: err?.message || info?.message } ));
+	}
 
-	// if no error message and no AuthUser
-	if (errorMessage === "" && !authuser) errorMessage = "Access token does not refer any user.";
+	const { authuser, payload } = pass;
 
-	if (err || info || !authuser) {
-		return reject(new ApiError(httpStatus.UNAUTHORIZED, errorMessage));
+	if (!authuser) {
+		return reject(new ApiError(httpStatus.UNAUTHORIZED, "Access token does not refer any user."));
 	}
 
 	if (authuser.isDisabled) {
@@ -41,7 +40,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 		const user = await userService.getUser(authuser.id);
 		const role = user?.role ?? "user"; // there is no role yet while adding a user
 
-		console.log("role: ", role);
+		//console.log("role: ", role);
 
 		const userRights = roleRights[role];
 		const userRightsWithoutSelf = roleRights[role].map(right => right.split("@")[0]);
@@ -66,7 +65,7 @@ const auth = (...requiredRights) => async (req, res, next) => {
 		passport.authenticate('jwt', { session: false }, verifyCallback(req, resolve, reject, requiredRights))(req, res, next);
 	})
 	.then(() => next())
-	.catch((err) => next(err));
+	.catch((err) => {next(err)});
 };
 
 module.exports = { auth };

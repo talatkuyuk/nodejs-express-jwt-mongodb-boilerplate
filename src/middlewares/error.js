@@ -1,4 +1,4 @@
-const mongodb = require('mongodb');
+const MongoError = require('mongodb').MongoError;
 const httpStatus = require('http-status');
 const config = require('../config');
 const logger = require('../core/logger');
@@ -6,15 +6,18 @@ const ApiError = require('../utils/ApiError');
 
 // Convert errors to ApiError if it is not
 const errorConverter = (err, req, res, next) => {
-    let error = err;
+    let error = err, statusCode;
     if (!(error instanceof ApiError)) {
-      const statusCode = error.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
-	  if (error instanceof mongodb.MongoError) statusCode = httpStatus.BAD_REQUEST; //TODO 
+
+      statusCode = error.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
+      if (error instanceof MongoError) statusCode = httpStatus.BAD_REQUEST; //TODO 
+      
       const message = error.message || httpStatus[statusCode];
+      
       error = new ApiError(statusCode, message, null, false, err.stack);
     }
     next(error);
-  };
+};
   
 
   // eslint-disable-next-line no-unused-vars
