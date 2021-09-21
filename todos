@@ -23,6 +23,9 @@
 //TODO: swagger documentation
 //TODO: add collection named logs to mongodb
 
+//TODO: Check the Redis server is running before the app starts
+//TODO: Check the Redis connection before Redis operations 
+//TODO: Revoke the access token when the user session is closed
 //TODO: implement the Schema Versioning pattern, add a schema_version
 //TODO: set schemas for createcollection and create indexes and further arrange schemas
 //TODO: create email templates using email-templates package

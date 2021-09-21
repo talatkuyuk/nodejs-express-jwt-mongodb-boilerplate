@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon src/server.js",
     "test": "cross-env NODE_ENV=test jest --verbose --detectOpenHandles --config ./jest.config.json",
+    "test:login": "cross-env NODE_ENV=test jest --verbose --detectOpenHandles --config ./jest.config.json auth.login.test.js",
     "test:auth": "cross-env NODE_ENV=test jest --verbose --detectOpenHandles --config ./jest.config.json middleware.auth.test.js"
   },
   "keywords": [],

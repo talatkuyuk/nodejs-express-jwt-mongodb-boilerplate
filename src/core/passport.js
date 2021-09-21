@@ -8,7 +8,6 @@ const { authuserService, authProviders } = require('../services');
 
 const jwtVerify = async (payload, done) => {
 	try {
-		console.log("here")
 		if (payload.type !== tokenTypes.ACCESS) {
 			throw new Error('Invalid token type');
 		}

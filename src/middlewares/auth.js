@@ -4,6 +4,7 @@ const httpStatus = require('http-status');
 const ApiError = require('../utils/ApiError');
 const userService = require('../services/user.service');
 const { roleRights } = require('../config/roles');
+const logger = require('../core/logger');
 const redisClient = require('../utils/cache').getRedisClient();
 
 
@@ -17,22 +18,27 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 	const { authuser, payload } = pass;
 
 	if (!authuser) {
-		return reject(new ApiError(httpStatus.UNAUTHORIZED, "Access token does not refer any user."));
+		return reject(new ApiError(httpStatus.UNAUTHORIZED, "Access token does not refer any user"));
 	}
 
 	if (authuser.isDisabled) {
-		return reject(new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`));
+		return reject(new ApiError(httpStatus.FORBIDDEN, `You are disabled. Call the system administrator`));
 	}
 
 	// control if the request is coming from the same useragent - for preventing mitm
 	if (req.useragent.source !== payload.ua) {
-		return reject(new ApiError(httpStatus.UNAUTHORIZED, `Your browser/agent seems changed or updated, you have to re-login to get authentication.`));
+		return reject(new ApiError(httpStatus.UNAUTHORIZED, `Your browser/agent seems changed or updated, you have to re-login to get authentication`));
 	}
 
 	// control if the token is in blacklist
-	if (await redisClient.get(`blacklist_${payload.jti}`))
-		return reject(new ApiError(httpStatus.FORBIDDEN, `The token is in the blacklist.`));
-
+	if (redisClient.connected) { 
+		if (await redisClient.get(`blacklist_${payload.jti}`))
+			return reject(new ApiError(httpStatus.FORBIDDEN, `The token is in the blacklist`));
+	} else {
+		logger.warn("Auth: Redis server is down at the moment.");
+		return reject(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `We've encountered a server internal problem (Redis)`));
+	}
+	
 	req.user = authuser;
 	
 	if (requiredRights.length) {

@@ -26,15 +26,16 @@ class ApiError extends Error {
       
       // ApiError accepts any Error instance as the paramater error.
       if (error instanceof Error) {
-        console.log("ApiError from Error: ", Utils.removeKey("stack", serializeError(error)));
+        //console.log("ApiError from Error: ", Utils.removeKey("stack", serializeError(error)));
 
         super(error.message);
         this.name = error.name;
+        //this.stack = error.stack;
       }
 
       // ApiError accepts Object {name, message} as the paramater error.
       else if (typeof error === 'object') {
-        console.log("ApiError from object: ", error.message);
+        //console.log("ApiError from object: ", error);
 
         super(error.message);
         this.name = error.name ?? this.constructor.name;
@@ -42,7 +43,7 @@ class ApiError extends Error {
 
       // ApiError accepts string "error message" or "XxxError: error message" as the paramater error.
       else if (typeof error === 'string') {
-        console.log("ApiError from string: ", error);
+        //console.log("ApiError from string: ", error);
 
         if (error.includes(':')) {
             const [name, message] = Utils.splitTwo(error, ':');
@@ -69,6 +70,9 @@ class ApiError extends Error {
       } else {
           Error.captureStackTrace(this, this.constructor);
       }
+
+      // if (!this.stack)
+      //     Error.captureStackTrace(this, this.constructor);
     }
 
     static notFound() {

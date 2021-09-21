@@ -7,7 +7,7 @@ const config = require('./config');
 const app = require('./core/express');
 const logger = require('./core/logger')
 const mongodb = require('./core/mongodb');
-const { redisClient } = require('./utils/cache');
+const redisClient = require('./utils/cache').getRedisClient();
 
 let httpServer, httpsServer;
 const SSLdirectory = path.join(__dirname , '/ssl/')
@@ -56,7 +56,7 @@ const exitHandler = () => {
 	mongodb.disconnect();
 
 	redisClient.quit(function() {
-		console.log(`redis client quit.tk`);
+		logger.info(`redis client quit.tk`);
 	});
 
 };

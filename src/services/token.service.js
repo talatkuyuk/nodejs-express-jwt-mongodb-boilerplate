@@ -336,6 +336,7 @@ const removeTokens = async (query) => {
 
 
 module.exports = {
+  generateToken,
   verifyToken,
   refreshTokenRotation,
   generateAuthTokens,
