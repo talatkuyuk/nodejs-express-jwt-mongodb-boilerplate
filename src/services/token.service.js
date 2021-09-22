@@ -56,6 +56,8 @@ const verifyToken = async (token, type) => {
 	try {
 		const payload = jwt.verify(token, config.jwt.secret);
 
+		// my decision: no need to check the useragent (ua) in the token
+
 		const result = await tokenDbService.findToken({ token, type, user: payload.sub });
 
 		if (result?.blacklisted) {

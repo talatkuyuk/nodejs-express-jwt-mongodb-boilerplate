@@ -15,7 +15,7 @@ const { setupTestDatabase } = require('../setup-data/setupTestDatabase');
 const { setupRedis } = require('../setup-data/setupRedis');
 
 
-// setupTestDatabase();
+setupTestDatabase();
 setupRedis();
 
 
@@ -23,70 +23,51 @@ describe('POST /auth/logout', () => {
 
 	jest.setTimeout(50000);
 
-	describe('Token Errors', () => {
+	describe('Tests for Token Errors', () => {
 
-		test('should return 401 if the token is expired', async () => {
+		test('should return ApiError with code 401 if the token is expired', async () => {
 			
 		});
 
-		test('should return 401 if the token has wrong signature', async () => {
-			
-		});
-	});
-
-
-	describe('Token Database Related Errors', () => {
-
-		test('should return 401 if the verified token is not in the database (token, type, user)', async () => {
-			
-		});
-
-
-		test('should return 401 if the verified token in the database is blacklisted', async () => {
-			
-		});
-
-
-		test('should return 401 if the verified token in the database refers to another user', async () => {
-			
-		});
-
-		
-		test('should return 403 if the referred user by verified token is disabled', async () => {
+		test('should return ApiError with code 401 if the token has wrong signature', async () => {
 			
 		});
 	});
 
 
 
-	describe('Refresh Token Specific Tests', () => {
+	describe('Tests for Refresh Token Specific Errors', () => {
 
 		// Refresh token is used in these routes: /auth/logout, /auth/signout and /auth/refreshtoken
 
 
 		// during signout+logout
-		test('should return 200 if refresh token is used at time not before than valid', async () => {
+		test('should return 200 if refresh token is used after "not before than"', async () => {
 			
 		});
 
 		// during refreshtoken
-		test('should return 401 if refresh token is used at time not before than valid', async () => {
+		test('should return ApiError with code 401 if refresh token is used at time "not before than"', async () => {
 			
 		});
 
 	});
 
 
+	describe('Token Database Related Errors', () => {
 
-	describe('Failed Authorizations', () => {
-
-		test('should return 403 if the user is disabled', async () => {
-
+		test('should return ApiError with code 401 if the verified token is not in the database (token, type, user)', async () => {
+			
 		});
 
-		
-		test('should return 403 if the user has changed or updated his/her user agent', async () => {
 
+		test('should return ApiError with code 401 if the verified token in the database is blacklisted', async () => {
+			
+		});
+
+
+		test('should return ApiError with code 401 if the verified token in the database refers to another user', async () => {
+			
 		});
 	});
 
