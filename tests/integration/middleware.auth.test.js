@@ -18,6 +18,7 @@ const { tokenTypes } = require('../../src/config/tokens');
 
 const { setupTestDatabase } = require('../setup-data/setupTestDatabase');
 const { setupRedis } = require('../setup-data/setupRedis');
+const { userService } = require('../../src/services');
 
 
 setupTestDatabase();
@@ -109,7 +110,7 @@ describe('Auth Middleware', () => {
 
 
 
-	describe('Failed Authorizations', () => {
+	describe('Failed Authentications', () => {
 
 		test('should return ApiError with code 401, if access token does not refer any user', async () => {
 			const authUserInstance = AuthUser.fromObject({
@@ -241,7 +242,6 @@ describe('Auth Middleware', () => {
 
 
 		test('should return ApiError with code 500, if redis cache server is down while checking blacklist', async () => {
-			console.log("Test: What happens when Redis is down started");
 			console.log("Stop Redis manually");
 			await new Promise(resolve => setTimeout(resolve, 10000));
 
@@ -264,11 +264,10 @@ describe('Auth Middleware', () => {
 	});
 
 
-	describe('Success Authorization', () => {
+	describe('Success Authentication', () => {
 		
 		test('should continue next middleware with user is attached to the request', async () => {
-			console.log("Test: Success Authorization started");
-			console.log("Restart Redis manually");
+			console.log("Restart Redis manually if it is stopped");
 			await new Promise(resolve => setTimeout(resolve, 10000));
 
 			const authUserInstance = AuthUser.fromObject({
@@ -292,6 +291,120 @@ describe('Auth Middleware', () => {
 			expect(next).toHaveBeenCalledWith();
 			expect(req.user.id).toEqual(authuser.id);
 
+		});
+	});
+
+
+
+	describe('Check Authorization whether the user has specific right(s) or not', () => {
+
+		const authUserInstance = AuthUser.fromObject({
+			email: 'talat@google.com',
+			password: 'HashedPass1word.HashedString.HashedPass1word'
+		});
+
+		const userAgent = "from-jest-test";
+		
+		
+		test('should return ApiError with code 403 if the user has appropriate right but self (param id does not match)', async () => {
+
+			const authuser = await authuserService.createAuthUser(authUserInstance);
+			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+	
+			var request  = httpMocks.createRequest({
+				method: 'GET',
+				headers: { Authorization: `Bearer ${tokens.access.token}` }, 
+				useragent: { source: userAgent },
+				params: { id: "62384687364898374912323" },
+			});
+
+			const req = httpMocks.createRequest(request);
+			const res = httpMocks.createResponse();
+			const next = jest.fn();
+
+			await auth("change-password")(req, res, next);
+
+			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "Forbidden. (only self-data)");
+			
+			expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+			expect(next).toHaveBeenCalledWith(expect.toBeMatchedWithError(expectedError));
+			expect(req.user.id).toEqual(authuser.id);
+			expect(req.user.role).toEqual("user");
+		});
+
+
+		test('should return ApiError with code 403 if the user does not have appropriate right', async () => {
+
+			const authuser = await authuserService.createAuthUser(authUserInstance);
+			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+	
+			var request  = httpMocks.createRequest({
+				method: 'GET',
+				headers: { Authorization: `Bearer ${tokens.access.token}` }, 
+				useragent: { source: userAgent },
+				params: { id: "62384687364898374912323" },
+			});
+
+			const req = httpMocks.createRequest(request);
+			const res = httpMocks.createResponse();
+			const next = jest.fn();
+
+			await auth("query-users")(req, res, next);
+
+			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "Forbidden, (you don\'t have appropriate right)");
+			
+			expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+			expect(next).toHaveBeenCalledWith(expect.toBeMatchedWithError(expectedError));
+			expect(req.user.id).toEqual(authuser.id);
+			expect(req.user.role).toEqual("user");
+		});
+
+
+		test('should continue next middleware if the user has appropriate right related himself', async () => {
+
+			const authuser = await authuserService.createAuthUser(authUserInstance);
+			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+	
+			var request  = httpMocks.createRequest({
+				method: 'POST',
+				headers: { Authorization: `Bearer ${tokens.access.token}` }, 
+				useragent: { source: userAgent },
+				params: { id: authuser.id },
+			});
+
+			const req = httpMocks.createRequest(request);
+			const res = httpMocks.createResponse();
+			const next = jest.fn();
+
+			await auth("change-password")(req, res, next);
+			
+			expect(next).toHaveBeenCalledWith();
+			expect(req.user.id).toEqual(authuser.id);
+			expect(req.user.role).toEqual("user");
+		});
+
+
+		test('should continue next middleware if the user has appropriate right which is not dependent on himself', async () => {
+			const authuser = await authuserService.createAuthUser(authUserInstance);
+			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+			const user = await userService.addUser(authuser.id, {name: "User", role: "admin" });
+	
+			var request  = httpMocks.createRequest({
+				method: 'POST',
+				headers: { Authorization: `Bearer ${tokens.access.token}` }, 
+				useragent: { source: userAgent },
+				params: { id: authuser.id },
+			});
+
+			const req = httpMocks.createRequest(request);
+			const res = httpMocks.createResponse();
+			const next = jest.fn();
+
+			await auth("query-users")(req, res, next);
+			
+			expect(next).toHaveBeenCalledWith();
+			expect(req.user.id).toEqual(authuser.id);
+			expect(req.user.role).toEqual("admin");
 		});
 	});
 })

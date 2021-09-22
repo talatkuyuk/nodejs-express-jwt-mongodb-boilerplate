@@ -45,8 +45,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 
 		const user = await userService.getUser(authuser.id);
 		const role = user?.role ?? "user"; // there is no role yet while adding a user
-
-		//console.log("role: ", role);
+		req.user.role = role;
 
 		const userRights = roleRights[role];
 		const userRightsWithoutSelf = roleRights[role].map(right => right.split("@")[0]);
@@ -55,10 +54,13 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 			const index = userRightsWithoutSelf.findIndex(right => right === requiredRight);
 
 			if (index === -1)
-				return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden. (has no rights)'));
+				return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden, (you don\'t have appropriate right)'));
+
+				console.log(req.params?.id.toString());
+				console.log(authuser.id.toString());
 
 			if (userRights[index].includes("self")) 
-				if (req.params.id && req.params.id !== authuser.id.toString()) 
+				if (req.params?.id.toString() !== authuser.id.toString()) 
 					return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden. (only self-data)'));
 		});
 	}
