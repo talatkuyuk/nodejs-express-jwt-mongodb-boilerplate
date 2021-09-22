@@ -30,15 +30,7 @@ class ApiError extends Error {
 
         super(error.message);
         this.name = error.name;
-        //this.stack = error.stack;
-      }
-
-      // ApiError accepts Object {name, message} as the paramater error.
-      else if (typeof error === 'object') {
-        //console.log("ApiError from object: ", error);
-
-        super(error.message);
-        this.name = error.name ?? this.constructor.name;
+        this.stack = error.stack;
       }
 
       // ApiError accepts string "error message" or "XxxError: error message" as the paramater error.
@@ -55,7 +47,7 @@ class ApiError extends Error {
         }
       }
 
-      // ApiError receives wrong argument type for the paramater error
+      // if ApiError receives wrong argument type for the paramater error
       else {
         super("bad reference for error message");
         this.name = this.constructor.name;;
@@ -64,15 +56,9 @@ class ApiError extends Error {
       this.statusCode = statusCode;
 	    this.errors = errors;
       this.isOperational = isOperational;
-      
-      if (stack) {
-          this.stack = stack;
-      } else {
-          Error.captureStackTrace(this, this.constructor);
-      }
 
-      // if (!this.stack)
-      //     Error.captureStackTrace(this, this.constructor);
+      if (!this.stack)
+          Error.captureStackTrace(this, this.constructor);
     }
 
     static notFound() {

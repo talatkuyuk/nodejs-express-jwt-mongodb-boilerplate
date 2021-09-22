@@ -12,7 +12,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 	//TODO: syntax error was not catched by error handling? let-const
 
 	if (err || info) {
-		return reject(new ApiError(httpStatus.UNAUTHORIZED, { name: "TokenError", message: err?.message || info?.message } ));
+		return reject(new ApiError(httpStatus.UNAUTHORIZED, `TokenError: ${err?.message || info?.message}` ));
 	}
 
 	const { authuser, payload } = pass;
