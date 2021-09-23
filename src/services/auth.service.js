@@ -98,17 +98,33 @@ const loginWith_oAuth = async (service, id, email) => {
  * @param {string} refreshToken
  * @returns {Promise}
  */
-const logout = async (refreshToken) => {
+const logout = async (authuser, accessToken, refreshToken) => {
 	try {
 		const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
 
 		// delete the refresh token family from db
 		await tokenService.removeTokens({ family: refreshTokenDoc.family });
 			
-		const jti = refreshTokenDoc.family.split("-")[1];
+		if (redisClient.connected) {
+			const jti = refreshTokenDoc.family.split("-")[1];
 
-		// put the access token into the blacklist (key, timeout, value)
-		await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);		
+			// put the access token related the refresh token into the blacklist (key, timeout, value)
+			await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);
+		}
+		
+		if (authuser?.id.toString() !== refreshTokenDoc.user.toString()) {
+			// Means that Refresh Token is stolen by authuser 
+			// This control is placed here to allow refresh token family removed from db, above.
+			
+			if (redisClient.connected) {
+				const { jti } = jwt.verify(accessToken, config.jwt.secret);
+
+				// put the access token into blacklist since the authuser made violation
+				await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);	
+			}
+			
+			throw new ApiError(httpStatus.UNAUTHORIZED, `Tokens could not be matched, please re-authenticate`);
+		}
 		
 	} catch (error) {
 		throw error;

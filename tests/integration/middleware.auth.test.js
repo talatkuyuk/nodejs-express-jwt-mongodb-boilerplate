@@ -187,7 +187,7 @@ describe('Auth Middleware', () => {
 			const userAgent = "from-jest-test";
 				
 			const authuser = await authuserService.createAuthUser(authUserInstance);
-			const accessToken = await tokenService.generateToken(authuser.id, moment().add(5, 'minutes'), tokenTypes.ACCESS, "jti", userAgent, 0, "INVALID-SECRET");
+			const accessToken = tokenService.generateToken(authuser.id, moment().add(5, 'minutes'), tokenTypes.ACCESS, "jti", userAgent, 0, "INVALID-SECRET");
 
 			const request = { headers: { Authorization: `Bearer ${accessToken}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: invalid signature");
