@@ -5,10 +5,11 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const httpMocks = require('node-mocks-http');
 const ApiError = require('../../src/utils/ApiError');
-const {serializeError} = require('serialize-error');
 const { auth } = require('../../src/middlewares/auth');
-const testData = require('../setup-data/testData');
+const testData = require('../data/testdata');
 const redisClient = require('../../src/utils/cache').getRedisClient();
+const TestUtil = require('../testutil/TestUtil');
+
 const app = require('../../src/core/express');
 const authuserService = require('../../src/services/authuser.service');
 const tokenService = require('../../src/services/token.service');
@@ -16,8 +17,8 @@ const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
 const { tokenTypes } = require('../../src/config/tokens');
 
-const { setupTestDatabase } = require('../setup-data/setupTestDatabase');
-const { setupRedis } = require('../setup-data/setupRedis');
+const { setupTestDatabase } = require('../setup/setupTestDatabase');
+const { setupRedis } = require('../setup/setupRedis');
 const { userService } = require('../../src/services');
 
 
@@ -29,21 +30,7 @@ describe('Auth Middleware', () => {
 
 	jest.setTimeout(50000);
 
-	expect.extend({
-		toBeMatchedWithError(received, expected) {
-			// Error objects are weird, so need to use serialize-error package.
-			const { name: rName, message: rMessage, statusCode: rCode } = serializeError(received);
-			const { name: eName, message: eMessage, statusCode: eCode } = serializeError(expected);
-
-			const check = (r, e) => r === e || console.log(`Expected: ${e}\nReceived: ${r}`);
-
-			const passName = check(rName, eName);
-			const passMessage = check(rMessage, eMessage);
-			const passCode = check(rCode, eCode);
-			
-			return { pass: passName && passMessage && passCode };
-		},
-	});
+	TestUtil.MatchErrors();
 
 	// function params: (Object, Error)
 	const commonHeaderTestProcess = async (requestHeader, expectedError) => {
@@ -59,51 +46,57 @@ describe('Auth Middleware', () => {
 
 	describe('Request Header and Access Token Errors', () => {
 
-		test('should return ApiError with code 401, if Authorization Header is absent', async () => {
+		test('should throw ApiError with code 401, if Authorization Header is absent', async () => {
 			const requestHeader = null;
 			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: No auth token");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
-		test('should return ApiError with code 401, if Authorization Header is bad formed without Bearer', async () => {
-			const requestHeader = { headers: { Authorization: `${testData.TOKEN_VALID_BUT_EXPIRED}` }};
+		test('should throw ApiError with code 401, if Authorization Header is bad formed without Bearer', async () => {
+			const requestHeader = { headers: { Authorization: `${testData.ACCESS_TOKEN_EXPIRED}` }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: No auth token");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
-		test('should return ApiError with code 401, if Authorization Header is bad formed mistyping Baerer', async () => {
-			const requestHeader = { headers: { Authorization: `Baerer ${testData.TOKEN_VALID_BUT_EXPIRED}` }};
+		test('should throw ApiError with code 401, if Authorization Header is bad formed mistyping Baerer', async () => {
+			const requestHeader = { headers: { Authorization: `Baerer ${testData.ACCESS_TOKEN_EXPIRED}` }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: No auth token");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
-		test('should return ApiError with code 401, if Authorization Header is bad formed with no space between Bearer and Token', async () => {
-			const requestHeader = { headers: { Authorization: `Bearer${testData.TOKEN_VALID_BUT_EXPIRED}` }};
+		test('should throw ApiError with code 401, if Authorization Header is bad formed with no space between Bearer and Token', async () => {
+			const requestHeader = { headers: { Authorization: `Bearer${testData.ACCESS_TOKEN_EXPIRED}` }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: No auth token");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
-		test('should return ApiError with code 401, if access token is not in the Authorization Header', async () => {
+		test('should throw ApiError with code 401, if access token is not in the Authorization Header', async () => {
 			const requestHeader = { headers: { Authorization: `Bearer ` }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: No auth token");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
-		test('should return ApiError with code 401, if access token is expired', async () => {
-			const requestHeader = { headers: { Authorization: `Bearer ${testData.TOKEN_VALID_BUT_EXPIRED}` }};
+		test('should throw ApiError with code 401, if access token is expired', async () => {
+			const requestHeader = { headers: { Authorization: `Bearer ${testData.ACCESS_TOKEN_EXPIRED}` }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: jwt expired");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
-		test('should return ApiError with code 401, if access token has invalid signature', async () => {
-			const requestHeader = { headers: { Authorization: `Bearer ${testData.TOKEN_WITH_INVALID_SIGNATURE}` }};
+		test('should throw ApiError with code 401, if access token has invalid signature', async () => {
+			const requestHeader = { headers: { Authorization: `Bearer ${testData.ACCESS_TOKEN_WITH_INVALID_SIGNATURE}` }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: invalid signature");
+			await commonHeaderTestProcess(requestHeader, expectedError);
+		});
+
+		test('should throw ApiError with code 401, if access token is malformed (Undefined)', async () => {
+			const requestHeader = { headers: { Authorization: `Bearer ${testData.ACCESS_TOKEN_UNDEFINED}` }};
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: jwt malformed");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 	});
@@ -112,7 +105,7 @@ describe('Auth Middleware', () => {
 
 	describe('Failed Authentications', () => {
 
-		test('should return ApiError with code 401, if access token does not refer any user', async () => {
+		test('should throw ApiError with code 401, if access token does not refer any user', async () => {
 			const authUserInstance = AuthUser.fromObject({
 				email: 'talat@google.com',
 				password: 'HashedPass1word.HashedString.HashedPass1word'
@@ -121,7 +114,7 @@ describe('Auth Middleware', () => {
 			const userAgent = "from-jest-test";
 				
 			const authuser = await authuserService.createAuthUser(authUserInstance);
-			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			await authuserService.deleteAuthUser(authuser.id);
 
@@ -131,7 +124,7 @@ describe('Auth Middleware', () => {
 		});
 
 
-		test('should return ApiError with code 401, if refresh token is used as access token', async () => {
+		test('should throw ApiError with code 401, if refresh token is used as access token', async () => {
 			const authUserInstance = AuthUser.fromObject({
 				email: 'talat@google.com',
 				password: 'HashedPass1word.HashedString.HashedPass1word'
@@ -140,7 +133,7 @@ describe('Auth Middleware', () => {
 			const userAgent = "from-jest-test";
 				
 			const authuser = await authuserService.createAuthUser(authUserInstance);
-			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			const request = { headers: { Authorization: `Bearer ${tokens.refresh.token}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: jwt not active"); // since Refresh Token is used before "not valid before"
@@ -148,7 +141,7 @@ describe('Auth Middleware', () => {
 		});
 
 
-		test('should return ApiError with code 401, if verify email token is used as access token', async () => {
+		test('should throw ApiError with code 401, if verify email token is used as access token', async () => {
 			const authUserInstance = AuthUser.fromObject({
 				email: 'talat@google.com',
 				password: 'HashedPass1word.HashedString.HashedPass1word'
@@ -157,7 +150,7 @@ describe('Auth Middleware', () => {
 			const userAgent = "from-jest-test";
 				
 			const authuser = await authuserService.createAuthUser(authUserInstance);
-			const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser);
+			const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser.id);
 
 			const request = { headers: { Authorization: `Bearer ${verifyEmailToken}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: Invalid token type");
@@ -165,7 +158,7 @@ describe('Auth Middleware', () => {
 		});
 
 
-		test('should return ApiError with code 401, if other user\'s access token is used', async () => {
+		test('should throw ApiError with code 401, if other user\'s access token is used', async () => {
 			// This means that it is stolen, the only prevention is to check the useragent which is embedded in the access token
 			const authUserInstance2 = AuthUser.fromObject({
 				email: 'kuyuk@google.com',
@@ -176,7 +169,7 @@ describe('Auth Middleware', () => {
 			const userAgent2 = "from-google-chrome";
 
 			const authuser2 = await authuserService.createAuthUser(authUserInstance2);
-			const tokens2 = await tokenService.generateAuthTokens(authuser2, userAgent2);
+			const tokens2 = await tokenService.generateAuthTokens(authuser2.id, userAgent2);
 
 			// authuser1 tries to use authuser2's access token but using different user agent
 			const request = { headers: { Authorization: `Bearer ${tokens2.access.token}` }, useragent: { source: userAgent1 }};
@@ -185,7 +178,7 @@ describe('Auth Middleware', () => {
 		});
 
 
-		test('should return ApiError with code 401, if access token is generated with an invalid secret', async () => {
+		test('should throw ApiError with code 401, if access token is generated with an invalid secret', async () => {
 			const authUserInstance = AuthUser.fromObject({
 				email: 'talat@google.com',
 				password: 'HashedPass1word.HashedString.HashedPass1word'
@@ -202,7 +195,7 @@ describe('Auth Middleware', () => {
 		});
 
 
-		test('should return ApiError with code 403, if the user is disabled', async () => {
+		test('should throw ApiError with code 403, if the user is disabled', async () => {
 			const authUserInstance = AuthUser.fromObject({
 				email: 'talat@google.com',
 				password: 'HashedPass1word.HashedString.HashedPass1word',
@@ -212,7 +205,7 @@ describe('Auth Middleware', () => {
 			const userAgent = "from-jest-test";
 				
 			const authuser = await authuserService.createAuthUser(authUserInstance);
-			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			const request = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "ApiError: You are disabled. Call the system administrator");
@@ -220,7 +213,7 @@ describe('Auth Middleware', () => {
 		});
 
 
-		test('should return ApiError with code 403, if access token is in the blacklist', async () => {
+		test('should throw ApiError with code 403, if access token is in the blacklist', async () => {
 			const authUserInstance = AuthUser.fromObject({
 				email: 'talat@google.com',
 				password: 'HashedPass1word.HashedString.HashedPass1word',
@@ -229,7 +222,7 @@ describe('Auth Middleware', () => {
 			const userAgent = "from-jest-test";
 				
 			const authuser = await authuserService.createAuthUser(authUserInstance);
-			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			const { jti } = jwt.decode(tokens.access.token, config.jwt.secret);
 
@@ -241,7 +234,7 @@ describe('Auth Middleware', () => {
 		});
 
 
-		test('should return ApiError with code 500, if redis cache server is down while checking blacklist', async () => {
+		test('should throw ApiError with code 500, if redis cache server is down while checking blacklist', async () => {
 			console.log("Stop Redis manually");
 			await new Promise(resolve => setTimeout(resolve, 10000));
 
@@ -253,7 +246,7 @@ describe('Auth Middleware', () => {
 			const userAgent = "from-jest-test";
 				
 			const authuser = await authuserService.createAuthUser(authUserInstance);
-			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			await new Promise(resolve => setTimeout(resolve, 2000));
 				
@@ -278,7 +271,7 @@ describe('Auth Middleware', () => {
 			const userAgent = "from-jest-test";
 				
 			const authuser = await authuserService.createAuthUser(authUserInstance);
-			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 			
 			const request = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
 
@@ -306,10 +299,10 @@ describe('Auth Middleware', () => {
 		const userAgent = "from-jest-test";
 		
 		
-		test('should return ApiError with code 403 if the user has appropriate right but self (param id does not match)', async () => {
+		test('should throw ApiError with code 403 if the user has appropriate right but self (param id does not match)', async () => {
 
 			const authuser = await authuserService.createAuthUser(authUserInstance);
-			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 	
 			var request  = httpMocks.createRequest({
 				method: 'GET',
@@ -333,10 +326,10 @@ describe('Auth Middleware', () => {
 		});
 
 
-		test('should return ApiError with code 403 if the user does not have appropriate right', async () => {
+		test('should throw ApiError with code 403 if the user does not have appropriate right', async () => {
 
 			const authuser = await authuserService.createAuthUser(authUserInstance);
-			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 	
 			var request  = httpMocks.createRequest({
 				method: 'GET',
@@ -363,7 +356,7 @@ describe('Auth Middleware', () => {
 		test('should continue next middleware if the user has appropriate right related himself', async () => {
 
 			const authuser = await authuserService.createAuthUser(authUserInstance);
-			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 	
 			var request  = httpMocks.createRequest({
 				method: 'POST',
@@ -386,7 +379,7 @@ describe('Auth Middleware', () => {
 
 		test('should continue next middleware if the user has appropriate right which is not dependent on himself', async () => {
 			const authuser = await authuserService.createAuthUser(authUserInstance);
-			const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 			const user = await userService.addUser(authuser.id, {name: "User", role: "admin" });
 	
 			var request  = httpMocks.createRequest({

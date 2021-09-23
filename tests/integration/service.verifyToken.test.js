@@ -3,79 +3,145 @@ const httpStatus = require('http-status');
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+
+const ApiError = require('../../src/utils/ApiError');
+const {serializeError} = require('serialize-error');
 
 const app = require('../../src/core/express');
-const authuserService = require('../../src/services/authuser.service');
-const tokenDbService = require('../../src/services/token.db.service');
+const { tokenService, tokenDbService } = require('../../src/services');
 const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
 const { tokenTypes } = require('../../src/config/tokens');
-
-const { setupTestDatabase } = require('../setup-data/setupTestDatabase');
-const { setupRedis } = require('../setup-data/setupRedis');
+const testData = require('../data/testdata');
+const TestUtil = require('../testutil/TestUtil');
+const { setupTestDatabase } = require('../setup/setupTestDatabase');
+const { setupRedis } = require('../setup/setupRedis');
 
 
 setupTestDatabase();
 setupRedis();
 
 
-describe('POST /auth/logout', () => {
+describe('Test for Refresh Token Rotation', () => {
 
 	jest.setTimeout(50000);
 
+	TestUtil.MatchErrors();
+
 	describe('Tests for Token Errors', () => {
 
-		test('should return ApiError with code 401 if the token is expired', async () => {
-			
+		test('should throw ApiError with code 401 if the reset password token is expired', async () => {
+
+			const token = testData.RESET_PASSWORD_TOKEN_EXPIRED;
+			const type = tokenTypes.RESET_PASSWORD;
+
+			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "TokenExpiredError: jwt expired");
+
+			expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(expect.toBeMatchedWithError(expectedError));
 		});
 
-		test('should return ApiError with code 401 if the token has wrong signature', async () => {
-			
-		});
-	});
+		
+		test('should throw ApiError with code 401 if the refresh token has wrong signature', async () => {
+			const token = testData.REFRESH_TOKEN_WITH_INVALID_SIGNATURE;
+			const type = tokenTypes.REFRESH;
 
+			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "JsonWebTokenError: invalid signature");
 
-
-	describe('Tests for Refresh Token Specific Errors', () => {
-
-		// Refresh token is used in these routes: /auth/logout, /auth/signout and /auth/refreshtoken
-
-
-		// during signout+logout
-		test('should return 200 if refresh token is used after "not before than"', async () => {
-			
+			expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(expect.toBeMatchedWithError(expectedError));
 		});
 
-		// during refreshtoken
-		test('should return ApiError with code 401 if refresh token is used at time "not before than"', async () => {
-			
-		});
 
+		test('should throw ApiError with code 401 if the token is malformed (Undefined)', async () => {
+			const token = testData.VERIFY_EMAIL_TOKEN_UNDEFINED;
+			const type = tokenTypes.VERIFY_EMAIL;
+
+			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "JsonWebTokenError: jwt must be provided");
+
+			expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(expect.toBeMatchedWithError(expectedError));
+		});
 	});
 
 
 	describe('Token Database Related Errors', () => {
 
-		test('should return ApiError with code 401 if the verified token is not in the database (token, type, user)', async () => {
-			
+		test('should throw ApiError with code 401 if the verified token is not in the database (token, type, user)', async () => {
+			const token = testData.REFRESH_TOKEN_VALID;
+			const type = tokenTypes.REFRESH;
+
+			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, `ApiError: ${type} token is not valid`);
+
+			expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(expect.toBeMatchedWithError(expectedError));
 		});
 
-
-		test('should return ApiError with code 401 if the verified token in the database is blacklisted', async () => {
-			
-		});
-
-
-		test('should return ApiError with code 401 if the verified token in the database refers to another user', async () => {
-			
-		});
 	});
 
 
-	describe('Success Token Verification and token or its family is removed from db', () => {
+	describe('Success Token Verification', () => {
 		
-		test('should return the verified token', async () => {
+		test('Refresh Token: should return the token document even if it used NotBeforeThan', async () => {
 
+			const userId = "613b417848981bfd6e91c662";
+			const userAgent = "from-jest";
+			const jti = crypto.randomBytes(16).toString('hex');
+
+			const { refreshToken, refreshTokenExpires } = await tokenService.generateRefreshToken(userId, userAgent, jti);
+
+			const token = refreshToken;
+			const type = tokenTypes.REFRESH;
+
+			// normally, the refresh token can not be used before than NotBeforeThan value or when it is expired (it's violation)
+			const data = await tokenService.verifyToken(token, type);
+
+			// we expect to result to be okey for Refresh Token Verification
+			expect(data).toEqual(expect.any(Token));
+		});
+
+
+		test('Refresh Token: should return the token document even if it is expired', async () => {
+
+			const userId = "6144e57c8b82d136729d290a";
+			const token = testData.REFRESH_TOKEN_EXPIRED;
+			const type = tokenTypes.REFRESH;
+
+			await tokenDbService.saveToken({
+				token,
+				user: userId,
+				type,
+				expires: "mo-matter-for-test",
+				family: "mo-matter-for-test",
+				blaclisted: false
+			})
+
+			// normally, the refresh token can not be used when it is expired (it's violation)
+			const data = await tokenService.verifyToken(token, type);
+
+			// we expect to result to be okey for Refresh Token Verification
+			expect(data).toEqual(expect.any(Token));
+		});
+
+
+		test('ResetPassword Token: should return the token document', async () => {
+
+			const userId = "613b417848981bfd6e91c662";
+		  
+			const token = await tokenService.generateResetPasswordToken(userId);
+			const type = tokenTypes.RESET_PASSWORD;			
+
+			const data = await tokenService.verifyToken(token, type);
+			expect(data).toEqual(expect.any(Token));
+		});
+
+
+		test('VerifyEmail Token: should return the token document', async () => {
+
+			const userId = "613b417848981bfd6e91c662";
+		  
+			const token = await tokenService.generateVerifyEmailToken(userId);
+			const type = tokenTypes.VERIFY_EMAIL;			
+
+			const data = await tokenService.verifyToken(token, type);
+			expect(data).toEqual(expect.any(Token));
 		});
 	});
 })

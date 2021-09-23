@@ -103,8 +103,8 @@ const logout = async (refreshToken) => {
 		const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
 
 		// delete the refresh token family from db
-		await tokenService.deleteFamilyRefreshToken(refreshTokenDoc);
-
+		await tokenService.removeTokens({ family: refreshTokenDoc.family });
+			
 		const jti = refreshTokenDoc.family.split("-")[1];
 
 		// put the access token into the blacklist (key, timeout, value)
@@ -196,7 +196,10 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
 	return authuser;
 
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}. Reset password failed.`);
+    if (error instanceof ApiError)
+	  		throw error
+		else
+			throw new ApiError(httpStatus.UNAUTHORIZED, error); // Reset password failed.
   }
 };
 
@@ -218,7 +221,10 @@ const verifyEmail = async (verifyEmailToken) => {
 	return authuser;
 
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}. Email verification failed.` );
+		if (error instanceof ApiError)
+	  		throw error
+		else
+			throw new ApiError(httpStatus.UNAUTHORIZED, error); // Email verification failed.
   }
 };
 

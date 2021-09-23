@@ -29,7 +29,7 @@ class ApiError extends Error {
         //console.log("ApiError from Error: ", Utils.removeKey("stack", serializeError(error)));
 
         super(error.message);
-        this.name = error.name;
+        this.name = error.name === Error.prototype.name ? this.constructor.name : error.name;
         this.stack = error.stack;
       }
 

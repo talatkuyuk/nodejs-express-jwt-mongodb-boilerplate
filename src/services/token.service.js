@@ -56,15 +56,15 @@ const verifyToken = async (token, type) => {
 	try {
 		const payload = jwt.verify(token, config.jwt.secret);
 
-		// my decision: no need to check the useragent (ua) in the token
+		// my decision: no need to check the useragent (ua) for refresh token since refresh token can lives during many days.
 
 		const result = await tokenDbService.findToken({ token, type, user: payload.sub });
 
-		if (result?.blacklisted) {
-			// TODO: it is blacklisted, could be malicious attack, so delete the token with whole family
-
-			throw new Error(`${type} token is not valid`);
-		}
+		// verifyToken method is used only by auth.service (logout, signout, verifyEmail, resetPassword)
+		// No matter the token is blacklisted; signout and logout will be carried out, 
+		// and the user's whole tokens or family refresh tokens will be removed from db.
+		// Also, verifyEmail and resetPassword tokens are not blacklisted, logically. (only expires) 
+		// For this reason, no need to throw an error or delete any token(s) here, if the result token is blacklisted.
 
 		const tokenDoc = Token.fromDoc(result);
 
@@ -73,7 +73,20 @@ const verifyToken = async (token, type) => {
 		return tokenDoc;
 		
 	} catch (error) {
-		throw error;
+
+		// Even if some verification errors occurs for refresh token, it is okey here,
+		// since refresh token verification is used by only signout and logout process.
+		// my decision: if the refresh token is expired or used not before than, signout or logout process will proceed.
+		if (type === tokenTypes.REFRESH && ["jwt not active", "jwt expired"].includes(error.message)) {
+			const payload = jwt.decode(token, config.jwt.secret);
+			const result = await tokenDbService.findToken({ token, type, user: payload.sub });
+			const tokenDoc = Token.fromDoc(result);
+			if (tokenDoc) return tokenDoc;
+			throw new ApiError(httpStatus.UNAUTHORIZED, `${type} token is not valid`);
+			
+		} else {
+			throw new ApiError(httpStatus.UNAUTHORIZED, error);
+		}
 	}
 };
 
@@ -110,6 +123,7 @@ const verifyToken = async (token, type) => {
 		if (refreshTokenDoc.blacklisted) {
 			console.log(`refreshTokenRotation: ${refreshTokenDoc.id} is in blacklisted`);
 
+			// disable the refresh token family
 			await disableFamilyRefreshToken(refreshTokenDoc);
 
 			throw new ApiError(httpStatus.UNAUTHORIZED, `Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication.`);
@@ -139,7 +153,8 @@ const verifyToken = async (token, type) => {
 		if (error.name === "NotBeforeError") {
 			console.log(`refreshTokenRotation: error.name is NotBeforeError`);
 
-			// Step-3a: if it is before than notValidBefore time
+			// Step-3a: if it is before than notValidBefore time,
+			// Disable the refresh token family since someone else could use it
 			await disableFamilyRefreshToken(refreshTokenDoc);
 
 			throw new ApiError(httpStatus.UNAUTHORIZED, `Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication.`);
@@ -148,19 +163,17 @@ const verifyToken = async (token, type) => {
 			console.log(`refreshTokenRotation: error.name is TokenExpiredError`);
 
 			// Step-3b: if it is expired (means it is not blacklisted and it is the last issued RT)
-			deleteFamilyRefreshToken(refreshTokenDoc);
+			
+			// Delete the refresh token family
+			await removeTokens({ family: refreshTokenDoc.family });
+			
+			// No need to put the related access token into the cached blacklist.
 
 			throw new ApiError(httpStatus.UNAUTHORIZED, `The refresh token is expired. You have to re-login to get authentication.`);
 
-		} else if (error.name === "JsonWebTokenError") {
-			console.log(`refreshTokenRotation: error.name is JsonWebTokenError`);
-
-			throw new ApiError(httpStatus.UNAUTHORIZED, `${error.name??'Error'}: ${error.message}`);
-
 		} else {
-			console.log(`refreshTokenRotation: error is something else`);
-
-			throw new ApiError(httpStatus.UNAUTHORIZED, `${error.name??'xError'}: ${error.message}`);
+			console.log(`refreshTokenRotation:`, error);
+			throw new ApiError(httpStatus.UNAUTHORIZED, error);
 		}
 	}
 };
@@ -187,7 +200,11 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 		// if no not-blacklisted, means that whole family was disabled before, 
 		// and now, whole family should be deleted
 		if (size === 0) {
-			await deleteFamilyRefreshToken(refreshTokenDoc);
+
+			// Delete the refresh token family
+			await removeTokens({ family: refreshTokenDoc.family });
+			
+			// No need to put the related access token into the cached blacklist.
 
 		// if there is not-blacklisted, means that the security isssue happens the first time 
 		// and each refresh token should be blacklisted and so related access token should too.
@@ -215,49 +232,20 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 
 
 /**
- * Delete the family of the RT and throw an error 
- * @param {Token} refreshTokenDoc
- * @returns {Promise<void>}
- */
- const deleteFamilyRefreshToken = async (refreshTokenDoc) => {
-
-	console.log(`deleteFamilyRefreshToken: ${refreshTokenDoc.id} family: ${refreshTokenDoc.family}`);
-
-	// Delete the refresh token family
-	await tokenDbService.removeTokens({ family: refreshTokenDoc.family });
-	
-	// No need to put the related access token into the cached blacklist.
-}
-
-
-/**
  * Generate auth tokens
- * @param {AuthUser} user
+ * @param {string} userId
  * @param {string} userAgent
  * @param {string} family
  * @returns {Promise<Object>}
  */
-const generateAuthTokens = async (user, userAgent, family) => {
+const generateAuthTokens = async (userId, userAgent, family) => {
 
-  // we will give the same jti to both to make connection between
+  // we will give the same jti to both (access & refresh) to make connection between
   const jti = crypto.randomBytes(16).toString('hex');
 
-  const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
-  const accessToken = generateToken(user.id, accessTokenExpires, tokenTypes.ACCESS, jti, userAgent);
+  const { accessToken, accessTokenExpires } = generateAccessToken(userId, userAgent, jti);
 
-  // not valid before is 60
-  const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
-  const refreshToken = generateToken(user.id, refreshTokenExpires, tokenTypes.REFRESH, jti, userAgent, config.jwt.accessExpirationMinutes * 60);
-
-  const tokenDoc = new Token(
-	refreshToken,
-	user.id,
-	refreshTokenExpires.toDate(),
-	tokenTypes.REFRESH,
-	(family ?? `${user.id}-${jti}`)
-  );
-  
-  await tokenDbService.saveToken(tokenDoc);
+  const { refreshToken, refreshTokenExpires } = await generateRefreshToken(userId, userAgent, jti, family);
 
   return {
     access: {
@@ -273,20 +261,68 @@ const generateAuthTokens = async (user, userAgent, family) => {
 
 
 /**
- * Generate reset password token
- * @param {AuthUser} user
+ * Generate access token
+ * @param {string} userId
+ * @returns {Promise<Object>}
+ */
+const generateAccessToken = (userId, userAgent, jti) => {
+	const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
+  	const accessToken = generateToken(
+		userId, 
+		accessTokenExpires, 
+		tokenTypes.ACCESS, 
+		jti, 
+		userAgent
+	);
+	return { accessToken, accessTokenExpires };
+}
+
+
+/**
+ * Generate refresh token and save the token document to db
+ * @param {string} userId
+ * @returns {Promise<Object>}
+ */
+const generateRefreshToken = async (userId, userAgent, jti, family) => {
+	const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
+	const refreshToken = generateToken(
+		userId, 
+		refreshTokenExpires, 
+		tokenTypes.REFRESH, 
+		jti, 
+		userAgent, 
+		config.jwt.accessExpirationMinutes * 60,  // not valid before is 60
+	);
+
+	const tokenDoc = new Token(
+		refreshToken,
+		userId,
+		refreshTokenExpires.toDate(),
+		tokenTypes.REFRESH,
+		(family ?? `${userId}-${jti}`)
+	  );
+	
+	await tokenDbService.saveToken(tokenDoc);
+
+	return { refreshToken, refreshTokenExpires };
+}
+
+
+/**
+ * Generate reset password token and save the token document to db
+ * @param {string} userId
  * @returns {Promise<string>}
  */
-const generateResetPasswordToken = async (user) => {
+const generateResetPasswordToken = async (userId) => {
 
   const jti = crypto.randomBytes(16).toString('hex');
 
   const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
-  const resetPasswordToken = generateToken(user.id, expires, tokenTypes.RESET_PASSWORD, jti);
+  const resetPasswordToken = generateToken(userId, expires, tokenTypes.RESET_PASSWORD, jti);
 
   const tokenDoc = new Token(
 	resetPasswordToken,
-	user.id,
+	userId,
 	expires.toDate(),
 	tokenTypes.RESET_PASSWORD
   );
@@ -298,20 +334,20 @@ const generateResetPasswordToken = async (user) => {
 
 
 /**
- * Generate verify email token
- * @param {AuthUser} user
+ * Generate verify email token and save the token document to db
+ * @param {string} userId
  * @returns {Promise<string>}
  */
-const generateVerifyEmailToken = async (user) => {
+const generateVerifyEmailToken = async (userId) => {
 
   const jti = crypto.randomBytes(16).toString('hex');
 
   const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
-  const verifyEmailToken = generateToken(user.id, expires, tokenTypes.VERIFY_EMAIL, jti);
+  const verifyEmailToken = generateToken(userId, expires, tokenTypes.VERIFY_EMAIL, jti);
 
   const tokenDoc = new Token(
 	verifyEmailToken,
-	user.id,
+	userId,
 	expires.toDate(),
 	tokenTypes.VERIFY_EMAIL
   );
@@ -338,13 +374,14 @@ const removeTokens = async (query) => {
 
 
 module.exports = {
-  generateToken,
-  verifyToken,
-  refreshTokenRotation,
-  generateAuthTokens,
-  generateResetPasswordToken,
-  generateVerifyEmailToken,
-  removeToken,
-  removeTokens,
-  deleteFamilyRefreshToken
+	generateToken,
+	verifyToken,
+	refreshTokenRotation,
+	generateAuthTokens,
+	generateAccessToken,
+	generateRefreshToken,
+	generateResetPasswordToken,
+	generateVerifyEmailToken,
+	removeToken,
+	removeTokens,
 };

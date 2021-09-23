@@ -25,7 +25,7 @@ const signup = asyncHandler(async (req, res) => {
 	const userAgent = req.useragent.source;
 
 	const authuser = await authService.signupWithEmailAndPassword(email, password);
-	const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+	const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 	req.user = authuser; // for morgan logger to tokenize it as user
 
@@ -39,7 +39,7 @@ const login = asyncHandler(async (req, res) => {
 	const userAgent = req.useragent.source;
 
 	const authuser = await authService.loginWithEmailAndPassword(email, password);
-	const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+	const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 	req.user = authuser; // for morgan logger to tokenize it as user
 
@@ -89,7 +89,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 	const callbackURL = req.body.callbackURL;
 	
 	const authuser = await authuserService.getAuthUserByEmail(email);
-	const resetPasswordToken = await tokenService.generateResetPasswordToken(authuser);
+	const resetPasswordToken = await tokenService.generateResetPasswordToken(authuser.id);
 	await emailService.sendResetPasswordEmail(email, resetPasswordToken, callbackURL);
 
 	req.user = authuser; // for morgan logger to tokenize it as user
@@ -119,7 +119,7 @@ const sendVerificationEmail = asyncHandler(async (req, res, next) => {
 		throw new ApiError(httpStatus.BAD_REQUEST, "Email is already verified");
 
 	} else {
-		const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser);
+		const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser.id);
 		emailService.sendVerificationEmail(authuser.email, verifyEmailToken)
 		.then(() => {res.status(httpStatus.NO_CONTENT).send()})
 		.catch((err) => {next(err)});
@@ -145,7 +145,7 @@ const oAuth = asyncHandler(async (req, res) => {
 	const userAgent = req.useragent.source;
 
 	const authuser = await authService.loginWith_oAuth(oAuthProvider, id, email);
-	const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+	const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 	res.status(httpStatus.OK).send({ user: authuser.authfilter(), tokens });
 });
 

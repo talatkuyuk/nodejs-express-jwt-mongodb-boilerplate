@@ -13,9 +13,9 @@ const saveToken = async (tokenDoc) => {
 		tokenDoc.user = ObjectId(tokenDoc.user);
 
 		const db = mongodb.getDatabase();
-		await db.collection("tokens").insertOne(tokenDoc);
-		
-		return tokenDoc;
+		const result = await db.collection("tokens").insertOne(tokenDoc);
+
+		console.log(`${result.insertedCount} record is created in tokens.`);
 		
 	} catch (error) {
 		throw error;
@@ -28,7 +28,9 @@ const findToken = async (query) => {
 		query.user && (query.user = ObjectId(query.user));
 
 		const db = mongodb.getDatabase();
-		return await db.collection("tokens").findOne(query);
+		const tokenDoc =  await db.collection("tokens").findOne(query);
+
+		return tokenDoc;
 
 	} catch (error) {
 		throw error;

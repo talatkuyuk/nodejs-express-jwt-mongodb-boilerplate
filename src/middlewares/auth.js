@@ -56,9 +56,6 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 			if (index === -1)
 				return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden, (you don\'t have appropriate right)'));
 
-				console.log(req.params?.id.toString());
-				console.log(authuser.id.toString());
-
 			if (userRights[index].includes("self")) 
 				if (req.params?.id.toString() !== authuser.id.toString()) 
 					return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden. (only self-data)'));

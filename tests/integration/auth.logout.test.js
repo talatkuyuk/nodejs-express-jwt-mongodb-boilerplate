@@ -11,8 +11,8 @@ const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
 const { tokenTypes } = require('../../src/config/tokens');
 
-const { setupTestDatabase } = require('../setup-data/setupTestDatabase');
-const { setupRedis } = require('../setup-data/setupRedis');
+const { setupTestDatabase } = require('../setup/setupTestDatabase');
+const { setupRedis } = require('../setup/setupRedis');
 
 
 // setupTestDatabase();
@@ -33,13 +33,29 @@ describe('POST /auth/logout', () => {
 
 	describe('Failed Logouts', () => {
 
-		test('should return 500 if redis cache server is down during logout', async () => {
+		test('should return 401 if the user use own access token but use the refresh token that is not own', async () => {
 
 		});
+
 	});
 
 
 	describe('Success logout', () => {
+
+		test('should return 204 even if refresh token is expired', async () => {
+
+		});
+
+
+		test('should return 204 even if refresh token is blacklisted', async () => {
+
+		});
+		
+
+		test('should return 204 even if redis cache server is down during logout, since Redis supports offline operations', async () => {
+
+		});
+
 
 		test('should return 204, remove refresh token family from db and revoke access tokens', async () => {
 

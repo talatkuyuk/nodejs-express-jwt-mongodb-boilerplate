@@ -7,9 +7,7 @@
     "dev": "cross-env NODE_ENV=development nodemon src/server.js",
     "test": "cross-env NODE_ENV=test jest --coverage --runInBand --verbose --detectOpenHandles --config ./jest.config.json",
     "test:coverage": "cross-env NODE_ENV=test jest --coverage --runInBand --config ./jest.config.json",
-    "test:login": "cross-env NODE_ENV=test jest --verbose --detectOpenHandles --config ./jest.config.json auth.login.test.js",
-    "test:auth": "cross-env NODE_ENV=test jest --verbose --detectOpenHandles --config ./jest.config.json middleware.auth.test.js",
-    "test:refresh": "cross-env NODE_ENV=test jest --verbose --detectOpenHandles --config ./jest.config.json service.verifyToken.test.js"
+    "test:verify": "cross-env NODE_ENV=test jest --verbose --detectOpenHandles --config ./jest.config.json service.verifyToken.test.js"
   },
   "keywords": [],
   "author": "",

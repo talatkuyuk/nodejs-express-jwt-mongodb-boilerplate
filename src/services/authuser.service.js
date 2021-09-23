@@ -61,7 +61,7 @@ const createAuthUser = async (authuser) => {
 		
 		authuser.transformId(result.insertedId);
 
-		console.log(`${result.insertedCount} record is created in authusers.`)
+		console.log(`${result.insertedCount} record is created in authusers.`);
 		
 		return authuser;
 
