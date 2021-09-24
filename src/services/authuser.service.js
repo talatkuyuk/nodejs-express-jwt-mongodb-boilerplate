@@ -220,9 +220,9 @@ const deleteAuthUser = async (id) => {
 			
 			const authuser = AuthUser.fromDoc(result.value);
 
-			await toDeletedAuthUsers(authuser);
+			const deletedAuthUser = await toDeletedAuthUsers(authuser);
 
-			return authuser;
+			return deletedAuthUser;
 
 		} else {
 			console.log(`The authuser is not deleted.`);
@@ -241,7 +241,7 @@ const deleteAuthUser = async (id) => {
 /**
  * Add the deleted authuser to the deletedauthusers
  * @param {AuthUser} deletedAuthUser
- * @returns {Promise}
+ * @returns {Promise<AuthUser?>}
  */
  const toDeletedAuthUsers = async (deletedAuthUser) => {
 	try {
@@ -252,7 +252,9 @@ const deleteAuthUser = async (id) => {
 		deletedAuthUser["deletedAt"] = Date.now();
 
 		const result = await db.collection("deletedauthusers").insertOne(deletedAuthUser);
-		console.log(`${result.insertedCount} record is created in deletedauthusers.`)
+		console.log(`${result.insertedCount} record is created in deletedauthusers.`);
+
+		return result.ops[0]; // deleted AuthUser
 		
 	} catch (error) {
 		throw error;
@@ -358,6 +360,46 @@ const deleteAuthUser = async (id) => {
 
 
 
+/**
+ * Get authuser
+ * @param {Object} query {id | email}
+ * @returns {Promise<AuthUser>}
+ */
+ const getDeletedAuthUser = async (query) => {
+	try {
+		const db = mongodb.getDatabase();
+		query.id && (query = {_id: ObjectId(query.id)});
+		const doc = await db.collection("deletedauthusers").findOne(query);
+
+		return AuthUser.fromDoc(doc);
+		
+	} catch (error) {
+		throw error
+	}
+};
+
+/**
+ * Get Deleted AuthUser by id
+ * @param {string} id
+ * @returns {Promise<AuthUser?>}
+ */
+ const getDeletedAuthUserById = async (id) => {
+	try {
+		const authuser = await getDeletedAuthUser({id});
+		
+		if (!authuser) {
+			throw new ApiError(httpStatus.NOT_FOUND, 'No deleted authuser found with this id');
+		}
+
+		return authuser;
+  
+	} catch (error) {
+	  throw error;
+	}
+};
+
+
+
 module.exports = {
 	createAuthUser,
 	get_oAuthUser,
@@ -370,6 +412,9 @@ module.exports = {
 	changePassword,
 	getAuthUserById,
 	getAuthUserByEmail,
+
+	getDeletedAuthUser,
+	getDeletedAuthUserById,
 };
 
 module.exports.utils = {

@@ -64,8 +64,9 @@ const logout = asyncHandler(async (req, res) => {
 const signout = asyncHandler(async (req, res) => {
 	const accessToken = req.headers.authorization.split(' ')[1];
 	const refreshtoken = req.body.refreshToken;
+	const authuser = req.user;
 
-	await authService.signout(accessToken, refreshtoken);
+	await authService.signout(authuser, accessToken, refreshtoken);
 
 	res.status(httpStatus.NO_CONTENT).send();
 });

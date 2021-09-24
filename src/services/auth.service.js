@@ -104,11 +104,11 @@ const logout = async (authuser, accessToken, refreshToken) => {
 
 		// delete the refresh token family from db
 		await tokenService.removeTokens({ family: refreshTokenDoc.family });
-			
+		
 		if (redisClient.connected) {
 			const jti = refreshTokenDoc.family.split("-")[1];
 
-			// put the access token related the refresh token into the blacklist (key, timeout, value)
+			// add access token into blacklist, which is paired with refreshtoken (key, timeout, value)
 			await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);
 		}
 		
@@ -119,7 +119,7 @@ const logout = async (authuser, accessToken, refreshToken) => {
 			if (redisClient.connected) {
 				const { jti } = jwt.verify(accessToken, config.jwt.secret);
 
-				// put the access token into blacklist since the authuser made violation
+				// add access token which is authenticated into blacklist since the authuser made violation
 				await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);	
 			}
 			
@@ -137,20 +137,36 @@ const logout = async (authuser, accessToken, refreshToken) => {
  * @param {string} refreshToken
  * @returns {Promise}
  */
- const signout = async (accessToken, refreshToken) => {
+ const signout = async (authuser, accessToken, refreshToken) => {
 	try {
 		const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
 		
 		// delete all tokens of the user
 		await tokenService.removeTokens({ user: refreshTokenDoc.user });
 
-		const { jti } = jwt.verify(accessToken, config.jwt.secret);
+		if (redisClient.connected) {
+			const { jti } = jwt.verify(accessToken, config.jwt.secret);
 
-		// put the access token in blacklist (key, timeout-seconds, value)
-		await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);		
+			// add access token into blacklist, which is paired with refreshtoken (key, timeout, value)
+			await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);		
+		}
+
+		if (authuser?.id.toString() !== refreshTokenDoc.user.toString()) {
+			// Means that Refresh Token is stolen by authuser 
+			// This control is placed here to allow refresh token family removed from db, above.
+			
+			if (redisClient.connected) {
+				const { jti } = jwt.verify(accessToken, config.jwt.secret);
+
+				// add access token which is authenticated into blacklist since the authuser made violation
+				await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);	
+			}
+			
+			throw new ApiError(httpStatus.UNAUTHORIZED, `Tokens could not be matched, please re-authenticate to signout from system`);
+		}
 
 		// delete authuser by id
-		await authuserService.deleteAuthUser(id);
+		await authuserService.deleteAuthUser(authuser.id);
 
 		// TODO: delete user data or do it via another request
 		

@@ -22,7 +22,7 @@ setupTestDatabase();
 setupRedis();
 
 
-describe('POST /auth/logout', () => {
+describe('POST /auth/signout', () => {
 
 	jest.setTimeout(50000);
 
@@ -50,7 +50,7 @@ describe('POST /auth/logout', () => {
 
 		test('should return 422 Validation Error if refresh token is not in the request body', async () => {
 
-			const response = await request(app).post('/auth/logout')
+			const response = await request(app).post('/auth/signout')
 												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
 												.send({});
@@ -79,7 +79,7 @@ describe('POST /auth/logout', () => {
 			// for further test, find otherUserRefreshToken from db, to get its family before it is deleted
 			const { family } = await tokenDbService.findToken({ token: otherUserRefreshToken, user: userId, type: tokenTypes.REFRESH });
 
-			const response = await request(app).post('/auth/logout')
+			const response = await request(app).post('/auth/signout')
 												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken: otherUserRefreshToken });
@@ -87,7 +87,7 @@ describe('POST /auth/logout', () => {
 			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.body.code).toEqual(401);
-			expect(response.body.message).toEqual("Tokens could not be matched, please re-authenticate");
+			expect(response.body.message).toEqual("Tokens could not be matched, please re-authenticate to signout from system");
 			expect(response.body.errors).toBeUndefined();
 
 			// check the access token of both authuser and otheruser are in the blacklist
@@ -133,7 +133,7 @@ describe('POST /auth/logout', () => {
 			});
 
 
-			const response = await request(app).post('/auth/logout')
+			const response = await request(app).post('/auth/signout')
 												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
@@ -151,7 +151,7 @@ describe('POST /auth/logout', () => {
 			// Update the refresh token with the { blacklisted: true }
 			await tokenDbService.updateToken(refrehTokenDoc._id, { blacklisted: true });
 
-			const response = await request(app).post('/auth/logout')
+			const response = await request(app).post('/auth/signout')
 												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
@@ -163,7 +163,7 @@ describe('POST /auth/logout', () => {
 
 		test('should return 204 even if redis cache server is down during logout, since Redis supports offline operations', async () => {
 			// I tested when the redis is off, it passed.
-			const response = await request(app).post('/auth/logout')
+			const response = await request(app).post('/auth/signout')
 												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
@@ -174,10 +174,17 @@ describe('POST /auth/logout', () => {
 
 
 		test('should return 204, remove refresh token family from db and revoke access tokens', async () => {
-			// for further test, find authuser's refresh token from db, to get its family before it is deleted
-			const { family } = await tokenDbService.findToken({ token: refreshToken, user: authuser.id, type: tokenTypes.REFRESH });
+			// add a token into db for the user, to make further expect is more reasonable related with removal the user's whole tokens.
+			await tokenDbService.saveToken({
+				token: "mo-matter-for-test",
+				user: authuser.id,
+				type: tokenTypes.VERIFY_EMAIL,
+				expires: "mo-matter-for-test",
+				family: "mo-matter-for-test",
+				blaclisted: false
+			});
 
-			const response = await request(app).post('/auth/logout')
+			const response = await request(app).post('/auth/signout')
 												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
@@ -192,11 +199,18 @@ describe('POST /auth/logout', () => {
 				expect(data).toBeDefined;
 			}
 
-			// check the authuser's refresh token and it's family are removed from db
-			// check whether there is any refresh token with refresToken's family in the db 
-			const data = await tokenDbService.findTokens({ family });
-			
+			// check the authuser's whole tokens and are removed from db
+			const data = await tokenDbService.findTokens({ user: authuser.id });
 			expect(data.length).toBe(0);
+
+			// check the authuser is removed from authuser collection in db
+			const data1 = await authuserService.getAuthUser({ _id: authuser.id });
+			expect(data1).toBeNull();
+
+			// check the authuser is moved to deleted authuser collection in db
+			const data2 = await authuserService.getDeletedAuthUser({ _id: authuser.id });
+			expect(data2).not.toBeNull();
+			expect(data2.deletedAt).not.toBeNull();
 		});
 	});
 })
