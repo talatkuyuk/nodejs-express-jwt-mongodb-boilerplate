@@ -1,8 +1,6 @@
-//TODO: handle errors for syntax or null/undefined in auth middleware
-
-//TODO: add test for logout/signout/refreshtoken/forgotpassword/resetpassword/verifyemail/sendverificationemail
-//TODO: add test for auth middleware
-//TODO: add test for token verification service
+//TODO: add test for forgotpassword/resetpassword/
+//TODO: add test for verifyemail/sendverificationemail
+//TODO: add test for validation middleware
 //TODO: add test for refresh token rotation process
 //TODO: add test for oAuth routes
 //TODO: add test for authuser routes
@@ -23,9 +21,14 @@
 //TODO: swagger documentation
 //TODO: add collection named logs to mongodb
 
-//TODO: Check the Redis server is running before the app starts
-//TODO: Check the Redis connection before Redis operations 
-//TODO: Revoke the access token when the user session is closed
+//TODO: add Redis Server URL into Config
+//TODO: update mongo database referring the actual db and add test db url into config as well
+//TODO: update unhandledRejection and uncaughtException mechanism
+//TODO: check the Redis server is running before the app starts (use promise)
+//TODO: check the Redis connection before Redis operations (control if it is connected)
+//TODO: update ErrorHandler strategy and isOperational logic
+//TODO: handle errors for syntax or null/undefined in auth middleware
+//TODO: revoke the access token when the user session is closed
 //TODO: implement the Schema Versioning pattern, add a schema_version
 //TODO: set schemas for createcollection and create indexes and further arrange schemas
 //TODO: create email templates using email-templates package
