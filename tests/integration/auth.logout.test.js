@@ -76,6 +76,9 @@ describe('POST /auth/logout', () => {
 			const otherUserJti = crypto.randomBytes(16).toString('hex');
 			const { refreshToken: otherUserRefreshToken } = await tokenService.generateRefreshToken(userId, userAgentOther, otherUserJti);
 
+			// for further test, find otherUserRefreshToken from db, to get its family before it is deleted
+			const { family } = await tokenDbService.findToken({ token: otherUserRefreshToken, user: userId, type: tokenTypes.REFRESH });
+
 			const response = await request(app).post('/auth/logout')
 												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
@@ -92,16 +95,17 @@ describe('POST /auth/logout', () => {
 				const { jti: authuserJti } = jwt.decode(accessToken, config.jwt.secret);
 
 				const data1 = await redisClient.get(`blacklist_${authuserJti}`);
-				expect(data1).toBeDefined;
+				expect(data1).toBeDefined();
 
 				const data2 = await redisClient.get(`blacklist_${otherUserJti}`);
-				expect(data2).toBeDefined;
+				expect(data2).toBeDefined();
 			}
 
-			// check the refresh token is removed from db
-			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: refresh token is not valid");
-
-			expect(() => tokenService.verifyToken(otherUserRefreshToken, tokenTypes.REFRESH)).rejects.toThrow(expect.toBeMatchedWithError(expectedError));
+			// check the other user's refresh token and it's family are removed from db
+			// check whether there is any refresh token with otherUserRefreshToken's family in the db 
+			const data = await tokenDbService.findTokens({ family });
+			
+			expect(data.length).toBe(0);
 		});
 
 	});
@@ -171,6 +175,9 @@ describe('POST /auth/logout', () => {
 
 
 		test('should return 204, remove refresh token family from db and revoke access tokens', async () => {
+			// for further test, find authuser's refresh token from db, to get its family before it is deleted
+			const { family } = await tokenDbService.findToken({ token: refreshToken, user: authuser.id, type: tokenTypes.REFRESH });
+
 			const response = await request(app).post('/auth/logout')
 												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
@@ -186,10 +193,11 @@ describe('POST /auth/logout', () => {
 				expect(data).toBeDefined;
 			}
 
-			// check the refresh token is removed from db
-			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: refresh token is not valid");
-
-			expect(() => tokenService.verifyToken(refreshToken, tokenTypes.REFRESH)).rejects.toThrow(expect.toBeMatchedWithError(expectedError));
+			// check the authuser's refresh token and it's family are removed from db
+			// check whether there is any refresh token with refresToken's family in the db 
+			const data = await tokenDbService.findTokens({ family });
+			
+			expect(data.length).toBe(0);
 		});
 	});
 })

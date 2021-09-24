@@ -25,6 +25,8 @@ const saveToken = async (tokenDoc) => {
 
 const findToken = async (query) => {
 	try {
+		console.log("findToken: ", query);
+
 		query.user && (query.user = ObjectId(query.user));
 
 		const db = mongodb.getDatabase();
