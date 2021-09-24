@@ -129,7 +129,7 @@ describe('POST /auth/signout', () => {
 				type: tokenTypes.REFRESH,
 				expires: "mo-matter-for-test",
 				family: "mo-matter-for-test",
-				blaclisted: false
+				blacklisted: false
 			});
 
 
@@ -181,7 +181,7 @@ describe('POST /auth/signout', () => {
 				type: tokenTypes.VERIFY_EMAIL,
 				expires: "mo-matter-for-test",
 				family: "mo-matter-for-test",
-				blaclisted: false
+				blacklisted: false
 			});
 
 			const response = await request(app).post('/auth/signout')

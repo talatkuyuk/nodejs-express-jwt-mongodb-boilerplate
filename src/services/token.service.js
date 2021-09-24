@@ -157,7 +157,7 @@ const verifyToken = async (token, type) => {
 			// Disable the refresh token family since someone else could use it
 			await disableFamilyRefreshToken(refreshTokenDoc);
 
-			throw new ApiError(httpStatus.UNAUTHORIZED, `Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication.`);
+			throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication.");
 
 		} else if (error.name === "TokenExpiredError") {
 			console.log(`refreshTokenRotation: error.name is TokenExpiredError`);
@@ -172,7 +172,6 @@ const verifyToken = async (token, type) => {
 			throw new ApiError(httpStatus.UNAUTHORIZED, `The refresh token is expired. You have to re-login to get authentication.`);
 
 		} else {
-			console.log(`refreshTokenRotation:`, error);
 			throw new ApiError(httpStatus.UNAUTHORIZED, error);
 		}
 	}
@@ -215,13 +214,15 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 				// Update each refresh token with the { blacklisted: true }
 				await tokenDbService.updateToken(tokenRecord._id, { blacklisted: true });
 			
-				// Get the related access token jti from refresh token
-				const { jti } = jwt.decode(tokenRecord.token, config.jwt.secret);
-	
-				// put the related access token into the blacklist (key, timeout, value)
-				await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true)
-					.then((result) => {console.log(`disableFamilyRefreshToken: redis ${result} for ${jti}`)})
-					.catch((err) => {throw err});
+				if (redisClient.connected) {
+					// Get the related access token jti from refresh token
+					const { jti } = jwt.decode(tokenRecord.token, config.jwt.secret);
+		
+					// put the related access token into the blacklist (key, timeout, value)
+					await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true)
+						.then((result) => {console.log(`disableFamilyRefreshToken: redis ${result} for ${jti}`)})
+						.catch((err) => {throw err});
+				}
 			}
 		}
 

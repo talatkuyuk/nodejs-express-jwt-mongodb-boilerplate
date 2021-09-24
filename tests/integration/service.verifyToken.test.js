@@ -110,7 +110,7 @@ describe('Test for Refresh Token Rotation', () => {
 				type,
 				expires: "mo-matter-for-test",
 				family: "mo-matter-for-test",
-				blaclisted: false
+				blacklisted: false
 			})
 
 			// normally, the refresh token can not be used when it is expired (it's violation)

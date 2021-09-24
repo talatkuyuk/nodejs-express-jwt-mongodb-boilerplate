@@ -129,7 +129,7 @@ describe('POST /auth/logout', () => {
 				type: tokenTypes.REFRESH,
 				expires: "mo-matter-for-test",
 				family: "mo-matter-for-test",
-				blaclisted: false
+				blacklisted: false
 			});
 
 
