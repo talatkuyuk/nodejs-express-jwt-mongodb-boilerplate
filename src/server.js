@@ -53,7 +53,9 @@ const exitHandler = () => {
 		logger.info('Https Server closed.tk');
 	});
 
-	mongodb.disconnect();
+	mongodb.disconnect(() => {
+		logger.info("Mongodb connection is closed.tk");
+	});
 
 	redisClient.quit(function() {
 		logger.info(`redis client quit.tk`);

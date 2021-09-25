@@ -11,6 +11,7 @@ const envVarsSchema = Joi.object()
     PORT_HTTP: Joi.number().default(3000),
 	PORT_HTTPS: Joi.number().default(8443),
     MONGODB_URL: Joi.string().required().description('Mongodb url'),
+    MONGODB_URL_QUERY_OPTIONS: Joi.string().description('Mongodb url query options that can be added'),
     REDIS_URL: Joi.string().required().description('Redis url'),
     JWT_SECRET: Joi.string().required().description('JWT secret key'),
     JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
@@ -34,7 +35,8 @@ module.exports = {
   env: envVars.NODE_ENV,
   porthttp: envVars.PORT_HTTP,
   porthttps: envVars.PORT_HTTPS,
-  mongodb_url: envVars.MONGODB_URL,
+  mongodb_url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : '') + envVars.MONGODB_URL_QUERY_OPTIONS,
+  mongodb_database: envVars.MONGODB_URL.split("/").pop(), // get the db name from url string
   redis_url: envVars.REDIS_URL,
   jwt: {
     secret: envVars.JWT_SECRET,

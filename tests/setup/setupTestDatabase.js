@@ -8,9 +8,6 @@ const setupTestDatabase = () => {
 		await mongodb.connect();
 	});
 
-	// beforeEach(async () => {
-	// 	jest.useFakeTimers();
-	// });
 
 	afterEach(async () => {
 		database = mongodb.getDatabase();
@@ -20,11 +17,14 @@ const setupTestDatabase = () => {
 		}
 	});
 
+	
 	afterAll(async () => {
-		await mongodb.disconnect();
+		await mongodb.disconnect(() => {
+			console.log("Mongodb connection is closed.tk");
+		});
 
 		// lets give sometime to all db connections closed.
-		await new Promise(resolve => setTimeout(() => resolve(), 5000));
+		await new Promise(resolve => setTimeout(() => resolve(), 7000));
 	});
 };
 
