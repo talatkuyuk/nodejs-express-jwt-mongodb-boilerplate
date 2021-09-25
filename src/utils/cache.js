@@ -1,6 +1,8 @@
 const redis = require('redis');
+const redisUrlParse = require('redis-url-parse');
 const { promisify } = require('util');
-const logger = require('..//core/logger');
+const logger = require('../core/logger');
+const config = require('../config');
 
 // In order to kill the client when the connection is lost
 // const retry_strategy =  (options) => undefined;
@@ -30,6 +32,8 @@ const retry_strategy = function(options) {
 
 
 let redisClient = null;
+const redis_connection_parameters = redisUrlParse(config.redis_url);
+if (!redis_connection_parameters?.password) delete redis_connection_parameters?.password;
 
 const getRedisClient = () => {
     if (redisClient){
@@ -37,7 +41,7 @@ const getRedisClient = () => {
     }
 
     // Connect to redis at 127.0.0.1 port 6379 no password.
-    redisClient = redis.createClient({ retry_strategy, connect_timeout: 10 * 60 * 1000 }); // 10 minutes   
+    redisClient = redis.createClient({ ...redis_connection_parameters, retry_strategy, connect_timeout: 10 * 60 * 1000 }); // 10 minutes   
     return redisClient;
 }
 

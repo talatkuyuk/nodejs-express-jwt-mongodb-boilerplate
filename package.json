@@ -43,6 +43,7 @@
     "passport-http-bearer": "^1.0.1",
     "passport-jwt": "^4.0.0",
     "redis": "^3.1.2",
+    "redis-url-parse": "^2.0.0",
     "serialize-error": "^8.1.0",
     "winston": "^3.3.3",
     "xss-clean": "^0.1.1"

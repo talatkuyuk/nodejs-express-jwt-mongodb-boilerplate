@@ -10,7 +10,8 @@ const envVarsSchema = Joi.object()
     NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
     PORT_HTTP: Joi.number().default(3000),
 	PORT_HTTPS: Joi.number().default(8443),
-    MONGODB_URL: Joi.string().required().description('Mongo DB url'),
+    MONGODB_URL: Joi.string().required().description('Mongodb url'),
+    REDIS_URL: Joi.string().required().description('Redis url'),
     JWT_SECRET: Joi.string().required().description('JWT secret key'),
     JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
     JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
@@ -34,6 +35,7 @@ module.exports = {
   porthttp: envVars.PORT_HTTP,
   porthttps: envVars.PORT_HTTPS,
   mongodb_url: envVars.MONGODB_URL,
+  redis_url: envVars.REDIS_URL,
   jwt: {
     secret: envVars.JWT_SECRET,
     accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,

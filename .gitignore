@@ -47,3 +47,4 @@ coverage/
 # dotenv environment variables file
 .env
 .env.test
+package-lock.json
