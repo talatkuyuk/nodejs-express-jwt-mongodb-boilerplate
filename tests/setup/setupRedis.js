@@ -1,12 +1,14 @@
-const redisClient = require('../../src/utils/cache').getRedisClient();
+const redis = require('../../src/core/redis');
 
 const setupRedis = () => {
 
-	afterAll(async () => {
-		redisClient.quit();
+	beforeAll(async () => {
+		await redis.establisConnection();
 	});
 
-	
+	afterAll(async () => {
+		redis.getRedisClient().quit();
+	});
 };
 
 module.exports = {

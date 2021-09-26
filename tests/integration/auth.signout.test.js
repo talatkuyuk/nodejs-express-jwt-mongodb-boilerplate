@@ -11,7 +11,7 @@ const { authuserService, tokenService, tokenDbService } = require('../../src/ser
 const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
 const { tokenTypes } = require('../../src/config/tokens');
-const redisClient = require('../../src/utils/cache').getRedisClient();
+const { getRedisClient } = require('../../src/core/redis');
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');
 const testData = require('../data/testdata');
@@ -91,6 +91,7 @@ describe('POST /auth/signout', () => {
 			expect(response.body.errors).toBeUndefined();
 
 			// check the access token of both authuser and otheruser are in the blacklist
+			const redisClient = getRedisClient();
 			if (redisClient.connected) {
 				const { jti: authuserJti } = jwt.decode(accessToken, config.jwt.secret);
 
@@ -192,6 +193,7 @@ describe('POST /auth/signout', () => {
 			expect(response.status).toBe(httpStatus.NO_CONTENT);
 
 			// check the access token of both authuser and otheruser are in the blacklist
+			const redisClient = getRedisClient();
 			if (redisClient.connected) {
 				const { jti } = jwt.decode(accessToken, config.jwt.secret);
 

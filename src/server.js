@@ -7,13 +7,14 @@ const config = require('./config');
 const app = require('./core/express');
 const logger = require('./core/logger')
 const mongodb = require('./core/mongodb');
-const redisClient = require('./utils/cache').getRedisClient();
+const redis = require('./core/redis');
 
-let httpServer, httpsServer;
-const SSLdirectory = path.join(__dirname , '/ssl/')
+let httpServer, httpsServer, redisClient;
+const SSLdirectory = path.join(__dirname , '/ssl/');
 
-mongodb.connect()
-	.then(() => {
+
+redis.establisConnection().then(() => {
+	mongodb.connect().then(() => {
 		const key  = fs.readFileSync(SSLdirectory + 'server.decrypted.key', 'utf8');
 		const cert = fs.readFileSync(SSLdirectory + 'server.crt', 'utf8');
 		const credentials = { key, cert };
@@ -33,41 +34,44 @@ mongodb.connect()
 		// server = app.listen(config.port, function () {
 		// 	logger.info('Server started on port ' + config.port);
 		// });
-
 	})
 	.catch((error) => {
 		logger.error(`mongodb connection error: ${error}`);
 		exitHandler();
-	})
+	});
+
+}).catch((error) => {
+	logger.error(`redis connection error: ${error}`);
+	exitHandler();
+});
 
 
-const exitHandler = () => {
+
+
+const exitHandler = async () => {
 
 	process.exitCode = 1;
 
-	httpServer?.close(() => {
-		logger.info('Http Server closed.tk');
+	await httpServer?.close(() => {
+		logger.info('Http Server closed.exithandler.tk');
 	});
 
-	httpsServer?.close(() => {
-		logger.info('Https Server closed.tk');
+	await httpsServer?.close(() => {
+		logger.info('Https Server closed.exithandler.tk');
 	});
 
-	mongodb.disconnect(() => {
-		logger.info("Mongodb connection is closed.tk");
+	await mongodb.disconnect(() => {
+		logger.info("Mongodb connection is closed.exithandler.tk");
 	});
 
-	redisClient.quit(function() {
-		logger.info(`redis client quit.tk`);
+	await redis.getRedisClient()?.quit(function() {
+		logger.info(`redis client quit.exithandler.tk`);
 	});
-
 };
   
   
 process.on('uncaughtException', (err, origin) => {
-	console.log(`UnCaught Exception: ${err}\nException Origin: ${origin}`);
-
-	logger.error(`uncaughtException happened: ${err}`);
+	logger.error(`uncaughtException: ${err}`);
 	exitHandler();
 });
 
@@ -75,7 +79,7 @@ process.on('uncaughtException', (err, origin) => {
 process.on('unhandledRejection', (reason, promise) => {
 	console.log(`Unhandled Rejection Promise: ${promise}\nRejection Reason: ${reason.stack || reason}`);
 	
-	logger.error(`unexpectedError happened: ${reason}`);
+	logger.error(`unexpectedError : ${reason}`);
 	exitHandler();
 });
 
@@ -90,11 +94,7 @@ function cleanup(signal) {
 
 
 process.on("exit", function(code){
-	redisClient.quit(function() {
-		console.log('redis client quit on process exit.tk');
-	});
-
-	console.log(`Process exit event with code: ${code}`);
+	logger.warn(`ON_EXIT code: ${code}`);
 });
 
   

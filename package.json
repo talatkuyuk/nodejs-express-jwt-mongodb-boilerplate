@@ -7,7 +7,13 @@
     "dev": "cross-env NODE_ENV=development nodemon src/server.js",
     "test": "cross-env NODE_ENV=test jest --coverage --runInBand --verbose --detectOpenHandles --config ./jest.config.json",
     "test:coverage": "cross-env NODE_ENV=test jest --coverage --runInBand --config ./jest.config.json",
-    "test:refresh": "cross-env NODE_ENV=test jest --verbose --detectOpenHandles --config ./jest.config.json auth.refresh.test.js"
+    "test:refresh": "cross-env NODE_ENV=test jest --verbose --detectOpenHandles --config ./jest.config.json auth.refresh.test.js",
+    "stop-node": "pkill node",
+    "redis:list-connections": "netstat -an | grep 6379 | grep ESTABLISHED", 
+    "redis:count-connections": "netstat -an | grep 6379 | grep ESTABLISHED | wc -l",
+    "redis:kill-connections": "redis-cli CLIENT KILL TYPE normal",
+    "redis:stop": "brew services stop redis",
+    "redis:restart": "brew services restart redis"
   },
   "keywords": [],
   "author": "",

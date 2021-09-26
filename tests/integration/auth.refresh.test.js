@@ -7,7 +7,7 @@ const crypto = require('crypto');
 
 
 const testData = require('../data/testdata');
-const redisClient = require('../../src/utils/cache').getRedisClient();
+const { getRedisClient } = require('../../src/core/redis');
 
 const app = require('../../src/core/express');
 const { authuserService, tokenService, tokenDbService } = require('../../src/services');
@@ -127,8 +127,10 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(control).toBe(true);
 
 			// check the refresh token {blacklisted: false} one above is added into blacklist cache
-			const { jti } = jwt.decode(testData.REFRESH_TOKEN_VALID, config.jwt.secret);
+			const redisClient = getRedisClient();
 			if (redisClient.connected) {
+				const { jti } = jwt.decode(testData.REFRESH_TOKEN_VALID, config.jwt.secret);
+
 				const data = await redisClient.get(`blacklist_${jti}`);
 				expect(data).toBeDefined();
 			};

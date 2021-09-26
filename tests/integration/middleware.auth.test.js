@@ -7,7 +7,7 @@ const httpMocks = require('node-mocks-http');
 const ApiError = require('../../src/utils/ApiError');
 const { auth } = require('../../src/middlewares/auth');
 const testData = require('../data/testdata');
-const redisClient = require('../../src/utils/cache').getRedisClient();
+const { getRedisClient } = require('../../src/core/redis');
 const TestUtil = require('../testutil/TestUtil');
 
 const app = require('../../src/core/express');
@@ -224,9 +224,12 @@ describe('Auth Middleware', () => {
 			const authuser = await authuserService.createAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
-			const { jti } = jwt.decode(tokens.access.token, config.jwt.secret);
+			const redisClient = getRedisClient();
+			if (redisClient) {
+				const { jti } = jwt.decode(tokens.access.token, config.jwt.secret);
 
-			redisClient.setex(`blacklist_${jti}`, 1 * 60, true);
+				redisClient.setex(`blacklist_${jti}`, 1 * 60, true);
+			}
 
 			const request = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "ApiError: The token is in the blacklist");
