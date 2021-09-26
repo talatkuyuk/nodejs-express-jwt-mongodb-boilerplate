@@ -12,7 +12,10 @@ const uri = config.mongodb_url;
 const options = {
 	poolSize: 10,
 	useNewUrlParser: true,
-	useUnifiedTopology: true
+	useUnifiedTopology: true,
+	serverSelectionTimeoutMS: 5000,
+	connectTimeoutMS: 5000,
+	socketTimeoutMS: 5000,
 }
 
 // Create a new MongoClient

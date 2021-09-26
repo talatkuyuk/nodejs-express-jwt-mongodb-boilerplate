@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const ApiError = require('../utils/ApiError');
 const config = require('../config');
-const redisClient = require('../utils/cache').getRedisClient();
+const { getRedisClient } = require('../core/redis');
 
 //for database operations for authusers
 const authuserService = require('./authuser.service');
@@ -104,8 +104,9 @@ const logout = async (authuser, accessToken, refreshToken) => {
 
 		// delete the refresh token family from db
 		await tokenService.removeTokens({ family: refreshTokenDoc.family });
-		
-		if (redisClient.connected) {
+
+		const redisClient = getRedisClient();
+		if (redisClient) {
 			const jti = refreshTokenDoc.family.split("-")[1];
 
 			// add access token into blacklist, which is paired with refreshtoken (key, timeout, value)
@@ -116,7 +117,7 @@ const logout = async (authuser, accessToken, refreshToken) => {
 			// Means that Refresh Token is stolen by authuser 
 			// This control is placed here to allow refresh token family removed from db, above.
 			
-			if (redisClient.connected) {
+			if (redisClient) {
 				const { jti } = jwt.verify(accessToken, config.jwt.secret);
 
 				// add access token which is authenticated into blacklist since the authuser made violation
@@ -144,7 +145,8 @@ const logout = async (authuser, accessToken, refreshToken) => {
 		// delete all tokens of the user
 		await tokenService.removeTokens({ user: refreshTokenDoc.user });
 
-		if (redisClient.connected) {
+		const redisClient = getRedisClient();
+		if (redisClient) {
 			const { jti } = jwt.verify(accessToken, config.jwt.secret);
 
 			// add access token into blacklist, which is paired with refreshtoken (key, timeout, value)
@@ -155,7 +157,7 @@ const logout = async (authuser, accessToken, refreshToken) => {
 			// Means that Refresh Token is stolen by authuser 
 			// This control is placed here to allow refresh token family removed from db, above.
 			
-			if (redisClient.connected) {
+			if (redisClient) {
 				const { jti } = jwt.verify(accessToken, config.jwt.secret);
 
 				// add access token which is authenticated into blacklist since the authuser made violation

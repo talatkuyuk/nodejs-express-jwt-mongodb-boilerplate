@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const httpStatus = require('http-status');
 
 const config = require('../config');
-const redisClient = require('../utils/cache').getRedisClient();
+const { getRedisClient } = require('../core/redis');
 
 const ApiError = require('../utils/ApiError');
 const { Token } = require('../models');
@@ -213,8 +213,9 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 	
 				// Update each refresh token with the { blacklisted: true }
 				await tokenDbService.updateToken(tokenRecord._id, { blacklisted: true });
-			
-				if (redisClient.connected) {
+
+				const redisClient = getRedisClient();
+				if (redisClient) {
 					// Get the related access token jti from refresh token
 					const { jti } = jwt.decode(tokenRecord.token, config.jwt.secret);
 		
