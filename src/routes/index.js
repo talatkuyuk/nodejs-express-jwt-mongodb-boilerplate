@@ -9,6 +9,7 @@ const docsRoute = require('./docs.route');
 
 const config = require('../config');
 const mongodb = require('../core/mongodb');
+const redis = require('../core/redis');
 
 const router = express.Router();
 
@@ -71,7 +72,28 @@ router.get('/list', (req, res) => {
 
 });
 
-router.get('/status', (req, res) => res.send('OK'));
+router.get('/status', asyncHandler( async (req, res) => {
+
+	var database = mongodb.getDatabase();
+	var cache = redis.getRedisClient();
+
+	let mongoStatus, redisStatus;
+
+	try {
+
+		redisStatus = cache?.connected ? "OK" : "DOWN";
+
+		const result = await database.admin().ping();
+		mongoStatus = result.ok === 1 ? "OK" : "DOWN";
+
+		res.json({ mongoStatus, redisStatus });
+		
+	} catch (error) {
+		res.json({ mongoStatus: "DOWN", redisStatus });
+		// throw error;
+	}
+}));
+
 
 router.use('/auth', authRoute);
 router.use('/authuser', authuserRoute);
