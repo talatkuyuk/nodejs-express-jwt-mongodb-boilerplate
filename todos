@@ -14,20 +14,19 @@
 
 //TODO: arrange errors and add errors object to response like validation errors
 //TODO: arrange http status 
-//TODO: add loggers for mongo ops
+//TODO: add loggers for mongo operations
+//TODO: update winston that if the user is not identified then dont it log like this "user:-", keep it empty
 
 //TODO: add todo part
 //TODO: add socket io
 //TODO: swagger documentation
 //TODO: add collection named logs to mongodb
 
-//TODO: add Redis Server URL into Config
-//TODO: update mongo database referring the actual db and add test db url into config as well
 //TODO: update unhandledRejection and uncaughtException mechanism
-//TODO: check the Redis server is running before the app starts (use promise)
-//TODO: check the Redis connection before Redis operations (control if it is connected)
 //TODO: update ErrorHandler strategy and isOperational logic
 //TODO: handle errors for syntax or null/undefined in auth middleware
+//TODO: handle mongoDB errors properly in error middleware
+
 //TODO: revoke the access token when the user session is closed
 //TODO: implement the Schema Versioning pattern, add a schema_version
 //TODO: set schemas for createcollection and create indexes and further arrange schemas
