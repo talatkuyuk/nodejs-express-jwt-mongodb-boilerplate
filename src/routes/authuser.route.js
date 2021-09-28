@@ -1,4 +1,5 @@
 const express = require('express');
+const router = express.Router();
 
 const { auth } = require('../middlewares/auth');
 const validate = require('../middlewares/validate');
@@ -6,7 +7,6 @@ const validate = require('../middlewares/validate');
 const { authuserController } = require('../controllers');
 const authuserValidation = require('../validations/authuser.ValidationRules');
 
-const router = express.Router();
 
 router.post('/', auth('add-authuser'), validate(authuserValidation.addAuthUser), authuserController.addAuthUser);
 router.get('/:id', auth('get-authuser'), validate(authuserValidation.getAuthUser), authuserController.getAuthUser);

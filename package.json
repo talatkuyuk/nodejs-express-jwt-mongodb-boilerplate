@@ -9,7 +9,7 @@
     "test:coverage": "cross-env NODE_ENV=test jest --coverage --runInBand --config ./jest.config.json",
     "test:refresh": "cross-env NODE_ENV=test jest --verbose --detectOpenHandles --config ./jest.config.json auth.refresh.test.js",
     "stop-node": "pkill node",
-    "redis:list-connections": "netstat -an | grep 6379 | grep ESTABLISHED", 
+    "redis:list-connections": "netstat -an | grep 6379 | grep ESTABLISHED",
     "redis:count-connections": "netstat -an | grep 6379 | grep ESTABLISHED | wc -l",
     "redis:kill-connections": "redis-cli CLIENT KILL TYPE normal",
     "redis:stop": "brew services stop redis",
@@ -51,6 +51,8 @@
     "redis": "^3.1.2",
     "redis-url-parse": "^2.0.0",
     "serialize-error": "^8.1.0",
+    "swagger-jsdoc": "^6.0.1",
+    "swagger-ui-express": "^4.1.6",
     "winston": "^3.3.3",
     "xss-clean": "^0.1.1"
   },

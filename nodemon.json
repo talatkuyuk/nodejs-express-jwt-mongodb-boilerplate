@@ -1,0 +1,5 @@
+{
+	"verbose": true,
+	"ignore": ["*.test.js", "*.spec.js"],
+	"ext": ".js, .mjs, .json, .yaml"
+}
