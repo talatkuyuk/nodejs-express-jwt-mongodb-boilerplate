@@ -11,65 +11,67 @@ const docsRoute = require('./docs.route');
 
 const mongodb = require('../core/mongodb');
 const redis = require('../core/redis');
+const config = require('../config');
 
 
-function getOneDocumentInCollection(database, collection) {
+// for testing purpose in development environment
+router.get('/list', asyncHandler( async (req, res) => {
+	try {
+		if (config.env === "development") {
+			var database = mongodb.getDatabase();
+			const response = {};
 
-	// get a document matched with query
-	const query = { email: new RegExp(".*" + "tk" + ".*") };
-	database.collection(collection).findOne(query, function(err, doc) {
-		if (err) throw err;
-		console.log("query result: ", doc?.email);
-	});
+			const collections = await database.listCollections({}).toArray();
 
-	// Getting the first document
-	database.collection(collection).findOne().then(console.log);
-}
+			for (const collection of collections) {
+				const result = await database.collection(collection.name).find({}).toArray();
+				response[collection.name] = result;
+			}
+
+			res.status(httpStatus.OK).json(response);
+		} else 
+			res.status(httpStatus.OK).json("OK");
+		
+	} catch (error) {
+		throw error;
+	}
+}));
 
 
-const listAllCollections = asyncHandler((req, res, next) => {
-	var database = mongodb.getDatabase();
-	database.listCollections({}).toArray(function(err, collections) {
-		let result = "collections: ";
-        if (err) throw err;
-        collections.forEach(function(collection) {
-			result += ` ${collection.name}`
-        });
-		console.log(result);
-		res.status(httpStatus.OK).send(result);
-    });
+// for testing purpose in development environment
+router.get('/console', (req, res) => {
+	try {
+		if (config.env === "development") {
+			var database = mongodb.getDatabase();
+			const collection = "authusers";
+		
+			// get the first document matched with query
+			const query = { email: new RegExp('[^tk]', 'i') };
+			database.collection(collection).findOne(query, function(err, doc) {
+				if (err) throw err;
+				console.log("Query result for the email contains tk : ", doc?.email);
+			});
+		
+			// get the first document
+			database.collection(collection).findOne().then(console.log);
+		
+			// get all documents
+			var cursor = database.collection(collection).find();
+			cursor.each(function(err, item) {
+				if (err) throw err;
+				if (item == null) return; // If null, the cursor is end
+				console.log(item);
+			});
+		}
+		res.status(httpStatus.OK).json("OK");
+
+	} catch (error) {
+		throw error;
+	}
 });
 
 
-function listAllDocumentsInCollection(database, collection) {
-	var cursor = database.collection(collection).find();
-
-	cursor.each(function(err, item) {
-		if (err) throw err;
-		if (item == null) return; // If null, the cursor is end
-		console.log(item);
-	});
-
-	database.collection(collection).find({}).toArray(function(err, result) {
-		if (err) throw err;
-		console.log("getting all documents in a collection as array");
-		console.log(result);
-	});
-}
-
-
-router.get('/', listAllCollections);
-
-
-router.get('/list', (req, res) => {
-
-	var db = mongodb.getDatabase();
-	
-	getOneDocumentInCollection(db, "users");
-	listAllDocumentsInCollection(db, "users");
-
-});
-
+// see the mongodb and redis client status
 router.get('/status', asyncHandler( async (req, res) => {
 
 	var database = mongodb.getDatabase();
