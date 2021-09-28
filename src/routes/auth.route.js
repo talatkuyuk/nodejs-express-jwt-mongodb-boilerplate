@@ -1,4 +1,5 @@
 const express = require('express');
+const router = express.Router();
 
 const { auth } = require('../middlewares/auth');
 const { oAuth, google_oAuth, facebook_oAuth } = require('../middlewares/oauth');
@@ -18,7 +19,6 @@ const {
 	verifyEmailValidationRules,
 	oAuthValidationRules } = require('../validations/auth.ValidationRules');
 
-const router = express.Router();
 
 router.post('/signup', validate(signupValidationRules), authController.signup);
 router.post('/login', validate(loginValidationRules), authController.login);
@@ -34,5 +34,6 @@ router.post('/google', validate(oAuthValidationRules), google_oAuth, authControl
 router.post('/facebook', validate(oAuthValidationRules), facebook_oAuth, authController.oAuth);
 router.post('/google/passport', oAuth("google"), authController.oAuth);
 router.post('/facebook/passport', oAuth("facebook"), authController.oAuth);
+
 
 module.exports = router;

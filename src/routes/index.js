@@ -1,4 +1,6 @@
 const express = require('express');
+const router = express.Router();
+
 const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler')
 
@@ -7,12 +9,8 @@ const authuserRoute = require('./authuser.route');
 const userRoute = require('./user.route');
 const docsRoute = require('./docs.route');
 
-const config = require('../config');
 const mongodb = require('../core/mongodb');
 const redis = require('../core/redis');
-
-const router = express.Router();
-
 
 
 function getOneDocumentInCollection(database, collection) {
@@ -95,13 +93,10 @@ router.get('/status', asyncHandler( async (req, res) => {
 }));
 
 
+router.use('/docs', docsRoute);
 router.use('/auth', authRoute);
 router.use('/authuser', authuserRoute);
 router.use('/user', userRoute);
 
-/* istanbul ignore next */
-if (config.env === 'development') {
-    router.use('/docs', docsRoute);
-}
 
 module.exports = router;
