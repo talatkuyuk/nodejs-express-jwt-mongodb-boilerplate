@@ -27,8 +27,8 @@ router.post('/signout', auth(), validate(signoutValidationRules), authController
 router.post('/refresh-tokens', validate(refreshTokensValidationRules), authController.refreshTokens);
 router.post('/forgot-password', validate(forgotPasswordValidationRules), authController.forgotPassword);
 router.post('/reset-password', validate(resetPasswordValidationRules), authController.resetPassword);
-router.post('/verify-email', validate(verifyEmailValidationRules), authController.verifyEmail);
 router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
+router.post('/verify-email', validate(verifyEmailValidationRules), authController.verifyEmail);
 
 router.post('/google', validate(oAuthValidationRules), google_oAuth, authController.oAuth);
 router.post('/facebook', validate(oAuthValidationRules), facebook_oAuth, authController.oAuth);
