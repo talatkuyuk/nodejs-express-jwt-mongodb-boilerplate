@@ -51,7 +51,7 @@ const loginWithEmailAndPassword = async (email, password) => {
 	}
 
 	if (authuser.isDisabled) {
-		throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled, call the system administrator`);
+		throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
 	}
 
 	if (!(await authuser.isPasswordMatch(password))) {
@@ -185,21 +185,24 @@ const logout = async (authuser, accessToken, refreshToken) => {
  */
 const refreshAuth = async (refreshToken, userAgent) => {
   try {
-    const refreshTokenDoc = await tokenService.refreshTokenRotation(refreshToken, userAgent);
+	const refreshTokenDoc = await tokenService.refreshTokenRotation(refreshToken, userAgent);
 
-    const authuser = await authuserService.getAuthUser({ id: refreshTokenDoc.user });
-    if (!authuser) throw new Error("User not found");
+	const authuser = await authuserService.getAuthUser({ id: refreshTokenDoc.user });
+	if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 	if (authuser.isDisabled) {
-		throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
+		throw new ApiError(httpStatus.FORBIDDEN, `You are disabled. Call the system administrator.`);
 	}
 
 	const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent, refreshTokenDoc.family);
-    
-    return { tokens, authuser };
+
+	return { tokens, authuser };
 
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, error);
+	if (error instanceof ApiError)
+		throw error
+	else
+		throw new ApiError(httpStatus.UNAUTHORIZED, error); // Refresh tokens failed.
   }
 };
 
@@ -216,7 +219,7 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
     const resetPasswordTokenDoc = await tokenService.verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
 
     const authuser = await authuserService.getAuthUser({ id: resetPasswordTokenDoc.user });
-    if (!authuser) throw new Error("User not found");
+    if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 	const password = await bcrypt.hash(newPassword, 8);
     
@@ -247,7 +250,7 @@ const verifyEmail = async (verifyEmailToken) => {
     const verifyEmailTokenDoc = await tokenService.verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
 
     const authuser = await authuserService.getAuthUser({ id: verifyEmailTokenDoc.user });
-    if (!authuser) throw new Error("User not found");
+    if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
     
     await authuserService.updateAuthUser(authuser.id, { isEmailVerified: true });
 	await tokenService.removeTokens({ user: authuser.id, type: tokenTypes.VERIFY_EMAIL });

@@ -3,7 +3,8 @@ const asyncHandler = require('express-async-handler')
 
 const Utils = require('../utils/Utils');
 
-const { 
+const {
+	authService, // addAuthUser
 	authuserService, 
 	tokenService // addAuthUser, deleteAuthUser
 } = require('../services');
@@ -13,12 +14,12 @@ const {
 // depend on tokenService because of token generate operation
 const addAuthUser = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
-	const userAgent = req.useragent.source;
 
-	const authuser = await authuserService.createAuthUser(email, password);
-	const tokens = await tokenService.generateAuthTokens(authuser, userAgent);
+	const authuser = await authService.signupWithEmailAndPassword(email, password);
 
-	res.status(httpStatus.CREATED).send({ user: authuser.passwordfilter(), tokens });
+	// no need to produce tokens since the user is going to login self
+
+	res.status(httpStatus.CREATED).send({ user: authuser.filter() });
 });
 
 
@@ -67,11 +68,10 @@ const getAuthUsers = asyncHandler(async (req, res) => {
 
 
 const changePassword = asyncHandler(async (req, res) => {
-	const currentPassword = req.body.currentPassword;
 	const newPassword = req.body.password;
 	const authuser = req.user;
 
-	await authuserService.changePassword(authuser, currentPassword, newPassword);
+	await authuserService.changePassword(authuser, newPassword);
 
 	res.status(httpStatus.NO_CONTENT).send();
 });
