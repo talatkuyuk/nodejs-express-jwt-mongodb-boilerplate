@@ -1,0 +1,183 @@
+/authuser:
+  get:
+    summary: Get the list of authuser within a paginary
+    tags: [AuthUser]
+    security:
+      - BearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/query-param-page'
+      - $ref: '#/components/parameters/query-param-size'
+      - $ref: '#/components/parameters/query-param-sort'
+      - $ref: '#/components/parameters/query-param-email'
+      - $ref: '#/components/parameters/query-param-isEmailVerified'
+      - $ref: '#/components/parameters/query-param-isDisabled'
+    responses:
+      200:
+        description: The list of the authusers with paginary info
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/authuser'
+                totalCount:
+                  type: number
+                pagination:
+                  type: object
+                  properties:
+                    perPage:
+                      type: number
+                    currentPage:
+                      type: number
+                    totalPages:
+                      type: number
+            examples:
+              _:
+                $ref: '#/components/examples/response-query-authusers'
+      401:
+        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/AuthMiddlewareForbiddenErrors'
+      404:
+        $ref: '#/components/responses/NoUserFound'
+      422:
+        $ref: '#/components/responses/AuthUserQueryParamsValidationErrors'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+  post:
+    summary: Add an authuser
+    tags: [AuthUser]
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/form-signup'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/form-signup'
+    responses:
+      201:
+        description: Created
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/authuser'
+                  example:
+                    $ref: '#components/examples/response-authuser'
+      401:
+        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/AuthMiddlewareForbiddenErrors'
+      422:
+        $ref: '#/components/responses/SignUpValidationErrors'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+
+/authuser/{id}:
+  parameters:
+    - $ref: '#/components/parameters/param-authuser-id'
+  get:
+    summary: Get an authuser
+    tags: [AuthUser]
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: The authuser info
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/authuser'
+            examples:
+              _:
+                $ref: '#components/examples/response-authuser'
+      401:
+        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/AuthMiddlewareForbiddenErrors'
+      404:
+        $ref: '#/components/responses/NoUserFound'
+      422:
+        $ref: '#/components/responses/ParamIdValidationError'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+  put:
+    summary: Disable or able an authuser
+    tags: [AuthUser]
+    security:
+      - BearerAuth: []
+    responses:
+      204:
+        description: NO CONTENT
+      401:
+        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/AuthMiddlewareForbiddenErrors'
+      404:
+        $ref: '#/components/responses/NoUserFound'
+      422:
+        $ref: '#/components/responses/ParamIdValidationError'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+  delete:
+    summary: Delete an authuser
+    tags: [AuthUser]
+    security:
+      - BearerAuth: []
+    responses:
+      204:
+        description: NO CONTENT
+      401:
+        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/AuthMiddlewareForbiddenErrors'
+      404:
+        $ref: '#/components/responses/NoUserFound'
+      422:
+        $ref: '#/components/responses/ParamIdValidationError'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+
+
+/authuser/password:
+  patch:
+    summary: Change own password
+    tags: [AuthUser]
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/form-change-password'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/form-change-password'
+    responses:
+      204:
+        description: NO CONTENT
+      401:
+        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/AuthMiddlewareForbiddenErrors'
+      404:
+        $ref: '#/components/responses/NoUserFound'
+      422:
+        $ref: '#/components/responses/ChangePasswordValidationErrors'
+      500:
+        $ref: '#/components/responses/InternalServerError'

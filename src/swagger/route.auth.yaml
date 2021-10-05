@@ -1,0 +1,282 @@
+### SIGNUP ###
+/auth/signup:
+  post:
+    summary: Signup
+    description: receives the registration form and returns the authuser info and tokens
+    tags: [Auth]
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/form-signup'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/form-signup'
+    responses:
+      201:
+        description: Created
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/authuser'
+                  example:
+                    $ref: '#components/examples/response-authuser'
+                tokens:
+                  $ref: '#/components/schemas/tokens'
+                  example:
+                    $ref: '#components/examples/response-tokens'
+      422:
+        $ref: '#/components/responses/SignUpValidationErrors'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+
+### LOGIN ###
+/auth/login:
+  post:
+    summary: Login
+    description: receives the login form and returns the authuser info and tokens
+    tags: [Auth]
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/form-login'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/form-login'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/authuser'
+                  example:
+                    $ref: '#components/examples/response-authuser'
+                tokens:
+                  $ref: '#/components/schemas/tokens'
+                  example:
+                    $ref: '#components/examples/response-tokens'
+      401:
+        $ref: '#/components/responses/LoginUnauthorizedFailures'
+      403:
+        $ref: '#/components/responses/DisabledForbiddenError'
+      422:
+        $ref: '#/components/responses/LoginValidationErrors'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+
+### LOGOUT ###
+/auth/logout:
+  post:
+    summary: Logout
+    description: receives the tokens, gets logged the authuser out and revokes the tokens
+    tags: [Auth]
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/form-refresh-token'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/form-refresh-token'
+    responses:
+      204:
+        description: NO CONTENT
+      401:
+        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/AuthMiddlewareForbiddenErrorsWithoutRightCheck'
+      422:
+        $ref: '#/components/responses/RefreshTokenValidationError'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+
+### SIGNOUT ###
+/auth/signout:
+  post:
+    summary: Signout
+    description: receives the tokens, gets signed the authuser out, deletes all the user data and revokes the tokens
+    tags: [Auth]
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/form-refresh-token'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/form-refresh-token'
+    responses:
+      204:
+        description: NO CONTENT
+      401:
+        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/AuthMiddlewareForbiddenErrorsWithoutRightCheck'
+      422:
+        $ref: '#/components/responses/RefreshTokenValidationError'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+
+### REFRESH-TOKENS ###
+/auth/refresh-tokens:
+  post:
+    summary: Refresh auth tokens
+    description: receives the refresh token, implements refresh token rotation and sends the new tokens
+    tags: [Auth]
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/form-refresh-token'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/form-refresh-token'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tokens'
+            examples:
+              _:
+                $ref: '#components/examples/response-tokens-for-refresh'
+      401:
+        $ref: '#/components/responses/RefreshTokensUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/DisabledForbiddenError'
+      404:
+        $ref: '#/components/responses/NoUserFound'
+      422:
+        $ref: '#/components/responses/RefreshTokenValidationError'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+
+### FORGOT-PASSWORD ###
+/auth/forgot-password:
+  post:
+    summary: Forgot password
+    description: sends an email with the token and reset-url İn order to reset password 
+    tags: [Auth]
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/form-forgot-password'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/form-forgot-password'
+    responses:
+      204:
+        description: NO CONTENT
+      404:
+        $ref: '#/components/responses/NoUserFound'
+      422:
+        $ref: '#/components/responses/ForgotPasswordValidationErrors'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+
+### RESET-PASSWORD ###
+/auth/reset-password:
+  post:
+    summary: Reset password
+    tags: [Auth]
+    parameters:
+      - $ref: '#/components/parameters/query-param-token'
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/form-reset-password'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/form-reset-password'
+    responses:
+      204:
+        description: NO CONTENT
+      401:
+        $ref: '#/components/responses/VerifyTokenUnauthorizedErrors'
+      404:
+        $ref: '#/components/responses/NoUserFound'
+      422:
+        $ref: '#/components/responses/ResetPasswordValidationErrors'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+
+### SEND-VERIFICATION-EMAIL ###
+/auth/send-verification-email:
+  post:
+    summary: Send verification email
+    description: An email will be sent to verify email.
+    tags: [Auth]
+    security:
+      - BearerAuth: []
+    responses:
+      204:
+        description: NO CONTENT
+      400:
+        description: BAD REQUEST
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              code: 400
+              name: ApiError
+              message: Email is already verified
+      401:
+        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/AuthMiddlewareForbiddenErrorsWithoutRightCheck'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+
+### VERIFY-EMAIL ###
+/auth/verify-email:
+  post:
+    summary: Verify email
+    tags: [Auth]
+    parameters:
+      - $ref: '#/components/parameters/query-param-token'
+    responses:
+      204:
+        description: NO CONTENT
+      401:
+        $ref: '#/components/responses/VerifyTokenUnauthorizedErrors'
+      404:
+        $ref: '#/components/responses/NoUserFound'
+      422:
+        $ref: '#/components/responses/QueryParamTokenValidationError'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+
+
+
