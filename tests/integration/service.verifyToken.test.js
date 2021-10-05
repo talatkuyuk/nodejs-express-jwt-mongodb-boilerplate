@@ -121,7 +121,7 @@ describe('Test for Refresh Token Rotation', () => {
 		});
 
 
-		test('ResetPassword Token: should return the token document', async () => {
+		test('Reset-Password Token: should return the token document', async () => {
 
 			const userId = "613b417848981bfd6e91c662";
 		  
@@ -133,7 +133,7 @@ describe('Test for Refresh Token Rotation', () => {
 		});
 
 
-		test('VerifyEmail Token: should return the token document', async () => {
+		test('Verify-Email Token: should return the token document', async () => {
 
 			const userId = "613b417848981bfd6e91c662";
 		  
