@@ -97,8 +97,8 @@ router.get('/status', asyncHandler( async (req, res) => {
 
 router.use('/docs', docsRoute);
 router.use('/auth', authRoute);
-router.use('/authuser', authuserRoute);
-router.use('/user', userRoute);
+router.use('/authusers', authuserRoute);
+router.use('/users', userRoute);
 
 
 module.exports = router;

@@ -31,7 +31,7 @@ const options = {
 				description: 'Authentication',
 			},
 			{
-				name: "AuthUser",
+				name: "AuthUsers",
 				description: 'Manuplates the AuthUsers',
 			},
 		]
