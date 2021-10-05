@@ -1,10 +1,11 @@
 class Token {
 
-	constructor(token, user, expires, type, family = "n/a", blacklisted = false, createdAt = Date.now()) {
+	constructor(token, user, expires, type, jti = "n/a", family = "n/a", blacklisted = false, createdAt = Date.now()) {
 		this.token = token;
 		this.user = user;
 		this.expires = expires;
 		this.type = type;
+		this.jti = jti;
 		this.family = family;
 		this.blacklisted = blacklisted;
 		this.createdAt = createdAt;
@@ -22,6 +23,7 @@ class Token {
 			doc.user,
 			doc.expires,
 			doc.type,
+			doc.jti,
 			doc.family,
 			doc.blacklisted,
 			doc.createdAt,

@@ -301,6 +301,7 @@ const generateRefreshToken = async (userId, userAgent, jti, family) => {
 		userId,
 		refreshTokenExpires.toDate(),
 		tokenTypes.REFRESH,
+		jti,
 		(family ?? `${userId}-${jti}`)
 	  );
 	

@@ -107,7 +107,7 @@ const logout = async (authuser, accessToken, refreshToken) => {
 
 		const redisClient = getRedisClient();
 		if (redisClient) {
-			const jti = refreshTokenDoc.family.split("-")[1];
+			const jti = refreshTokenDoc.jti;
 
 			// add access token into blacklist, which is paired with refreshtoken (key, timeout, value)
 			await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);
@@ -147,7 +147,7 @@ const logout = async (authuser, accessToken, refreshToken) => {
 
 		const redisClient = getRedisClient();
 		if (redisClient) {
-			const { jti } = jwt.verify(accessToken, config.jwt.secret);
+			const jti = refreshTokenDoc.jti;
 
 			// add access token into blacklist, which is paired with refreshtoken (key, timeout, value)
 			await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);		
