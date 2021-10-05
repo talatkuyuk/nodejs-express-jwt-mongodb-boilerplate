@@ -58,7 +58,8 @@ describe('POST /auth/signout', () => {
 			expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.body.code).toEqual(422);
-			expect(response.body.message).toEqual("Validation Error");
+			expect(response.body.name).toEqual("ValidationError");
+			expect(response.body.message).toEqual("The request could not be validated");
 			expect(Object.keys(response.body.errors).length).toBe(1);
 			expect(response.body.errors.refreshToken).toEqual(["refresh token must not be empty"]); 
 		});

@@ -30,7 +30,8 @@ describe('POST /auth/signup', () => {
 			expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.body.code).toEqual(422);
-			expect(response.body.message).toEqual("Validation Error");
+			expect(response.body.name).toEqual("ValidationError");
+			expect(response.body.message).toEqual("The request could not be validated");
 		}
 
 	  	test('should return 422 Validation Error if email is empty or falsy value', async () => {
@@ -206,6 +207,7 @@ describe('POST /auth/signup', () => {
 					"email": "talat@gmail.com",
 					"id": expect.stringMatching(/^[0-9a-fA-F]{24}$/), // valid mongodb ObjectID: 24-size hex value
 					"isEmailVerified": false,
+					"isDisabled": false,
 					"services": {
 					  "emailpassword": "registered",
 					},

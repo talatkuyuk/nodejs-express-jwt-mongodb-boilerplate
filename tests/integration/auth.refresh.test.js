@@ -39,7 +39,8 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.body.code).toEqual(422);
-			expect(response.body.message).toEqual("Validation Error");
+			expect(response.body.name).toEqual("ValidationError");
+			expect(response.body.message).toEqual("The request could not be validated");
 			expect(Object.keys(response.body.errors).length).toBe(1);
 			expect(response.body.errors.refreshToken).toEqual(["refresh token must not be empty"]); 
 		});
@@ -75,7 +76,7 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.body.code).toEqual(401);
-			expect(response.body.message).toEqual("The refresh token is not valid");
+			expect(response.body.message).toEqual("refresh token is not valid");
 			expect(response.body.errors).toBeUndefined();
 		});
 
@@ -284,10 +285,10 @@ describe('POST /auth/refresh-tokens', () => {
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
 
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+			expect(response.status).toBe(httpStatus.NOT_FOUND);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.body.code).toEqual(401);
-			expect(response.body.message).toEqual("User not found");
+			expect(response.body.message).toEqual("No user found");
 			expect(response.body.errors).toBeUndefined();
 		});
 
