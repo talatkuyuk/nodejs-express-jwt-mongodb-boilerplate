@@ -36,7 +36,7 @@ redis.establisConnection().then(() => {
 		// });
 	})
 	.catch((error) => {
-		logger.error(`mongodb connection error: ${error}`);
+		logger.error(`Mongodb connection error: ${error}`);
 		exitHandler();
 	});
 

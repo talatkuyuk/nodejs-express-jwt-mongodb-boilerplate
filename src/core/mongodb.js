@@ -47,7 +47,7 @@ const connect = async function() {
 		//db.createCollection("tokens", { validator: { $jsonSchema: tokenSchema } });
 		
 	} catch (error) {
-		console.log("MongoClient connection error. tk.");
+		logger.error("MongoClient connection error. tk.");
 		throw error;
 	}
 }
@@ -64,7 +64,7 @@ const disconnect = async function(callback) {
 			callback(); 
 		}
 	} catch (error) {
-		console.log("MongoClient connection error. tk.");
+		logger.error("MongoClient connection error. tk.");
 		throw error;
 	}
 }
