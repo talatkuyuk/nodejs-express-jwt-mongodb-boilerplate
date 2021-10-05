@@ -116,7 +116,7 @@ const verifyToken = async (token, type) => {
 
 		refreshTokenDoc = Token.fromDoc(result);
 		if (!refreshTokenDoc) {
-			throw new ApiError(httpStatus.UNAUTHORIZED, `The refresh token is not valid`);}
+			throw new ApiError(httpStatus.UNAUTHORIZED, `refresh token is not valid`);}
 
 
 		// Step-2: control if that RT is blacklisted
