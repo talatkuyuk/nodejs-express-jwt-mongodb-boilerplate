@@ -63,7 +63,7 @@ const verifyToken = async (token, type) => {
 		// verifyToken method is used only by auth.service (logout, signout, verifyEmail, resetPassword)
 		// No matter the token is blacklisted; signout and logout will be carried out, 
 		// and the user's whole tokens or family refresh tokens will be removed from db.
-		// Also, verifyEmail and resetPassword tokens are not blacklisted, logically. (only expires) 
+		// Also, verify-email and reset-password tokens are not blacklisted, logically. (only expires) 
 		// For this reason, no need to throw an error or delete any token(s) here, if the result token is blacklisted.
 
 		const tokenDoc = Token.fromDoc(result);
