@@ -1,7 +1,7 @@
-/authuser:
+/authusers:
   get:
     summary: Get the list of authuser within a paginary
-    tags: [AuthUser]
+    tags: [AuthUsers]
     security:
       - BearerAuth: []
     parameters:
@@ -50,7 +50,7 @@
 
   post:
     summary: Add an authuser
-    tags: [AuthUser]
+    tags: [AuthUsers]
     security:
       - BearerAuth: []
     requestBody:
@@ -84,12 +84,12 @@
         $ref: '#/components/responses/InternalServerError'
 
 
-/authuser/{id}:
+/authusers/{id}:
   parameters:
     - $ref: '#/components/parameters/param-authuser-id'
   get:
     summary: Get an authuser
-    tags: [AuthUser]
+    tags: [AuthUsers]
     security:
       - BearerAuth: []
     responses:
@@ -115,7 +115,7 @@
 
   put:
     summary: Disable or able an authuser
-    tags: [AuthUser]
+    tags: [AuthUsers]
     security:
       - BearerAuth: []
     responses:
@@ -134,7 +134,7 @@
 
   delete:
     summary: Delete an authuser
-    tags: [AuthUser]
+    tags: [AuthUsers]
     security:
       - BearerAuth: []
     responses:
@@ -153,7 +153,7 @@
 
 
 
-/authuser/password:
+/authusers/password:
   patch:
     summary: Change own password
     tags: [AuthUser]
