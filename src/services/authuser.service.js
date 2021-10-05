@@ -147,6 +147,7 @@ const getAuthUser = async (query) => {
 					isEmailVerified: 1,
 					isDisabled: 1,
 					createdAt: 1,
+					services: 1,
 				}
 			},
 			{
@@ -215,20 +216,17 @@ const deleteAuthUser = async (id) => {
 		const db = mongodb.getDatabase();
 		const result = await db.collection("authusers").findOneAndDelete({_id: ObjectId(id)});
 
-		if (result.ok === 1) {
-			console.log(`The authuser ${id} is deleted in authusers`);
-			
-			const authuser = AuthUser.fromDoc(result.value);
+		if (result.ok === 0)
+			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
-			const deletedAuthUser = await toDeletedAuthUsers(authuser);
+		
+		console.log(`The authuser ${id} is deleted in authusers`);
+		
+		const authuser = AuthUser.fromDoc(result.value);
 
-			return deletedAuthUser;
+		const deletedAuthUser = await toDeletedAuthUsers(authuser);
 
-		} else {
-			console.log(`The authuser is not deleted.`);
-
-			return null;
-		}
+		return deletedAuthUser;
 		
 	} catch (error) {
 		throw error;
@@ -272,12 +270,12 @@ const deleteAuthUser = async (id) => {
  const toggleAbility = async (id) => {
 	try {
 		const authuser = await getAuthUser({id});
-		if (!authuser) throw new Error("User not found");
+		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 		await updateAuthUser(id, {isDisabled: !authuser.isDisabled});
   
 	} catch (error) {
-	  throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}. Enabling/disabling authuser failed.` );
+	  throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}. Enabling/disabling failed.` );
 	}
 };
 
@@ -291,17 +289,8 @@ const deleteAuthUser = async (id) => {
  * @param {string} newPassword
  * @returns {Promise}
  */
- const changePassword = async (authuser, currentPassword, newPassword) => {
+ const changePassword = async (authuser, newPassword) => {
 	try {
-		console.log(newPassword+"")
-		console.log(await bcrypt.hash(currentPassword, 8));
-		console.log(authuser.password);
-		console.log(await bcrypt.compare(currentPassword, authuser.password))
-
-		if (!(await authuser.isPasswordMatch(currentPassword))) {
-			throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect current password');
-		}
-
 		const password = await bcrypt.hash(newPassword, 8);
     	await updateAuthUser(authuser.id, { password });
 
@@ -323,7 +312,7 @@ const deleteAuthUser = async (id) => {
 		const authuser = await getAuthUser({email});
 		
 		if (!authuser) {
-			throw new ApiError(httpStatus.NOT_FOUND, 'No authuser found with this email');
+			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 			// or fake message for security, forgotPassword
 			throw new ApiError(httpStatus.OK, 'An email has been sent for reseting password.');
 		}
@@ -348,7 +337,7 @@ const deleteAuthUser = async (id) => {
 		const authuser = await getAuthUser({id});
 		
 		if (!authuser) {
-			throw new ApiError(httpStatus.NOT_FOUND, 'No authuser found with this id');
+			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 		}
 
 		return authuser;
@@ -388,7 +377,7 @@ const deleteAuthUser = async (id) => {
 		const authuser = await getDeletedAuthUser({id});
 		
 		if (!authuser) {
-			throw new ApiError(httpStatus.NOT_FOUND, 'No deleted authuser found with this id');
+			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 		}
 
 		return authuser;
