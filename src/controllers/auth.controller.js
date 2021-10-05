@@ -77,7 +77,8 @@ const refreshTokens = asyncHandler(async (req, res) => {
 	const refreshtoken = req.body.refreshToken;
 	const userAgent = req.useragent.source;
 
-	const { tokens, authuser } = await authService.refreshAuth(refreshtoken, userAgent);
+	const { authuser, refreshTokenFamily } = await authService.refreshAuth(refreshtoken, userAgent);
+	const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent, refreshTokenFamily);
 
 	req.user = authuser; // for morgan logger to tokenize it as user
 	
