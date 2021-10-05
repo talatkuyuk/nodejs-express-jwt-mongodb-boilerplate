@@ -38,7 +38,6 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 			return reject(new ApiError(httpStatus.FORBIDDEN, `The token is in the blacklist`));
 	}
 		
-	
 	req.user = authuser;
 	
 	if (requiredRights.length) {

@@ -8,6 +8,8 @@ module.exports.tokenSchema = {
 		user: { bsonType: "objectId" },
 		expires: { bsonType: "date" },
 		type: { enum: [tokenTypes.REFRESH, tokenTypes.RESET_PASSWORD, tokenTypes.VERIFY_EMAIL] },
+		jti: { bsonType: "string" },
+		family: { bsonType: "string" },
 		blacklisted: { bsonType: "bool" },
 		createdAt: { bsonType: "date" },
 	}
