@@ -32,17 +32,17 @@ const tokenDbService = require('./token.db.service');
  * @param {string} [secret]
  * @returns {string}
  */
-const generateToken = (userId, expires, type, jti, userAgent, notValidBefore, secret = config.jwt.secret) => {
+const generateToken = (userId, expires, type, jti = "n/a", userAgent = "n/a", notValidBefore = 0, secret = config.jwt.secret) => {
   const now = moment().unix();
   const payload = {
     sub: userId,
     iat: now,
     exp: expires.unix(),
 	jti,
-	ua: userAgent ?? "n/a",
+	ua: userAgent,
     type,
   };
-  return jwt.sign(payload, secret, { notBefore: notValidBefore ?? 0});
+  return jwt.sign(payload, secret, { notBefore: notValidBefore });
 };
 
 
@@ -318,10 +318,8 @@ const generateRefreshToken = async (userId, userAgent, jti, family) => {
  */
 const generateResetPasswordToken = async (userId) => {
 
-  const jti = crypto.randomBytes(16).toString('hex');
-
   const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
-  const resetPasswordToken = generateToken(userId, expires, tokenTypes.RESET_PASSWORD, jti);
+  const resetPasswordToken = generateToken(userId, expires, tokenTypes.RESET_PASSWORD);
 
   const tokenDoc = new Token(
 	resetPasswordToken,
@@ -343,10 +341,8 @@ const generateResetPasswordToken = async (userId) => {
  */
 const generateVerifyEmailToken = async (userId) => {
 
-  const jti = crypto.randomBytes(16).toString('hex');
-
   const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
-  const verifyEmailToken = generateToken(userId, expires, tokenTypes.VERIFY_EMAIL, jti);
+  const verifyEmailToken = generateToken(userId, expires, tokenTypes.VERIFY_EMAIL);
 
   const tokenDoc = new Token(
 	verifyEmailToken,
