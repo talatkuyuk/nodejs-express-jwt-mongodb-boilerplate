@@ -29,7 +29,7 @@ const signup = asyncHandler(async (req, res) => {
 
 	req.user = authuser; // for morgan logger to tokenize it as user
 
-	res.status(httpStatus.CREATED).send({ user: authuser.authfilter(), tokens });
+	res.status(httpStatus.CREATED).send({ user: authuser.filter(), tokens });
 });
 
 
@@ -43,7 +43,7 @@ const login = asyncHandler(async (req, res) => {
 
 	req.user = authuser; // for morgan logger to tokenize it as user
 
-	res.status(httpStatus.OK).send({ user: authuser.authfilter(), tokens });
+	res.status(httpStatus.OK).send({ user: authuser.filter(), tokens });
 });
 
 
@@ -148,7 +148,7 @@ const oAuth = asyncHandler(async (req, res) => {
 
 	const authuser = await authService.loginWith_oAuth(oAuthProvider, id, email);
 	const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
-	res.status(httpStatus.OK).send({ user: authuser.authfilter(), tokens });
+	res.status(httpStatus.OK).send({ user: authuser.filter(), tokens });
 });
 
 

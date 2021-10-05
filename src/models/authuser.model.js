@@ -19,6 +19,8 @@ class AuthUser {
 	}
 
 	transformId(id){
+		//delete this._id;
+		//return Object.assign({ id }, this);
 		this.id = id;
 		delete this._id;
 	}
@@ -64,17 +66,7 @@ class AuthUser {
 	}
 
 	// eleminates private keys
-	authfilter(){
-		const authuser = Object.assign({}, this);
-		const notAllowedKeys = ["password", "isDisabled"];
-		for (const key of Object.keys(authuser)) {
-			if (notAllowedKeys.includes(key)) delete authuser[key];
-		}
-		return authuser;
-	}
-
-	// eleminates private password
-	passwordfilter(){
+	filter(){
 		const authuser = Object.assign({}, this);
 		const notAllowedKeys = ["password"];
 		for (const key of Object.keys(authuser)) {
