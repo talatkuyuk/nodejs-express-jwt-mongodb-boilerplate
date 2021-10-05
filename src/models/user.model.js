@@ -31,7 +31,7 @@ class User {
 	}
 
 	// eleminates private keys
-	userfilter() {
+	filter() {
 		const user = Object.assign({}, this);
 		const notAllowedKeys = ["updatedAt"];
 		for (const key of Object.keys(user)) {

@@ -28,7 +28,7 @@ const getAuthUser = asyncHandler(async (req, res) => {
 
 	const authuser = await authuserService.getAuthUserById(id);
 
-	res.status(httpStatus.OK).send(authuser.passwordfilter());
+	res.status(httpStatus.OK).send(authuser.filter());
 });
 
 

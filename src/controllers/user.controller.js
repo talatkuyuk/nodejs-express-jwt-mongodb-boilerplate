@@ -13,7 +13,7 @@ const addUser = asyncHandler(async (req, res) => {
 
 	const user = await userService.addUser(id, addBody);
 
-	res.status(httpStatus.CREATED).send(user.userfilter());
+	res.status(httpStatus.CREATED).send(user.filter());
 });
 
 
@@ -23,7 +23,7 @@ const getUser = asyncHandler(async (req, res) => {
 
 	const user = await userService.getUser(id);
 	
-	res.status(httpStatus.OK).send(user.userfilter());
+	res.status(httpStatus.OK).send(user.filter());
 });
 
 
@@ -93,7 +93,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
   	const user = await userService.updateUser(id, {name, gender, country});
 
-  	res.status(httpStatus.OK).send(user.userfilter());
+  	res.status(httpStatus.OK).send(user.filter());
 });
 
 
