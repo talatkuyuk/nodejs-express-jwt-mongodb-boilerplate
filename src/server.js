@@ -9,31 +9,35 @@ const logger = require('./core/logger')
 const mongodb = require('./core/mongodb');
 const redis = require('./core/redis');
 
-let httpServer, httpsServer, redisClient;
+let httpServer, httpsServer;
 const SSLdirectory = path.join(__dirname , '/ssl/');
 
 
 redis.establisConnection().then(() => {
 	mongodb.connect().then(() => {
-		const key  = fs.readFileSync(SSLdirectory + 'server.decrypted.key', 'utf8');
-		const cert = fs.readFileSync(SSLdirectory + 'server.crt', 'utf8');
-		const credentials = { key, cert };
 
-		httpServer = http.createServer(app);
-		httpsServer = https.createServer(credentials, app);
+		if (config.server === "https" || config.server === "both") {
+			const key  = fs.readFileSync(SSLdirectory + 'server.decrypted.key', 'utf8');
+			const cert = fs.readFileSync(SSLdirectory + 'server.crt', 'utf8');
+			const credentials = { key, cert };
 
-		httpServer.listen(config.porthttp, function () {
-			logger.info('Http Server started on port ' + config.porthttp);
-		});
+			httpsServer = https.createServer(credentials, app);
+			httpsServer.listen(config.porthttps, function () {
+				logger.info('Https Server started on port ' + config.porthttps);
+			});
+		}
+		
+		if (config.server === "http" || config.server === "both") {
+			httpServer = http.createServer(app);
+			httpServer.listen(config.porthttp, function () {
+				logger.info('Http Server started on port ' + config.porthttp);
+			});
 
-		httpsServer.listen(config.porthttps, function () {
-			logger.info('Https Server started on port ' + config.porthttps);
-		});
-
-		// app.listen actually creates an http server instance
-		// server = app.listen(config.port, function () {
-		// 	logger.info('Server started on port ' + config.port);
-		// });
+			// app.listen actually also creates an http server instance
+			// httpServer = app.listen(config.porthttp, function () {
+			// 	logger.info('Http Server started on port ' + config.porthttp);
+			// });
+		}
 	})
 	.catch((error) => {
 		logger.error(`Mongodb connection error: ${error}`);
