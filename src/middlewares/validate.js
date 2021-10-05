@@ -27,7 +27,7 @@ const validate = (rulesSchema) => async (req, res, next) => {
 
 	const error = new ApiError(
 		httpStatus.UNPROCESSABLE_ENTITY, // statusCode: 422
-		"Validation Error", // message
+		"ValidationError: The request could not be validated", // message
 		xerrors, // errors
 		true // isOperational
 	); 
