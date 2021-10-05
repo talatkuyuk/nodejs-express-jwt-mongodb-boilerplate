@@ -194,9 +194,7 @@ const refreshAuth = async (refreshToken, userAgent) => {
 		throw new ApiError(httpStatus.FORBIDDEN, `You are disabled. Call the system administrator.`);
 	}
 
-	const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent, refreshTokenDoc.family);
-
-	return { tokens, authuser };
+	return { authuser, refreshTokenFamily: refreshTokenDoc.family };
 
   } catch (error) {
 	if (error instanceof ApiError)
