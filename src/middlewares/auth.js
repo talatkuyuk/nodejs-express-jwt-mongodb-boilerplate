@@ -22,7 +22,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 	}
 
 	if (authuser.isDisabled) {
-		return reject(new ApiError(httpStatus.FORBIDDEN, `You are disabled. Call the system administrator`));
+		return reject(new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`));
 	}
 
 	// control if the request is coming from the same useragent - for preventing mitm
@@ -56,9 +56,9 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 			if (index === -1)
 				return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden, (you don\'t have appropriate right)'));
 
-			if (userRights[index].includes("self")) 
-				if (req.params?.id.toString() !== authuser.id.toString()) 
-					return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden. (only self-data)'));
+			if (userRights[index].includes("self") && req.params && req.params.id)
+				if (req.params.id.toString() !== authuser.id.toString()) 
+					return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden, (only self-data)'));
 		});
 	}
 

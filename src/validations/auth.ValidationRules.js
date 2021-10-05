@@ -40,7 +40,7 @@ const check_body_password = [
 
 const check_body_passwordConfirmation = [
 	body('passwordConfirmation').custom((value, { req }) => {
-		if (value !== req.body.password) {
+		if (!Object.is(value, req.body.password)) {
 		  throw new Error('password confirmation does not match with the password');
 		}
 		return true; // Indicates the success
@@ -104,16 +104,17 @@ const forgotPasswordValidationRules = [
 
 const resetPasswordValidationRules = [
 	...check_body_password,
+	...check_body_passwordConfirmation,
 
 	query('token')
-      .notEmpty().withMessage('reset password token must not be empty'),
+      .notEmpty().withMessage('The query parameter token must not be empty'),
 ];
 
 
 
 const verifyEmailValidationRules = [
 	query('token')
-      .notEmpty().withMessage('email verification token must not be empty'),
+      .notEmpty().withMessage('The query parameter token must not be empty'),
 ];
 
 

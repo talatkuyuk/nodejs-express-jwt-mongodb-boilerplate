@@ -208,7 +208,7 @@ describe('Auth Middleware', () => {
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			const request = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
-			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "ApiError: You are disabled. Call the system administrator");
+			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "ApiError: You are disabled, call the system administrator");
 			commonHeaderTestProcess(request, expectedError);
 		});
 
@@ -320,7 +320,7 @@ describe('Auth Middleware', () => {
 
 			await auth("change-password")(req, res, next);
 
-			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "Forbidden. (only self-data)");
+			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "Forbidden, (only self-data)");
 			
 			expect(next).toHaveBeenCalledWith(expect.any(ApiError));
 			expect(next).toHaveBeenCalledWith(expect.toBeMatchedWithError(expectedError));
