@@ -113,7 +113,7 @@ describe('POST /auth/login', () => {
 				password: hashedPassword,
 				isDisabled: true
 			});
-			await authuserDbService.createAuthUser(authuser);
+			await authuserDbService.addAuthUser(authuser);
 
 			let loginForm = {
 				email: 'talat@gmail.com',
@@ -133,7 +133,7 @@ describe('POST /auth/login', () => {
 				email: 'talat@gmail.com',
 				password: hashedPassword,
 			});
-			await authuserDbService.createAuthUser(authuser);
+			await authuserDbService.addAuthUser(authuser);
 
 			let loginForm = {
 				email: 'talat@gmail.com',
@@ -158,7 +158,7 @@ describe('POST /auth/login', () => {
 				services: { emailpassword: "registered" }
 			});
 				
-			await authuserDbService.createAuthUser(authuser);
+			await authuserDbService.addAuthUser(authuser);
 			
 			let loginForm = {
 				email: 'talat@gmail.com',

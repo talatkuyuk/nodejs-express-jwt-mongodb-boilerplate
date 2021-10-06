@@ -111,7 +111,7 @@ describe('Auth Middleware', () => {
 
 			const userAgent = "from-jest-test";
 				
-			const authuser = await authuserDbService.createAuthUser(authUserInstance);
+			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			await authuserDbService.deleteAuthUser(authuser.id);
@@ -130,7 +130,7 @@ describe('Auth Middleware', () => {
 
 			const userAgent = "from-jest-test";
 				
-			const authuser = await authuserDbService.createAuthUser(authUserInstance);
+			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			const request = { headers: { Authorization: `Bearer ${tokens.refresh.token}` }, useragent: { source: userAgent }};
@@ -147,7 +147,7 @@ describe('Auth Middleware', () => {
 
 			const userAgent = "from-jest-test";
 				
-			const authuser = await authuserDbService.createAuthUser(authUserInstance);
+			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser.id);
 
 			const request = { headers: { Authorization: `Bearer ${verifyEmailToken}` }, useragent: { source: userAgent }};
@@ -166,7 +166,7 @@ describe('Auth Middleware', () => {
 			const userAgent1 = "from-jest-test";
 			const userAgent2 = "from-google-chrome";
 
-			const authuser2 = await authuserDbService.createAuthUser(authUserInstance2);
+			const authuser2 = await authuserDbService.addAuthUser(authUserInstance2);
 			const tokens2 = await tokenService.generateAuthTokens(authuser2.id, userAgent2);
 
 			// authuser1 tries to use authuser2's access token but using different user agent
@@ -184,7 +184,7 @@ describe('Auth Middleware', () => {
 
 			const userAgent = "from-jest-test";
 				
-			const authuser = await authuserDbService.createAuthUser(authUserInstance);
+			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const accessToken = tokenService.generateToken(authuser.id, moment().add(5, 'minutes'), tokenTypes.ACCESS, "jti", userAgent, 0, "INVALID-SECRET");
 
 			const request = { headers: { Authorization: `Bearer ${accessToken}` }, useragent: { source: userAgent }};
@@ -202,7 +202,7 @@ describe('Auth Middleware', () => {
 
 			const userAgent = "from-jest-test";
 				
-			const authuser = await authuserDbService.createAuthUser(authUserInstance);
+			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			const request = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
@@ -219,7 +219,7 @@ describe('Auth Middleware', () => {
 
 			const userAgent = "from-jest-test";
 				
-			const authuser = await authuserDbService.createAuthUser(authUserInstance);
+			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			const redisClient = getRedisClient();
@@ -246,7 +246,7 @@ describe('Auth Middleware', () => {
 
 			const userAgent = "from-jest-test";
 				
-			const authuser = await authuserDbService.createAuthUser(authUserInstance);
+			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			await new Promise(resolve => setTimeout(resolve, 2000));
@@ -271,7 +271,7 @@ describe('Auth Middleware', () => {
 
 			const userAgent = "from-jest-test";
 				
-			const authuser = await authuserDbService.createAuthUser(authUserInstance);
+			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 			
 			const request = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
@@ -302,7 +302,7 @@ describe('Auth Middleware', () => {
 		
 		test('should throw ApiError with code 403 if the user has appropriate right but self (param id does not match)', async () => {
 
-			const authuser = await authuserDbService.createAuthUser(authUserInstance);
+			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 	
 			var request  = httpMocks.createRequest({
@@ -329,7 +329,7 @@ describe('Auth Middleware', () => {
 
 		test('should throw ApiError with code 403 if the user does not have appropriate right', async () => {
 
-			const authuser = await authuserDbService.createAuthUser(authUserInstance);
+			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 	
 			var request  = httpMocks.createRequest({
@@ -356,7 +356,7 @@ describe('Auth Middleware', () => {
 
 		test('should continue next middleware if the user has appropriate right related himself', async () => {
 
-			const authuser = await authuserDbService.createAuthUser(authUserInstance);
+			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 	
 			var request  = httpMocks.createRequest({
@@ -379,7 +379,7 @@ describe('Auth Middleware', () => {
 
 
 		test('should continue next middleware if the user has appropriate right which is not dependent on himself', async () => {
-			const authuser = await authuserDbService.createAuthUser(authUserInstance);
+			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 			
 			// let's an admin user to check he/she has appropriate right

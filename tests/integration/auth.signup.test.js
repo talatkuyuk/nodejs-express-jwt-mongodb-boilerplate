@@ -69,7 +69,7 @@ describe('POST /auth/signup', () => {
 				password: 'HashedPass1word.HashedString.HashedPass1word'
 			})
 				
-			await authuserDbService.createAuthUser(authuser);
+			await authuserDbService.addAuthUser(authuser);
 
 			registerform = {
 				email: 'talat@google.com',

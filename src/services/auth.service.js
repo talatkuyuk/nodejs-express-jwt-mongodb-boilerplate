@@ -30,7 +30,7 @@ const signupWithEmailAndPassword = async (email, password) => {
 		const authuserx = new AuthUser(email, hashedPassword);
 		authuserx.services = { emailpassword: "registered" };
 
-		return await authuserDbService.createAuthUser(authuserx);
+		return await authuserDbService.addAuthUser(authuserx);
 
 	} catch (error) {
 		throw error;
@@ -91,7 +91,7 @@ const loginWith_oAuth = async (service, id, email) => {
 		[`${service}`]: id   // { google: 46598364598354983 }
 	};
 
-	authuser = await authuserDbService.createAuthUser(authuserx);
+	authuser = await authuserDbService.addAuthUser(authuserx);
 
 	return authuser;
 };
