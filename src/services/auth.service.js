@@ -168,7 +168,8 @@ const logout = async (authuser, accessToken, refreshToken) => {
 			throw new ApiError(httpStatus.UNAUTHORIZED, `Tokens could not be matched, please re-authenticate to signout from system`);
 		}
 
-		// delete authuser by id
+		// delete authuser by id 
+		//TODO: consider again whether is necessey to check isDeleted, since it passed before authorization
 		const isDeleted = await authuserDbService.deleteAuthUser(authuser.id);
 		if (!isDeleted)
 			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');

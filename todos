@@ -16,14 +16,15 @@
 //TODO: swagger docs for user routes
 
 //TODO: add description field to ApiError
-//TODO: seperate authuserservice with authuser.db operations
+//TODO: seperate authuserservice with authuser.db operations+
 //TODO: decide access and refresh token requirement during logout/login; and update services accordingly
 //TODO: email service add try catch
-//TODO: seperate db services from services
+//TODO: seperate db services from services+
 //TODO: add redis service
 //TODO: add pagination utility
 //TODO: handle deprecation for mongodb collection.findOneAndUpdate option [returnOriginal]
 //TODO: change the routes with plural names+
+//TODO: add mechanism for query authuser or user using pipedelimeter for the query param sort
 
 //TODO: update mongodb native driver to 4.x.x
 
