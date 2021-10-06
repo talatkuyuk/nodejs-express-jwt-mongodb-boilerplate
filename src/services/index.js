@@ -8,3 +8,4 @@ module.exports.userDbService = require('./user.db.service');
 module.exports.tokenDbService = require('./token.db.service');
 
 module.exports.authProviders = require('./authProviders');
+module.exports.paginaryService = require('./paginary.service');
