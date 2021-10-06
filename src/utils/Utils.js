@@ -18,28 +18,29 @@ class Utils {
 
 	/**
 	 * Create an object composed of the sort property
-	 * @param {Object} object
+	 * @param {Object|string} sort
 	 * @returns {Object}
 	 */
-	 static pickSort (object) {
+	 static pickSort (querSort) {
 		
-		const key = "sort";
 		const obj = {};
 
-		if (typeof(object[key]) === "object") {
-			object[key].map( item => {
+		// if it is array
+		if (typeof(querSort) === "object") {
+			querSort.map( item => {
 				const [sort, by] = item.split(".");
 				obj[sort] = by?.toLowerCase() === "desc" ? -1 : 1;
 			});
 		}
 
-		else if (typeof(object[key]) === "string") {
-			const [sort, by] = object[key].split(".");
+		// if it is string
+		else if (typeof(querSort) === "string") {
+			const [sort, by] = querSort.split(".");
 			obj[sort] = by?.toLowerCase() === "desc" ? -1 : 1;
 		}
 
-		else
-			obj["createdAt"] = -1 ;
+		// add default sorting field
+		obj["createdAt"] = -1 ;
 		
 		return obj;
 	};
