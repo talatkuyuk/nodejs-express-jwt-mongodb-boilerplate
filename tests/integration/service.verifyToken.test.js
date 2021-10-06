@@ -104,7 +104,7 @@ describe('Test for Refresh Token Rotation', () => {
 			const token = testData.REFRESH_TOKEN_EXPIRED;
 			const type = tokenTypes.REFRESH;
 
-			await tokenDbService.saveToken({
+			await tokenDbService.addToken({
 				token,
 				user: userId,
 				type,

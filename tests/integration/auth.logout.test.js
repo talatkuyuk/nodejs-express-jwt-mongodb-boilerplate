@@ -78,7 +78,7 @@ describe('POST /auth/logout', () => {
 			const { refreshToken: otherUserRefreshToken } = await tokenService.generateRefreshToken(userId, userAgentOther, otherUserJti);
 
 			// for further test, find otherUserRefreshToken from db, to get its family before it is deleted
-			const { family } = await tokenDbService.findToken({ token: otherUserRefreshToken, user: userId, type: tokenTypes.REFRESH });
+			const { family } = await tokenDbService.getToken({ token: otherUserRefreshToken, user: userId, type: tokenTypes.REFRESH });
 
 			const response = await request(app).post('/auth/logout')
 												.set('Authorization', `Bearer ${accessToken}`) 
@@ -105,7 +105,7 @@ describe('POST /auth/logout', () => {
 
 			// check the other user's refresh token and it's family are removed from db
 			// check whether there is any refresh token with otherUserRefreshToken's family in the db 
-			const data = await tokenDbService.findTokens({ family });
+			const data = await tokenDbService.getTokens({ family });
 			expect(data.length).toBe(0);
 		});
 
@@ -125,7 +125,7 @@ describe('POST /auth/logout', () => {
 			refreshToken = tokenService.generateToken(authuser.id, moment().add(1, 'milliseconds'), tokenTypes.REFRESH, jti, userAgent, 0);
 
 			// put the expired refresh token into db
-			await tokenDbService.saveToken({
+			await tokenDbService.addToken({
 				token: refreshToken,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
@@ -148,7 +148,7 @@ describe('POST /auth/logout', () => {
 		test('should return 204 even if refresh token is blacklisted', async () => {
 
 			// find the refresh token in db to get id
-			const refrehTokenDoc = await tokenDbService.findToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
+			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
 
 			// Update the refresh token with the { blacklisted: true }
 			await tokenDbService.updateToken(refrehTokenDoc._id, { blacklisted: true });
@@ -177,7 +177,7 @@ describe('POST /auth/logout', () => {
 
 		test('should return 204, remove refresh token family from db and revoke access tokens', async () => {
 			// for further test, find authuser's refresh token from db, to get its family before it is deleted
-			const { family } = await tokenDbService.findToken({ token: refreshToken, user: authuser.id, type: tokenTypes.REFRESH });
+			const { family } = await tokenDbService.getToken({ token: refreshToken, user: authuser.id, type: tokenTypes.REFRESH });
 
 			const response = await request(app).post('/auth/logout')
 												.set('Authorization', `Bearer ${accessToken}`) 
@@ -197,7 +197,7 @@ describe('POST /auth/logout', () => {
 
 			// check the authuser's refresh token and it's family are removed from db
 			// check whether there is any refresh token with refresToken's family in the db 
-			const data = await tokenDbService.findTokens({ family });
+			const data = await tokenDbService.getTokens({ family });
 			
 			expect(data.length).toBe(0);
 		});

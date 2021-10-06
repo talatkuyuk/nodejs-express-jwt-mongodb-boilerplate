@@ -219,7 +219,7 @@ describe('POST /auth/login', () => {
 			});
 
 			// check the refresh token is stored into database
-			const result = await tokenDbService.findToken({
+			const result = await tokenDbService.getToken({
 				user: response.body.user.id,
 				token: refreshToken,
 				expires: moment(response.body.tokens.refresh.expires).toDate(),

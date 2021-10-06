@@ -84,14 +84,14 @@ describe('POST /auth/refresh-tokens', () => {
 		test('should return 401 and disable family if refresh token is blacklisted (if first time violation)', async () => {
 
 			// find the refresh token in db to get id
-			const refrehTokenDoc = await tokenDbService.findToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
+			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
 
 			// Update the refresh token with the { blacklisted: true }
 			await tokenDbService.updateToken(refrehTokenDoc._id, { blacklisted: true });
 
 			// add two refresh tokens into db for the user and with the same family, keep one as not blacklisted
 			// to make further expect is more reasonable related with disable family tokens.
-			await tokenDbService.saveToken({
+			await tokenDbService.addToken({
 				token: testData.REFRESH_TOKEN_VALID,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
@@ -100,7 +100,7 @@ describe('POST /auth/refresh-tokens', () => {
 				blacklisted: false
 			});
 
-			await tokenDbService.saveToken({
+			await tokenDbService.addToken({
 				token: testData.REFRESH_TOKEN_EXPIRED,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
@@ -120,7 +120,7 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(response.body.errors).toBeUndefined();
 
 			// check the whole refresh token's family are in db // up to now, 3 refresh tokens are added
-			const data = await tokenDbService.findTokens({ family: refrehTokenDoc.family });
+			const data = await tokenDbService.getTokens({ family: refrehTokenDoc.family });
 			expect(data.length).toBe(3);
 
 			// check the all refresh tokens that belong the family are blacklisted
@@ -141,14 +141,14 @@ describe('POST /auth/refresh-tokens', () => {
 		test('should return 401 and delete family if refresh token is blacklisted (if second time violation)', async () => {
 
 			// find the refresh token in db to get id
-			const refrehTokenDoc = await tokenDbService.findToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
+			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
 
 			// Update the refresh token with the { blacklisted: true }
 			await tokenDbService.updateToken(refrehTokenDoc._id, { blacklisted: true });
 
 			// add two refresh tokens into db for the user and with the same family, keep all as blacklisted
 			// to make further expect is more reasonable related with delete family tokens.
-			await tokenDbService.saveToken({
+			await tokenDbService.addToken({
 				token: testData.REFRESH_TOKEN_VALID,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
@@ -157,7 +157,7 @@ describe('POST /auth/refresh-tokens', () => {
 				blacklisted: true
 			});
 
-			await tokenDbService.saveToken({
+			await tokenDbService.addToken({
 				token: testData.REFRESH_TOKEN_EXPIRED,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
@@ -177,7 +177,7 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(response.body.errors).toBeUndefined();
 
 			// check the whole refresh token's family are removed from db // up to now, 3 refresh tokens are added
-			const data = await tokenDbService.findTokens({ family: refrehTokenDoc.family });
+			const data = await tokenDbService.getTokens({ family: refrehTokenDoc.family });
 			expect(data.length).toBe(0);
 		});
 
@@ -192,7 +192,7 @@ describe('POST /auth/refresh-tokens', () => {
 			refreshToken = tokenService.generateToken(authuser.id, moment().add(1, 'milliseconds'), tokenTypes.REFRESH, jti, userAgent, 0);
 
 			// put the expired refresh token into db
-			await tokenDbService.saveToken({
+			await tokenDbService.addToken({
 				token: refreshToken,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
@@ -252,7 +252,7 @@ describe('POST /auth/refresh-tokens', () => {
 			refreshToken = tokenService.generateToken(authuser.id, moment().add(5, 'minutes'), tokenTypes.REFRESH, jti, userAgent, 0);
 
 			// save that refresh token into db
-			await tokenDbService.saveToken({
+			await tokenDbService.addToken({
 				token: refreshToken,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
@@ -329,7 +329,7 @@ describe('POST /auth/refresh-tokens', () => {
 			const refreshToken = tokenService.generateToken(authuser.id, moment().add(5, 'minutes'), tokenTypes.REFRESH, jti, userAgent, 0);
 
 			// save that refresh token into db
-			await tokenDbService.saveToken({
+			await tokenDbService.addToken({
 				token: refreshToken,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
