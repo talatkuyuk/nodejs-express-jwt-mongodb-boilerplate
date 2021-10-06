@@ -19,8 +19,13 @@ const authuserDbService = require('./authuser.db.service');
  * @returns {Promise<Boolean>}
  */
 const isEmailTaken = async function (email) {
-	const authuser = await authuserDbService.getAuthUser({ email });
-	return !!authuser;
+	try {
+		const authuser = await authuserDbService.getAuthUser({ email });
+		return !!authuser;
+
+	} catch (error) {
+		throw error;
+	}
 };
 
 
@@ -30,8 +35,13 @@ const isEmailTaken = async function (email) {
  * @returns {Promise<Boolean>}
  */
  const isValidAuthUser = async function (id) {
-	const authuser = await authuserDbService.getAuthUser({ id });
-	return !!authuser;
+	try {
+		const authuser = await authuserDbService.getAuthUser({ id });
+		return !!authuser;
+
+	} catch (error) {
+		throw error;
+	}
 };
 
 
@@ -42,8 +52,13 @@ const isEmailTaken = async function (email) {
  * @returns {Promise<Boolean>}
  */
 const isPair_EmailAndId = async function (id, email) {
-	const authuser = await authuserDbService.getAuthUser({ id, email });
-	return !!authuser;
+	try {
+		const authuser = await authuserDbService.getAuthUser({ id, email });
+		return !!authuser;
+
+	} catch (error) {
+		throw error;
+	}
 };
 
 
