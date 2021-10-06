@@ -6,9 +6,9 @@ const Utils = require('../utils/Utils');
 // SERVICE DEPENDENCY
 const {
 	authService, 		// addAuthUser
-	authuserService, 	// changePassword, toggleAbility
-	authuserDbService, 	// getAuthUser, getAuthUsers, deleteAuthUser
-	tokenService 		// addAuthUser, deleteAuthUser
+	authuserService, 	// getAuthUser,  deleteAuthUser, changePassword, toggleAbility
+	authuserDbService, 	// getAuthUsers, deleteAuthUser
+	tokenService 		// addAuthUser,  deleteAuthUser
 } = require('../services');
 
 
@@ -29,7 +29,8 @@ const addAuthUser = asyncHandler(async (req, res) => {
 const getAuthUser = asyncHandler(async (req, res) => {
 	const id = req.params.id;
 
-	const authuser = await authuserDbService.getAuthUser({ id });
+	// the service checks the param id refers any valid authuser
+	const authuser = await authuserService.getAuthUserById(id);
 
 	res.status(httpStatus.OK).send(authuser.filter());
 });
@@ -83,6 +84,7 @@ const changePassword = asyncHandler(async (req, res) => {
 const toggleAbility = asyncHandler(async (req, res) => {
 	const id = req.params.id;
 
+	// the service checks the param id refers any valid authuser
 	await authuserService.toggleAbility(id);
   
 	res.status(httpStatus.NO_CONTENT).send();
@@ -91,14 +93,15 @@ const toggleAbility = asyncHandler(async (req, res) => {
 
 
 // depend on tokenService because of token remove operation
-const deleteAuthUser = asyncHandler(async (req, res) => {
+const deleteAuthUser = asyncHandler(async (req, res, next) => {
 	const id = req.params.id;
 
+	// the service checks the param id refers any valid authuser
+	await authuserService.deleteAuthUser(id);
+	
 	// delete all tokens,
 	await tokenService.removeTokens({ user: id });
 
-	await authuserDbService.deleteAuthUser(id);
-  
 	res.status(httpStatus.NO_CONTENT).send();
 });
 

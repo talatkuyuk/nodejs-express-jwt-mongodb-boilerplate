@@ -30,7 +30,7 @@ const isEmailTaken = async function (email) {
  * @returns {Promise<Boolean>}
  */
  const isValidAuthUser = async function (id) {
-	const authuser = await authuserDbService.getAuthUser({ _id: ObjectId(id) });
+	const authuser = await authuserDbService.getAuthUser({ id });
 	return !!authuser;
 };
 
@@ -42,7 +42,7 @@ const isEmailTaken = async function (email) {
  * @returns {Promise<Boolean>}
  */
 const isPair_EmailAndId = async function (id, email) {
-	const authuser = await authuserDbService.getAuthUser({_id: ObjectId(id), email });
+	const authuser = await authuserDbService.getAuthUser({ id, email });
 	return !!authuser;
 };
 
@@ -57,13 +57,13 @@ const isPair_EmailAndId = async function (id, email) {
  */
  const toggleAbility = async (id) => {
 	try {
-		const authuser = await getAuthUser({id});
+		const authuser = await authuserDbService.getAuthUser({ id });
 		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 		await authuserDbService.updateAuthUser(id, {isDisabled: !authuser.isDisabled});
   
 	} catch (error) {
-	  throw new ApiError(httpStatus.UNAUTHORIZED, `${error.message}. Enabling/disabling failed.` );
+	  	throw error;
 	}
 };
 
@@ -84,8 +84,28 @@ const isPair_EmailAndId = async function (id, email) {
 	} catch (error) {
 		throw error;
 	}
-}
+};
 
+
+
+/**
+ * Delete AuthUser
+ * @param {string} id
+ * @returns {Promise}
+ */
+ const deleteAuthUser = async (id) => {
+	try {
+		const authuser = await authuserDbService.getAuthUser({ id });
+		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+
+		await authuserDbService.deleteAuthUser(id);
+
+		// TODO: delete user data or do it via another request
+  
+	} catch (error) {
+	  	throw error;
+	}
+};
 
 
 
@@ -96,18 +116,16 @@ const isPair_EmailAndId = async function (id, email) {
  */
  const getAuthUserByEmail = async (email) => {
 	try {
-		const authuser = await authuserDbService.getAuthUser({email});
+		const authuser = await authuserDbService.getAuthUser({ email });
+		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 		
-		if (!authuser) {
-			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
-			// or fake message for security, forgotPassword
-			throw new ApiError(httpStatus.OK, 'An email has been sent for reseting password.');
-		}
+		// or fake message for security, forexample when forgotPassword
+		// if (!authuser) throw new ApiError(httpStatus.OK, 'An email has been sent for reseting password.');
 
 		return authuser;
   
 	} catch (error) {
-	  throw error;
+	  	throw error;
 	}
 };
 
@@ -121,16 +139,13 @@ const isPair_EmailAndId = async function (id, email) {
  */
  const getAuthUserById = async (id) => {
 	try {
-		const authuser = await authuserDbService.getAuthUser({id});
+		const authuser = await authuserDbService.getAuthUser({ id });
+		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 		
-		if (!authuser) {
-			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
-		}
-
 		return authuser;
   
 	} catch (error) {
-	  throw error;
+	  	throw error;
 	}
 };
 
@@ -144,15 +159,12 @@ const isPair_EmailAndId = async function (id, email) {
  const getDeletedAuthUserById = async (id) => {
 	try {
 		const authuser = await authuserDbService.getDeletedAuthUser({id});
-		
-		if (!authuser) {
-			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
-		}
+		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 		return authuser;
   
 	} catch (error) {
-	  throw error;
+	  	throw error;
 	}
 };
 
@@ -161,7 +173,9 @@ const isPair_EmailAndId = async function (id, email) {
 module.exports = {
 	toggleAbility,
 	changePassword,
-	
+
+	deleteAuthUser,
+
 	getAuthUserById,
 	getAuthUserByEmail,
 	getDeletedAuthUserById,
