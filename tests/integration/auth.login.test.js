@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 const app = require('../../src/core/express');
-const { authuserService, tokenDbService } = require('../../src/services');
+const { authuserDbService, tokenDbService } = require('../../src/services');
 const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
 const { tokenTypes } = require('../../src/config/tokens');
@@ -113,7 +113,7 @@ describe('POST /auth/login', () => {
 				password: hashedPassword,
 				isDisabled: true
 			});
-			await authuserService.createAuthUser(authuser);
+			await authuserDbService.createAuthUser(authuser);
 
 			let loginForm = {
 				email: 'talat@gmail.com',
@@ -133,7 +133,7 @@ describe('POST /auth/login', () => {
 				email: 'talat@gmail.com',
 				password: hashedPassword,
 			});
-			await authuserService.createAuthUser(authuser);
+			await authuserDbService.createAuthUser(authuser);
 
 			let loginForm = {
 				email: 'talat@gmail.com',
@@ -158,7 +158,7 @@ describe('POST /auth/login', () => {
 				services: { emailpassword: "registered" }
 			});
 				
-			await authuserService.createAuthUser(authuser);
+			await authuserDbService.createAuthUser(authuser);
 			
 			let loginForm = {
 				email: 'talat@gmail.com',

@@ -6,8 +6,9 @@ const ApiError = require('../utils/ApiError');
 const config = require('../config');
 const { getRedisClient } = require('../core/redis');
 
+
 //for database operations for authusers
-const authuserService = require('./authuser.service');
+const authuserDbService = require('./authuser.db.service');
 const { AuthUser } = require('../models');
 
 //for verifying and removing token(s)
@@ -28,7 +29,7 @@ const signupWithEmailAndPassword = async (email, password) => {
 		const authuserx = new AuthUser(email, hashedPassword);
 		authuserx.services = { emailpassword: "registered" };
 
-		return await authuserService.createAuthUser(authuserx);
+		return await authuserDbService.createAuthUser(authuserx);
 
 	} catch (error) {
 		throw error;
@@ -44,7 +45,7 @@ const signupWithEmailAndPassword = async (email, password) => {
  */
 const loginWithEmailAndPassword = async (email, password) => {
 
-	const authuser = await authuserService.getAuthUser({email});
+	const authuser = await authuserDbService.getAuthUser({ email });
 
 	if (!authuser) {
 		throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not registered user');
@@ -71,7 +72,7 @@ const loginWithEmailAndPassword = async (email, password) => {
  */
 const loginWith_oAuth = async (service, id, email) => {
 
-	let authuser = await authuserService.get_oAuthUser(service, id, email);
+	let authuser = await authuserDbService.get_oAuthUser(service, id, email);
 
 	if (authuser?.isDisabled) {
 		throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
@@ -87,7 +88,7 @@ const loginWith_oAuth = async (service, id, email) => {
 		[`${service}`]: id   // { google: 46598364598354983 }
 	};
 
-	authuser = await authuserService.createAuthUser(authuserx);
+	authuser = await authuserDbService.createAuthUser(authuserx);
 
 	return authuser;
 };
@@ -153,7 +154,7 @@ const logout = async (authuser, accessToken, refreshToken) => {
 			await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);		
 		}
 
-		if (authuser?.id.toString() !== refreshTokenDoc.user.toString()) {
+		if (authuser.id.toString() !== refreshTokenDoc.user.toString()) {
 			// Means that Refresh Token is stolen by authuser 
 			// This control is placed here to allow refresh token family removed from db, above.
 			
@@ -168,7 +169,9 @@ const logout = async (authuser, accessToken, refreshToken) => {
 		}
 
 		// delete authuser by id
-		await authuserService.deleteAuthUser(authuser.id);
+		const isDeleted = await authuserDbService.deleteAuthUser(authuser.id);
+		if (!isDeleted)
+			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 		// TODO: delete user data or do it via another request
 		
@@ -187,7 +190,7 @@ const refreshAuth = async (refreshToken, userAgent) => {
   try {
 	const refreshTokenDoc = await tokenService.refreshTokenRotation(refreshToken, userAgent);
 
-	const authuser = await authuserService.getAuthUser({ id: refreshTokenDoc.user });
+	const authuser = await authuserDbService.getAuthUser({ id: refreshTokenDoc.user });
 	if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 	if (authuser.isDisabled) {
@@ -216,12 +219,12 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
   try {
     const resetPasswordTokenDoc = await tokenService.verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
 
-    const authuser = await authuserService.getAuthUser({ id: resetPasswordTokenDoc.user });
+    const authuser = await authuserDbService.getAuthUser({ id: resetPasswordTokenDoc.user });
     if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 	const password = await bcrypt.hash(newPassword, 8);
     
-    await authuserService.updateAuthUser(authuser.id, { 
+    await authuserDbService.updateAuthUser(authuser.id, { 
 		password, 
 		services: { ...authuser.services, emailpassword: "registered" }
 	});
@@ -247,10 +250,10 @@ const verifyEmail = async (verifyEmailToken) => {
   try {
     const verifyEmailTokenDoc = await tokenService.verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
 
-    const authuser = await authuserService.getAuthUser({ id: verifyEmailTokenDoc.user });
+    const authuser = await authuserDbService.getAuthUser({ id: verifyEmailTokenDoc.user });
     if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
     
-    await authuserService.updateAuthUser(authuser.id, { isEmailVerified: true });
+    await authuserDbService.updateAuthUser(authuser.id, { isEmailVerified: true });
 	await tokenService.removeTokens({ user: authuser.id, type: tokenTypes.VERIFY_EMAIL });
 
 	return authuser;

@@ -10,7 +10,7 @@ const testData = require('../data/testdata');
 const { getRedisClient } = require('../../src/core/redis');
 
 const app = require('../../src/core/express');
-const { authuserService, tokenService, tokenDbService } = require('../../src/services');
+const { authuserDbService, tokenDbService, tokenService } = require('../../src/services');
 const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
 const { tokenTypes } = require('../../src/config/tokens');
@@ -59,7 +59,7 @@ describe('POST /auth/refresh-tokens', () => {
 				password: 'HashedPass1word.HashedString.HashedPass1word'
 			});
 
-			authuser = await authuserService.createAuthUser(authUserInstance);
+			authuser = await authuserDbService.createAuthUser(authUserInstance);
 			tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			accessToken = tokens.access.token;
@@ -245,7 +245,7 @@ describe('POST /auth/refresh-tokens', () => {
 				password: 'HashedPass1word.HashedString.HashedPass1word'
 			});
 
-			authuser = await authuserService.createAuthUser(authUserInstance);
+			authuser = await authuserDbService.createAuthUser(authUserInstance);
 
 			// create for that authuser refreshtoken (not expired but "not valid before" is 0 in order not to be trapped)
 			const jti = crypto.randomBytes(16).toString('hex');
@@ -276,10 +276,10 @@ describe('POST /auth/refresh-tokens', () => {
 		});
 
 
-		test('should return 401 if any authuser could not found', async () => {
+		test('should return 404 if any authuser could not found', async () => {
 
 			// just to delete the authuser to see the result as not found user.
-			await authuserService.deleteAuthUser(authuser.id);
+			await authuserDbService.deleteAuthUser(authuser.id);
 
 			const response = await request(app).post('/auth/refresh-tokens')
 												.set('User-Agent', userAgent) 
@@ -287,23 +287,23 @@ describe('POST /auth/refresh-tokens', () => {
 
 			expect(response.status).toBe(httpStatus.NOT_FOUND);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
+			expect(response.body.code).toEqual(404);
 			expect(response.body.message).toEqual("No user found");
 			expect(response.body.errors).toBeUndefined();
 		});
 
 
-		test('should return 401 if the authuser is disabled', async () => {
+		test('should return 403 if the authuser is disabled', async () => {
 			// just to update the authuser to see the result as the user is disabled.
-			await authuserService.updateAuthUser(authuser.id, { isDisabled: true });
+			await authuserDbService.updateAuthUser(authuser.id, { isDisabled: true });
 
 			const response = await request(app).post('/auth/refresh-tokens')
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
 
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+			expect(response.status).toBe(httpStatus.FORBIDDEN);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
+			expect(response.body.code).toEqual(403);
 			expect(response.body.message).toEqual("You are disabled. Call the system administrator.");
 			expect(response.body.errors).toBeUndefined();
 		});
@@ -322,7 +322,7 @@ describe('POST /auth/refresh-tokens', () => {
 				password: 'HashedPass1word.HashedString.HashedPass1word'
 			});
 
-			authuser = await authuserService.createAuthUser(authUserInstance);
+			authuser = await authuserDbService.createAuthUser(authUserInstance);
 
 			// create for that authuser refreshtoken (not expired but "not valid before" is 0 in order not to be trapped)
 			const jti = crypto.randomBytes(16).toString('hex');

@@ -4,7 +4,7 @@ const moment = require('moment');
 const jwt = require('jsonwebtoken');
 
 const app = require('../../src/core/express');
-const { authuserService, tokenDbService } = require('../../src/services');
+const { authuserDbService, tokenDbService } = require('../../src/services');
 const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
 const { tokenTypes } = require('../../src/config/tokens');
@@ -69,7 +69,7 @@ describe('POST /auth/signup', () => {
 				password: 'HashedPass1word.HashedString.HashedPass1word'
 			})
 				
-			await authuserService.createAuthUser(authuser);
+			await authuserDbService.createAuthUser(authuser);
 
 			registerform = {
 				email: 'talat@google.com',

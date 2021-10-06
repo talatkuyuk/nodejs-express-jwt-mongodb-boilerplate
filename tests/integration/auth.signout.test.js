@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const ApiError = require('../../src/utils/ApiError');
 
 const app = require('../../src/core/express');
-const { authuserService, tokenService, tokenDbService } = require('../../src/services');
+const { authuserDbService, tokenDbService, tokenService } = require('../../src/services');
 const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
 const { tokenTypes } = require('../../src/config/tokens');
@@ -38,7 +38,7 @@ describe('POST /auth/signout', () => {
 			password: 'HashedPass1word.HashedString.HashedPass1word'
 		});
 
-		authuser = await authuserService.createAuthUser(authUserInstance);
+		authuser = await authuserDbService.createAuthUser(authUserInstance);
 		tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 		accessToken = tokens.access.token;
@@ -207,11 +207,11 @@ describe('POST /auth/signout', () => {
 			expect(data.length).toBe(0);
 
 			// check the authuser is removed from authuser collection in db
-			const data1 = await authuserService.getAuthUser({ _id: authuser.id });
+			const data1 = await authuserDbService.getAuthUser({ _id: authuser.id });
 			expect(data1).toBeNull();
 
 			// check the authuser is moved to deleted authuser collection in db
-			const data2 = await authuserService.getDeletedAuthUser({ _id: authuser.id });
+			const data2 = await authuserDbService.getDeletedAuthUser({ _id: authuser.id });
 			expect(data2).not.toBeNull();
 			expect(data2.deletedAt).not.toBeNull();
 		});

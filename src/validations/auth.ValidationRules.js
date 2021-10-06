@@ -16,7 +16,7 @@ const check_body_email_custom_isTaken = [
 	// check E-mail is already in use
     body('email').custom(async (value) => {
 		try {
-			if (await authuserService.utils.isEmailTaken(value)) {
+			if (await authuserService.isEmailTaken(value)) {
 				throw new Error('email is already taken');
 			} else {
 				return true;

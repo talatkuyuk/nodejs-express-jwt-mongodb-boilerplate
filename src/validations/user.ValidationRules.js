@@ -73,7 +73,7 @@ const addUser = [
 		.bail()
 		.custom(async (value) => {
 			try {
-				if (!await authuserService.utils.isValidAuthUser(value)) 
+				if (!await authuserService.isValidAuthUser(value)) 
 					throw new Error('Id does not match with any authenticated user');
 
 				if (await userDbService.utils.isValidUser(value)) 
@@ -95,7 +95,7 @@ const addUser = [
 		.toLowerCase()
 		.custom(async (value, { req }) => {
 			try {
-				if (!await authuserService.utils.isPair_EmailAndId(req.body.id, value))
+				if (!await authuserService.isPair_EmailAndId(req.body.id, value))
 					throw new Error('Email does not match with the auth id.');
 				
 				return true; // Indicates the success
