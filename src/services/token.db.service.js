@@ -3,12 +3,14 @@ const ObjectId = require('mongodb').ObjectId;
 
 const { Token } = require('../models');
 
+
+
 /**
  * Save the token to db
  * @param {Token} tokenDoc 
- * @returns {Promise<Token>}
+ * @returns {Promise}
  */
-const saveToken = async (tokenDoc) => {
+const addToken = async (tokenDoc) => {
 	try {
 		tokenDoc.user = ObjectId(tokenDoc.user);
 
@@ -23,14 +25,22 @@ const saveToken = async (tokenDoc) => {
 };
 
 
-const findToken = async (query) => {
+
+/**
+ * Get the token from db
+ * @param {Object} query 
+ * @returns {Promise<Token>}
+ */
+const getToken = async (query) => {
 	try {
-		console.log("findToken: ", query);
+		console.log("getToken: ", query);
 
 		query.user && (query.user = ObjectId(query.user));
 
 		const db = mongodb.getDatabase();
-		const tokenDoc =  await db.collection("tokens").findOne(query);
+		const result =  await db.collection("tokens").findOne(query);
+
+		const tokenDoc = Token.fromDoc(result);
 
 		return tokenDoc;
 
@@ -40,9 +50,15 @@ const findToken = async (query) => {
 }
 
 
-const findTokens = async (query) => {
+
+/**
+ * Get the tokens from db
+ * @param {Object} query 
+ * @returns {Promise<Object[]>}
+ */
+const getTokens = async (query) => {
 	try {
-		console.log("findTokens: ", query);
+		console.log("getTokens: ", query);
 
 		query.user && (query.user = ObjectId(query.user));
 
@@ -55,6 +71,7 @@ const findTokens = async (query) => {
 		throw error;
 	}	
 }
+
 
 
 /**
@@ -86,9 +103,15 @@ const updateToken = async (id, updateBody) => {
 };
 
 
-const removeToken = async (id) => {
+
+/**
+ * Delete the token from db
+ * @param {string | ObjectId} id 
+ * @returns {Promise<Object>}
+ */
+const deleteToken = async (id) => {
 	try {
-		console.log("removeToken: ", id);
+		console.log("deleteToken: ", id);
 
 		const db = mongodb.getDatabase();
 		const result = await db.collection("tokens").deleteOne({_id: ObjectId(id)});
@@ -100,9 +123,16 @@ const removeToken = async (id) => {
 	}
 }
 
-const removeTokens = async (query) => {
+
+
+/**
+ * Delete the tokens from db
+ * @param {Object} query 
+ * @returns {Promise<Object>}
+ */
+const deleteTokens = async (query) => {
 	try {
-		console.log("removeTokens: ", query);
+		console.log("deleteTokens: ", query);
 
 		query.user && (query.user = ObjectId(query.user));
 
@@ -118,10 +148,10 @@ const removeTokens = async (query) => {
 
 
 module.exports = {
-	findToken,
-	findTokens,
-	saveToken,
+	addToken,
+	getToken,
+	getTokens,
 	updateToken,
-	removeToken,
-	removeTokens,
+	deleteToken,
+	deleteTokens,
 };

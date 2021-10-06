@@ -58,7 +58,10 @@ const verifyToken = async (token, type) => {
 
 		// my decision: no need to check the useragent (ua) for refresh token since refresh token can lives during many days.
 
-		const result = await tokenDbService.findToken({ token, type, user: payload.sub });
+		const tokenDoc = await tokenDbService.getToken({ token, type, user: payload.sub });
+
+		if (!tokenDoc)
+			throw new Error(`${type} token is not valid`);
 
 		// verifyToken method is used only by auth.service (logout, signout, verifyEmail, resetPassword)
 		// No matter the token is blacklisted; signout and logout will be carried out, 
@@ -66,10 +69,6 @@ const verifyToken = async (token, type) => {
 		// Also, verify-email and reset-password tokens are not blacklisted, logically. (only expires) 
 		// For this reason, no need to throw an error or delete any token(s) here, if the result token is blacklisted.
 
-		const tokenDoc = Token.fromDoc(result);
-
-		if (!tokenDoc) throw new Error(`${type} token is not valid`);
-		
 		return tokenDoc;
 		
 	} catch (error) {
@@ -78,11 +77,14 @@ const verifyToken = async (token, type) => {
 		// since refresh token verification is used by only signout and logout process.
 		// my decision: if the refresh token is expired or used not before than, signout or logout process will proceed.
 		if (type === tokenTypes.REFRESH && ["jwt not active", "jwt expired"].includes(error.message)) {
+
 			const payload = jwt.decode(token, config.jwt.secret);
-			const result = await tokenDbService.findToken({ token, type, user: payload.sub });
-			const tokenDoc = Token.fromDoc(result);
-			if (tokenDoc) return tokenDoc;
-			throw new ApiError(httpStatus.UNAUTHORIZED, `${type} token is not valid`);
+			const tokenDoc = await tokenDbService.getToken({ token, type, user: payload.sub });
+
+			if (!tokenDoc) 
+				throw new ApiError(httpStatus.UNAUTHORIZED, `${type} token is not valid`);
+
+			return tokenDoc;
 			
 		} else {
 			throw new ApiError(httpStatus.UNAUTHORIZED, error);
@@ -112,9 +114,8 @@ const verifyToken = async (token, type) => {
 	try {
 
 		// Step-1: control if that RT is in DB
-		const result = await tokenDbService.findToken({ token: refreshToken, type: tokenTypes.REFRESH });
+		const refreshTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH });
 
-		refreshTokenDoc = Token.fromDoc(result);
 		if (!refreshTokenDoc) {
 			throw new ApiError(httpStatus.UNAUTHORIZED, `refresh token is not valid`);}
 
@@ -188,7 +189,7 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 		console.log(`disableFamilyRefreshToken: ${refreshTokenDoc.id} family: ${refreshTokenDoc.family}`);
 
 		// Get refresh token descandents not in the blacklist
-		const not_blacklisted_family_member_refresh_tokens = await tokenDbService.findTokens({ 
+		const not_blacklisted_family_member_refresh_tokens = await tokenDbService.getTokens({ 
 			family: refreshTokenDoc.family, 
 			blacklisted: false 
 		});
@@ -305,7 +306,7 @@ const generateRefreshToken = async (userId, userAgent, jti, family) => {
 		(family ?? `${userId}-${jti}`)
 	  );
 	
-	await tokenDbService.saveToken(tokenDoc);
+	await tokenDbService.addToken(tokenDoc);
 
 	return { refreshToken, refreshTokenExpires };
 }
@@ -328,7 +329,7 @@ const generateResetPasswordToken = async (userId) => {
 	tokenTypes.RESET_PASSWORD
   );
 
-  await tokenDbService.saveToken(tokenDoc);
+  await tokenDbService.addToken(tokenDoc);
   
   return resetPasswordToken;
 };
@@ -351,21 +352,21 @@ const generateVerifyEmailToken = async (userId) => {
 	tokenTypes.VERIFY_EMAIL
   );
 
-  await tokenDbService.saveToken(tokenDoc);
+  await tokenDbService.addToken(tokenDoc);
 
   return verifyEmailToken;
 };
 
 
 const removeToken = async (id) => {
-	const {isDeleted, deletedCount} = await tokenDbService.removeToken(id);
+	const {isDeleted, deletedCount} = await tokenDbService.deleteToken(id);
 
 	isDeleted ? console.log(`${deletedCount} token deleted.`) 
 			  : console.log("No token is deleted.");
 }
 
 const removeTokens = async (query) => {
-	const {isDeleted, deletedCount} = await tokenDbService.removeTokens(query);
+	const {isDeleted, deletedCount} = await tokenDbService.deleteTokens(query);
 	
 	isDeleted ? console.log(`${deletedCount} token(s) deleted.`) 
 			  : console.log("No token is deleted.");
