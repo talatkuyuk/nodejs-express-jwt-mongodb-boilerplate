@@ -224,13 +224,13 @@ describe('POST /auth/signup', () => {
 			});
 
 			// check the refresh token is stored into database
-			const result = await tokenDbService.getToken({
+			const tokenDoc = await tokenDbService.getToken({
 				user: response.body.user.id,
 				token: refreshToken,
 				expires: moment(response.body.tokens.refresh.expires).toDate(),
 				type: tokenTypes.REFRESH,
 			});
-			expect(Token.fromDoc(result)?.id).toBeDefined();
+			expect(tokenDoc?.id).toBeDefined();
 
 			// TODO: check the new auth user is stored into database
 			// TODO: check the new auth user password is hashed in the database

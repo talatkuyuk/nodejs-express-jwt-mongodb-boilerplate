@@ -21,21 +21,21 @@ class Utils {
 	 * @param {Object|string} sort
 	 * @returns {Object}
 	 */
-	 static pickSort (querSort) {
+	 static pickSort (querySort) {
 		
 		const obj = {};
 
 		// if it is array
-		if (typeof(querSort) === "object") {
-			querSort.map( item => {
+		if (typeof(querySort) === "object") {
+			querySort.map( item => {
 				const [sort, by] = item.split(".");
 				obj[sort] = by?.toLowerCase() === "desc" ? -1 : 1;
 			});
 		}
 
 		// if it is string
-		else if (typeof(querSort) === "string") {
-			const [sort, by] = querSort.split(".");
+		else if (typeof(querySort) === "string") {
+			const [sort, by] = querySort.split(".");
 			obj[sort] = by?.toLowerCase() === "desc" ? -1 : 1;
 		}
 
