@@ -151,7 +151,7 @@ describe('POST /auth/signout', () => {
 			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
 
 			// Update the refresh token with the { blacklisted: true }
-			await tokenDbService.updateToken(refrehTokenDoc._id, { blacklisted: true });
+			await tokenDbService.updateToken(refrehTokenDoc.id, { blacklisted: true });
 
 			const response = await request(app).post('/auth/signout')
 												.set('Authorization', `Bearer ${accessToken}`) 

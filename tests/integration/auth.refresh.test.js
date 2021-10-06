@@ -87,7 +87,7 @@ describe('POST /auth/refresh-tokens', () => {
 			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
 
 			// Update the refresh token with the { blacklisted: true }
-			await tokenDbService.updateToken(refrehTokenDoc._id, { blacklisted: true });
+			await tokenDbService.updateToken(refrehTokenDoc.id, { blacklisted: true });
 
 			// add two refresh tokens into db for the user and with the same family, keep one as not blacklisted
 			// to make further expect is more reasonable related with disable family tokens.
@@ -144,7 +144,7 @@ describe('POST /auth/refresh-tokens', () => {
 			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
 
 			// Update the refresh token with the { blacklisted: true }
-			await tokenDbService.updateToken(refrehTokenDoc._id, { blacklisted: true });
+			await tokenDbService.updateToken(refrehTokenDoc.id, { blacklisted: true });
 
 			// add two refresh tokens into db for the user and with the same family, keep all as blacklisted
 			// to make further expect is more reasonable related with delete family tokens.

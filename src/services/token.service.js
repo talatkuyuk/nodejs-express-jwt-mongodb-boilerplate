@@ -109,12 +109,13 @@ const verifyToken = async (token, type) => {
 
 	console.log(`refreshTokenRotation: start`);
 
+	// reachable from try-catch both blocks
 	let refreshTokenDoc = null;
 
 	try {
 
 		// Step-1: control if that RT is in DB
-		const refreshTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH });
+		refreshTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH });
 
 		if (!refreshTokenDoc) {
 			throw new ApiError(httpStatus.UNAUTHORIZED, `refresh token is not valid`);}
