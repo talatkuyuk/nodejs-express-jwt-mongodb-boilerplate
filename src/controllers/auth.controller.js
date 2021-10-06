@@ -3,18 +3,12 @@ const asyncHandler = require('express-async-handler')
 
 const ApiError = require('../utils/ApiError');
 
+// SERVICE DEPENDENCY
 const { 
 	authService,
-
-	//generate token(s): signup login refreshAuth forgotPassword sendVerificationEmail
-	tokenService,
-	
-	//send email: forgotPassword sendVerificationEmail
-	emailService,
-
-	//get auth user by email: forgotPassword
-	authuserService,
-
+	authuserService,      //getAuthUser: forgotPassword
+	tokenService,   //generate token(s): forgotPassword, sendVerificationEmail, signup, login, refreshTokens
+	emailService,          //send email: forgotPassword, sendVerificationEmail
 } = require('../services');
 
 
@@ -118,7 +112,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 const sendVerificationEmail = asyncHandler(async (req, res, next) => {
 	const authuser = req.user;
 
-	if (authuser.isEmailVerified) {
+	if (authuser[isEmailVerified]) {
 		throw new ApiError(httpStatus.BAD_REQUEST, "Email is already verified");
 
 	} else {

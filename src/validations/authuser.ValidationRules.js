@@ -10,7 +10,7 @@ const check_param_id_with_custom = [
 		.bail()
 		.custom(async (value) => {
 			try {
-				if (await authuserService.utils.isValidAuthUser(value)) 
+				if (await authuserService.isValidAuthUser(value)) 
 					return true; // indicates validation is success: the id is valid
 				throw new Error('No user found');
 				

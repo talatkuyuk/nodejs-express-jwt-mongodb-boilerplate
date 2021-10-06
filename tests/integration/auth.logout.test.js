@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const ApiError = require('../../src/utils/ApiError');
 
 const app = require('../../src/core/express');
-const { authuserService, tokenService, tokenDbService } = require('../../src/services');
+const { authuserDbService, tokenDbService, tokenService } = require('../../src/services');
 const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
 const { tokenTypes } = require('../../src/config/tokens');
@@ -38,7 +38,7 @@ describe('POST /auth/logout', () => {
 			password: 'HashedPass1word.HashedString.HashedPass1word'
 		});
 
-		authuser = await authuserService.createAuthUser(authUserInstance);
+		authuser = await authuserDbService.createAuthUser(authUserInstance);
 		tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 		accessToken = tokens.access.token;

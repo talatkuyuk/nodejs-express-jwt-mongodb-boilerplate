@@ -3,10 +3,12 @@ const asyncHandler = require('express-async-handler')
 
 const Utils = require('../utils/Utils');
 
+// SERVICE DEPENDENCY
 const {
-	authService, // addAuthUser
-	authuserService, 
-	tokenService // addAuthUser, deleteAuthUser
+	authService, 		// addAuthUser
+	authuserService, 	// changePassword, toggleAbility
+	authuserDbService, 	// getAuthUser, getAuthUsers, deleteAuthUser
+	tokenService 		// addAuthUser, deleteAuthUser
 } = require('../services');
 
 
@@ -27,7 +29,7 @@ const addAuthUser = asyncHandler(async (req, res) => {
 const getAuthUser = asyncHandler(async (req, res) => {
 	const id = req.params.id;
 
-	const authuser = await authuserService.getAuthUserById(id);
+	const authuser = await authuserDbService.getAuthUser({ id });
 
 	res.status(httpStatus.OK).send(authuser.filter());
 });
@@ -51,7 +53,7 @@ const getAuthUsers = asyncHandler(async (req, res) => {
 	const skip = (currentPage - 1) * limit; 
 	
 	console.log(filter, sort, skip, limit);
-	const result = await authuserService.getAuthUsers(filter, sort, skip, limit);
+	const result = await authuserDbService.getAuthUsers(filter, sort, skip, limit);
 
 	let totalCount;
 	if (result[0]["totalCount"].length > 0)
@@ -95,7 +97,7 @@ const deleteAuthUser = asyncHandler(async (req, res) => {
 	// delete all tokens,
 	await tokenService.removeTokens({ user: id });
 
-	await authuserService.deleteAuthUser(id);
+	await authuserDbService.deleteAuthUser(id);
   
 	res.status(httpStatus.NO_CONTENT).send();
 });

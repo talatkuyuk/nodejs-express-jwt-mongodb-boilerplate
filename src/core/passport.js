@@ -3,7 +3,7 @@ const BearerStrategy = require('passport-http-bearer').Strategy;
 
 const config = require('../config');
 const { tokenTypes } = require('../config/tokens');
-const { authuserService, authProviders } = require('../services');
+const { authuserDbService, authProviders } = require('../services');
 
 
 const jwtVerify = async (payload, done) => {
@@ -12,7 +12,7 @@ const jwtVerify = async (payload, done) => {
 			throw new Error('Invalid token type');
 		}
 
-		const authuser = await authuserService.getAuthUser({id: payload.sub});
+		const authuser = await authuserDbService.getAuthUser({ id: payload.sub});
 
 		if (!authuser) return done(null, false);
 		
