@@ -3,12 +3,11 @@ const bcrypt = require('bcryptjs');
 
 const ApiError = require('../utils/ApiError');
 
-const mongodb = require('../core/mongodb');
-const ObjectId = require('mongodb').ObjectId;
-
 const { AuthUser } = require('../models');
 
 const authuserDbService = require('./authuser.db.service');
+
+const paginaryService = require('./paginary.service');
 
 /////////////////////////  UTILS  ///////////////////////////////////////
 
@@ -105,6 +104,25 @@ const isPair_EmailAndId = async function (id, email) {
 
 /**
  * Delete AuthUser
+ * @param {Object} query
+ * @returns {Promise<Object>}
+ */
+ const getAuthUsers = async (query) => {
+	try {
+		const queryFields = ['email'];
+		const booleanFields = ['isEmailVerified', 'isDisabled'];
+		
+		return await paginaryService.paginary(query, queryFields, booleanFields, authuserDbService.getAuthUsers);
+  
+	} catch (error) {
+	  	throw error;
+	}
+};
+
+
+
+/**
+ * Delete AuthUser
  * @param {string} id
  * @returns {Promise}
  */
@@ -189,6 +207,7 @@ module.exports = {
 	toggleAbility,
 	changePassword,
 
+	getAuthUsers,
 	deleteAuthUser,
 
 	getAuthUserById,
