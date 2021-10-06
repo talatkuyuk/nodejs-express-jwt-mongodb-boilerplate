@@ -12,9 +12,14 @@ const { User } = require('../models');
  * @returns {Promise<Boolean>}
  */
  const isValidUser = async function (id) {
-	var db = mongodb.getDatabase();
-	const user = await db.collection("users").findOne({ _id: ObjectId(id) });
-	return !!user;
+	 try {
+		var db = mongodb.getDatabase();
+		const user = await db.collection("users").findOne({ _id: ObjectId(id) });
+		return !!user;
+
+	 } catch (error) {
+		throw error;
+	 }
 };
 
 
