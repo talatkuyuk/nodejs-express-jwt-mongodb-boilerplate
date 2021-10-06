@@ -1,5 +1,5 @@
 const { body, param } = require('express-validator');
-const {authuserService, userService} = require('../services');
+const { authuserService, userDbService } = require('../services');
 const { roles } = require('../config/roles');
 
 
@@ -11,7 +11,7 @@ const check_param_id = [
 		.custom(async (value) => {
 			try {
 				console.log("value:", value);
-				if (await userService.utils.isValidUser(value)) 
+				if (await userDbService.utils.isValidUser(value)) 
 					return true; // indicates validation is success: the id is valid
 				throw new Error('param id does not refer any user. (User not found)');
 				
@@ -76,7 +76,7 @@ const addUser = [
 				if (!await authuserService.utils.isValidAuthUser(value)) 
 					throw new Error('Id does not match with any authenticated user');
 
-				if (await userService.utils.isValidUser(value)) 
+				if (await userDbService.utils.isValidUser(value)) 
 					throw new Error('There is another user with the same id.');
 
 				return true;

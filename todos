@@ -23,7 +23,7 @@
 //TODO: add redis service
 //TODO: add pagination utility
 //TODO: handle deprecation for mongodb collection.findOneAndUpdate option [returnOriginal]
-//TODO: change the routes with plural names
+//TODO: change the routes with plural names+
 
 //TODO: update mongodb native driver to 4.x.x
 

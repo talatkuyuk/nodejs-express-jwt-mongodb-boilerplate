@@ -2,9 +2,8 @@ const passport = require('passport');
 const httpStatus = require('http-status');
 
 const ApiError = require('../utils/ApiError');
-const userService = require('../services/user.service');
+const { userDbService } = require('../services');
 const { roleRights } = require('../config/roles');
-const logger = require('../core/logger');
 const { getRedisClient } = require('../core/redis');
 
 
@@ -42,7 +41,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 	
 	if (requiredRights.length) {
 
-		const user = await userService.getUser(authuser.id);
+		const user = await userDbService.getUser(authuser.id);
 		const role = user?.role ?? "user"; // there is no role yet while adding a user
 		req.user.role = role;
 
