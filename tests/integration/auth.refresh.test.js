@@ -59,7 +59,7 @@ describe('POST /auth/refresh-tokens', () => {
 				password: 'HashedPass1word.HashedString.HashedPass1word'
 			});
 
-			authuser = await authuserDbService.createAuthUser(authUserInstance);
+			authuser = await authuserDbService.addAuthUser(authUserInstance);
 			tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			accessToken = tokens.access.token;
@@ -245,7 +245,7 @@ describe('POST /auth/refresh-tokens', () => {
 				password: 'HashedPass1word.HashedString.HashedPass1word'
 			});
 
-			authuser = await authuserDbService.createAuthUser(authUserInstance);
+			authuser = await authuserDbService.addAuthUser(authUserInstance);
 
 			// create for that authuser refreshtoken (not expired but "not valid before" is 0 in order not to be trapped)
 			const jti = crypto.randomBytes(16).toString('hex');
@@ -322,7 +322,7 @@ describe('POST /auth/refresh-tokens', () => {
 				password: 'HashedPass1word.HashedString.HashedPass1word'
 			});
 
-			authuser = await authuserDbService.createAuthUser(authUserInstance);
+			authuser = await authuserDbService.addAuthUser(authUserInstance);
 
 			// create for that authuser refreshtoken (not expired but "not valid before" is 0 in order not to be trapped)
 			const jti = crypto.randomBytes(16).toString('hex');

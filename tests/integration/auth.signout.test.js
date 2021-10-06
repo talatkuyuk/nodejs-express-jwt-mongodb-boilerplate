@@ -38,7 +38,7 @@ describe('POST /auth/signout', () => {
 			password: 'HashedPass1word.HashedString.HashedPass1word'
 		});
 
-		authuser = await authuserDbService.createAuthUser(authUserInstance);
+		authuser = await authuserDbService.addAuthUser(authUserInstance);
 		tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 		accessToken = tokens.access.token;

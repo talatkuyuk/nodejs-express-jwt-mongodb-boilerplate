@@ -5,20 +5,20 @@ const { AuthUser } = require('../models');
 
 
 /**
- * Create a authuser
+ * Add an authuser into db
  * @param {AuthUser} authuser
  * @returns {Promise<AuthUser>}
  */
-const createAuthUser = async (authuser) => {
+const addAuthUser = async (authuser) => {
 	try {
 		const db = mongodb.getDatabase();
 		const result = await db.collection("authusers").insertOne(authuser);
-		
-		authuser.transformId(result.insertedId);
 
-		console.log(`${result.insertedCount} record is created in authusers.`);
+		const authuserx = AuthUser.fromDoc(result.ops[0]);
 		
-		return authuser;
+		console.log(`${result.insertedCount} record is created in authusers. (${result.insertedId})`);
+		
+		return authuserx;
 
 	} catch (error) {
 		throw error;
@@ -87,7 +87,7 @@ const getAuthUser = async (query) => {
 
 /**
  * Query for authusers
- * @param {Object} filter - Mongo filter for authusers
+ * @param {Object} filter - Filter fields for authusers
  * @param {Object} sort - Sort option in the format: { field1: 1, field2: -1}
  * @param {number} limit - Maximum number of results per page (default = 20)
  * @param {number} page - Current page (default = 1)
@@ -143,7 +143,7 @@ const getAuthUser = async (query) => {
  */
 const updateAuthUser = async (id, updateBody) => {
 	try {
-		console.log(updateBody);
+		console.log("updateAuthUser: ", updateBody);
 	  
 		const db = mongodb.getDatabase();
 	  
@@ -153,14 +153,13 @@ const updateAuthUser = async (id, updateBody) => {
 		  { returnOriginal: false }
 		);
 	  
-		console.log(`${result.ok} record is updated in users`);
+		console.log(`${result.ok} record is updated in authusers.`);
 	  
 		return AuthUser.fromDoc(result.value);
 		
 	} catch (error) {
 		throw error
 	}
-  
 };
 
 
@@ -169,12 +168,15 @@ const updateAuthUser = async (id, updateBody) => {
 /**
  * Delete authuser by id
  * @param {ObjectId} id
- * @returns {Promise<AuthUser?>}
+ * @returns {Promise<Boolean>}
  */
 const deleteAuthUser = async (id) => {
 	try {
+		console.log("deleteAuthUser: ", id);
+
 		const db = mongodb.getDatabase();
-		const result = await db.collection("authusers").findOneAndDelete({_id: ObjectId(id)});
+
+		const result = await db.collection("authusers").findOneAndDelete({ _id: ObjectId(id) });
 
 		if (result.ok === 0) return false;
 
@@ -201,6 +203,8 @@ const deleteAuthUser = async (id) => {
  */
  const toDeletedAuthUsers = async (deletedAuthUser) => {
 	try {
+		console.log("toDeletedAuthUsers: ", deletedAuthUser.id);
+
 		const db = mongodb.getDatabase();
 
 		deletedAuthUser["_id"] = deletedAuthUser.id;
@@ -208,6 +212,7 @@ const deleteAuthUser = async (id) => {
 		deletedAuthUser["deletedAt"] = Date.now();
 
 		const result = await db.collection("deletedauthusers").insertOne(deletedAuthUser);
+		
 		console.log(`${result.insertedCount} record is created in deletedauthusers.`);
 
 		return result.ops[0]; // deleted AuthUser
@@ -220,19 +225,21 @@ const deleteAuthUser = async (id) => {
 
 
 /**
- * Get authuser
+ * Get deleted authuser
  * @param {Object} query {id | email}
  * @returns {Promise<AuthUser>}
  */
  const getDeletedAuthUser = async (query) => {
 	try {
+		console.log("getDeletedAuthUser: ", query);
+
 		const db = mongodb.getDatabase();
 		
 		if (query.id) {
 			query = { ...query, _id: ObjectId(query.id) };
 			delete query.id;
 		}
-		
+
 		const doc = await db.collection("deletedauthusers").findOne(query);
 
 		return AuthUser.fromDoc(doc);
@@ -244,11 +251,12 @@ const deleteAuthUser = async (id) => {
 
 
 module.exports = {
-	createAuthUser,
-	get_oAuthUser,
+	addAuthUser,
 	getAuthUser,
 	getAuthUsers,
 	updateAuthUser,
 	deleteAuthUser,
+
+	get_oAuthUser,
 	getDeletedAuthUser,
 };
