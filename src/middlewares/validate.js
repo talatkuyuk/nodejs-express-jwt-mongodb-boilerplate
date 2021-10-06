@@ -6,7 +6,7 @@ const { validationResult } = require('express-validator')
 const validate = (rulesSchema) => async (req, res, next) => {
 
 	// it validates all related validation rules (express-validator rules in validations directory)
-	await Promise.all(rulesSchema.map((rulesSchema) => rulesSchema.run(req)));
+	await Promise.all(rulesSchema.map((rule) => rule.run(req)));
 
 	const errors = validationResult(req);
 
