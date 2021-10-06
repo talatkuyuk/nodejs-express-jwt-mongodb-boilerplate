@@ -1,5 +1,5 @@
 const { body, query } = require('express-validator');
-const authuserService = require('../services/authuser.service');
+const { authuserService } = require('../services');
 
 
 const check_body_email = [

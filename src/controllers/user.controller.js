@@ -3,7 +3,7 @@ const asyncHandler = require('express-async-handler');
 
 const Utils = require('../utils/Utils');
 
-const { userService } = require('../services');
+const { userDbService } = require('../services');
 
 
 
@@ -11,7 +11,7 @@ const { userService } = require('../services');
 const addUser = asyncHandler(async (req, res) => {
 	const {id, ...addBody} = req.body;
 
-	const user = await userService.addUser(id, addBody);
+	const user = await userDbService.addUser(id, addBody);
 
 	res.status(httpStatus.CREATED).send(user.filter());
 });
@@ -21,7 +21,7 @@ const addUser = asyncHandler(async (req, res) => {
 const getUser = asyncHandler(async (req, res) => {
 	const id = req.params.id
 
-	const user = await userService.getUser(id);
+	const user = await userDbService.getUser(id);
 	
 	res.status(httpStatus.OK).send(user.filter());
 });
@@ -40,7 +40,7 @@ const getUsers = asyncHandler(async (req, res) => {
 	const skip = (currentPage - 1) * limit;
 	
 	console.log(filter, sort, skip, limit);
-	const result = await userService.getUsers(filter, sort, skip, limit);
+	const result = await userDbService.getUsers(filter, sort, skip, limit);
 
 	let totalCount;
 	if (result[0]["totalCount"].length > 0)
@@ -71,7 +71,7 @@ const getUsersJoined = asyncHandler(async (req, res) => {
 	const skip = (currentPage - 1) * limit; 
 	
 	console.log(filterLeft, filterRight, sort, skip, limit);
-	const result = await userService.getUsersJoined(filterLeft, filterRight, sort, skip, limit);
+	const result = await userDbService.getUsersJoined(filterLeft, filterRight, sort, skip, limit);
 
 	let totalCount;
 	if (result[0]["totalCount"].length > 0)
@@ -91,7 +91,7 @@ const updateUser = asyncHandler(async (req, res) => {
 	const id = req.params.id;
   	const {name, gender, country} = req.body;
 
-  	const user = await userService.updateUser(id, {name, gender, country});
+  	const user = await userDbService.updateUser(id, {name, gender, country});
 
   	res.status(httpStatus.OK).send(user.filter());
 });
@@ -101,7 +101,7 @@ const updateUser = asyncHandler(async (req, res) => {
 const deleteUser = asyncHandler(async (req, res) => {
 	const id = req.params.id;
 
-	await userService.deleteUser(id);
+	await userDbService.deleteUser(id);
 
 	res.status(httpStatus.NO_CONTENT).send();
 });
@@ -112,7 +112,7 @@ const changeRole = asyncHandler(async (req, res) => {
 	const id = req.params.id;
 	const role = req.body.role
 
-	await userService.updateUser(id, {role});
+	await userDbService.updateUser(id, {role});
 
 	res.status(httpStatus.NO_CONTENT).send();
 });

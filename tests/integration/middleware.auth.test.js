@@ -11,8 +11,7 @@ const { getRedisClient } = require('../../src/core/redis');
 const TestUtil = require('../testutil/TestUtil');
 
 const app = require('../../src/core/express');
-const authuserService = require('../../src/services/authuser.service');
-const tokenService = require('../../src/services/token.service');
+const { authuserService, tokenService } = require('../../src/services');
 const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
 const { tokenTypes } = require('../../src/config/tokens');

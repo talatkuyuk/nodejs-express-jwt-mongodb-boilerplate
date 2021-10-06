@@ -1,5 +1,3 @@
-const bcrypt = require('bcryptjs');
-
 class User {
 
 	constructor(email, role, name = null, gender = null, country = null, createdAt = Date.now()) {
