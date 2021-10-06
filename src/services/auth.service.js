@@ -16,6 +16,7 @@ const tokenService = require('./token.service');
 const { tokenTypes } = require('../config/tokens');
 
 
+
 /**
  * Signup with username and password
  * @param {string} email
@@ -36,6 +37,7 @@ const signupWithEmailAndPassword = async (email, password) => {
 	}
 }
  			
+
 
 /**
  * Login with username and password
@@ -61,6 +63,7 @@ const loginWithEmailAndPassword = async (email, password) => {
 
 	return authuser;
 };
+
 
 
 /**
@@ -92,6 +95,7 @@ const loginWith_oAuth = async (service, id, email) => {
 
 	return authuser;
 };
+
 
 
 /**
@@ -132,6 +136,7 @@ const logout = async (authuser, accessToken, refreshToken) => {
 		throw error;
 	}
 };
+
 
 
 /**
@@ -180,6 +185,8 @@ const logout = async (authuser, accessToken, refreshToken) => {
 		throw error;
 	}
 };
+
+
 
 /**
  * Refresh auth tokens
@@ -241,6 +248,8 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
 			throw new ApiError(httpStatus.UNAUTHORIZED, error); // Reset password failed.
   }
 };
+
+
 
 /**
  * Verify email
