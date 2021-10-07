@@ -2,20 +2,20 @@ const request = require('supertest');
 const httpStatus = require('http-status');
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-const ApiError = require('../../src/utils/ApiError');
 
 const app = require('../../src/core/express');
-const { authuserDbService, tokenDbService, tokenService } = require('../../src/services');
-const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
-const { tokenTypes } = require('../../src/config/tokens');
 const { getRedisClient } = require('../../src/core/redis');
+
+const { authuserDbService, tokenDbService, tokenService } = require('../../src/services');
+const { AuthUser } = require('../../src/models');
+const { tokenTypes } = require('../../src/config/tokens');
+
+const TestUtil = require('../testutil/TestUtil');
+
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');
-const testData = require('../data/testdata');
-const TestUtil = require('../testutil/TestUtil');
 
 
 setupTestDatabase();

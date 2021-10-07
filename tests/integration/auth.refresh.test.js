@@ -2,22 +2,20 @@ const request = require('supertest');
 const httpStatus = require('http-status');
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
-
-const testData = require('../data/testdata');
+const app = require('../../src/core/express');
+const config = require('../../src/config');
 const { getRedisClient } = require('../../src/core/redis');
 
-const app = require('../../src/core/express');
 const { authuserDbService, tokenDbService, tokenService } = require('../../src/services');
-const { AuthUser, Token } = require('../../src/models');
-const config = require('../../src/config');
+const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
+
+const testData = require('../data/testdata');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');
-const { token } = require('morgan');
 
 
 setupTestDatabase();
@@ -340,7 +338,7 @@ describe('POST /auth/refresh-tokens', () => {
 
 			expect(response.status).toBe(httpStatus.OK);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			
+
 			expect(response.body).toEqual({
 					"access": {
 					  "token": expect.any(String),
