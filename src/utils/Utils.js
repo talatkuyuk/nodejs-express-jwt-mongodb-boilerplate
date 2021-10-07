@@ -46,7 +46,7 @@ class Utils {
 			}
 
 			// add default sorting field
-			obj["createdAt"] = -1 ;
+			obj["createdAt"] || (obj["createdAt"] = -1);
 			
 			return obj;
 
