@@ -22,7 +22,7 @@ const Utils = require('./Utils');
 // }
 
 class ApiError extends Error {
-    constructor(statusCode, error, errors = null, isOperational = true, stack = '') {
+    constructor(statusCode, error, description = null, errors = null, isOperational = true, stack = '') {
       
       // ApiError accepts any Error instance as the paramater error.
       if (error instanceof Error) {
@@ -30,13 +30,12 @@ class ApiError extends Error {
 
         super(error.message);
         this.name = error.name === Error.prototype.name ? this.constructor.name : error.name;
+        this.description = error.description ?? description;
         this.stack = error.stack;
       }
 
       // ApiError accepts string "error message" or "XxxError: error message" as the paramater error.
       else if (typeof error === 'string') {
-        //console.log("ApiError from string: ", error);
-
         if (error.includes(':')) {
             const [name, message] = Utils.splitTwo(error, ':');
             super(message);
@@ -45,12 +44,14 @@ class ApiError extends Error {
             super(error);
             this.name = this.constructor.name;
         }
+        this.description = description;
       }
 
       // if ApiError receives wrong argument type for the paramater error
       else {
         super("bad reference for error message");
-        this.name = this.constructor.name;;
+        this.name = this.constructor.name;
+        this.description = description;
       }
       
       this.statusCode = statusCode;

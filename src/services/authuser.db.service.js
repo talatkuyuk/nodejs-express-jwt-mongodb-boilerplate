@@ -21,6 +21,7 @@ const addAuthUser = async (authuser) => {
 		return authuserx;
 
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in AuthUserDbService [addAuthUser]");
 		throw error;
 	}
 };
@@ -54,7 +55,8 @@ const addAuthUser = async (authuser) => {
 		return AuthUser.fromDoc(doc);
 		
 	} catch (error) {
-		throw error
+		error.description || (error.description = "Database Operation failed in AuthUserDbService [get_oAuthUser]");
+		throw error;
 	}
 };
 
@@ -78,7 +80,8 @@ const getAuthUser = async (query) => {
 		return AuthUser.fromDoc(doc);
 		
 	} catch (error) {
-		throw error
+		error.description || (error.description = "Database Operation failed in AuthUserDbService [getAuthUser]");
+		throw error;
 	}
 };
 
@@ -128,6 +131,7 @@ const getAuthUser = async (query) => {
 	   return await db.collection("authusers").aggregate(pipeline).toArray();
 		
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in AuthUserDbService [getAuthUsers]");
 		throw error;
 	}
 };
@@ -158,6 +162,7 @@ const updateAuthUser = async (id, updateBody) => {
 		return AuthUser.fromDoc(result.value);
 		
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in AuthUserDbService [updateAuthUser]");
 		throw error
 	}
 };
@@ -189,6 +194,7 @@ const deleteAuthUser = async (id) => {
 		return true;
 		
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in AuthUserDbService [deleteAuthUser]");
 		throw error;
 	}
 };
@@ -218,6 +224,7 @@ const deleteAuthUser = async (id) => {
 		return result.ops[0]; // deleted AuthUser
 		
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in AuthUserDbService [toDeletedAuthUsers]");
 		throw error;
 	}
 };
@@ -245,6 +252,7 @@ const deleteAuthUser = async (id) => {
 		return AuthUser.fromDoc(doc);
 		
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in AuthUserDbService [getDeletedAuthUser]");
 		throw error
 	}
 };

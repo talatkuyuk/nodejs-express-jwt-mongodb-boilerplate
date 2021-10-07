@@ -31,6 +31,7 @@ describe('POST /auth/signup', () => {
 			expect(response.body.code).toEqual(422);
 			expect(response.body.name).toEqual("ValidationError");
 			expect(response.body.message).toEqual("The request could not be validated");
+			expect(response.body).not.toHaveProperty("description");
 		}
 
 	  	test('should return 422 Validation Error if email is empty or falsy value', async () => {
@@ -174,10 +175,6 @@ describe('POST /auth/signup', () => {
 
 			expect(response.status).toBe(httpStatus.CREATED);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-
-			expect(response.body).not.toHaveProperty("code");
-			expect(response.body).not.toHaveProperty("message");
-			expect(response.body).not.toHaveProperty("errors");
 
 			const accessToken = response.body.tokens.access.token;
 			const refreshToken = response.body.tokens.refresh.token;

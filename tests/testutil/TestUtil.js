@@ -1,11 +1,20 @@
 const {serializeError} = require('serialize-error');
+const ApiError = require('../../src/utils/ApiError');
 
 class TestUtil {
 	static MatchErrors = () => expect.extend({
 		toBeMatchedWithError(received, expected) {
-			// Error objects are weird, so need to use serialize-error package.
-			const { name: rName, message: rMessage, statusCode: rCode } = serializeError(received);
-			const { name: eName, message: eMessage, statusCode: eCode } = serializeError(expected);
+
+			// if the received error is not ApiError, convert it, since I set the expected to be ApiError for simplicity
+			if (!(received instanceof ApiError))
+				received = new ApiError(expected.statusCode, received);
+		
+			// Error objects have un-enumarated keys, so need to use serialize-error package.
+			const sReceived = serializeError(received)
+			const sExpected = serializeError(expected)
+
+			const { name: rName, message: rMessage, statusCode: rCode } = sReceived;
+			const { name: eName, message: eMessage, statusCode: eCode } = sExpected;
 
 			const check = (r, e) => r === e || console.log(`Expected: ${e}\nReceived: ${r}`);
 

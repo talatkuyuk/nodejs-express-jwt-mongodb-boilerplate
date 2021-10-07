@@ -38,6 +38,7 @@ const paginary = async (query, queryFields, booleanFields, dbQueryCallback) => {
 		return result[0];
 		
 	} catch (error) {
+		error.description || (error.description = "Paginary Service failed");
 		throw error;
 	}
 }

@@ -33,16 +33,22 @@ const tokenDbService = require('./token.db.service');
  * @returns {string}
  */
 const generateToken = (userId, expires, type, jti = "n/a", userAgent = "n/a", notValidBefore = 0, secret = config.jwt.secret) => {
-  const now = moment().unix();
-  const payload = {
-    sub: userId,
-    iat: now,
-    exp: expires.unix(),
-	jti,
-	ua: userAgent,
-    type,
-  };
-  return jwt.sign(payload, secret, { notBefore: notValidBefore });
+	try {
+		const now = moment().unix();
+		const payload = {
+			sub: userId,
+			iat: now,
+			exp: expires.unix(),
+			jti,
+			ua: userAgent,
+			type,
+		};
+		return jwt.sign(payload, secret, { notBefore: notValidBefore });
+
+	} catch (error) {
+		error.description || (error.description = "Token Generation failed in TokenService");
+		throw error;
+	}
 };
 
 
@@ -61,16 +67,16 @@ const verifyToken = async (token, type) => {
 		const tokenDoc = await tokenDbService.getToken({ token, type, user: payload.sub });
 
 		if (!tokenDoc)
-			throw new Error(`${type} token is not valid`);
+			throw new ApiError(httpStatus.UNAUTHORIZED, `${type} token is not valid`);
 
+		return tokenDoc;
+		
 		// verifyToken method is used only by auth.service (logout, signout, verifyEmail, resetPassword)
 		// No matter the token is blacklisted; signout and logout will be carried out, 
 		// and the user's whole tokens or family refresh tokens will be removed from db.
 		// Also, verify-email and reset-password tokens are not blacklisted, logically. (only expires) 
 		// For this reason, no need to throw an error or delete any token(s) here, if the result token is blacklisted.
 
-		return tokenDoc;
-		
 	} catch (error) {
 
 		// Even if some verification errors occurs for refresh token, it is okey here,
@@ -81,13 +87,16 @@ const verifyToken = async (token, type) => {
 			const payload = jwt.decode(token, config.jwt.secret);
 			const tokenDoc = await tokenDbService.getToken({ token, type, user: payload.sub });
 
-			if (!tokenDoc) 
+			if (!tokenDoc) {
+				error.description || (error.description = "Token Verification failed in TokenService");
 				throw new ApiError(httpStatus.UNAUTHORIZED, `${type} token is not valid`);
-
+			}
+				
 			return tokenDoc;
 			
 		} else {
-			throw new ApiError(httpStatus.UNAUTHORIZED, error);
+			error.description || (error.description = "Token Verification failed in TokenService");
+			throw error;
 		}
 	}
 };
@@ -174,7 +183,8 @@ const verifyToken = async (token, type) => {
 			throw new ApiError(httpStatus.UNAUTHORIZED, `The refresh token is expired. You have to re-login to get authentication.`);
 
 		} else {
-			throw new ApiError(httpStatus.UNAUTHORIZED, error);
+			error.description || (error.description = "Refresh Token Rotation failed in TokenService");
+			throw error;
 		}
 	}
 };
@@ -230,6 +240,7 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 		}
 
 	} catch (error) {
+		error.description || (error.description = "Refresh Token family disable action failed in TokenService");
 		throw error;
 	}
 }
@@ -243,24 +254,29 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
  * @returns {Promise<Object>}
  */
 const generateAuthTokens = async (userId, userAgent, family) => {
+	try {
+		// we will give the same jti to both (access & refresh) to make connection between
+		const jti = crypto.randomBytes(16).toString('hex');
 
-  // we will give the same jti to both (access & refresh) to make connection between
-  const jti = crypto.randomBytes(16).toString('hex');
+		const { accessToken, accessTokenExpires } = generateAccessToken(userId, userAgent, jti);
 
-  const { accessToken, accessTokenExpires } = generateAccessToken(userId, userAgent, jti);
+		const { refreshToken, refreshTokenExpires } = await generateRefreshToken(userId, userAgent, jti, family);
 
-  const { refreshToken, refreshTokenExpires } = await generateRefreshToken(userId, userAgent, jti, family);
+		return {
+			access: {
+			token: accessToken,
+			expires: accessTokenExpires.toDate(),
+			},
+			refresh: {
+			token: refreshToken,
+			expires: refreshTokenExpires.toDate(),
+			},
+		};
 
-  return {
-    access: {
-      token: accessToken,
-      expires: accessTokenExpires.toDate(),
-    },
-    refresh: {
-      token: refreshToken,
-      expires: refreshTokenExpires.toDate(),
-    },
-  };
+	} catch (error) {
+		error.description || (error.description = "Generate Auth Tokens failed in TokenService");
+		throw error;
+	}
 };
 
 
@@ -270,15 +286,21 @@ const generateAuthTokens = async (userId, userAgent, family) => {
  * @returns {Promise<Object>}
  */
 const generateAccessToken = (userId, userAgent, jti) => {
-	const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
-  	const accessToken = generateToken(
-		userId, 
-		accessTokenExpires, 
-		tokenTypes.ACCESS, 
-		jti, 
-		userAgent
-	);
-	return { accessToken, accessTokenExpires };
+	try {
+		const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
+		const accessToken = generateToken(
+			userId, 
+			accessTokenExpires, 
+			tokenTypes.ACCESS, 
+			jti, 
+			userAgent
+		);
+		return { accessToken, accessTokenExpires };
+
+	} catch (error) {
+		error.description || (error.description = "Generate Access Token failed in TokenService");
+		throw error;
+	}
 }
 
 
@@ -288,28 +310,34 @@ const generateAccessToken = (userId, userAgent, jti) => {
  * @returns {Promise<Object>}
  */
 const generateRefreshToken = async (userId, userAgent, jti, family) => {
-	const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
-	const refreshToken = generateToken(
-		userId, 
-		refreshTokenExpires, 
-		tokenTypes.REFRESH, 
-		jti, 
-		userAgent, 
-		config.jwt.accessExpirationMinutes * 60,  // not valid before is 60
-	);
+	try {
+		const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
+		const refreshToken = generateToken(
+			userId, 
+			refreshTokenExpires, 
+			tokenTypes.REFRESH, 
+			jti, 
+			userAgent, 
+			config.jwt.accessExpirationMinutes * 60,  // not valid before is 60
+		);
 
-	const tokenDoc = new Token(
-		refreshToken,
-		userId,
-		refreshTokenExpires.toDate(),
-		tokenTypes.REFRESH,
-		jti,
-		(family ?? `${userId}-${jti}`)
-	  );
-	
-	await tokenDbService.addToken(tokenDoc);
+		const tokenDoc = new Token(
+			refreshToken,
+			userId,
+			refreshTokenExpires.toDate(),
+			tokenTypes.REFRESH,
+			jti,
+			(family ?? `${userId}-${jti}`)
+		);
+		
+		await tokenDbService.addToken(tokenDoc);
 
-	return { refreshToken, refreshTokenExpires };
+		return { refreshToken, refreshTokenExpires };
+
+	} catch (error) {
+		error.description || (error.description = "Generate Refresh Token failed in TokenService");
+		throw error;
+	}
 }
 
 
@@ -319,20 +347,25 @@ const generateRefreshToken = async (userId, userAgent, jti, family) => {
  * @returns {Promise<string>}
  */
 const generateResetPasswordToken = async (userId) => {
+	try {
+		const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
+		const resetPasswordToken = generateToken(userId, expires, tokenTypes.RESET_PASSWORD);
 
-  const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
-  const resetPasswordToken = generateToken(userId, expires, tokenTypes.RESET_PASSWORD);
+		const tokenDoc = new Token(
+			resetPasswordToken,
+			userId,
+			expires.toDate(),
+			tokenTypes.RESET_PASSWORD
+		);
 
-  const tokenDoc = new Token(
-	resetPasswordToken,
-	userId,
-	expires.toDate(),
-	tokenTypes.RESET_PASSWORD
-  );
+		await tokenDbService.addToken(tokenDoc);
+		
+		return resetPasswordToken;
 
-  await tokenDbService.addToken(tokenDoc);
-  
-  return resetPasswordToken;
+	} catch (error) {
+		error.description || (error.description = "Generate Reset Password Token failed in TokenService");
+		throw error;
+	}
 };
 
 
@@ -342,35 +375,51 @@ const generateResetPasswordToken = async (userId) => {
  * @returns {Promise<string>}
  */
 const generateVerifyEmailToken = async (userId) => {
+	try {
+		const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
+		const verifyEmailToken = generateToken(userId, expires, tokenTypes.VERIFY_EMAIL);
 
-  const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
-  const verifyEmailToken = generateToken(userId, expires, tokenTypes.VERIFY_EMAIL);
+		const tokenDoc = new Token(
+			verifyEmailToken,
+			userId,
+			expires.toDate(),
+			tokenTypes.VERIFY_EMAIL
+		);
 
-  const tokenDoc = new Token(
-	verifyEmailToken,
-	userId,
-	expires.toDate(),
-	tokenTypes.VERIFY_EMAIL
-  );
+		await tokenDbService.addToken(tokenDoc);
 
-  await tokenDbService.addToken(tokenDoc);
+		return verifyEmailToken;
 
-  return verifyEmailToken;
+	} catch (error) {
+		error.description || (error.description = "Generate Verify Email Token failed in TokenService");
+		throw error;
+	}
 };
 
 
 const removeToken = async (id) => {
-	const {isDeleted, deletedCount} = await tokenDbService.deleteToken(id);
+	try {
+		const {isDeleted, deletedCount} = await tokenDbService.deleteToken(id);
 
-	isDeleted ? console.log(`${deletedCount} token deleted.`) 
-			  : console.log("No token is deleted.");
+		isDeleted ? console.log(`${deletedCount} token deleted.`) 
+				: console.log("No token is deleted.");
+
+	} catch (error) {
+		error.description || (error.description = "Remove Token failed in TokenService");
+		throw error;
+	}
 }
 
 const removeTokens = async (query) => {
-	const {isDeleted, deletedCount} = await tokenDbService.deleteTokens(query);
+	try {
+		const {isDeleted, deletedCount} = await tokenDbService.deleteTokens(query);
 	
-	isDeleted ? console.log(`${deletedCount} token(s) deleted.`) 
-			  : console.log("No token is deleted.");
+		isDeleted ? console.log(`${deletedCount} token(s) deleted.`) 
+				: console.log("No token is deleted.");
+	} catch (error) {
+		error.description || (error.description = "Remove Tokens failed in TokenService");
+		throw error;
+	}
 }
 
 

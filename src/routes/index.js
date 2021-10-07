@@ -33,6 +33,7 @@ router.get('/list', asyncHandler( async (req, res) => {
 			res.status(httpStatus.OK).json("OK");
 		
 	} catch (error) {
+		error.description || (error.description = "Database operation [list collections] failed in response");
 		throw error;
 	}
 }));
@@ -66,6 +67,7 @@ router.get('/console', (req, res) => {
 		res.status(httpStatus.OK).json("OK");
 
 	} catch (error) {
+		error.description || (error.description = "Database operation [list collections] failed in console");
 		throw error;
 	}
 });
@@ -90,6 +92,9 @@ router.get('/status', asyncHandler( async (req, res) => {
 		
 	} catch (error) {
 		res.json({ mongoStatus: "DOWN", redisStatus });
+
+		error.description || (error.description = "Checking status of MongoDb and Redis servers failed");
+		console.log(error);
 		// throw error;
 	}
 }));

@@ -77,6 +77,7 @@ const isPair_EmailAndId = async function (id, email) {
 		await authuserDbService.updateAuthUser(id, {isDisabled: !authuser.isDisabled});
   
 	} catch (error) {
+		error.description || (error.description = "Toggle Ability failed in AuthUserService");
 	  	throw error;
 	}
 };
@@ -96,6 +97,7 @@ const isPair_EmailAndId = async function (id, email) {
     	await authuserDbService.updateAuthUser(authuser.id, { password });
 
 	} catch (error) {
+		error.description || (error.description = "Change Password failed in AuthUserService");
 		throw error;
 	}
 };
@@ -115,6 +117,7 @@ const isPair_EmailAndId = async function (id, email) {
 		return await paginaryService.paginary(query, queryFields, booleanFields, authuserDbService.getAuthUsers);
   
 	} catch (error) {
+		error.description || (error.description = "Get AuthUsers in paginary failed in AuthUserService");
 	  	throw error;
 	}
 };
@@ -136,6 +139,7 @@ const isPair_EmailAndId = async function (id, email) {
 		// TODO: delete user data or do it via another request
   
 	} catch (error) {
+		error.description || (error.description = "Delete AuthUser failed in AuthUserService");
 	  	throw error;
 	}
 };
@@ -158,6 +162,7 @@ const isPair_EmailAndId = async function (id, email) {
 		return authuser;
   
 	} catch (error) {
+		error.description || (error.description = "Get AuthUser by email failed in AuthUserService");
 	  	throw error;
 	}
 };
@@ -178,6 +183,7 @@ const isPair_EmailAndId = async function (id, email) {
 		return authuser;
   
 	} catch (error) {
+		error.description || (error.description = "Get AuthUser by id failed in AuthUserService");
 	  	throw error;
 	}
 };
@@ -197,6 +203,7 @@ const isPair_EmailAndId = async function (id, email) {
 		return authuser;
   
 	} catch (error) {
+		error.description || (error.description = "Get deleted AuthUser by id failed in AuthUserService");
 	  	throw error;
 	}
 };

@@ -41,6 +41,7 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(response.body.code).toEqual(422);
 			expect(response.body.name).toEqual("ValidationError");
 			expect(response.body.message).toEqual("The request could not be validated");
+			expect(response.body).not.toHaveProperty("description");
 			expect(Object.keys(response.body.errors).length).toBe(1);
 			expect(response.body.errors.refreshToken).toEqual(["refresh token must not be empty"]); 
 		});
@@ -66,6 +67,15 @@ describe('POST /auth/refresh-tokens', () => {
 			refreshToken = tokens.refresh.token;
 		});
 
+		function commonExpectations(response, status) {
+			expect(response.status).toBe(status);
+			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
+			expect(response.body.code).toEqual(status);
+			expect(response.body).toHaveProperty("name");
+			expect(response.body).toHaveProperty("description");
+			expect(response.body).not.toHaveProperty("errors");
+		}
+
 
 		test('should return 401 if refresh token is not in the db', async () => {
 
@@ -73,11 +83,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken: testData.REFRESH_TOKEN_VALID });
 
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
+			commonExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.message).toEqual("refresh token is not valid");
-			expect(response.body.errors).toBeUndefined();
 		});
 
 		
@@ -113,11 +120,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
 
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
+			commonExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.message).toEqual("Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication.");
-			expect(response.body.errors).toBeUndefined();
 
 			// check the whole refresh token's family are in db // up to now, 3 refresh tokens are added
 			const data = await tokenDbService.getTokens({ family: refrehTokenDoc.family });
@@ -170,11 +174,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
 
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
+			commonExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.message).toEqual("Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication.");
-			expect(response.body.errors).toBeUndefined();
 
 			// check the whole refresh token's family are removed from db // up to now, 3 refresh tokens are added
 			const data = await tokenDbService.getTokens({ family: refrehTokenDoc.family });
@@ -205,11 +206,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
 
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
+			commonExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.message).toEqual("The refresh token is expired. You have to re-login to get authentication.");
-			expect(response.body.errors).toBeUndefined();
 		});
 
 
@@ -220,11 +218,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.set('User-Agent', userAgent)
 												.send({ refreshToken });
 
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
+			commonExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.message).toEqual("Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication.");
-			expect(response.body.errors).toBeUndefined();
 
 			// no need to check family is removed or blacklisted here since this control is handled in the above tests
 			// (means that disableFamilyRefreshToken in Token Service is tested, it is fine.)
@@ -262,17 +257,24 @@ describe('POST /auth/refresh-tokens', () => {
 			});
 		});
 
+		function commonExpectations(response, status) {
+			expect(response.status).toBe(status);
+			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
+			expect(response.body.code).toEqual(status);
+			expect(response.body).toHaveProperty("name");
+			expect(response.body).toHaveProperty("description");
+			expect(response.body).not.toHaveProperty("errors");
+		}
+
+
 		test('should return 401 if userAgent of refresh token is different from request userAgent', async () => {
 			
 			const response = await request(app).post('/auth/refresh-tokens')
 												.set('User-Agent', "something-different-userAgent") 
 												.send({ refreshToken });
 
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
+			commonExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.message).toEqual("Your browser/agent seems changed or updated, you have to re-login to get authentication.");
-			expect(response.body.errors).toBeUndefined();
 		});
 
 
@@ -285,11 +287,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
 
-			expect(response.status).toBe(httpStatus.NOT_FOUND);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(404);
+			commonExpectations(response, httpStatus.NOT_FOUND);
 			expect(response.body.message).toEqual("No user found");
-			expect(response.body.errors).toBeUndefined();
 		});
 
 
@@ -301,11 +300,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
 
-			expect(response.status).toBe(httpStatus.FORBIDDEN);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(403);
+			commonExpectations(response, httpStatus.FORBIDDEN);
 			expect(response.body.message).toEqual("You are disabled. Call the system administrator.");
-			expect(response.body.errors).toBeUndefined();
 		});
 	});
 
@@ -343,6 +339,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			expect(response.status).toBe(httpStatus.OK);
+			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
+			
 			expect(response.body).toEqual({
 					"access": {
 					  "token": expect.any(String),

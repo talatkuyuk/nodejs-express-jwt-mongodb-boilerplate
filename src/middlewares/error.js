@@ -6,38 +6,47 @@ const ApiError = require('../utils/ApiError');
 
 // Convert errors to ApiError if it is not
 const errorConverter = (err, req, res, next) => {
-    let error = err, statusCode;
-    if (!(error instanceof ApiError)) {
 
-      statusCode = error.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
-      if (error instanceof MongoError) statusCode = httpStatus.BAD_REQUEST; //TODO 
-      
-      const message = error.message || httpStatus[statusCode];
-      
-      error = new ApiError(statusCode, message, null, false, err.stack);
+    if (!(err instanceof ApiError)) {
+      let statusCode, description;
+
+      if (err instanceof MongoError) {
+          statusCode = httpStatus.BAD_REQUEST;
+          description = err.description ?? "Database error in MongoDB";
+
+      } else {
+          statusCode = httpStatus.INTERNAL_SERVER_ERROR;
+          description = err.description ?? "internal error";
+      }
+
+      const convertedError = new ApiError(statusCode, err, description, null, false, err.stack);
+      next(convertedError);
     }
-    next(error);
+    
+    next(err);
 };
   
 
   // eslint-disable-next-line no-unused-vars
   const errorHandler = (err, req, res, next) => {
-
-    let { name, statusCode, message, errors, stack } = err;
+    let { name, statusCode, message, description, errors, stack } = err;
 
     if (config.env === 'production' && !err.isOperational) {
       statusCode = httpStatus.INTERNAL_SERVER_ERROR;
       message = httpStatus[httpStatus.INTERNAL_SERVER_ERROR];
+      description = null;
     }
   
-	// morgan handler uses the errorMessage in res.locals to tokenize
-    res.locals.errorMessage = message;
+	  // morgan handler uses the error in res.locals to tokenize
+    res.locals.error = `${name}: ${message}`;
+
   
     const response = {
       code: statusCode,
       name,
       message,
-	    ...(errors && { errors }), // { errors: errors }
+      ...(description && { description }),
+	    ...(errors && { errors }),
       ...(config.env === 'development' && { stack }) // { stack: stack }
     };
   

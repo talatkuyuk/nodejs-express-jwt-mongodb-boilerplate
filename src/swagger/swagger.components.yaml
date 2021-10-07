@@ -153,9 +153,11 @@ components:
         email:
           type: string
           format: email
+          description: the email that the reset password link is going to be sent
         callbackURL:
           type: string
           format: url
+          description: the url that the be visited for the form reset password in frontend app
       example:
         email: talatkuyuk@gmail.com
         callbackURL: http://localhost:5500/reset-password
@@ -188,10 +190,16 @@ components:
       properties:
         code:
           type: number
+          description: The status code of the response
         name:
           type: string
+          description: The error name
         message:
           type: string
+          description: The error message
+        description:
+          type: string
+          description: The service name that the error occured, only in development environment
 
 
     # VALIDATION ERROR
@@ -209,7 +217,7 @@ components:
           value: "The request could not be validated"
         errors:
           type: object
-          description: The object keys refer to any property name in the requestbody (email, password, passwordConfirmation, refresToken etc.), with the value which is an array of string that refers to specific error message for that property
+          description: "{ key1: string[], key2: string[], ... } The keys refer to a property name validation failed in the requestbody (email, password etc.), having value which is an array of string that refers to specific error message for that property"
 
 
 
@@ -283,7 +291,7 @@ components:
             code: 401
             name: "ApiError"
             message: "one of the error messages appears here"
-
+            description: "the service name where the error occured"
 
     AuthMiddlewareUnauthorizedErrors:
       description: | 
@@ -310,11 +318,13 @@ components:
                 code: 401
                 name: "TokenError"
                 message: "One of the token errors appears here"
+                description: "the service name where the error occured"
             ApiError:
               value:
                 code: 401
                 name: "ApiError"
                 message: "One of the api errors appears here"
+                description: "the service name where the error occured"
 
 
     AuthMiddlewareForbiddenErrors:
@@ -334,6 +344,7 @@ components:
             code: 403
             name: "ApiError"
             message: "One of the api errors appears here"
+            description: "the service name where the error occured"
 
 
     AuthMiddlewareForbiddenErrorsWithoutRightCheck:
@@ -351,6 +362,7 @@ components:
             code: 403
             name: "ApiError"
             message: "One of the api errors appears here"
+            description: "the service name where the error occured"
 
 
     RefreshTokenValidationError:
@@ -385,6 +397,7 @@ components:
             code: 401
             name: "ApiError"
             message: "one of the error messages appears here"
+            description: "the service name where the error occured"
 
     
     VerifyTokenUnauthorizedErrors:
@@ -410,11 +423,13 @@ components:
                 code: 401
                 name: "TokenError"
                 message: "One of the token errors appears here"
+                description: "the service name where the error occured"
             ApiError:
               value:
                 code: 401
                 name: "ApiError"
                 message: "refresh|resetPassword|verifyEmail token is not valid"
+                description: "the service name where the error occured"
 
 
     ForgotPasswordValidationErrors:
@@ -490,6 +505,7 @@ components:
             code: 403
             name: "ApiError"
             message: "You are disabled, call the system administrator"
+            description: "the service name where the error occured"
 
 
     ParamIdValidationError:
@@ -569,6 +585,7 @@ components:
             code: 404
             name: ApiError
             message: No user found
+            description: "the service name where the error occured"
 
 
     InternalServerError:
@@ -581,6 +598,7 @@ components:
             code: 500
             name: ApiError
             message: Internal Server Error
+            description: "the service name where the error occured"
 
 
     Unauthorized:
@@ -593,6 +611,7 @@ components:
             code: 401
             name: ApiError
             message: Unauthorized
+            description: "the service name where the error occured"
           
     Forbidden:
       description: FORBIDDEN
@@ -604,6 +623,7 @@ components:
             code: 403
             name: ApiError
             message: Forbidden
+            description: "the service name where the error occured"
 
 
 
