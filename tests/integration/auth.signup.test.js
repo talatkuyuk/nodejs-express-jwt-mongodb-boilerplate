@@ -4,9 +4,10 @@ const moment = require('moment');
 const jwt = require('jsonwebtoken');
 
 const app = require('../../src/core/express');
-const { authuserDbService, tokenDbService } = require('../../src/services');
-const { AuthUser, Token } = require('../../src/models');
 const config = require('../../src/config');
+
+const { authuserDbService, tokenDbService } = require('../../src/services');
+const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');

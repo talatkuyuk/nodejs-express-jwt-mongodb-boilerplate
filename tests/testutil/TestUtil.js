@@ -1,4 +1,5 @@
 const {serializeError} = require('serialize-error');
+
 const ApiError = require('../../src/utils/ApiError');
 
 class TestUtil {
