@@ -10,12 +10,19 @@ const oAuth = (service) => (req, res, next) => passport.authenticate(
 	service, 
 	{ session: false },
 	function(err, user, info) {
-		if (err) { return next(err); }
+		if (err) {
+			err.description || (err.description = "Process [err] failed in oAuth middleware");
+			return next(err); 
+		}
 
 		//passport-authentication error
-        if (!user) { return  next(new Error('Invalid-Formed Bearer Token. ' + (info ?? ""))); }
+        if (!user) {
+			const err = new Error('Invalid-Formed Bearer Token. ' + (info ?? ""));
+			err.description || (err.description = "Process [user] failed in oAuth middleware");
+			return  next(err); 
+		}
         
-		next()
+		next();
 	}
 )(req, res, next);
 
@@ -39,6 +46,7 @@ const google_oAuth = async (req, res, next) => {
 		next();
 	
 	} catch (error) {
+		error.description || (error.description = "Google Login with oAuth failed in middleware");
 		next(error);
 	}
 }
@@ -60,6 +68,7 @@ const facebook_oAuth = async (req, res, next) => {
 		next();
 	
 	} catch (error) {
+		error.description || (error.description = "Facebook Login with oAuth failed in middleware");
 		next(error);
 	}
 }

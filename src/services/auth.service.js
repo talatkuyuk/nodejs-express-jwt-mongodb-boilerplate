@@ -33,6 +33,7 @@ const signupWithEmailAndPassword = async (email, password) => {
 		return await authuserDbService.addAuthUser(authuserx);
 
 	} catch (error) {
+		error.description || (error.description = "Signup with Email-Password failed in AuthService");
 		throw error;
 	}
 }
@@ -46,22 +47,27 @@ const signupWithEmailAndPassword = async (email, password) => {
  * @returns {Promise<AuthUser>}
  */
 const loginWithEmailAndPassword = async (email, password) => {
+	try {
+		const authuser = await authuserDbService.getAuthUser({ email });
 
-	const authuser = await authuserDbService.getAuthUser({ email });
+		if (!authuser) {
+			throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not registered user');
+		}
 
-	if (!authuser) {
-		throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not registered user');
+		if (authuser.isDisabled) {
+			throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
+		}
+
+		if (!(await authuser.isPasswordMatch(password))) {
+			throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+		}
+
+		return authuser;
+
+	} catch (error) {
+		error.description || (error.description = "Login with Email-Password failed in AuthService");
+		throw error;
 	}
-
-	if (authuser.isDisabled) {
-		throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
-	}
-
-	if (!(await authuser.isPasswordMatch(password))) {
-		throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
-	}
-
-	return authuser;
 };
 
 
@@ -74,26 +80,31 @@ const loginWithEmailAndPassword = async (email, password) => {
  * @returns {Promise<AuthUser>}
  */
 const loginWith_oAuth = async (service, id, email) => {
+	try {
+		let authuser = await authuserDbService.get_oAuthUser(service, id, email);
 
-	let authuser = await authuserDbService.get_oAuthUser(service, id, email);
+		if (authuser?.isDisabled) {
+			throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
+		}
 
-	if (authuser?.isDisabled) {
-		throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
+		if (authuser) return authuser;
+		
+		// new user
+		const authuserx = new AuthUser(email);
+		authuserx.isEmailVerified = true;
+		authuserx.services = { 
+			emailpassword: "not registered", 
+			[`${service}`]: id   // { google: 46598364598354983 }
+		};
+
+		authuser = await authuserDbService.addAuthUser(authuserx);
+
+		return authuser;
+		
+	} catch (error) {
+		error.description || (error.description = "Login with oAuth failed in AuthService");
+		throw error;
 	}
-
-    if (authuser) return authuser;
-    
-	// new user
-	const authuserx = new AuthUser(email);
-	authuserx.isEmailVerified = true;
-	authuserx.services = { 
-		emailpassword: "not registered", 
-		[`${service}`]: id   // { google: 46598364598354983 }
-	};
-
-	authuser = await authuserDbService.addAuthUser(authuserx);
-
-	return authuser;
 };
 
 
@@ -133,6 +144,7 @@ const logout = async (authuser, accessToken, refreshToken) => {
 		}
 		
 	} catch (error) {
+		error.description || (error.description = "Logout failed in AuthService");
 		throw error;
 	}
 };
@@ -182,6 +194,7 @@ const logout = async (authuser, accessToken, refreshToken) => {
 		// TODO: delete user data or do it via another request
 		
 	} catch (error) {
+		error.description || (error.description = "Signout failed in AuthService");
 		throw error;
 	}
 };
@@ -208,10 +221,8 @@ const refreshAuth = async (refreshToken, userAgent) => {
 	return { authuser, refreshTokenFamily: refreshTokenDoc.family };
 
   } catch (error) {
-	if (error instanceof ApiError)
-		throw error
-	else
-		throw new ApiError(httpStatus.UNAUTHORIZED, error); // Refresh tokens failed.
+	error.description || (error.description = "Refresh Auth Tokens failed in AuthService");
+	throw error;
   }
 };
 
@@ -242,10 +253,8 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
 	return authuser;
 
   } catch (error) {
-    if (error instanceof ApiError)
-	  		throw error
-		else
-			throw new ApiError(httpStatus.UNAUTHORIZED, error); // Reset password failed.
+    error.description || (error.description = "Reset Password failed in AuthService");
+	throw error;
   }
 };
 
@@ -269,10 +278,8 @@ const verifyEmail = async (verifyEmailToken) => {
 	return authuser;
 
   } catch (error) {
-		if (error instanceof ApiError)
-	  		throw error
-		else
-			throw new ApiError(httpStatus.UNAUTHORIZED, error); // Email verification failed.
+	error.description || (error.description = "Email Verification failed in AuthService");
+	throw error;
   }
 };
 

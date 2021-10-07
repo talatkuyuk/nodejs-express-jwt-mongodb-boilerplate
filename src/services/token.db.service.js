@@ -20,6 +20,7 @@ const addToken = async (tokenDoc) => {
 		console.log(`${result.insertedCount} record is created in tokens.`);
 		
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in TokenDbService [addToken]");
 		throw error;
 	}
 };
@@ -45,6 +46,7 @@ const getToken = async (query) => {
 		return tokenDoc;
 
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in TokenDbService [getToken]");
 		throw error;
 	}	
 }
@@ -68,6 +70,7 @@ const getTokens = async (query) => {
 		return tokens;
 
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in TokenDbService [getTokens]");
 		throw error;
 	}	
 }
@@ -98,7 +101,8 @@ const updateToken = async (id, updateBody) => {
 		return token;
 		
 	} catch (error) {
-	   throw error
+		error.description || (error.description = "Database Operation failed in TokenDbService [updateToken]");
+	   	throw error;
 	}
 };
 
@@ -119,6 +123,7 @@ const deleteToken = async (id) => {
 		return {isDeleted: result.result.ok === 1, deletedCount: result.deletedCount };
 		
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in TokenDbService [deleteToken]");
 		throw error;
 	}
 }
@@ -142,6 +147,7 @@ const deleteTokens = async (query) => {
 		return {isDeleted: result.result.ok === 1, deletedCount: result.deletedCount };
 		
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in TokenDbService [deleteTokens]");
 		throw error;
 	}
 }

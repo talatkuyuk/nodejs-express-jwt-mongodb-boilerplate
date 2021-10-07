@@ -60,6 +60,7 @@ describe('POST /auth/signout', () => {
 			expect(response.body.code).toEqual(422);
 			expect(response.body.name).toEqual("ValidationError");
 			expect(response.body.message).toEqual("The request could not be validated");
+			expect(response.body).not.toHaveProperty("description");
 			expect(Object.keys(response.body.errors).length).toBe(1);
 			expect(response.body.errors.refreshToken).toEqual(["refresh token must not be empty"]); 
 		});
@@ -67,7 +68,7 @@ describe('POST /auth/signout', () => {
 
 
 
-	describe('Failed Logouts', () => {
+	describe('Failed signout', () => {
 
 		test('should return 401 if the user use own access token but use the refresh token that is not own', async () => {
 
@@ -88,8 +89,10 @@ describe('POST /auth/signout', () => {
 			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.body.code).toEqual(401);
+			expect(response.body).toHaveProperty("name");
 			expect(response.body.message).toEqual("Tokens could not be matched, please re-authenticate to signout from system");
-			expect(response.body.errors).toBeUndefined();
+			expect(response.body).toHaveProperty("description");
+			expect(response.body).not.toHaveProperty("errors");
 
 			// check the access token of both authuser and otheruser are in the blacklist
 			const redisClient = getRedisClient();

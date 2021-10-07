@@ -19,6 +19,7 @@ const jwtVerify = async (payload, done) => {
 		done(null, {authuser, payload});
 
 	} catch (error) {
+		error.description || (error.description = "JWT verification failed in Passport");
 		done(error);
 	}
 };
@@ -34,8 +35,9 @@ const oAuthVerify = (service) => async (req, token, done) => {
 	  
 	  return done(null, oAuth.user);
 
-	} catch (err) {
-	  return done(err);
+	} catch (error) {
+		error.description || (error.description = "oAuth verification failed in Passport");
+	  	return done(error);
 	}
 };
 

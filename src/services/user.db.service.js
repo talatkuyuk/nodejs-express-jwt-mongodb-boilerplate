@@ -18,6 +18,7 @@ const { User } = require('../models');
 		return !!user;
 
 	 } catch (error) {
+		error.description || (error.description = "Database Operation failed in UserDbService [isValidUser]");
 		throw error;
 	 }
 };
@@ -54,6 +55,7 @@ const { User } = require('../models');
 			return null;
 		
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in UserDbService [addUser]");
 		throw error;
 	}
 };
@@ -74,7 +76,8 @@ const { User } = require('../models');
 		return User.fromDoc(doc);
 		
 	} catch (error) {
-		throw error
+		error.description || (error.description = "Database Operation failed in UserDbService [getUser]");
+		throw error;
 	}
 };
 
@@ -125,6 +128,7 @@ const { User } = require('../models');
 	   return await db.collection("users").aggregate(pipeline).toArray();
 		
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in UserDbService [getUsers]");
 		throw error;
 	}
 };
@@ -193,6 +197,7 @@ const { User } = require('../models');
 		return await db.collection("authusers").aggregate(pipeline).toArray();
 		 
 	 } catch (error) {
+		error.description || (error.description = "Database Operation failed in UserDbService [getUsersJoined]");
 		 throw error;
 	 }
 };
@@ -224,7 +229,8 @@ const { User } = require('../models');
 		 return user;
 		 
 	 } catch (error) {
-		throw error
+		error.description || (error.description = "Database Operation failed in UserDbService [updateUser]");
+		throw error;
 	 }
 
 };
@@ -257,6 +263,7 @@ const { User } = require('../models');
 		}
 
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in UserDbService [deleteUser]");
 		throw error;
 	}
 };
@@ -281,6 +288,7 @@ const { User } = require('../models');
 		console.log(`${result.insertedCount} record is created in deletedusers.`)
 		
 	} catch (error) {
+		error.description || (error.description = "Database Operation failed in UserDbService [toDeletedUsers]");
 		throw error;
 	}
 };

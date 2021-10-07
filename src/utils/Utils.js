@@ -7,13 +7,19 @@ class Utils {
 	 * @returns {Object}
 	 */
 	static pick (object, keys) {
-		if (!keys) return {};
-		return keys.reduce((obj, key) => {
-			if (object && Object.prototype.hasOwnProperty.call(object, key)) {
-				obj[key] = object[key];
-			}
-			return obj;
-		}, {});
+		try {
+			if (!keys) return {};
+			return keys.reduce((obj, key) => {
+				if (object && Object.prototype.hasOwnProperty.call(object, key)) {
+					obj[key] = object[key];
+				}
+				return obj;
+			}, {});
+
+		} catch (error) {
+			error.description || (error.description = "Utility [pick] failed");
+			throw error;
+		}
 	};
 
 	/**
@@ -22,27 +28,32 @@ class Utils {
 	 * @returns {Object}
 	 */
 	 static pickSort (querySort) {
-		
-		const obj = {};
+		try {
+			const obj = {};
 
-		// if it is array
-		if (typeof(querySort) === "object") {
-			querySort.map( item => {
-				const [sort, by] = item.split(".");
+			// if it is array
+			if (typeof(querySort) === "object") {
+				querySort.map( item => {
+					const [sort, by] = item.split(".");
+					obj[sort] = by?.toLowerCase() === "desc" ? -1 : 1;
+				});
+			}
+
+			// if it is string
+			else if (typeof(querySort) === "string") {
+				const [sort, by] = querySort.split(".");
 				obj[sort] = by?.toLowerCase() === "desc" ? -1 : 1;
-			});
-		}
+			}
 
-		// if it is string
-		else if (typeof(querySort) === "string") {
-			const [sort, by] = querySort.split(".");
-			obj[sort] = by?.toLowerCase() === "desc" ? -1 : 1;
-		}
+			// add default sorting field
+			obj["createdAt"] = -1 ;
+			
+			return obj;
 
-		// add default sorting field
-		obj["createdAt"] = -1 ;
-		
-		return obj;
+		} catch (error) {
+			error.description || (error.description = "Utility [pickSort] failed");
+			throw error;
+		}
 	};
 
 	/**
@@ -52,19 +63,25 @@ class Utils {
 	 * @returns {Object}
 	 */
 	static parseBooleans (object, keys) {
-		keys.forEach( key => {
-			if (object.hasOwnProperty(key)) {
-				if (typeof object[key] === "string")
-					object[key] = object[key].toLowerCase();
+		try {
+			keys.forEach( key => {
+				if (object.hasOwnProperty(key)) {
+					if (typeof object[key] === "string")
+						object[key] = object[key].toLowerCase();
 
-				if (['true', 'false', true, false].includes(object[key]))
-					object[key] =  JSON.parse(object[key]);
-				else
-					delete object[key];
-			}
-			 
-		});
-		return object;
+					if (['true', 'false', true, false].includes(object[key]))
+						object[key] =  JSON.parse(object[key]);
+					else
+						delete object[key];
+				}
+				
+			});
+			return object;
+
+		} catch (error) {
+			error.description || (error.description = "Utility [parseBooleans] failed");
+			throw error;
+		}
 	};
 
 	/**
@@ -74,9 +91,15 @@ class Utils {
 	 * @returns Array[string, string]
 	 */
 	static splitTwo (str, seperator) {
-		const [first, ...rest] = str.split(seperator);
-		const second = rest.join(' ');
-		return [first.trim(), second.trim()];
+		try {
+			const [first, ...rest] = str.split(seperator);
+			const second = rest.join(' ');
+			return [first.trim(), second.trim()];
+
+		} catch (error) {
+			error.description || (error.description = "Utility [splitTwo] failed");
+			throw error;
+		}
 	}
 
 

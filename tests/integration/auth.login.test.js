@@ -32,6 +32,7 @@ describe('POST /auth/login', () => {
 			expect(response.body.code).toEqual(422);
 			expect(response.body.name).toEqual("ValidationError");
 			expect(response.body.message).toEqual("The request could not be validated");
+			expect(response.body).not.toHaveProperty("description");
 		}
 
 	  	test('should return 422 Validation Error if email is empty or falsy value', async () => {
@@ -88,10 +89,13 @@ describe('POST /auth/login', () => {
 
 	describe('Failed logins', () => {
 
-		function commonExpectations(response) {
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+		function commonExpectations(response, status) {
+			expect(response.status).toBe(status);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
+			expect(response.body.code).toEqual(status);
+			expect(response.body).toHaveProperty("name");
+			expect(response.body).toHaveProperty("description");
+			expect(response.body).not.toHaveProperty("errors");
 		}
 		
 
@@ -101,7 +105,7 @@ describe('POST /auth/login', () => {
 				password: 'Pass1word.',
 			};
 			const response = await request(app).post('/auth/login').send(loginForm);
-			commonExpectations(response);
+			commonExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.message).toEqual("You are not registered user");
 		});
 
@@ -120,10 +124,9 @@ describe('POST /auth/login', () => {
 				password: 'Pass1word.',
 			};
 			const response = await request(app).post('/auth/login').send(loginForm);
-			expect(response.status).toBe(httpStatus.FORBIDDEN);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(403);
+			commonExpectations(response, httpStatus.FORBIDDEN);
 			expect(response.body.message).toEqual("You are disabled, call the system administrator");
+
 		});
 
 
@@ -140,7 +143,7 @@ describe('POST /auth/login', () => {
 				password: 'Pass1word',
 			};
 			const response = await request(app).post('/auth/login').send(loginForm);
-			commonExpectations(response);
+			commonExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.message).toEqual("Incorrect email or password");
 		});
 	});
@@ -169,10 +172,6 @@ describe('POST /auth/login', () => {
 
 			expect(response.status).toBe(httpStatus.OK);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-
-			expect(response.body).not.toHaveProperty("code");
-			expect(response.body).not.toHaveProperty("message");
-			expect(response.body).not.toHaveProperty("errors");
 
 			const accessToken = response.body.tokens.access.token;
 			const refreshToken = response.body.tokens.refresh.token;
