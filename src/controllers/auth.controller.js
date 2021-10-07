@@ -81,11 +81,10 @@ const refreshTokens = asyncHandler(async (req, res) => {
 
 const forgotPassword = asyncHandler(async (req, res) => {
 	const email = req.body.email;
-	const callbackURL = req.body.callbackURL;
 	
 	const authuser = await authuserService.getAuthUserByEmail(email);
 	const resetPasswordToken = await tokenService.generateResetPasswordToken(authuser.id);
-	await emailService.sendResetPasswordEmail(email, resetPasswordToken, callbackURL);
+	await emailService.sendResetPasswordEmail(email, resetPasswordToken);
 
 	req.user = authuser; // for morgan logger to tokenize it as user
 

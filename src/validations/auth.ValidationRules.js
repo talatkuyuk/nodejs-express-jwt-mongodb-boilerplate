@@ -48,6 +48,16 @@ const check_body_passwordConfirmation = [
 ];
 
 
+// just for archive in case need any url validation
+const check_body_url = [
+	body('url')
+		.notEmpty()
+		.withMessage('You have to set callback URL')
+		.isURL({require_tld: false}) // consider later on .isURL({ protocols: ['https'] })
+		.withMessage('The callback URL must be valid URL')
+];
+
+
 ////////////////////////////////////////////////////////////////////////
 
 
@@ -92,12 +102,6 @@ const refreshTokensValidationRules = [
 
 const forgotPasswordValidationRules = [
 	...check_body_email,
-
-	body('callbackURL')
-      .notEmpty()
-	  .withMessage('You have to set callback URL (callbackURL) for the further reset password page')
-	  .isURL({require_tld: false}) // for localhost // consider later on .isURL({ protocols: ['https'] })
-	  .withMessage('The callback URL must be valid URL')
 ];
 
 
