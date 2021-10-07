@@ -18,7 +18,7 @@
 //TODO: add description field to ApiError+
 //TODO: seperate authuserservice with authuser.db operations+
 //TODO: decide access and refresh token requirement during logout/login; and update services accordingly
-//TODO: email service add try catch
+//TODO: email service add try catch+
 //TODO: seperate db services from services+
 //TODO: add redis service
 //TODO: add pagination service+

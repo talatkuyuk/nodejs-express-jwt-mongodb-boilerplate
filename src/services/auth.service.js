@@ -284,6 +284,20 @@ const verifyEmail = async (verifyEmailToken) => {
 };
 
 
+/**
+ * Check if the authuser's email is already verified
+ * @param {boolean} isEmailVerified
+ * @returns {any}
+ */
+ const handleEmailIsAlreadyVerified = function (isEmailVerified) {
+	if (isEmailVerified) {
+		const error = new ApiError(httpStatus.BAD_REQUEST, "Email is already verified");
+		error.description || (error.description = "Email Is Already Verified happened in AuthService");
+		throw error;
+	}
+};
+
+
 
 module.exports = {
   signupWithEmailAndPassword,
@@ -294,4 +308,5 @@ module.exports = {
   refreshAuth,
   resetPassword,
   verifyEmail,
+  handleEmailIsAlreadyVerified,
 };
