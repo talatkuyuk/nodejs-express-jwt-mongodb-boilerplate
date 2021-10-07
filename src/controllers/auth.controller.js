@@ -1,8 +1,6 @@
 const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler')
 
-const ApiError = require('../utils/ApiError');
-
 // SERVICE DEPENDENCY
 const { 
 	authService,
@@ -110,17 +108,14 @@ const resetPassword = asyncHandler(async (req, res) => {
 
 
 const sendVerificationEmail = asyncHandler(async (req, res, next) => {
-	const authuser = req.user;
+	const { id, email, isEmailVerified } = req.user;
 
-	if (authuser[isEmailVerified]) {
-		throw new ApiError(httpStatus.BAD_REQUEST, "Email is already verified");
+	authService.handleEmailIsAlreadyVerified(isEmailVerified);
+	const verifyEmailToken = await tokenService.generateVerifyEmailToken(id);
+	await emailService.sendVerificationEmail(email, verifyEmailToken);
 
-	} else {
-		const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser.id);
-		emailService.sendVerificationEmail(authuser.email, verifyEmailToken)
-		.then(() => {res.status(httpStatus.NO_CONTENT).send()})
-		.catch((err) => {next(err)});
-	}
+	res.status(httpStatus.NO_CONTENT).send();
+
 });
 
 

@@ -7,7 +7,7 @@ const logger = require('../core/logger');
 
 const transporter = nodemailer.createTransport(config.email.smtp);
 
-/* istanbul ignore next */
+
 if (config.env !== 'test') {
   transporter
     .verify()
@@ -46,12 +46,18 @@ const sendEmail = (to, subject, text) => {
  * @param {string} token
  * @returns {Promise}
  */
-const sendResetPasswordEmail = (to, token, url) => {
+const sendResetPasswordEmail = async (to, token, url) => {
 	const subject = 'Reset password';
 	const resetPasswordUrl = `${url}?token=${token}`;
 	const text = `Dear user,\n\nTo reset your password, click on this link: ${resetPasswordUrl}\n\nIf you did not request any password resets, then ignore this email.`;
 
-  	return sendEmail(to, subject, text);
+	try {
+		return await sendEmail(to, subject, text);
+
+	} catch (error) {
+		error.description || (error.description = "Send Reset Password Email failed in EmailService");
+		throw error;
+	}
 };
 
 /**
@@ -60,12 +66,18 @@ const sendResetPasswordEmail = (to, token, url) => {
  * @param {string} token
  * @returns {Promise}
  */
-const sendVerificationEmail = (to, token) => {
+const sendVerificationEmail = async (to, token) => {
 	const subject = 'Email Verification';
 	const verificationEmailUrl = `http://localhost:3000/auth/verify-email?token=${token}`;
 	const text = `Dear user,\n\nTo verify your email, click on this link: ${verificationEmailUrl}\n\nIf you did not create an account, then ignore this email.`;
 
-  	return sendEmail(to, subject, text);
+	try {
+		return await sendEmail(to, subject, text);
+
+	} catch (error) {
+		error.description || (error.description = "Send Verification Email failed in EmailService");
+		throw error;
+	}
 };
 
 module.exports = {
