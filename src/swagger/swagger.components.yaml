@@ -148,19 +148,12 @@ components:
       type: object
       # required:
       #   - email
-      #   - callbackURL
       properties:
         email:
           type: string
           format: email
           description: the email that the reset password link is going to be sent
-        callbackURL:
-          type: string
-          format: url
-          description: the url that the be visited for the form reset password in frontend app
-      example:
-        email: talatkuyuk@gmail.com
-        callbackURL: http://localhost:5500/reset-password
+          example: talatkuyuk@gmail.com
 
 
     # RESET PASSWORD FORM IN REQUEST.BODY
@@ -439,8 +432,6 @@ components:
         #### ValidationErrors
         * _email must not be empty or falsy value_
         * _email must be in valid form_
-        * _You have to set callback URL (callbackURL) for the further reset password page_
-        * _The callback URL must be valid URL_
       content:
         application/json:
           schema:
@@ -451,7 +442,6 @@ components:
             message: The request could not be validated
             errors: {
               email: ["email validation errors appear in a string array"],
-              callbackURL: ["callbackURL validation errors appear in a string array"],
             }
 
 

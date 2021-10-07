@@ -46,9 +46,9 @@ const sendEmail = (to, subject, text) => {
  * @param {string} token
  * @returns {Promise}
  */
-const sendResetPasswordEmail = async (to, token, url) => {
+const sendResetPasswordEmail = async (to, token) => {
 	const subject = 'Reset password';
-	const resetPasswordUrl = `${url}?token=${token}`;
+	const resetPasswordUrl = `${config.resetPasswordUrl}?token=${token}`;
 	const text = `Dear user,\n\nTo reset your password, click on this link: ${resetPasswordUrl}\n\nIf you did not request any password resets, then ignore this email.`;
 
 	try {
@@ -68,7 +68,7 @@ const sendResetPasswordEmail = async (to, token, url) => {
  */
 const sendVerificationEmail = async (to, token) => {
 	const subject = 'Email Verification';
-	const verificationEmailUrl = `http://localhost:3000/auth/verify-email?token=${token}`;
+	const verificationEmailUrl = `${config.verifyEmailUrl}?token=${token}`;
 	const text = `Dear user,\n\nTo verify your email, click on this link: ${verificationEmailUrl}\n\nIf you did not create an account, then ignore this email.`;
 
 	try {

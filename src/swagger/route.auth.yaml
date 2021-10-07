@@ -179,7 +179,7 @@
 /auth/forgot-password:
   post:
     summary: Forgot password
-    description: sends an email with the token and reset-url İn order to reset password 
+    description: sends an email with a link and token in order to reset password 
     tags: [Auth]
     requestBody:
       required: true
