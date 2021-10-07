@@ -10,26 +10,26 @@
 //TODO: implement authuserDAO
 //TODO: implement userDAO
 
-//TODO: add swagger documentation
-//TODO: swagger docs for auth routes
-//TODO: swagger docs for authuser routes
+//TODO: add swagger documentation+
+//TODO: swagger docs for auth routes+
+//TODO: swagger docs for authuser routes+
 //TODO: swagger docs for user routes
 
-//TODO: add description field to ApiError
+//TODO: add description field to ApiError+
 //TODO: seperate authuserservice with authuser.db operations+
 //TODO: decide access and refresh token requirement during logout/login; and update services accordingly
 //TODO: email service add try catch
 //TODO: seperate db services from services+
 //TODO: add redis service
-//TODO: add pagination utility
+//TODO: add pagination service+
 //TODO: handle deprecation for mongodb collection.findOneAndUpdate option [returnOriginal]
 //TODO: change the routes with plural names+
 //TODO: add mechanism for query authuser or user using pipedelimeter for the query param sort
 
 //TODO: update mongodb native driver to 4.x.x
 
-//TODO: arrange errors and add errors object to response like validation errors
-//TODO: arrange http status 
+//TODO: arrange errors and handle all correctly+
+//TODO: arrange http status+
 //TODO: add loggers for mongo operations
 //TODO: update winston that if the user is not identified then dont it log like this "user:-", keep it empty
 
@@ -39,8 +39,8 @@
 
 //TODO: update unhandledRejection and uncaughtException mechanism
 //TODO: update ErrorHandler strategy and isOperational logic
-//TODO: handle errors for syntax or null/undefined in auth middleware
-//TODO: handle mongoDB errors properly in error middleware
+//TODO: handle errors for syntax or null/undefined in auth middleware+
+//TODO: handle mongoDB errors properly in error middleware+
 
 //TODO: revoke the access token when the user session is closed
 //TODO: implement the Schema Versioning pattern, add a schema_version
