@@ -12,11 +12,11 @@ const jwtVerify = async (payload, done) => {
 			throw new Error('Invalid token type');
 		}
 
-		const authuser = await authuserDbService.getAuthUser({ id: payload.sub});
+		const authuser = await authuserDbService.getAuthUser({ id: payload.sub });
 
 		if (!authuser) return done(null, false);
 		
-		done(null, {authuser, payload});
+		done(null, { authuser, payload });
 
 	} catch (error) {
 		error.description || (error.description = "JWT verification failed in Passport");

@@ -114,33 +114,15 @@ const loginWith_oAuth = async (service, id, email) => {
  * @param {string} refreshToken
  * @returns {Promise}
  */
-const logout = async (authuser, accessToken, refreshToken) => {
+const logout = async (id, jti) => {
 	try {
-		const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
-
 		// delete the refresh token family from db
-		await tokenService.removeTokens({ family: refreshTokenDoc.family });
+		await tokenService.findTokenAndRemoveFamily({ user: id, jti }, "family");
 
+		// add access token into blacklist, which is paired with refreshtoken (key, timeout, value)
 		const redisClient = getRedisClient();
 		if (redisClient) {
-			const jti = refreshTokenDoc.jti;
-
-			// add access token into blacklist, which is paired with refreshtoken (key, timeout, value)
 			await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);
-		}
-		
-		if (authuser?.id.toString() !== refreshTokenDoc.user.toString()) {
-			// Means that Refresh Token is stolen by authuser 
-			// This control is placed here to allow refresh token family removed from db, above.
-			
-			if (redisClient) {
-				const { jti } = jwt.verify(accessToken, config.jwt.secret);
-
-				// add access token which is authenticated into blacklist since the authuser made violation
-				await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);	
-			}
-			
-			throw new ApiError(httpStatus.UNAUTHORIZED, `Tokens could not be matched, please re-authenticate`);
 		}
 		
 	} catch (error) {
@@ -156,40 +138,19 @@ const logout = async (authuser, accessToken, refreshToken) => {
  * @param {string} refreshToken
  * @returns {Promise}
  */
- const signout = async (authuser, accessToken, refreshToken) => {
+ const signout = async (id, jti) => {
 	try {
-		const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
-		
-		// delete all tokens of the user
-		await tokenService.removeTokens({ user: refreshTokenDoc.user });
+		// delete the whole tokens of the user from db
+		await tokenService.findTokenAndRemoveFamily({ user: id, jti }, "user");
 
+		// add access token into blacklist, which is paired with refreshtoken (key, timeout, value)
 		const redisClient = getRedisClient();
 		if (redisClient) {
-			const jti = refreshTokenDoc.jti;
-
-			// add access token into blacklist, which is paired with refreshtoken (key, timeout, value)
 			await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);		
 		}
 
-		if (authuser.id.toString() !== refreshTokenDoc.user.toString()) {
-			// Means that Refresh Token is stolen by authuser 
-			// This control is placed here to allow refresh token family removed from db, above.
-			
-			if (redisClient) {
-				const { jti } = jwt.verify(accessToken, config.jwt.secret);
-
-				// add access token which is authenticated into blacklist since the authuser made violation
-				await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);	
-			}
-			
-			throw new ApiError(httpStatus.UNAUTHORIZED, `Tokens could not be matched, please re-authenticate to signout from system`);
-		}
-
-		// delete authuser by id 
-		//TODO: consider again whether is necessey to check isDeleted, since it passed before authorization
-		const isDeleted = await authuserDbService.deleteAuthUser(authuser.id);
-		if (!isDeleted)
-			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+		// delete authuser by id; no need to check id in database since he/she has passed the authorization soon ago
+		await authuserDbService.deleteAuthUser(id);
 
 		// TODO: delete user data or do it via another request
 		
@@ -209,16 +170,19 @@ const logout = async (authuser, accessToken, refreshToken) => {
  */
 const refreshAuth = async (refreshToken, userAgent) => {
   try {
-	const refreshTokenDoc = await tokenService.refreshTokenRotation(refreshToken, userAgent);
+	// ensure the refresh token blacklisted during RTR and get back the document
+	const { user: id, family } = await tokenService.refreshTokenRotation(refreshToken, userAgent);
 
-	const authuser = await authuserDbService.getAuthUser({ id: refreshTokenDoc.user });
-	if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+	const authuser = await authuserDbService.getAuthUser({ id });
 
-	if (authuser.isDisabled) {
+	if (!authuser) 
+		throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+
+	if (authuser.isDisabled)
 		throw new ApiError(httpStatus.FORBIDDEN, `You are disabled. Call the system administrator.`);
-	}
 
-	return { authuser, refreshTokenFamily: refreshTokenDoc.family };
+	// returns the family as well since it is going to be used while re-generating new refresh token
+	return { authuser, refreshTokenFamily: family };
 
   } catch (error) {
 	error.description || (error.description = "Refresh Auth Tokens failed in AuthService");

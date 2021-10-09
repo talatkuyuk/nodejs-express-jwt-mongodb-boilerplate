@@ -156,7 +156,7 @@
 /authusers/password:
   patch:
     summary: Change own password
-    tags: [AuthUser]
+    tags: [AuthUsers]
     security:
       - BearerAuth: []
     requestBody:

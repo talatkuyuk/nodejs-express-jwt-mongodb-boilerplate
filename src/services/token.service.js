@@ -53,7 +53,8 @@ const generateToken = (userId, expires, type, jti = "n/a", userAgent = "n/a", no
 
 
 /**
- * Verify token and return token doc (or throw an error if it is not valid)
+ * Verify token and return token document (or throw an error if it is not valid)
+ * is used only by auth.service (verifyEmail, resetPassword)
  * @param {string} token
  * @param {string} type
  * @returns {Promise<Token>}
@@ -62,42 +63,19 @@ const verifyToken = async (token, type) => {
 	try {
 		const payload = jwt.verify(token, config.jwt.secret);
 
-		// my decision: no need to check the useragent (ua) for refresh token since refresh token can lives during many days.
-
 		const tokenDoc = await tokenDbService.getToken({ token, type, user: payload.sub });
 
 		if (!tokenDoc)
 			throw new ApiError(httpStatus.UNAUTHORIZED, `${type} token is not valid`);
 
+		if (tokenDoc.blacklisted)
+			throw new ApiError(httpStatus.UNAUTHORIZED, `${type} token is in the blacklist`);
+
 		return tokenDoc;
-		
-		// verifyToken method is used only by auth.service (logout, signout, verifyEmail, resetPassword)
-		// No matter the token is blacklisted; signout and logout will be carried out, 
-		// and the user's whole tokens or family refresh tokens will be removed from db.
-		// Also, verify-email and reset-password tokens are not blacklisted, logically. (only expires) 
-		// For this reason, no need to throw an error or delete any token(s) here, if the result token is blacklisted.
 
 	} catch (error) {
-
-		// Even if some verification errors occurs for refresh token, it is okey here,
-		// since refresh token verification is used by only signout and logout process.
-		// my decision: if the refresh token is expired or used not before than, signout or logout process will proceed.
-		if (type === tokenTypes.REFRESH && ["jwt not active", "jwt expired"].includes(error.message)) {
-
-			const payload = jwt.decode(token, config.jwt.secret);
-			const tokenDoc = await tokenDbService.getToken({ token, type, user: payload.sub });
-
-			if (!tokenDoc) {
-				error.description || (error.description = "Token Verification failed in TokenService");
-				throw new ApiError(httpStatus.UNAUTHORIZED, `${type} token is not valid`);
-			}
-				
-			return tokenDoc;
-			
-		} else {
-			error.description || (error.description = "Token Verification failed in TokenService");
-			throw error;
-		}
+		error.description || (error.description = "Token Verification failed in TokenService");
+		throw error;
 	}
 };
 
@@ -118,7 +96,7 @@ const verifyToken = async (token, type) => {
 
 	console.log(`refreshTokenRotation: start`);
 
-	// reachable from try-catch both blocks
+	// reachable from both try-catch blocks
 	let refreshTokenDoc = null;
 
 	try {
@@ -126,8 +104,8 @@ const verifyToken = async (token, type) => {
 		// Step-1: control if that RT is in DB
 		refreshTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH });
 
-		if (!refreshTokenDoc) {
-			throw new ApiError(httpStatus.UNAUTHORIZED, `refresh token is not valid`);}
+		if (!refreshTokenDoc)
+			throw new ApiError(httpStatus.UNAUTHORIZED, "refresh token is not valid");
 
 
 		// Step-2: control if that RT is blacklisted
@@ -137,7 +115,7 @@ const verifyToken = async (token, type) => {
 			// disable the refresh token family
 			await disableFamilyRefreshToken(refreshTokenDoc);
 
-			throw new ApiError(httpStatus.UNAUTHORIZED, `Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication.`);
+			throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized usage of refresh token has been detected.");
 		}
 
 
@@ -153,7 +131,7 @@ const verifyToken = async (token, type) => {
 			throw new ApiError(httpStatus.UNAUTHORIZED, `Your browser/agent seems changed or updated, you have to re-login to get authentication.`);
 		}
 
-		// okey then, start rotation, update the refresh token with the { blacklisted: true }
+		// okey then, success refresh token rotation happened; update the refresh token with the { blacklisted: true }
 		await tokenDbService.updateToken(refreshTokenDoc.id, { blacklisted: true });
 		
 		return refreshTokenDoc;
@@ -168,9 +146,10 @@ const verifyToken = async (token, type) => {
 			// Disable the refresh token family since someone else could use it
 			await disableFamilyRefreshToken(refreshTokenDoc);
 
-			throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication.");
-
-		} else if (error.name === "TokenExpiredError") {
+			error = new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized usage of refresh token has been detected.");
+		} 
+		
+		if (error.name === "TokenExpiredError") {
 			console.log(`refreshTokenRotation: error.name is TokenExpiredError`);
 
 			// Step-3b: if it is expired (means it is not blacklisted and it is the last issued RT)
@@ -180,12 +159,11 @@ const verifyToken = async (token, type) => {
 			
 			// No need to put the related access token into the cached blacklist.
 
-			throw new ApiError(httpStatus.UNAUTHORIZED, `The refresh token is expired. You have to re-login to get authentication.`);
-
-		} else {
-			error.description || (error.description = "Refresh Token Rotation failed in TokenService");
-			throw error;
+			error = new ApiError(httpStatus.UNAUTHORIZED, `The refresh token is expired. You have to re-login to get authentication.`);
 		}
+
+		error.description || (error.description = "Refresh Token Rotation failed in TokenService");
+		throw error;
 	}
 };
 
@@ -209,7 +187,7 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 		console.log(`disableFamilyRefreshToken: not-blacklisted-family-size: ${size}`);
 
 		// if no not-blacklisted, means that whole family was disabled before, 
-		// and now, whole family should be deleted
+		// and now, whole family should be deleted because the second bad usage happens
 		if (size === 0) {
 
 			// Delete the refresh token family
@@ -226,14 +204,11 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 				// Update each refresh token with the { blacklisted: true }
 				await tokenDbService.updateToken(tokenRecord._id, { blacklisted: true });
 
+				// put the related access token into the blacklist (key, timeout, value)
 				const redisClient = getRedisClient();
 				if (redisClient) {
-					// Get the related access token jti from refresh token
-					const { jti } = jwt.decode(tokenRecord.token, config.jwt.secret);
-		
-					// put the related access token into the blacklist (key, timeout, value)
-					await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true)
-						.then((result) => {console.log(`disableFamilyRefreshToken: redis ${result} for ${jti}`)})
+					await redisClient.setex(`blacklist_${tokenRecord.jti}`, config.jwt.accessExpirationMinutes * 60, true)
+						.then((result) => {console.log(`disableFamilyRefreshToken: redis ${result} for ${tokenRecord.jti}`)})
 						.catch((err) => {throw err});
 				}
 			}
@@ -397,12 +372,17 @@ const generateVerifyEmailToken = async (userId) => {
 };
 
 
+/**
+ * Remove the token with the id and issue report
+ * @param {string} id
+ * @returns {Promise}
+ */
 const removeToken = async (id) => {
 	try {
 		const {isDeleted, deletedCount} = await tokenDbService.deleteToken(id);
 
 		isDeleted ? console.log(`${deletedCount} token deleted.`) 
-				: console.log("No token is deleted.");
+				  : console.log("No token is deleted.");
 
 	} catch (error) {
 		error.description || (error.description = "Remove Token failed in TokenService");
@@ -410,14 +390,58 @@ const removeToken = async (id) => {
 	}
 }
 
+
+/**
+ * Remove tokens that queried and issue report
+ * @param {Object} query
+ * @returns {Promise}
+ */
 const removeTokens = async (query) => {
 	try {
 		const {isDeleted, deletedCount} = await tokenDbService.deleteTokens(query);
 	
 		isDeleted ? console.log(`${deletedCount} token(s) deleted.`) 
-				: console.log("No token is deleted.");
+				  : console.log("No token deleted.");
+
 	} catch (error) {
 		error.description || (error.description = "Remove Tokens failed in TokenService");
+		throw error;
+	}
+}
+
+
+/**
+ * Find the token and remove family's token or user's tokens according to command option
+ * @param {Object} query
+ * @param {string} command
+ * @returns {Promise}
+ */
+const findTokenAndRemoveFamily = async (query, command) => {
+	try {
+		const tokenDoc = await tokenDbService.getToken(query);
+
+		// normally a refresh token can be deleted in only refresh token rotation, 
+		// any bad usage of refresh token can cause it be deleted
+		// TODO: make an analyze here how this situation happen
+		if (!tokenDoc)
+			throw new ApiError(httpStatus.UNAUTHORIZED, "refresh token is not valid");
+
+		// normally a refresh token can be blacklisted in only refresh token rotation, 
+		// during the refresh token rotation, access token that paired with refresh token is also blacklisted in cache
+		// So, the user who requests the logout can not reach here, but wait !!!
+		// what if the redis down during refresh token rotation that causes the refresh token jti is not blacklisted
+		// TODO: make a decision here: continue the process and get the user logged out or raise an error
+		if (tokenDoc.blacklisted)
+			throw new ApiError(httpStatus.UNAUTHORIZED, "refresh token is in the blacklist");
+
+		if (command === "family") 
+			await removeTokens({ family: tokenDoc.family });
+		
+		if (command === "user") 
+			await removeTokens({ user: tokenDoc.user });
+
+	} catch (error) {
+		error.description || (error.description = "Find And Remove Family Tokens failed in TokenService");
 		throw error;
 	}
 }
@@ -434,4 +458,5 @@ module.exports = {
 	generateVerifyEmailToken,
 	removeToken,
 	removeTokens,
+	findTokenAndRemoveFamily,
 };

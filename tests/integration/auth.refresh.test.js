@@ -119,7 +119,7 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			commonExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.message).toEqual("Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication.");
+			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected.");
 
 			// check the whole refresh token's family are in db // up to now, 3 refresh tokens are added
 			const data = await tokenDbService.getTokens({ family: refrehTokenDoc.family });
@@ -173,7 +173,7 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			commonExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.message).toEqual("Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication.");
+			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected.");
 
 			// check the whole refresh token's family are removed from db // up to now, 3 refresh tokens are added
 			const data = await tokenDbService.getTokens({ family: refrehTokenDoc.family });
@@ -217,7 +217,7 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			commonExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.message).toEqual("Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication.");
+			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected.");
 
 			// no need to check family is removed or blacklisted here since this control is handled in the above tests
 			// (means that disableFamilyRefreshToken in Token Service is tested, it is fine.)
@@ -351,6 +351,5 @@ describe('POST /auth/refresh-tokens', () => {
 				});
 		});
 	});
-
 
 })

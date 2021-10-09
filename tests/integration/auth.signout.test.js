@@ -26,8 +26,6 @@ describe('POST /auth/signout', () => {
 
 	jest.setTimeout(50000);
 
-	TestUtil.MatchErrors();
-
 	let accessToken, refreshToken;
 	let authuser, tokens;
 	const userAgent = "from-jest-test";
@@ -45,158 +43,31 @@ describe('POST /auth/signout', () => {
 		refreshToken = tokens.refresh.token;
 	});
 
+	// Since the process of signout is the same with logout mostly, especially considering failures; 
+	// It is enough here to test only success signout 
 
-	describe('Request Validation Errors', () => {
+	describe('Success signout', () => {
 
-		test('should return 422 Validation Error if refresh token is not in the request body', async () => {
+		test('should return 204, remove refresh token of the authuser from db and revoke access tokens', async () => {
 
-			const response = await request(app).post('/auth/signout')
-												.set('Authorization', `Bearer ${accessToken}`) 
-												.set('User-Agent', userAgent) 
-												.send({});
-
-			expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(422);
-			expect(response.body.name).toEqual("ValidationError");
-			expect(response.body.message).toEqual("The request could not be validated");
-			expect(response.body).not.toHaveProperty("description");
-			expect(Object.keys(response.body.errors).length).toBe(1);
-			expect(response.body.errors.refreshToken).toEqual(["refresh token must not be empty"]); 
-		});
-	});
-
-
-
-	describe('Failed signout', () => {
-
-		test('should return 401 if the user use own access token but use the refresh token that is not own', async () => {
-
-			// For Other User
-			const userId = "613b417848981bfd6e91c662";
-			const userAgentOther = "from-jest";
-			const otherUserJti = crypto.randomBytes(16).toString('hex');
-			const { refreshToken: otherUserRefreshToken } = await tokenService.generateRefreshToken(userId, userAgentOther, otherUserJti);
-
-			// for further test, find otherUserRefreshToken from db, to get its family before it is deleted
-			const { family } = await tokenDbService.getToken({ token: otherUserRefreshToken, user: userId, type: tokenTypes.REFRESH });
-
-			const response = await request(app).post('/auth/signout')
-												.set('Authorization', `Bearer ${accessToken}`) 
-												.set('User-Agent', userAgent) 
-												.send({ refreshToken: otherUserRefreshToken });
-
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
-			expect(response.body).toHaveProperty("name");
-			expect(response.body.message).toEqual("Tokens could not be matched, please re-authenticate to signout from system");
-			expect(response.body).toHaveProperty("description");
-			expect(response.body).not.toHaveProperty("errors");
-
-			// check the access token of both authuser and otheruser are in the blacklist
-			const redisClient = getRedisClient();
-			if (redisClient.connected) {
-				const { jti: authuserJti } = jwt.decode(accessToken, config.jwt.secret);
-
-				const data1 = await redisClient.get(`blacklist_${authuserJti}`);
-				expect(data1).toBeDefined();
-
-				const data2 = await redisClient.get(`blacklist_${otherUserJti}`);
-				expect(data2).toBeDefined();
-			}
-
-			// check the other user's refresh token and it's family are removed from db
-			// check whether there is any refresh token with otherUserRefreshToken's family in the db 
-			const data = await tokenDbService.getTokens({ family });
-			expect(data.length).toBe(0);
-		});
-
-	});
-
-
-
-	describe('Success logout', () => {
-
-		test('should return 204 even if refresh token is expired', async () => {
-
-			// remove the existing refresh token from db for the test
-			await tokenService.removeTokens({ token: refreshToken, user: authuser.id, type: tokenTypes.REFRESH });
-
-			// produce new expired refresh token for the same authuser
-			const { jti } = jwt.decode(accessToken, config.jwt.secret); 
-			refreshToken = tokenService.generateToken(authuser.id, moment().add(1, 'milliseconds'), tokenTypes.REFRESH, jti, userAgent, 0);
-
-			// put the expired refresh token into db
-			await tokenDbService.addToken({
-				token: refreshToken,
-				user: authuser.id,
-				type: tokenTypes.REFRESH,
-				expires: "mo-matter-for-test",
-				family: "mo-matter-for-test",
-				blacklisted: false
-			});
-
-
-			const response = await request(app).post('/auth/signout')
-												.set('Authorization', `Bearer ${accessToken}`) 
-												.set('User-Agent', userAgent) 
-												.send({ refreshToken });
-
-			expect(response.status).toBe(httpStatus.NO_CONTENT);
-		});
-
-
-
-		test('should return 204 even if refresh token is blacklisted', async () => {
-
-			// find the refresh token in db to get id
-			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
-
-			// Update the refresh token with the { blacklisted: true }
-			await tokenDbService.updateToken(refrehTokenDoc.id, { blacklisted: true });
-
-			const response = await request(app).post('/auth/signout')
-												.set('Authorization', `Bearer ${accessToken}`) 
-												.set('User-Agent', userAgent) 
-												.send({ refreshToken });
-
-			expect(response.status).toBe(httpStatus.NO_CONTENT);
-		});
-		
-
-
-		test('should return 204 even if redis cache server is down during logout, since Redis supports offline operations', async () => {
-			// I tested when the redis is off, it passed.
-			const response = await request(app).post('/auth/signout')
-												.set('Authorization', `Bearer ${accessToken}`) 
-												.set('User-Agent', userAgent) 
-												.send({ refreshToken });
-
-			expect(response.status).toBe(httpStatus.NO_CONTENT);
-		});
-
-
-
-		test('should return 204, remove refresh token family from db and revoke access tokens', async () => {
 			// add a token into db for the user, to make further expect is more reasonable related with removal the user's whole tokens.
 			await tokenDbService.addToken({
-				token: "mo-matter-for-test",
+				token: "no-matter-for-this-test",
 				user: authuser.id,
 				type: tokenTypes.VERIFY_EMAIL,
-				expires: "mo-matter-for-test",
-				family: "mo-matter-for-test",
+				expires: "no-matter-for-this-test",
+				family: "no-matter-for-this-test",
 				blacklisted: false
 			});
 
 			const response = await request(app).post('/auth/signout')
 												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
-												.send({ refreshToken });
+												.send();
 
 			expect(response.status).toBe(httpStatus.NO_CONTENT);
 
-			// check the access token of both authuser and otheruser are in the blacklist
+			// check the access token of the authuser is in the blacklist
 			const redisClient = getRedisClient();
 			if (redisClient.connected) {
 				const { jti } = jwt.decode(accessToken, config.jwt.secret);

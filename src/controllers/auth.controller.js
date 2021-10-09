@@ -41,12 +41,9 @@ const login = asyncHandler(async (req, res) => {
 
 
 const logout = asyncHandler(async (req, res) => {
-	// const accessToken = req.header('Authorization').replace('Bearer ', '');
-	const accessToken = req.headers.authorization.split(' ')[1];
-	const refreshtoken = req.body.refreshToken;
-	const authuser = req.user;
+	const { id, jti } = req.user; // jti added in the auth middleware
 
-	await authService.logout(authuser, accessToken, refreshtoken);
+	await authService.logout(id, jti);
 
 	res.status(httpStatus.NO_CONTENT).send();
 });
@@ -54,11 +51,9 @@ const logout = asyncHandler(async (req, res) => {
 
 
 const signout = asyncHandler(async (req, res) => {
-	const accessToken = req.headers.authorization.split(' ')[1];
-	const refreshtoken = req.body.refreshToken;
-	const authuser = req.user;
+	const { id, jti } = req.user; // jti added in the auth middleware
 
-	await authService.signout(authuser, accessToken, refreshtoken);
+	await authService.signout(id, jti);
 
 	res.status(httpStatus.NO_CONTENT).send();
 });

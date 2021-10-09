@@ -1,8 +1,6 @@
 const request = require('supertest');
 const httpStatus = require('http-status');
-const moment = require('moment');
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
 
 const app = require('../../src/core/express');
 const config = require('../../src/config');
@@ -26,8 +24,6 @@ describe('POST /auth/logout', () => {
 
 	jest.setTimeout(50000);
 
-	TestUtil.MatchErrors();
-
 	let accessToken, refreshToken;
 	let authuser, tokens;
 	const userAgent = "from-jest-test";
@@ -46,70 +42,74 @@ describe('POST /auth/logout', () => {
 	});
 
 
-	describe('Request Validation Errors', () => {
-
-		test('should return 422 Validation Error if refresh token is not in the request body', async () => {
-
-			const response = await request(app).post('/auth/logout')
-												.set('Authorization', `Bearer ${accessToken}`) 
-												.set('User-Agent', userAgent) 
-												.send({});
-
-			expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(422);
-			expect(response.body.name).toEqual("ValidationError");
-			expect(response.body.message).toEqual("The request could not be validated");
-			expect(response.body).not.toHaveProperty("description");
-			expect(Object.keys(response.body.errors).length).toBe(1);
-			expect(response.body.errors.refreshToken).toEqual(["refresh token must not be empty"]); 
-		});
-	});
-
-
 
 	describe('Failed logout', () => {
 
-		test('should return 401 if the user use own access token but use the refresh token that is not own', async () => {
+		test('should return 401 if the refresh token is blacklisted', async () => {
+			// this proplem may happen the refresh token is used before than valid ONE-TIME (refresh token rotation)
+			// it requires also the redis down at the moment of refresh token rotation, causing the access token in not blacklisted
 
-			// For Other User
-			const userId = "613b417848981bfd6e91c662";
-			const userAgentOther = "from-jest";
-			const otherUserJti = crypto.randomBytes(16).toString('hex');
-			const { refreshToken: otherUserRefreshToken } = await tokenService.generateRefreshToken(userId, userAgentOther, otherUserJti);
-
-			// for further test, find otherUserRefreshToken from db, to get its family before it is deleted
-			const { family } = await tokenDbService.getToken({ token: otherUserRefreshToken, user: userId, type: tokenTypes.REFRESH });
+			// Update the refresh token with the { blacklisted: true } in order to produce problem
+			const { id } = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
+			await tokenDbService.updateToken(id, { blacklisted: true });
 
 			const response = await request(app).post('/auth/logout')
 												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
-												.send({ refreshToken: otherUserRefreshToken });
+												.send();
 
 			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.body.code).toEqual(401);
 			expect(response.body).toHaveProperty("name");
-			expect(response.body.message).toEqual("Tokens could not be matched, please re-authenticate");
+			expect(response.body.message).toEqual("refresh token is in the blacklist");
 			expect(response.body).toHaveProperty("description");
 			expect(response.body).not.toHaveProperty("errors");
+		});
 
-			// check the access token of both authuser and otheruser are in the blacklist
-			const redisClient = getRedisClient();
-			if (redisClient.connected) {
-				const { jti: authuserJti } = jwt.decode(accessToken, config.jwt.secret);
 
-				const data1 = await redisClient.get(`blacklist_${authuserJti}`);
-				expect(data1).toBeDefined();
+		test('should return 401 if the refresh token is not found in db using the query on user and jti', async () => {
+			// this proplem may happen the same refresh token is used before than valid TWO-TIMES (refresh token rotation)
+			// it requires also the redis down at the moment of refresh token rotation, causing the access token in not blacklisted
 
-				const data2 = await redisClient.get(`blacklist_${otherUserJti}`);
-				expect(data2).toBeDefined();
-			}
+			// delete the refresh token from db in order to produce problem
+			await tokenDbService.deleteTokens({ token: refreshToken, user: authuser.id, type: tokenTypes.REFRESH });
 
-			// check the other user's refresh token and it's family are removed from db
-			// check whether there is any refresh token with otherUserRefreshToken's family in the db 
-			const data = await tokenDbService.getTokens({ family });
-			expect(data.length).toBe(0);
+			const response = await request(app).post('/auth/logout')
+												.set('Authorization', `Bearer ${accessToken}`) 
+												.set('User-Agent', userAgent) 
+												.send();
+
+			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
+			expect(response.body.code).toEqual(401);
+			expect(response.body).toHaveProperty("name");
+			expect(response.body.message).toEqual("refresh token is not valid");
+			expect(response.body).toHaveProperty("description");
+			expect(response.body).not.toHaveProperty("errors");
+		});
+
+
+		test('should return 403 in case the refresh token is used before than valid', async () => {
+
+			// use /auth/refresh-tokens before than valid in order to produce problem
+			await request(app).post('/auth/refresh-tokens')
+												.set('Authorization', `Bearer ${accessToken}`) 
+												.set('User-Agent', userAgent) 
+												.send({ refreshToken });
+
+			const response = await request(app).post('/auth/logout')
+												.set('Authorization', `Bearer ${accessToken}`) 
+												.set('User-Agent', userAgent) 
+												.send();
+												
+			expect(response.status).toBe(httpStatus.FORBIDDEN);
+			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
+			expect(response.body.code).toEqual(403);
+			expect(response.body).toHaveProperty("name");
+			expect(response.body.message).toEqual("Access token is in the blacklist");
+			expect(response.body.description).toBe("Process failed in Authorization middleware");
+			expect(response.body).not.toHaveProperty("errors");
 		});
 
 	});
@@ -118,78 +118,37 @@ describe('POST /auth/logout', () => {
 
 	describe('Success logout', () => {
 
-		test('should return 204 even if refresh token is expired', async () => {
-
-			// remove the existing refresh token from db for the test
-			await tokenService.removeTokens({ token: refreshToken, user: authuser.id, type: tokenTypes.REFRESH });
-
-			// produce new expired refresh token for the same authuser
-			const { jti } = jwt.decode(accessToken, config.jwt.secret); 
-			refreshToken = tokenService.generateToken(authuser.id, moment().add(1, 'milliseconds'), tokenTypes.REFRESH, jti, userAgent, 0);
-
-			// put the expired refresh token into db
-			await tokenDbService.addToken({
-				token: refreshToken,
-				user: authuser.id,
-				type: tokenTypes.REFRESH,
-				expires: "mo-matter-for-test",
-				family: "mo-matter-for-test",
-				blacklisted: false
-			});
-
+		test('should return 204 even if redis cache server is down during logout', async () => {
+			
+			console.log("Stop Redis manually");
+			await new Promise(resolve => setTimeout(resolve, 10000));
 
 			const response = await request(app).post('/auth/logout')
 												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
-												.send({ refreshToken });
+												.send();
 
 			expect(response.status).toBe(httpStatus.NO_CONTENT);
-		});
 
-
-
-		test('should return 204 even if refresh token is blacklisted', async () => {
-
-			// find the refresh token in db to get id
-			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
-
-			// Update the refresh token with the { blacklisted: true }
-			await tokenDbService.updateToken(refrehTokenDoc.id, { blacklisted: true });
-
-			const response = await request(app).post('/auth/logout')
-												.set('Authorization', `Bearer ${accessToken}`) 
-												.set('User-Agent', userAgent) 
-												.send({ refreshToken });
-
-			expect(response.status).toBe(httpStatus.NO_CONTENT);
-		});
-		
-
-
-		test('should return 204 even if redis cache server is down during logout, since Redis supports offline operations', async () => {
-			// I tested when the redis is off, it passed.
-			const response = await request(app).post('/auth/logout')
-												.set('Authorization', `Bearer ${accessToken}`) 
-												.set('User-Agent', userAgent) 
-												.send({ refreshToken });
-
-			expect(response.status).toBe(httpStatus.NO_CONTENT);
+			console.log("Restart Redis manually if it is stopped");
+			await new Promise(resolve => setTimeout(resolve, 10000));
 		});
 
 
 
 		test('should return 204, remove refresh token family from db and revoke access tokens', async () => {
+			
 			// for further test, find authuser's refresh token from db, to get its family before it is deleted
 			const { family } = await tokenDbService.getToken({ token: refreshToken, user: authuser.id, type: tokenTypes.REFRESH });
 
 			const response = await request(app).post('/auth/logout')
 												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
-												.send({ refreshToken });
+												.send();
 
 			expect(response.status).toBe(httpStatus.NO_CONTENT);
 
-			// check the access token of both authuser and otheruser are in the blacklist
+			// check the access token of the authuser is in the blacklist
 			const redisClient = getRedisClient();
 			if (redisClient.connected) {
 				const { jti } = jwt.decode(accessToken, config.jwt.secret);
@@ -198,10 +157,8 @@ describe('POST /auth/logout', () => {
 				expect(data).toBeDefined;
 			}
 
-			// check the authuser's refresh token and it's family are removed from db
 			// check whether there is any refresh token with refresToken's family in the db 
 			const data = await tokenDbService.getTokens({ family });
-			
 			expect(data.length).toBe(0);
 		});
 	});

@@ -358,6 +358,26 @@ components:
             description: "the service name where the error occured"
 
 
+    LogoutSignoutUnauthorizedErrors:
+      description: | 
+        UNAUTHORIZED
+
+        (Here is continuation of 401 UNAUTHORIZED response above, not 402)
+
+        #### ApiErrors
+        * _refresh token is not valid_
+        * _refresh token is in the blacklist_
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            name: "ApiError"
+            message: "One of the api errors appears here"
+            description: "the service name where the error occured"
+
+
     RefreshTokenValidationError:
       description: UNPROCESSABLE ENTITY
       content:
