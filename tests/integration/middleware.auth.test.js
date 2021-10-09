@@ -3,6 +3,10 @@ const moment = require('moment');
 const jwt = require('jsonwebtoken');
 const httpMocks = require('node-mocks-http');
 
+// without these two lines which are actually not necessary the test stucks, I don't know the reason
+const request = require('supertest');
+const app = require('../../src/core/express');
+
 const config = require('../../src/config');
 const ApiError = require('../../src/utils/ApiError');
 const { auth } = require('../../src/middlewares/auth');
