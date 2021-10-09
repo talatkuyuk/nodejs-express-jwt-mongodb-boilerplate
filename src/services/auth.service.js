@@ -1,11 +1,11 @@
 const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
-const ApiError = require('../utils/ApiError');
 const config = require('../config');
-const { getRedisClient } = require('../core/redis');
+const ApiError = require('../utils/ApiError');
 
+// for redis operations
+const redisService = require('./redis.service');
 
 //for database operations for authusers
 const authuserDbService = require('./authuser.db.service');
@@ -119,11 +119,9 @@ const logout = async (id, jti) => {
 		// delete the refresh token family from db
 		await tokenService.findTokenAndRemoveFamily({ user: id, jti }, "family");
 
-		// add access token into blacklist, which is paired with refreshtoken (key, timeout, value)
-		const redisClient = getRedisClient();
-		if (redisClient) {
-			await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);
-		}
+		// put the access token's jti into the blacklist
+		await redisService.put_jti_into_blacklist(jti);
+
 		
 	} catch (error) {
 		error.description || (error.description = "Logout failed in AuthService");
@@ -143,11 +141,8 @@ const logout = async (id, jti) => {
 		// delete the whole tokens of the user from db
 		await tokenService.findTokenAndRemoveFamily({ user: id, jti }, "user");
 
-		// add access token into blacklist, which is paired with refreshtoken (key, timeout, value)
-		const redisClient = getRedisClient();
-		if (redisClient) {
-			await redisClient.setex(`blacklist_${jti}`, config.jwt.accessExpirationMinutes * 60, true);		
-		}
+		// put the access token's jti into the blacklist
+		await redisService.put_jti_into_blacklist(jti);
 
 		// delete authuser by id; no need to check id in database since he/she has passed the authorization soon ago
 		await authuserDbService.deleteAuthUser(id);

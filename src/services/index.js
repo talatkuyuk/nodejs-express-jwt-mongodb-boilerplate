@@ -9,3 +9,4 @@ module.exports.tokenDbService = require('./token.db.service');
 
 module.exports.authProviders = require('./authProviders');
 module.exports.paginaryService = require('./paginary.service');
+module.exports.redisService = require('./redis.service');

@@ -4,13 +4,10 @@ const jwt = require('jsonwebtoken');
 
 const app = require('../../src/core/express');
 const config = require('../../src/config');
-const { getRedisClient } = require('../../src/core/redis');
 
-const { authuserDbService, tokenDbService, tokenService } = require('../../src/services');
+const { authuserDbService, tokenDbService, tokenService, redisService } = require('../../src/services');
 const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
-
-const TestUtil = require('../testutil/TestUtil');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');
@@ -94,7 +91,6 @@ describe('POST /auth/logout', () => {
 
 			// use /auth/refresh-tokens before than valid in order to produce problem
 			await request(app).post('/auth/refresh-tokens')
-												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
 
@@ -138,8 +134,8 @@ describe('POST /auth/logout', () => {
 
 		test('should return 204, remove refresh token family from db and revoke access tokens', async () => {
 			
-			// for further test, find authuser's refresh token from db, to get its family before it is deleted
-			const { family } = await tokenDbService.getToken({ token: refreshToken, user: authuser.id, type: tokenTypes.REFRESH });
+			// for further test, find authuser's refresh token from db, to get its family and jti before it is deleted
+			const { jti, family } = await tokenDbService.getToken({ token: refreshToken, user: authuser.id, type: tokenTypes.REFRESH });
 
 			const response = await request(app).post('/auth/logout')
 												.set('Authorization', `Bearer ${accessToken}`) 
@@ -149,13 +145,8 @@ describe('POST /auth/logout', () => {
 			expect(response.status).toBe(httpStatus.NO_CONTENT);
 
 			// check the access token of the authuser is in the blacklist
-			const redisClient = getRedisClient();
-			if (redisClient.connected) {
-				const { jti } = jwt.decode(accessToken, config.jwt.secret);
-
-				const data = await redisClient.get(`blacklist_${jti}`);
-				expect(data).toBeDefined;
-			}
+			const result = await redisService.check_jti_in_blacklist(jti);
+			expect(result).toBe(true);
 
 			// check whether there is any refresh token with refresToken's family in the db 
 			const data = await tokenDbService.getTokens({ family });

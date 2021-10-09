@@ -4,13 +4,14 @@ const crypto = require('crypto');
 const httpStatus = require('http-status');
 
 const config = require('../config');
-const { getRedisClient } = require('../core/redis');
 
 const ApiError = require('../utils/ApiError');
 const { Token } = require('../models');
 const { tokenTypes } = require('../config/tokens');
 
 const tokenDbService = require('./token.db.service');
+const redisService = require('./redis.service');
+
 
 // TOKEN MECHANIZM
 // When log in, send 2 tokens (Access token, Refresh token) in response to the client.
@@ -193,7 +194,7 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 			// Delete the refresh token family
 			await removeTokens({ family: refreshTokenDoc.family });
 			
-			// No need to put the related access token into the cached blacklist.
+			// No need to put the related access token into the cached blacklist, since it was done before
 
 		// if there is not-blacklisted, means that the security isssue happens the first time 
 		// and each refresh token should be blacklisted and so related access token should too.
@@ -204,13 +205,8 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 				// Update each refresh token with the { blacklisted: true }
 				await tokenDbService.updateToken(tokenRecord._id, { blacklisted: true });
 
-				// put the related access token into the blacklist (key, timeout, value)
-				const redisClient = getRedisClient();
-				if (redisClient) {
-					await redisClient.setex(`blacklist_${tokenRecord.jti}`, config.jwt.accessExpirationMinutes * 60, true)
-						.then((result) => {console.log(`disableFamilyRefreshToken: redis ${result} for ${tokenRecord.jti}`)})
-						.catch((err) => {throw err});
-				}
+				// put the related access token's jti into the blacklist
+				await redisService.put_jti_into_blacklist(tokenRecord.jti);
 			}
 		}
 

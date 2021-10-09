@@ -27,6 +27,7 @@ const envVarsSchema = Joi.object()
     EMAIL_FROM: Joi.string().description('the from field in the emails sent by the app'),
     RESET_PASSWORD_URL: Joi.string().description('reset password url of frontend application'),
     VERIFY_EMAIL_URL: Joi.string().description('verify email url of frontend application'),
+    RAISE_ERROR_WHEN_REDIS_DOWN: Joi.boolean().description('set the behaviour of the app when redis is down').default(false),
   })
   .unknown();
 
@@ -66,4 +67,5 @@ module.exports = {
   },
   resetPasswordUrl: envVars.RESET_PASSWORD_URL,
   verifyEmailUrl: envVars.VERIFY_EMAIL_URL,
+  raiseErrorWhenRedisDown: envVars.RAISE_ERROR_WHEN_REDIS_DOWN,
 };

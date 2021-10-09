@@ -6,13 +6,10 @@ const crypto = require('crypto');
 
 const app = require('../../src/core/express');
 const config = require('../../src/config');
-const { getRedisClient } = require('../../src/core/redis');
 
-const { authuserDbService, tokenDbService, tokenService } = require('../../src/services');
+const { authuserDbService, tokenDbService, tokenService, redisService } = require('../../src/services');
 const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
-
-const TestUtil = require('../testutil/TestUtil');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');
@@ -68,13 +65,9 @@ describe('POST /auth/signout', () => {
 			expect(response.status).toBe(httpStatus.NO_CONTENT);
 
 			// check the access token of the authuser is in the blacklist
-			const redisClient = getRedisClient();
-			if (redisClient.connected) {
-				const { jti } = jwt.decode(accessToken, config.jwt.secret);
-
-				const data = await redisClient.get(`blacklist_${jti}`);
-				expect(data).toBeDefined;
-			}
+			const { jti } = jwt.decode(accessToken, config.jwt.secret);
+			const result = await redisService.check_jti_in_blacklist(jti);
+			expect(result).toBe(true);
 
 			// check the authuser's whole tokens and are removed from db
 			const data = await tokenDbService.getTokens({ user: authuser.id });
