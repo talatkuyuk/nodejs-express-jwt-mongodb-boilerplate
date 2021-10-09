@@ -6,9 +6,8 @@ const crypto = require('crypto');
 
 const app = require('../../src/core/express');
 const config = require('../../src/config');
-const { getRedisClient } = require('../../src/core/redis');
 
-const { authuserDbService, tokenDbService, tokenService } = require('../../src/services');
+const { authuserDbService, tokenDbService, tokenService, redisService } = require('../../src/services');
 const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 
@@ -94,13 +93,14 @@ describe('POST /auth/refresh-tokens', () => {
 			// Update the refresh token with the { blacklisted: true }
 			await tokenDbService.updateToken(refrehTokenDoc.id, { blacklisted: true });
 
-			// add two refresh tokens into db for the user and with the same family, keep one as not blacklisted
-			// to make further expect is more reasonable related with disable family tokens.
+			// add two refresh tokens into db for the user and with the same family, keep them not blacklisted
+			// to make further expect is more reasonable related with disable family tokens, and store both jti into cache as blacklisted
 			await tokenDbService.addToken({
 				token: testData.REFRESH_TOKEN_VALID,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
-				expires: "mo-matter-for-test",
+				expires: "no-matter-for-the-test",
+				jti: "i-am-supposed-to-be-blacklisted",
 				family: refrehTokenDoc.family,
 				blacklisted: false
 			});
@@ -109,9 +109,10 @@ describe('POST /auth/refresh-tokens', () => {
 				token: testData.REFRESH_TOKEN_EXPIRED,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
-				expires: "mo-matter-for-test",
+				expires: "no-matter-for-the-test",
+				jti: "i-am-supposed-to-be-blacklisted-too",
 				family: refrehTokenDoc.family,
-				blacklisted: true
+				blacklisted: false
 			});
 
 			const response = await request(app).post('/auth/refresh-tokens')
@@ -129,14 +130,13 @@ describe('POST /auth/refresh-tokens', () => {
 			const control = data.every( token => token.blacklisted );
 			expect(control).toBe(true);
 
-			// check the refresh token {blacklisted: false} one above is added into blacklist cache
-			const redisClient = getRedisClient();
-			if (redisClient.connected) {
-				const { jti } = jwt.decode(testData.REFRESH_TOKEN_VALID, config.jwt.secret);
+			// check the first refresh token above is added into blacklist cache
+			const result1 = await redisService.check_jti_in_blacklist("i-am-supposed-to-be-blacklisted");
+			expect(result1).toBe(true);
 
-				const data = await redisClient.get(`blacklist_${jti}`);
-				expect(data).toBeDefined();
-			};
+			// check the second refresh token above is added into blacklist cache as well
+			const result2 = await redisService.check_jti_in_blacklist("i-am-supposed-to-be-blacklisted-too");
+			expect(result2).toBe(true);
 		});
 
 
@@ -154,7 +154,8 @@ describe('POST /auth/refresh-tokens', () => {
 				token: testData.REFRESH_TOKEN_VALID,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
-				expires: "mo-matter-for-test",
+				expires: "no-matter-for-the-test",
+				jti: "no-matter-for-the-test",
 				family: refrehTokenDoc.family,
 				blacklisted: true
 			});
@@ -163,7 +164,8 @@ describe('POST /auth/refresh-tokens', () => {
 				token: testData.REFRESH_TOKEN_EXPIRED,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
-				expires: "mo-matter-for-test",
+				expires: "no-matter-for-the-test",
+				jti: "no-matter-for-the-test",
 				family: refrehTokenDoc.family,
 				blacklisted: true
 			});
@@ -178,6 +180,8 @@ describe('POST /auth/refresh-tokens', () => {
 			// check the whole refresh token's family are removed from db // up to now, 3 refresh tokens are added
 			const data = await tokenDbService.getTokens({ family: refrehTokenDoc.family });
 			expect(data.length).toBe(0);
+
+			// no need to check cache, since access tokens' jtis are already in the blacklist, see the test above 
 		});
 
 
@@ -195,8 +199,9 @@ describe('POST /auth/refresh-tokens', () => {
 				token: refreshToken,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
-				expires: "mo-matter-for-test",
-				family: "mo-matter-for-test",
+				expires: "no-matter-for-the-test",
+				jti: "no-matter-for-the-test",
+				family: "i-am-supposed-to-be-deleted",
 				blacklisted: false
 			});
 
@@ -206,6 +211,10 @@ describe('POST /auth/refresh-tokens', () => {
 
 			commonExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.message).toEqual("The refresh token is expired. You have to re-login to get authentication.");
+
+			// check the whole refresh token's family are removed from db
+			const data = await tokenDbService.getTokens({ family: "i-am-supposed-to-be-deleted" });
+			expect(data.length).toBe(0);
 		});
 
 
@@ -219,8 +228,13 @@ describe('POST /auth/refresh-tokens', () => {
 			commonExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected.");
 
-			// no need to check family is removed or blacklisted here since this control is handled in the above tests
+			// no need to check family of the refresh token is removed or blacklisted here since this control is handled in the above tests
 			// (means that disableFamilyRefreshToken in Token Service is tested, it is fine.)
+
+			// check the authuser's access token is added into blacklist cache
+			const { jti } = jwt.decode(accessToken, config.jwt.secret);
+			const result = await redisService.check_jti_in_blacklist(jti);
+			expect(result).toBe(true);
 		});
 	});
 
@@ -249,8 +263,9 @@ describe('POST /auth/refresh-tokens', () => {
 				token: refreshToken,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
-				expires: "mo-matter-for-test",
-				family: "mo-matter-for-test",
+				expires: "no-matter-for-the-test",
+				jti: "no-matter-for-the-test",
+				family: "no-matter-for-the-test",
 				blacklisted: false
 			});
 		});
@@ -327,8 +342,9 @@ describe('POST /auth/refresh-tokens', () => {
 				token: refreshToken,
 				user: authuser.id,
 				type: tokenTypes.REFRESH,
-				expires: "mo-matter-for-test",
-				family: "mo-matter-for-test",
+				expires: "no-matter-for-the-test",
+				jti: "no-matter-for-the-test",
+				family: "no-matter-for-the-test",
 				blacklisted: false
 			})
 

@@ -10,9 +10,8 @@ const app = require('../../src/core/express');
 const config = require('../../src/config');
 const ApiError = require('../../src/utils/ApiError');
 const { auth } = require('../../src/middlewares/auth');
-const { getRedisClient } = require('../../src/core/redis');
 
-const { authuserDbService, userDbService, tokenService } = require('../../src/services');
+const { authuserDbService, userDbService, tokenService, redisService } = require('../../src/services');
 const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 
@@ -225,12 +224,8 @@ describe('Auth Middleware', () => {
 			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
-			const redisClient = getRedisClient();
-			if (redisClient) {
-				const { jti } = jwt.decode(tokens.access.token, config.jwt.secret);
-
-				redisClient.setex(`blacklist_${jti}`, 1 * 60, true);
-			}
+			const { jti } = jwt.decode(tokens.access.token, config.jwt.secret);
+			await redisService.put_jti_into_blacklist(jti);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "ApiError: Access token is in the blacklist");

@@ -37,8 +37,8 @@ describe('Test for Refresh Token Rotation', () => {
 
 		
 		test('should throw ApiError with code 401 if the refresh token has wrong signature', async () => {
-			const token = testData.REFRESH_TOKEN_WITH_INVALID_SIGNATURE;
-			const type = tokenTypes.REFRESH;
+			const token = testData.VERIFY_EMAIL_TOKEN_WITH_INVALID_SIGNATURE;
+			const type = tokenTypes.VERIFY_EMAIL;
 
 			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "JsonWebTokenError: invalid signature");
 
@@ -47,7 +47,7 @@ describe('Test for Refresh Token Rotation', () => {
 
 
 		test('should throw ApiError with code 401 if the token is malformed (Undefined)', async () => {
-			const token = testData.VERIFY_EMAIL_TOKEN_UNDEFINED;
+			const token = testData.VERIFY_EMAIL_TOKEN_UNDEFINED; // there is no such token in testData in order to simulate "undefined"
 			const type = tokenTypes.VERIFY_EMAIL;
 
 			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "JsonWebTokenError: jwt must be provided");
@@ -60,11 +60,10 @@ describe('Test for Refresh Token Rotation', () => {
 	describe('Token Database Related Errors', () => {
 
 		test('should throw ApiError with code 401 if the verified token is not in the database (token, type, user)', async () => {
-			const token = testData.REFRESH_TOKEN_VALID;
+			const token = testData.REFRESH_TOKEN_VALID; // There is no such token in the database
 			const type = tokenTypes.REFRESH;
 
 			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, `ApiError: ${type} token is not valid`);
-
 			expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(expect.toBeMatchedWithError(expectedError));
 		});
 

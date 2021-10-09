@@ -2,9 +2,8 @@ const passport = require('passport');
 const httpStatus = require('http-status');
 
 const ApiError = require('../utils/ApiError');
-const { userDbService } = require('../services');
+const { userDbService, redisService } = require('../services');
 const { roleRights } = require('../config/roles');
-const { getRedisClient } = require('../core/redis');
 
 
 const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pass, info) => {
@@ -28,15 +27,9 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 			return reject(new ApiError(httpStatus.UNAUTHORIZED, `Your browser/agent seems changed or updated, you have to re-login to get authentication`));
 		}
 	
-	
 		// control if the token is in blacklist
-		const redisClient = getRedisClient();
-		if (redisClient) {
-			if (await redisClient.get(`blacklist_${payload.jti}`))
-				return reject(new ApiError(httpStatus.FORBIDDEN, `Access token is in the blacklist`));
-		} else {
-			logger.warn("Redis Client is down at the moment of authorization.");
-			return reject(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `We've encountered a server internal problem (Redis)`));
+		if (await redisService.check_jti_in_blacklist(payload.jti)) {
+			return reject(new ApiError(httpStatus.FORBIDDEN, `Access token is in the blacklist`));
 		}
 			
 		req.user = authuser;
