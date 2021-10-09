@@ -12,7 +12,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 		if (err || info) {
 			return reject(new ApiError(httpStatus.UNAUTHORIZED, `TokenError: ${err?.message || info?.message}` ));
 		}
-	
+		
 		const { authuser, payload } = pass;
 	
 		if (!authuser) {
@@ -33,13 +33,15 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 		const redisClient = getRedisClient();
 		if (redisClient) {
 			if (await redisClient.get(`blacklist_${payload.jti}`))
-				return reject(new ApiError(httpStatus.FORBIDDEN, `The token is in the blacklist`));
+				return reject(new ApiError(httpStatus.FORBIDDEN, `Access token is in the blacklist`));
 		} else {
 			logger.warn("Redis Client is down at the moment of authorization.");
 			return reject(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `We've encountered a server internal problem (Redis)`));
 		}
 			
 		req.user = authuser;
+		authuser.jti = payload.jti; // it refers to access token and refresh token paired
+		// to get accessToken use req.headers.authorization.split(' ')[1];
 		
 		if (requiredRights.length) {
 	

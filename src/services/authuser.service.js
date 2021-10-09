@@ -3,9 +3,9 @@ const bcrypt = require('bcryptjs');
 
 const ApiError = require('../utils/ApiError');
 
-const { AuthUser } = require('../models');
-
+//for database operations for authusers
 const authuserDbService = require('./authuser.db.service');
+const { AuthUser } = require('../models');
 
 const paginaryService = require('./paginary.service');
 
@@ -135,8 +135,6 @@ const isPair_EmailAndId = async function (id, email) {
 		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 		await authuserDbService.deleteAuthUser(id);
-
-		// TODO: delete user data or do it via another request
   
 	} catch (error) {
 		error.description || (error.description = "Delete AuthUser failed in AuthUserService");

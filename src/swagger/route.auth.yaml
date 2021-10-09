@@ -80,28 +80,19 @@
 /auth/logout:
   post:
     summary: Logout
-    description: receives the tokens, gets logged the authuser out and revokes the tokens
+    description: gets logged the authuser out, deletes the refresh token family and revokes the access tokens
     tags: [Auth]
     security:
       - BearerAuth: []
-    requestBody:
-      required: true
-      content:
-        application/x-www-form-urlencoded:
-          schema:
-            $ref: '#/components/schemas/form-refresh-token'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/form-refresh-token'
     responses:
       204:
         description: NO CONTENT
       401:
         $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+      402:
+        $ref: '#/components/responses/LogoutSignoutUnauthorizedErrors'
       403:
         $ref: '#/components/responses/AuthMiddlewareForbiddenErrorsWithoutRightCheck'
-      422:
-        $ref: '#/components/responses/RefreshTokenValidationError'
       500:
         $ref: '#/components/responses/InternalServerError'
 
@@ -110,19 +101,10 @@
 /auth/signout:
   post:
     summary: Signout
-    description: receives the tokens, gets signed the authuser out, deletes all the user data and revokes the tokens
+    description: gets signed the authuser out, deletes all the user data and tokens and revokes the access tokens
     tags: [Auth]
     security:
       - BearerAuth: []
-    requestBody:
-      required: true
-      content:
-        application/x-www-form-urlencoded:
-          schema:
-            $ref: '#/components/schemas/form-refresh-token'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/form-refresh-token'
     responses:
       204:
         description: NO CONTENT
@@ -130,8 +112,6 @@
         $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
       403:
         $ref: '#/components/responses/AuthMiddlewareForbiddenErrorsWithoutRightCheck'
-      422:
-        $ref: '#/components/responses/RefreshTokenValidationError'
       500:
         $ref: '#/components/responses/InternalServerError'
 

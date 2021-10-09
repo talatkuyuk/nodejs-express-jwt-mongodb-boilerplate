@@ -34,7 +34,7 @@ describe('Auth Middleware', () => {
 		const req = httpMocks.createRequest(requestHeader);
 		const res = httpMocks.createResponse();
 		const next = jest.fn();
-
+		
 		await auth()(req, res, next);
 		
 		expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -115,9 +115,9 @@ describe('Auth Middleware', () => {
 
 			await authuserDbService.deleteAuthUser(authuser.id);
 
-			const request = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
+			const requestHeader = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: Access token does not refer any user");
-			commonHeaderTestProcess(request, expectedError);
+			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
@@ -132,9 +132,9 @@ describe('Auth Middleware', () => {
 			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
-			const request = { headers: { Authorization: `Bearer ${tokens.refresh.token}` }, useragent: { source: userAgent }};
+			const requestHeader = { headers: { Authorization: `Bearer ${tokens.refresh.token}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: jwt not active"); // since Refresh Token is used before "not valid before"
-			commonHeaderTestProcess(request, expectedError);
+			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
@@ -149,9 +149,9 @@ describe('Auth Middleware', () => {
 			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser.id);
 
-			const request = { headers: { Authorization: `Bearer ${verifyEmailToken}` }, useragent: { source: userAgent }};
+			const requestHeader = { headers: { Authorization: `Bearer ${verifyEmailToken}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: Invalid token type");
-			commonHeaderTestProcess(request, expectedError);
+			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
@@ -169,9 +169,9 @@ describe('Auth Middleware', () => {
 			const tokens2 = await tokenService.generateAuthTokens(authuser2.id, userAgent2);
 
 			// authuser1 tries to use authuser2's access token but using different user agent
-			const request = { headers: { Authorization: `Bearer ${tokens2.access.token}` }, useragent: { source: userAgent1 }};
+			const requestHeader = { headers: { Authorization: `Bearer ${tokens2.access.token}` }, useragent: { source: userAgent1 }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: Your browser/agent seems changed or updated, you have to re-login to get authentication");
-			commonHeaderTestProcess(request, expectedError);
+			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
@@ -186,9 +186,9 @@ describe('Auth Middleware', () => {
 			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const accessToken = tokenService.generateToken(authuser.id, moment().add(5, 'minutes'), tokenTypes.ACCESS, "jti", userAgent, 0, "INVALID-SECRET");
 
-			const request = { headers: { Authorization: `Bearer ${accessToken}` }, useragent: { source: userAgent }};
+			const requestHeader = { headers: { Authorization: `Bearer ${accessToken}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: invalid signature");
-			commonHeaderTestProcess(request, expectedError);
+			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
@@ -204,9 +204,9 @@ describe('Auth Middleware', () => {
 			const authuser = await authuserDbService.addAuthUser(authUserInstance);
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
-			const request = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
+			const requestHeader = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "ApiError: You are disabled, call the system administrator");
-			commonHeaderTestProcess(request, expectedError);
+			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
@@ -228,9 +228,9 @@ describe('Auth Middleware', () => {
 				redisClient.setex(`blacklist_${jti}`, 1 * 60, true);
 			}
 
-			const request = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
-			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "ApiError: The token is in the blacklist");
-			commonHeaderTestProcess(request, expectedError);
+			const requestHeader = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
+			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "ApiError: Access token is in the blacklist");
+			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
@@ -250,9 +250,9 @@ describe('Auth Middleware', () => {
 
 			await new Promise(resolve => setTimeout(resolve, 2000));
 				
-			const request = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
+			const requestHeader = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "ApiError: We've encountered a server internal problem (Redis)");
-			commonHeaderTestProcess(request, expectedError);
+			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 	});
 

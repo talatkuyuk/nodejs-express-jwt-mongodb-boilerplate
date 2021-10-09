@@ -79,20 +79,6 @@ const signupValidationRules = [
 
 
 
-const logoutValidationRules = [
-	body('refreshToken')
-      .notEmpty().withMessage('refresh token must not be empty')
-];
-
-
-
-const signoutValidationRules = [
-	body('refreshToken')
-      .notEmpty().withMessage('refresh token must not be empty')
-];
-
-
-
 const refreshTokensValidationRules = [
 	body('refreshToken')
       .notEmpty().withMessage('refresh token must not be empty')
@@ -122,6 +108,7 @@ const verifyEmailValidationRules = [
 ];
 
 
+
 const oAuthValidationRules = [
 	body('token')
 		.exists({checkFalsy: true}).withMessage('oAuth Provider\'s token must not be empty or falsy value')
@@ -132,8 +119,6 @@ const oAuthValidationRules = [
 module.exports = { 
 	loginValidationRules, 
 	signupValidationRules,
-	logoutValidationRules,
-	signoutValidationRules,
 	refreshTokensValidationRules,
 	forgotPasswordValidationRules,
 	resetPasswordValidationRules,
