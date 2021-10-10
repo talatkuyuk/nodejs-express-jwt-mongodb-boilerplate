@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon src/server.js",
-    "test": "cross-env NODE_ENV=test jest --coverage --runInBand --verbose --detectOpenHandles --config ./jest.config.json",
+    "test": "cross-env NODE_ENV=test jest --runInBand --verbose --detectOpenHandles --config ./jest.config.json",
     "test:file": "cross-env NODE_ENV=test jest --runInBand --verbose --detectOpenHandles --config ./jest.config.json middleware.auth.test.js",
     "test:coverage": "cross-env NODE_ENV=test jest --coverage --runInBand --config ./jest.config.json",
     "node:kill": "pkill node",

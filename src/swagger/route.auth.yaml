@@ -122,8 +122,6 @@
     summary: Refresh auth tokens
     description: receives the refresh token, implements refresh token rotation and sends the new tokens
     tags: [Auth]
-    security:
-      - BearerAuth: []
     requestBody:
       required: true
       content:
