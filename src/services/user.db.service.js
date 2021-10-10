@@ -4,55 +4,29 @@ const ObjectId = require('mongodb').ObjectId;
 const { User } = require('../models');
 
 
-/////////////////////////  UTILS  ///////////////////////////////////////
 
 /**
- * Check if the user exists
- * @param {String} id
- * @returns {Promise<Boolean>}
- */
- const isValidUser = async function (id) {
-	 try {
-		var db = mongodb.getDatabase();
-		const user = await db.collection("users").findOne({ _id: ObjectId(id) });
-		return !!user;
-
-	 } catch (error) {
-		error.description || (error.description = "Database Operation failed in UserDbService [isValidUser]");
-		throw error;
-	 }
-};
-
-
-/////////////////////////////////////////////////////////////////////
-
-
-
-/**
- * Create a user with the same id of the authuser
+ * Add an user into db with the same id of the authuser
  * @param {String} id
  * @param {Object} addBody
  * @returns {Promise}
  */
  const addUser = async (id, addBody) => {
 	try {
-		const db = mongodb.getDatabase();
-
 		const {email, role, name, gender, country} = addBody;
-
 		const user = new User(email, role, name, gender, country);
-
+		
+		const db = mongodb.getDatabase();
 		const result = await db.collection("users").insertOne({
 			_id: ObjectId(id), 
 			...user
 		});
 
-		console.log(`${result.insertedCount} record is created in users.`);
+		if (result.result.ok !== 1) return null;
 
-		if (result.result.ok === 1) 
-			return User.fromDoc(result.ops[0]); // inserted document
-		else
-			return null;
+		console.log(`${result.insertedCount} record is created in users. (${result.insertedId})`);
+
+		return User.fromDoc(result.ops[0]); // inserted document
 		
 	} catch (error) {
 		error.description || (error.description = "Database Operation failed in UserDbService [addUser]");
@@ -64,14 +38,20 @@ const { User } = require('../models');
 
 
 /**
- * Get user by id
- * @param {ObjectId} id
+ * Get user
+ * @param {Object} query
  * @returns {Promise<User>}
  */
- const getUser = async (id) => {
+ const getUser = async (query) => {
 	try {
 		const db = mongodb.getDatabase();
-		const doc = await db.collection("users").findOne({_id: ObjectId(id)});
+
+		if (query.id) {
+			query = { ...query, _id: ObjectId(query.id) };
+			delete query.id;
+		}
+
+		const doc = await db.collection("users").findOne(query);
 
 		return User.fromDoc(doc);
 		
@@ -137,7 +117,7 @@ const { User } = require('../models');
 
 
 /**
- * Query for users
+ * Query for users joined with authusers
  * @param {Object} filterLeft - Mongo filter for authusers
  * @param {Object} filterRight - Mongo filter for users
  * @param {Object} sort - Sort option in the format: { field1: 1, field2: -1}
@@ -209,30 +189,28 @@ const { User } = require('../models');
  * Update user by id
  * @param {ObjectId} id
  * @param {Object} updateBody
- * @returns {Promise<User>}
+ * @returns {Promise<User?>}
  */
  const updateUser = async (id, updateBody) => {
 	 try {
-		 console.log(updateBody);
+		 console.log("updateUser: ", updateBody);
 	   
 		 const db = mongodb.getDatabase();
-
 		 const result = await db.collection("users").findOneAndUpdate(
 			{ _id: ObjectId(id) },
 			{ $set: {...updateBody, updatedAt: Date.now()} },
-			{ returnOriginal: false }
+			{ returnDocument: "after" }
 		 );
 
-		 console.log(`${result.ok} record is updated in users`);
+		 const count = result.value == null ? 0 : 1;
+		 console.log(`${count} record is updated in users`);
 
-		 const user = User.fromDoc(result.value);
-		 return user;
+		 return User.fromDoc(result.value);
 		 
 	 } catch (error) {
 		error.description || (error.description = "Database Operation failed in UserDbService [updateUser]");
 		throw error;
 	 }
-
 };
 
 
@@ -241,26 +219,29 @@ const { User } = require('../models');
 /**
  * Delete user by id
  * @param {ObjectId} id
- * @returns {Promise<User?>}
+ * @returns {Promise<boolean>}
  */
  const deleteUser = async (id) => {
 	try {
+		console.log("deleteUser: ", id);
+
 		const db = mongodb.getDatabase();
 		const result = await db.collection("users").findOneAndDelete({_id: ObjectId(id)});
 
-		if (result.ok === 1) {
-			console.log(`The user ${id} is deleted in users`);
-			const user = User.fromDoc(result.value);
+		if (result.ok !== 1) return false;
+		if (result.value === null) return false;
 
-			await toDeletedUsers(user);
+		console.log(`deleteUser: The user ${id} is deleted in users`);
+	
+		const user = User.fromDoc(result.value);
 
-			return user;
-
-		} else {
-			console.log(`The user is not deleted.`);
-
-			return null;
+		const result2 = await toDeletedUsers(user);
+		if (result2 == null) {
+			// do not raise error but log the issue
+			console.log(`deleteUser: The user ${id} could not added into deletetedusers`);
 		}
+
+		return true;
 
 	} catch (error) {
 		error.description || (error.description = "Database Operation failed in UserDbService [deleteUser]");
@@ -274,18 +255,24 @@ const { User } = require('../models');
 /**
  * Add the deleted user to the deletedusers
  * @param {User} deletedUser
- * @returns {Promise}
+ * @returns {Promise<User?>}
  */
  const toDeletedUsers = async (deletedUser) => {
 	try {
-		const db = mongodb.getDatabase();
+		console.log("toDeletedAuthUsers: ", deletedUser.id);
 
 		deletedUser["_id"] = deletedUser.id;
 		delete deletedUser.id;
 		deletedUser["deletedAt"] = Date.now();
 
+		const db = mongodb.getDatabase();
 		const result = await db.collection("deletedusers").insertOne(deletedUser);
-		console.log(`${result.insertedCount} record is created in deletedusers.`)
+
+		if (result.result.ok !== 1) return null;
+		
+		console.log(`${result.insertedCount} record is created in deletedusers. ${result.insertedId}`);
+
+		return result.ops[0]; // deleted User
 		
 	} catch (error) {
 		error.description || (error.description = "Database Operation failed in UserDbService [toDeletedUsers]");
@@ -295,15 +282,40 @@ const { User } = require('../models');
 
 
 
+/**
+ * Get deleted user
+ * @param {Object} query
+ * @returns {Promise<User?>}
+ */
+ const getDeletedUser = async (query) => {
+	try {
+		console.log("getDeletedUser: ", query);
+
+		if (query.id) {
+			query = { ...query, _id: ObjectId(query.id) };
+			delete query.id;
+		}
+
+		const db = mongodb.getDatabase();
+		const doc = await db.collection("deletedusers").findOne(query);
+
+		return User.fromDoc(doc);
+		
+	} catch (error) {
+		error.description || (error.description = "Database Operation failed in UserDbService [getDeletedUser]");
+		throw error
+	}
+};
+
+
+
 module.exports = {
 	addUser,
 	getUser,
 	getUsers,
-	getUsersJoined,
 	updateUser,
 	deleteUser,
-};
 
-module.exports.utils = {
-	isValidUser,
-}
+	getUsersJoined,
+	getDeletedUser,
+};

@@ -71,6 +71,7 @@ const isPair_EmailAndId = async function (id, email) {
  */
  const toggleAbility = async (id) => {
 	try {
+		// to get authuser first is necessary to toggle disable further
 		const authuser = await authuserDbService.getAuthUser({ id });
 		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
@@ -94,7 +95,10 @@ const isPair_EmailAndId = async function (id, email) {
  const changePassword = async (authuser, newPassword) => {
 	try {
 		const password = await bcrypt.hash(newPassword, 8);
-    	await authuserDbService.updateAuthUser(authuser.id, { password });
+    	const result = await authuserDbService.updateAuthUser(authuser.id, { password });
+
+		if (result === null)
+			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 	} catch (error) {
 		error.description || (error.description = "Change Password failed in AuthUserService");
@@ -105,39 +109,19 @@ const isPair_EmailAndId = async function (id, email) {
 
 
 /**
- * Delete AuthUser
- * @param {Object} query
- * @returns {Promise<Object>}
- */
- const getAuthUsers = async (query) => {
-	try {
-		const queryFields = ['email'];
-		const booleanFields = ['isEmailVerified', 'isDisabled'];
-		
-		return await paginaryService.paginary(query, queryFields, booleanFields, authuserDbService.getAuthUsers);
-  
-	} catch (error) {
-		error.description || (error.description = "Get AuthUsers in paginary failed in AuthUserService");
-	  	throw error;
-	}
-};
-
-
-
-/**
- * Delete AuthUser
+ * Get AuthUser by id
  * @param {string} id
- * @returns {Promise}
+ * @returns {Promise<AuthUser?>}
  */
- const deleteAuthUser = async (id) => {
+ const getAuthUserById = async (id) => {
 	try {
 		const authuser = await authuserDbService.getAuthUser({ id });
 		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
-
-		await authuserDbService.deleteAuthUser(id);
+		
+		return authuser;
   
 	} catch (error) {
-		error.description || (error.description = "Delete AuthUser failed in AuthUserService");
+		error.description || (error.description = "Get AuthUser by id failed in AuthUserService");
 	  	throw error;
 	}
 };
@@ -169,19 +153,39 @@ const isPair_EmailAndId = async function (id, email) {
 
 
 /**
- * Get AuthUser by id
- * @param {string} id
- * @returns {Promise<AuthUser?>}
+ * Get AuthUsers in a paginary
+ * @param {Object} query
+ * @returns {Promise<Object>}
  */
- const getAuthUserById = async (id) => {
+ const getAuthUsers = async (query) => {
 	try {
-		const authuser = await authuserDbService.getAuthUser({ id });
-		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+		const queryFields = ['email'];
+		const booleanFields = ['isEmailVerified', 'isDisabled'];
 		
-		return authuser;
+		return await paginaryService.paginary(query, queryFields, booleanFields, authuserDbService.getAuthUsers);
   
 	} catch (error) {
-		error.description || (error.description = "Get AuthUser by id failed in AuthUserService");
+		error.description || (error.description = "Get AuthUsers in paginary failed in AuthUserService");
+	  	throw error;
+	}
+};
+
+
+
+/**
+ * Delete AuthUser
+ * @param {string} id
+ * @returns {Promise}
+ */
+ const deleteAuthUser = async (id) => {
+	try {
+		const result = await authuserDbService.deleteAuthUser(id);
+
+		if (!result)
+			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+  
+	} catch (error) {
+		error.description || (error.description = "Delete AuthUser failed in AuthUserService");
 	  	throw error;
 	}
 };
@@ -195,7 +199,7 @@ const isPair_EmailAndId = async function (id, email) {
  */
  const getDeletedAuthUserById = async (id) => {
 	try {
-		const authuser = await authuserDbService.getDeletedAuthUser({id});
+		const authuser = await authuserDbService.getDeletedAuthUser({ id });
 		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 		return authuser;
@@ -209,17 +213,17 @@ const isPair_EmailAndId = async function (id, email) {
 
 
 module.exports = {
+	isEmailTaken,
+	isValidAuthUser,
+	isPair_EmailAndId,
+
 	toggleAbility,
 	changePassword,
 
-	getAuthUsers,
-	deleteAuthUser,
-
 	getAuthUserById,
 	getAuthUserByEmail,
-	getDeletedAuthUserById,
+	getAuthUsers,
 
-	isEmailTaken,
-	isValidAuthUser,
-	isPair_EmailAndId
+	deleteAuthUser,
+	getDeletedAuthUserById,
 };
