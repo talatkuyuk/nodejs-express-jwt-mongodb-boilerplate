@@ -1,9 +1,13 @@
 const path = require('path');
 const Joi = require('joi');
 
-require('dotenv-safe').config({ example: path.join(__dirname , '../../.env.example') });
+require('dotenv-safe').config({ 
+  path: path.join(__dirname, '../../.env'), // defult, path: path.resolve(process.cwd(), '.env')
+  example: path.join(__dirname , '../../.env.example') // default, example: path.resolve(process.cwd(), '.env.example')
+});
 
-//dotenv.config({ path: path.join(__dirname, '../../.env') });
+// actually, above options are default, so you can use like below as well
+// require('dotenv-safe').config();
 
 const envVarsSchema = Joi.object()
   .keys({
@@ -34,6 +38,7 @@ const envVarsSchema = Joi.object()
 const { value: envVars, error } = envVarsSchema.prefs({ errors: { label: 'key' } }).validate(process.env);
 
 if (error) {
+  delete error._original;
   error.description || (error.description = "Environment variable validation failed in Config");
   throw error;
 }
