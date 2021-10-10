@@ -14,11 +14,11 @@ const addAuthUser = async (authuser) => {
 		const db = mongodb.getDatabase();
 		const result = await db.collection("authusers").insertOne(authuser);
 
-		const authuserx = AuthUser.fromDoc(result.ops[0]);
-		
+		if (result.result.ok !== 1) return null;
+
 		console.log(`${result.insertedCount} record is created in authusers. (${result.insertedId})`);
-		
-		return authuserx;
+
+		return AuthUser.fromDoc(result.ops[0]); // inserted document
 
 	} catch (error) {
 		error.description || (error.description = "Database Operation failed in AuthUserDbService [addAuthUser]");
@@ -37,7 +37,6 @@ const addAuthUser = async (authuser) => {
  */
  const get_oAuthUser = async (service, id, email) => {
 	try {
-		
 		const db = mongodb.getDatabase();
 		const doc = await db.collection("authusers").findOne({ 
 			$or: [
@@ -143,21 +142,21 @@ const getAuthUser = async (query) => {
  * Update authuser by id
  * @param {ObjectId} id
  * @param {Object} updateBody
- * @returns {Promise<AuthUser>}
+ * @returns {Promise<AuthUser?>}
  */
 const updateAuthUser = async (id, updateBody) => {
 	try {
 		console.log("updateAuthUser: ", updateBody);
 	  
 		const db = mongodb.getDatabase();
-	  
 		const result = await db.collection("authusers").findOneAndUpdate(
 		  { _id: ObjectId(id) },
 		  { $set: {...updateBody, updatedAt: Date.now()} },
-		  { returnOriginal: false }
+		  { returnDocument: "after" }
 		);
 	  
-		console.log(`${result.ok} record is updated in authusers.`);
+		const count = result.value === null ? 0 : 1;
+		console.log(`${count} record is updated in authusers.`);
 	  
 		return AuthUser.fromDoc(result.value);
 		
@@ -173,26 +172,30 @@ const updateAuthUser = async (id, updateBody) => {
 /**
  * Delete authuser by id
  * @param {ObjectId} id
- * @returns {Promise<Boolean>}
+ * @returns {Promise<boolean>}
  */
 const deleteAuthUser = async (id) => {
 	try {
 		console.log("deleteAuthUser: ", id);
 
 		const db = mongodb.getDatabase();
-
 		const result = await db.collection("authusers").findOneAndDelete({ _id: ObjectId(id) });
 
-		if (result.ok === 0) return false;
+		if (result.ok !== 1) return false;
+		if (result.value === null) return false;
 
-		console.log(`The authuser ${id} is deleted in authusers`);
-		
+		console.log(`deleteAuthUser: The authuser ${id} is deleted in authusers`);
+	
 		const authuser = AuthUser.fromDoc(result.value);
 
-		await toDeletedAuthUsers(authuser);
+		const result2 = await toDeletedAuthUsers(authuser);
+		if (result2 == null) {
+			// do not raise error but log the issue
+			console.log(`deleteAuthUser: The authuser ${id} could not added into deletedauthusers`);
+		}
 
 		return true;
-		
+
 	} catch (error) {
 		error.description || (error.description = "Database Operation failed in AuthUserDbService [deleteAuthUser]");
 		throw error;
@@ -211,15 +214,16 @@ const deleteAuthUser = async (id) => {
 	try {
 		console.log("toDeletedAuthUsers: ", deletedAuthUser.id);
 
-		const db = mongodb.getDatabase();
-
 		deletedAuthUser["_id"] = deletedAuthUser.id;
 		delete deletedAuthUser.id;
 		deletedAuthUser["deletedAt"] = Date.now();
 
+		const db = mongodb.getDatabase();
 		const result = await db.collection("deletedauthusers").insertOne(deletedAuthUser);
+
+		if (result.result.ok !== 1) return null;
 		
-		console.log(`${result.insertedCount} record is created in deletedauthusers.`);
+		console.log(`${result.insertedCount} record is created in deletedauthusers. ${result.insertedId}`);
 
 		return result.ops[0]; // deleted AuthUser
 		
@@ -234,19 +238,18 @@ const deleteAuthUser = async (id) => {
 /**
  * Get deleted authuser
  * @param {Object} query {id | email}
- * @returns {Promise<AuthUser>}
+ * @returns {Promise<AuthUser?>}
  */
  const getDeletedAuthUser = async (query) => {
 	try {
 		console.log("getDeletedAuthUser: ", query);
 
-		const db = mongodb.getDatabase();
-		
 		if (query.id) {
 			query = { ...query, _id: ObjectId(query.id) };
 			delete query.id;
 		}
 
+		const db = mongodb.getDatabase();
 		const doc = await db.collection("deletedauthusers").findOne(query);
 
 		return AuthUser.fromDoc(doc);

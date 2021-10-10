@@ -37,9 +37,9 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 		// to get accessToken use req.headers.authorization.split(' ')[1];
 		
 		if (requiredRights.length) {
-	
-			const user = await userDbService.getUser(authuser.id);
-			const role = user?.role ?? "user"; // there is no role yet while adding a user
+			
+			const user = await userDbService.getUser({ id: authuser.id });
+			const role = user?.role ?? "user"; // there is no role yet forexample while adding an authuser
 			req.user.role = role;
 	
 			const userRights = roleRights[role];
