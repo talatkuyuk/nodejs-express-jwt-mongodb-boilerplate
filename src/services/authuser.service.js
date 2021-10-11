@@ -159,13 +159,43 @@ const isPair_EmailAndId = async function (id, email) {
  */
  const getAuthUsers = async (query) => {
 	try {
-		const queryFields = ['email'];
-		const booleanFields = ['isEmailVerified', 'isDisabled'];
+		const fields = {
+			stringFields: ['email'],
+			booleanFields: ['isEmailVerified', 'isDisabled'],
+		}
 		
-		return await paginaryService.paginary(query, queryFields, booleanFields, authuserDbService.getAuthUsers);
+		return await paginaryService.paginary(query, fields, authuserDbService.getAuthUsers);
   
 	} catch (error) {
 		error.description || (error.description = "Get AuthUsers in paginary failed in AuthUserService");
+	  	throw error;
+	}
+};
+
+
+
+/**
+ * Get AuthUsers Joined with Users in a paginary
+ * @param {Object} query
+ * @returns {Promise<Object>}
+ */
+ const getAuthUsersJoined = async (query) => {
+	try {
+
+		const fieldsLeft = {
+			stringFields: ['email'],
+			booleanFields: ['isEmailVerified', 'isDisabled'],
+		}
+
+		const fieldsRight = {
+			stringFields: ['role', 'name', 'country', 'gender'],
+			booleanFields: [],
+		}
+		
+		return await paginaryService.paginaryForJoinQuery(query, fieldsLeft, fieldsRight, authuserDbService.getAuthUsersJoined);
+  
+	} catch (error) {
+		error.description || (error.description = "Get AuthUsers joined in paginary failed in AuthUserService");
 	  	throw error;
 	}
 };
@@ -223,6 +253,7 @@ module.exports = {
 	getAuthUserById,
 	getAuthUserByEmail,
 	getAuthUsers,
+	getAuthUsersJoined,
 
 	deleteAuthUser,
 	getDeletedAuthUserById,

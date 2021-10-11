@@ -1,7 +1,6 @@
 const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
 
-const config = require('../config');
 const ApiError = require('../utils/ApiError');
 
 // for redis operations
@@ -30,7 +29,10 @@ const signupWithEmailAndPassword = async (email, password) => {
 		const authuserx = new AuthUser(email, hashedPassword);
 		authuserx.services = { emailpassword: "registered" };
 
-		return await authuserDbService.addAuthUser(authuserx);
+		const authuser = await authuserDbService.addAuthUser(authuserx);
+		
+		if (!authuser)
+			throw new ApiError(httpStatus.BAD_REQUEST, "Internal Server Problem (Database)");
 
 	} catch (error) {
 		error.description || (error.description = "Signup with Email-Password failed in AuthService");

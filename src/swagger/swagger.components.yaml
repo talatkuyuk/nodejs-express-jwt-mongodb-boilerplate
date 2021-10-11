@@ -761,9 +761,9 @@ components:
         ]
         totalCount: 2
         pagination: {
-          perPage: 20,
           currentPage: 1,
           totalPages: 1,
+          perPage: 20,
         }
 
                     

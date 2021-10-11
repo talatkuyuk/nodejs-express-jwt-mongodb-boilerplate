@@ -7,7 +7,7 @@ const { AuthUser } = require('../models');
 /**
  * Add an authuser into db
  * @param {AuthUser} authuser
- * @returns {Promise<AuthUser>}
+ * @returns {Promise<AuthUser?>}
  */
 const addAuthUser = async (authuser) => {
 	try {
@@ -117,13 +117,20 @@ const getAuthUser = async (query) => {
 			},
 			{
 			   $facet:{
-				   users: [{ $skip: skip }, { $limit: limit}],
-				   totalCount: [
-					   {
-						   $count: 'count'
-					   }
+				   users: [
+					    { 
+							$skip: skip 
+						}, 
+						{ 
+							$limit: limit
+						}
+					],
+				   total: [
+					    {
+							$count: 'count'
+					    }
 				   ]
-				 }
+				}
 			}
 		]
 	
@@ -135,6 +142,81 @@ const getAuthUser = async (query) => {
 	}
 };
 
+
+
+
+/**
+ * Query for authusers joined with users
+ * @param {Object} filterLeft - Mongo filter for authusers
+ * @param {Object} filterRight - Mongo filter for users
+ * @param {Object} sort - Sort option in the format: { field1: 1, field2: -1}
+ * @param {number} limit - Maximum number of results per page (default = 20)
+ * @param {number} page - Current page (default = 1)
+ * @returns {Promise<QueryResult>}
+ */
+ const getAuthUsersJoined = async (filterLeft, filterRight, sort, skip, limit) => {
+	try {
+		const db = mongodb.getDatabase();
+	
+		const pipeline = [
+			{
+			   $match: filterLeft
+			},
+			{ 
+				$lookup: {
+					from: 'users',
+					localField: '_id',
+					foreignField: '_id',
+					as: 'details',
+				}
+			},
+			{
+			   $unwind: "$details"
+			},
+			{
+				$project:{
+					email: 1,
+					isEmailVerified: 1,
+					isDisabled: 1,
+					role: "$details.role",
+					name: "$details.name",
+					gender: "$details.gender",
+					country: "$details.country",
+					createdAt: 1,
+				}
+			},
+			{
+			   $match: filterRight
+			},
+			{
+			   $sort: sort
+			},
+			{
+			   $facet:{
+				   users: [
+					   { 
+						   $skip: skip 
+					   }, 
+					   { 
+						   $limit: limit
+					   }
+				   ],
+				   total: [
+					   {
+						   $count: 'count'
+					   }
+				   ]
+				 }
+			}
+		]
+	
+	   return await db.collection("authusers").aggregate(pipeline).toArray();
+		
+	} catch (error) {
+	   error.description || (error.description = "Database Operation failed in UserDbService [getUsersJoined]");
+		throw error;
+	}
+};
 
 
 
@@ -269,5 +351,6 @@ module.exports = {
 	deleteAuthUser,
 
 	get_oAuthUser,
+	getAuthUsersJoined,
 	getDeletedAuthUser,
 };

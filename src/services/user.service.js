@@ -56,13 +56,44 @@ const paginaryService = require('./paginary.service');
  */
  const getUsers = async (query) => {
 	try {
-		const queryFields = ['email', 'role', 'name', 'country', 'gender'];
-		const booleanFields = [];
+
+		const fields = {
+			stringFields: ['email', 'role', 'name', 'country', 'gender'],
+			booleanFields: [],
+		}
 		
-		return await paginaryService.paginary(query, queryFields, booleanFields, userDbService.getUsers);
+		return await paginaryService.paginary(query, fields, userDbService.getUsers);
   
 	} catch (error) {
 		error.description || (error.description = "Get Users in paginary failed in UserService");
+	  	throw error;
+	}
+};
+
+
+
+/**
+ * Get Users Joined with Authusers in a paginary
+ * @param {Object} query
+ * @returns {Promise<Object>}
+ */
+ const getUsersJoined = async (query) => {
+	try {
+
+		const fieldsLeft = {
+			stringFields: ['email', 'role', 'name', 'country', 'gender'],
+			booleanFields: [],
+		}
+
+		const fieldsRight = {
+			stringFields: [],
+			booleanFields: ['isEmailVerified', 'isDisabled'],
+		}
+		
+		return await paginaryService.paginaryForJoinQuery(query, fieldsLeft, fieldsRight, userDbService.getUsersJoined);
+  
+	} catch (error) {
+		error.description || (error.description = "Get Users joined in paginary failed in UserService");
 	  	throw error;
 	}
 };
@@ -114,6 +145,7 @@ module.exports = {
 
 	getUserById,
 	getUsers,
+	getUsersJoined,
 
 	deleteUser,
 	getDeletedUserById,

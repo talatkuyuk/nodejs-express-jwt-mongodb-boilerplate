@@ -43,6 +43,16 @@ const getAuthUsers = asyncHandler(async (req, res) => {
 
 
 
+const getAuthUsersJoined = asyncHandler(async (req, res) => {
+	const query = req.query;
+
+	const result = await authuserService.getAuthUsersJoined(query);
+	
+	res.status(httpStatus.OK).send(result);
+});
+
+
+
 const changePassword = asyncHandler(async (req, res) => {
 	const newPassword = req.body.password;
 	const authuser = req.user;
@@ -85,6 +95,7 @@ module.exports = {
 	addAuthUser,
 	getAuthUser,
 	getAuthUsers,
+	getAuthUsersJoined,
 	changePassword,
 	toggleAbility,
 	deleteAuthUser,
