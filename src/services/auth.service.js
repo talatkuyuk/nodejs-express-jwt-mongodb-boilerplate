@@ -34,6 +34,8 @@ const signupWithEmailAndPassword = async (email, password) => {
 		if (!authuser)
 			throw new ApiError(httpStatus.BAD_REQUEST, "Internal Server Problem (Database)");
 
+		return authuser;
+
 	} catch (error) {
 		error.description || (error.description = "Signup with Email-Password failed in AuthService");
 		throw error;
