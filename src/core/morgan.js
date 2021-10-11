@@ -8,8 +8,8 @@ morgan.token('user', (req, res) => req?.user?.email || 'anonymous');
 morgan.token('error', (req, res) => res.locals.error || '');
 
 const getIpFormat = () => (config.env === 'production' ? ':remote-addr - ' : '');
-const successResponseFormat = `${getIpFormat()}:method :url :status - :response-time ms - user: :user`;
-const errorResponseFormat = `${getIpFormat()}:method :url :status - :response-time ms - user: :user - :error`;
+const successResponseFormat = `${getIpFormat()}:method :url :status - :response-time ms - :user`;
+const errorResponseFormat = `${getIpFormat()}:method :url :status - :response-time ms - :user - :error`;
 
 const successHandler = morgan(successResponseFormat, {
   skip: (req, res) => res.statusCode >= 400,
