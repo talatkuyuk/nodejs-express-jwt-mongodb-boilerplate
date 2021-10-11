@@ -2,6 +2,7 @@ const axios = require('axios');
 const {OAuth2Client} = require('google-auth-library');
 
 const config = require('../config');
+const { locateError } = require('../utils/ApiError');
 
 
 const google = async (idToken) => {
@@ -17,8 +18,7 @@ const google = async (idToken) => {
 		return { provider: "google", user: {id, email} };
 
 	} catch (error) {
-		error.description || (error.description = "Google Provider failed in authProviders");
-		throw error;
+		throw locateError(error, "AuthProviders : google");
 	}
 };
 
@@ -33,8 +33,7 @@ const facebook = async (access_token) => {
 		return { provider: "facebook", user: {id, email} };
 
 	} catch (error) {
-		error.description || (error.description = "Facebook Provider failed in authProviders");
-		throw error;
+		throw locateError(error, "AuthProviders : facebook");
 	}
 };
 

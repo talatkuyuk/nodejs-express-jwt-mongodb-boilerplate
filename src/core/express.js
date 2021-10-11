@@ -12,12 +12,11 @@ const mongoSanitize = require('express-mongo-sanitize');
 const routes     = require('../routes');
 const config     = require('../config');
 const morgan     = require('./morgan');
-const ApiError   = require('../utils/ApiError');
 
 const { jwtStrategy, googleStrategy, facebookStrategy } = require('./passport');
 const { errorConverter, errorHandler } = require('../middlewares/error');
 const { authLimiter } = require('../middlewares/rateLimiter');
-
+const { ApiError } = require('../utils/ApiError');
 
 // *****************************************************************
 function initViewEngine(app) {
@@ -114,7 +113,7 @@ app.use(xss());
 app.use('/', routes);
 
 // send back a 404 error for any unknown api request
-app.use((req, res, next) => next(ApiError.notFound()));
+app.use((req, res, next) => next( new ApiError(httpStatus.NOT_FOUND, 'Not found') ));
 
 // convert error to ApiError
 app.use(errorConverter);

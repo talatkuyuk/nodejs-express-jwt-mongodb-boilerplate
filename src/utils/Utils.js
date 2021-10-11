@@ -1,3 +1,5 @@
+const { locateError } = require('../utils/ApiError');
+
 class Utils {
 
 	/**
@@ -17,8 +19,7 @@ class Utils {
 			}, {});
 
 		} catch (error) {
-			error.description || (error.description = "Utility [pick] failed");
-			throw error;
+			throw locateError(error, "Util : pick");
 		}
 	};
 
@@ -51,8 +52,7 @@ class Utils {
 			return obj;
 
 		} catch (error) {
-			error.description || (error.description = "Utility [pickSort] failed");
-			throw error;
+			throw locateError(error, "Util : pickSort");
 		}
 	};
 
@@ -79,8 +79,7 @@ class Utils {
 			return object;
 
 		} catch (error) {
-			error.description || (error.description = "Utility [parseBooleans] failed");
-			throw error;
+			throw locateError(error, "Util : parseBooleans");
 		}
 	};
 
@@ -97,8 +96,7 @@ class Utils {
 			return [first.trim(), second.trim()];
 
 		} catch (error) {
-			error.description || (error.description = "Utility [splitTwo] failed");
-			throw error;
+			throw locateError(error, "Util : splitTwo");
 		}
 	}
 

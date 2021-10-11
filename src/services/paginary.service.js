@@ -1,4 +1,5 @@
 const Utils = require('../utils/Utils');
+const { locateError } = require('../utils/ApiError');
 
 const paginary = async (query, fields, dbQueryCallback) => {
 
@@ -13,8 +14,7 @@ const paginary = async (query, fields, dbQueryCallback) => {
 		return prepareResponse(content, page, limit);
 		
 	} catch (error) {
-		error.description || (error.description = "Paginary Service failed");
-		throw error;
+		throw locateError(error, "PaginaryService : paginary");
 	}
 }
 
@@ -33,8 +33,7 @@ const paginaryForJoinQuery = async (query, fieldsLeft, fieldsRight, dbQueryCallb
 		return prepareResponse(content, page, limit);
 		
 	} catch (error) {
-		error.description || (error.description = "Paginary Service ForJoinQuery  failed");
-		throw error;
+		throw locateError(error, "PaginaryService : paginaryForJoinQuery");
 	}
 }
 

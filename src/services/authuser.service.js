@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
 
-const ApiError = require('../utils/ApiError');
+const { ApiError, locateError } = require('../utils/ApiError');
 
 //for database operations for authusers
 const authuserDbService = require('./authuser.db.service');
@@ -78,8 +78,7 @@ const isPair_EmailAndId = async function (id, email) {
 		await authuserDbService.updateAuthUser(id, {isDisabled: !authuser.isDisabled});
   
 	} catch (error) {
-		error.description || (error.description = "Toggle Ability failed in AuthUserService");
-	  	throw error;
+		throw locateError(error, "AuthUserService : toggleAbility");
 	}
 };
 
@@ -101,8 +100,7 @@ const isPair_EmailAndId = async function (id, email) {
 			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 	} catch (error) {
-		error.description || (error.description = "Change Password failed in AuthUserService");
-		throw error;
+		throw locateError(error, "AuthUserService : changePassword");
 	}
 };
 
@@ -121,8 +119,7 @@ const isPair_EmailAndId = async function (id, email) {
 		return authuser;
   
 	} catch (error) {
-		error.description || (error.description = "Get AuthUser by id failed in AuthUserService");
-	  	throw error;
+		throw locateError(error, "AuthUserService : getAuthUserById");
 	}
 };
 
@@ -144,8 +141,7 @@ const isPair_EmailAndId = async function (id, email) {
 		return authuser;
   
 	} catch (error) {
-		error.description || (error.description = "Get AuthUser by email failed in AuthUserService");
-	  	throw error;
+		throw locateError(error, "AuthUserService : getAuthUserByEmail");
 	}
 };
 
@@ -167,8 +163,7 @@ const isPair_EmailAndId = async function (id, email) {
 		return await paginaryService.paginary(query, fields, authuserDbService.getAuthUsers);
   
 	} catch (error) {
-		error.description || (error.description = "Get AuthUsers in paginary failed in AuthUserService");
-	  	throw error;
+		throw locateError(error, "AuthUserService : getAuthUsers");
 	}
 };
 
@@ -195,8 +190,7 @@ const isPair_EmailAndId = async function (id, email) {
 		return await paginaryService.paginaryForJoinQuery(query, fieldsLeft, fieldsRight, authuserDbService.getAuthUsersJoined);
   
 	} catch (error) {
-		error.description || (error.description = "Get AuthUsers joined in paginary failed in AuthUserService");
-	  	throw error;
+		throw locateError(error, "AuthUserService : getAuthUsersJoined");
 	}
 };
 
@@ -215,8 +209,7 @@ const isPair_EmailAndId = async function (id, email) {
 			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
   
 	} catch (error) {
-		error.description || (error.description = "Delete AuthUser failed in AuthUserService");
-	  	throw error;
+		throw locateError(error, "AuthUserService : deleteAuthUser");
 	}
 };
 
@@ -235,8 +228,7 @@ const isPair_EmailAndId = async function (id, email) {
 		return authuser;
   
 	} catch (error) {
-		error.description || (error.description = "Get deleted AuthUser by id failed in AuthUserService");
-	  	throw error;
+		throw locateError(error, "AuthUserService : getDeletedAuthUserById");
 	}
 };
 

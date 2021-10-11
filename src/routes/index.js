@@ -12,7 +12,7 @@ const docsRoute = require('./docs.route');
 const mongodb = require('../core/mongodb');
 const redis = require('../core/redis');
 const config = require('../config');
-
+const { locateError } = require('../middlewares/error');
 
 // for testing purpose in development environment
 router.get('/list', asyncHandler( async (req, res) => {
@@ -33,8 +33,7 @@ router.get('/list', asyncHandler( async (req, res) => {
 			res.status(httpStatus.OK).json("OK");
 		
 	} catch (error) {
-		error.description || (error.description = "Database operation [list collections] failed in response");
-		throw error;
+		throw locateError(error, "RouteIndex : getList");
 	}
 }));
 
@@ -67,8 +66,7 @@ router.get('/console', (req, res) => {
 		res.status(httpStatus.OK).json("OK");
 
 	} catch (error) {
-		error.description || (error.description = "Database operation [list collections] failed in console");
-		throw error;
+		throw locateError(error, "RouteIndex : getConsole");
 	}
 });
 
@@ -93,9 +91,8 @@ router.get('/status', asyncHandler( async (req, res) => {
 	} catch (error) {
 		res.json({ mongoStatus: "DOWN", redisStatus });
 
-		error.description || (error.description = "Checking status of MongoDb and Redis servers failed");
-		console.log(error);
-		// throw error;
+		//throw locateError(error, "RouteIndex : getStatus");
+		console.log(locateError(error, "RouteIndex : getStatus"));
 	}
 }));
 

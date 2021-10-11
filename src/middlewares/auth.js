@@ -1,7 +1,7 @@
 const passport = require('passport');
 const httpStatus = require('http-status');
 
-const ApiError = require('../utils/ApiError');
+const { ApiError, locateError } = require('../utils/ApiError');
 const { userDbService, redisService } = require('../services');
 const { roleRights } = require('../config/roles');
 
@@ -60,8 +60,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 		resolve();
 		
 	} catch (error) {
-		error.description || (error.description = "Authorization middleware [verifyCallback] failed");
-		reject(error);
+		reject( locateError(error, "AuthMiddleware : verifyCallback") );
 	}
 };
 
@@ -70,7 +69,9 @@ const auth = (...requiredRights) => async (req, res, next) => {
 		passport.authenticate('jwt', { session: false }, verifyCallback(req, resolve, reject, requiredRights))(req, res, next);
 	})
 	.then(() => next())
-	.catch((error) => { error.description || (error.description = "Process failed in Authorization middleware"); next(error)});
+	.catch((error) => { 
+		next( locateError(error, "AuthMiddleware : auth") );
+	});
 };
 
 module.exports = { auth };

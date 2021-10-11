@@ -11,7 +11,6 @@ const {
 
 
 
-
 const signup = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
 	const userAgent = req.useragent.source;
@@ -109,7 +108,6 @@ const sendVerificationEmail = asyncHandler(async (req, res, next) => {
 	await emailService.sendVerificationEmail(email, verifyEmailToken);
 
 	res.status(httpStatus.NO_CONTENT).send();
-
 });
 
 
@@ -132,6 +130,7 @@ const oAuth = asyncHandler(async (req, res) => {
 
 	const authuser = await authService.loginWith_oAuth(oAuthProvider, id, email);
 	const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
+
 	res.status(httpStatus.OK).send({ user: authuser.filter(), tokens });
 });
 

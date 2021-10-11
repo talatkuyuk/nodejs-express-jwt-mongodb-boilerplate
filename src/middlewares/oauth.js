@@ -1,9 +1,9 @@
 const passport = require('passport');
 const axios = require('axios');
-
 const {OAuth2Client} = require('google-auth-library');
 
 const config = require('../config');
+const { locateError } = require('../utils/ApiError');
 
 
 const oAuth = (service) => (req, res, next) => passport.authenticate(
@@ -11,15 +11,13 @@ const oAuth = (service) => (req, res, next) => passport.authenticate(
 	{ session: false },
 	function(err, user, info) {
 		if (err) {
-			err.description || (err.description = "Process [err] failed in oAuth middleware");
-			return next(err); 
+			next( locateError(err, "oAuthMiddleware : oAuth(err)") );
 		}
 
 		//passport-authentication error
         if (!user) {
 			const err = new Error('Invalid-Formed Bearer Token. ' + (info ?? ""));
-			err.description || (err.description = "Process [user] failed in oAuth middleware");
-			return  next(err); 
+			next( locateError(err, "oAuthMiddleware : oAuth(user)") );
 		}
         
 		next();
@@ -46,8 +44,7 @@ const google_oAuth = async (req, res, next) => {
 		next();
 	
 	} catch (error) {
-		error.description || (error.description = "Google Login with oAuth failed in middleware");
-		next(error);
+		throw locateError(error, "oAuthMiddleware : google_oAuth");
 	}
 }
 
@@ -68,8 +65,7 @@ const facebook_oAuth = async (req, res, next) => {
 		next();
 	
 	} catch (error) {
-		error.description || (error.description = "Facebook Login with oAuth failed in middleware");
-		next(error);
+		throw locateError(error, "oAuthMiddleware : facebook_oAuth");
 	}
 }
 

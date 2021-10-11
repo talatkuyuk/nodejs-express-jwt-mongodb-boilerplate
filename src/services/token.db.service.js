@@ -2,8 +2,7 @@ const mongodb = require('../core/mongodb');
 const ObjectId = require('mongodb').ObjectId;
 
 const { Token } = require('../models');
-
-
+const { locateError } = require('../utils/ApiError');
 
 /**
  * Save the token to db
@@ -20,8 +19,7 @@ const addToken = async (tokenDoc) => {
 		console.log(`${result.insertedCount} record is created in tokens.`);
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in TokenDbService [addToken]");
-		throw error;
+		throw locateError(error, "TokenDbService : addToken");
 	}
 };
 
@@ -46,8 +44,7 @@ const getToken = async (query) => {
 		return tokenDoc;
 
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in TokenDbService [getToken]");
-		throw error;
+		throw locateError(error, "TokenDbService : getToken");
 	}	
 }
 
@@ -70,8 +67,7 @@ const getTokens = async (query) => {
 		return tokens;
 
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in TokenDbService [getTokens]");
-		throw error;
+		throw locateError(error, "TokenDbService : getTokens");
 	}	
 }
 
@@ -101,8 +97,7 @@ const updateToken = async (id, updateBody) => {
 		return token;
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in TokenDbService [updateToken]");
-	   	throw error;
+		throw locateError(error, "TokenDbService : updateToken");
 	}
 };
 
@@ -123,8 +118,7 @@ const deleteToken = async (id) => {
 		return {isDeleted: result.result.ok === 1, deletedCount: result.deletedCount };
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in TokenDbService [deleteToken]");
-		throw error;
+		throw locateError(error, "TokenDbService : deleteToken");
 	}
 }
 
@@ -147,8 +141,7 @@ const deleteTokens = async (query) => {
 		return {isDeleted: result.result.ok === 1, deletedCount: result.deletedCount };
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in TokenDbService [deleteTokens]");
-		throw error;
+		throw locateError(error, "TokenDbService : deleteTokens");
 	}
 }
 

@@ -1,8 +1,4 @@
-const httpStatus = require('http-status');
-const {serializeError} = require('serialize-error');
-
-const Utils = require('./Utils');
-
+const config = require('../config');
 
 // interface Error {
 //     name: string, // always "Error"
@@ -21,13 +17,12 @@ const Utils = require('./Utils');
 //     stack?: string,
 // }
 
+
 class ApiError extends Error {
-    constructor(statusCode, error, description = null, errors = null, isOperational = true, stack = '') {
+    constructor(statusCode, error, description = null, errors = null, isOperational = true, stack) {
       
       // ApiError accepts any Error instance as the paramater error.
       if (error instanceof Error) {
-        //console.log("ApiError from Error: ", Utils.removeKey("stack", serializeError(error)));
-
         super(error.message);
         this.name = error.name === Error.prototype.name ? this.constructor.name : error.name;
         this.description = error.description ?? description;
@@ -37,9 +32,9 @@ class ApiError extends Error {
       // ApiError accepts string "error message" or "XxxError: error message" as the paramater error.
       else if (typeof error === 'string') {
         if (error.includes(':')) {
-            const [name, message] = Utils.splitTwo(error, ':');
-            super(message);
-            this.name = name;
+            const [name, message] = error.split(":");
+            super(message.trim());
+            this.name = name.trim();
         } else {
             super(error);
             this.name = this.constructor.name;
@@ -58,13 +53,36 @@ class ApiError extends Error {
 	    this.errors = errors;
       this.isOperational = isOperational;
 
+      stack && (this.stack = stack);
+
       if (!this.stack)
           Error.captureStackTrace(this, this.constructor);
     }
-
-    static notFound() {
-        return new ApiError(httpStatus.NOT_FOUND, 'Not found');
-    }
 }
 
-module.exports = ApiError;
+
+
+// Add desription to Error to locate the module in which occurs
+const locateError = (error, description) => {
+  if (config.env !== "production") {
+
+      const [main, module] = description.split(" : ");
+
+      // OPTION-1 (error point)
+      // error.description || (error.description = description);
+
+      // OPTION-2 (error path)
+      if (error.description)
+          error.description += `  --->  ${main} [${module}]`
+      else
+          error.description = `failed in ${main} [${module}]`
+      
+      return error;
+  }
+}
+
+
+module.exports = {
+  ApiError,
+  locateError
+};
