@@ -1,15 +1,16 @@
 const Utils = require('../utils/Utils');
 const { locateError } = require('../utils/ApiError');
 
-const paginary = async (query, fields, dbQueryCallback) => {
+const paginary = async (query, filter, dbQueryCallback) => {
 
 	try {
-		const filter = composeFilter(query, fields);
 		const { page, sort, skip, limit } = composePaginary(query);
 	
-		// query from db //
+		// query from db
 		const result = await dbQueryCallback(filter, sort, skip, limit);
-		const content = result[0];  // [{ users: [objects], total: [{ count: x }] }]
+
+		// main content from result = [{ users: [objects], total: [{ count: n }] }]
+		const content = result[0];
 
 		return prepareResponse(content, page, limit);
 		
@@ -19,16 +20,16 @@ const paginary = async (query, fields, dbQueryCallback) => {
 }
 
 
-const paginaryForJoinQuery = async (query, fieldsLeft, fieldsRight, dbQueryCallback) => {
+const paginaryForJoinQuery = async (query, filterLeft, filterRight, dbQueryCallback) => {
 
 	try {
-		const filterLeft = composeFilter(query, fieldsLeft);
-		const filterRight = composeFilter(query, fieldsRight);
 		const { page, sort, skip, limit } = composePaginary(query);
 	
-		// query from db //
+		// query from db
 		const result = await dbQueryCallback(filterLeft, filterRight, sort, skip, limit);
-		const content = result[0];  // [{ users: [objects], total: [{ count: x }] }]
+
+		// main content from result = [{ users: [objects], total: [{ count: n }] }]
+		const content = result[0];
 
 		return prepareResponse(content, page, limit);
 		
@@ -52,22 +53,6 @@ const prepareResponse = (content, page, limit) => {
 	};
 	
 	return content;
-}
-
-
-const composeFilter = (query, fields) => {
-	let stringFilters = {}, booleanFilters = {};
-
-	if (fields.stringFields) {
-		stringFilters = Utils.pick(query, fields.stringFields);
-	}
-	
-	if (fields.booleanFields) {
-		const booleans = Utils.pick(query, fields.booleanFields);
-		booleanFilters = Utils.parseBooleans(booleans, fields.booleanFields);
-	}
-
-	return {...stringFilters, ...booleanFilters};
 }
 
 
