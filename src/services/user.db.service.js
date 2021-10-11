@@ -2,7 +2,7 @@ const mongodb = require('../core/mongodb');
 const ObjectId = require('mongodb').ObjectId;
 
 const { User } = require('../models');
-
+const { locateError } = require('../utils/ApiError');
 
 
 /**
@@ -29,8 +29,7 @@ const { User } = require('../models');
 		return User.fromDoc(result.ops[0]); // inserted document
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in UserDbService [addUser]");
-		throw error;
+		throw locateError(error, "UserDbService : addUser");
 	}
 };
 
@@ -56,8 +55,7 @@ const { User } = require('../models');
 		return User.fromDoc(doc);
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in UserDbService [getUser]");
-		throw error;
+		throw locateError(error, "UserDbService : getUser");
 	}
 };
 
@@ -115,8 +113,7 @@ const { User } = require('../models');
 	   return await db.collection("users").aggregate(pipeline).toArray();
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in UserDbService [getUsers]");
-		throw error;
+		throw locateError(error, "UserDbService : getUsers");
 	}
 };
 
@@ -191,8 +188,7 @@ const { User } = require('../models');
 		return await db.collection("users").aggregate(pipeline).toArray();
 		 
 	 } catch (error) {
-		error.description || (error.description = "Database Operation failed in UserDbService [getUsersJoined]");
-		 throw error;
+		throw locateError(error, "UserDbService : getUsersJoined");
 	 }
 };
 
@@ -222,8 +218,7 @@ const { User } = require('../models');
 		 return User.fromDoc(result.value);
 		 
 	 } catch (error) {
-		error.description || (error.description = "Database Operation failed in UserDbService [updateUser]");
-		throw error;
+		throw locateError(error, "UserDbService : updateUser");
 	 }
 };
 
@@ -258,8 +253,7 @@ const { User } = require('../models');
 		return true;
 
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in UserDbService [deleteUser]");
-		throw error;
+		throw locateError(error, "UserDbService : deleteUser");
 	}
 };
 
@@ -289,8 +283,7 @@ const { User } = require('../models');
 		return result.ops[0]; // deleted User
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in UserDbService [toDeletedUsers]");
-		throw error;
+		throw locateError(error, "UserDbService : toDeletedUsers");
 	}
 };
 
@@ -316,8 +309,7 @@ const { User } = require('../models');
 		return User.fromDoc(doc);
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in UserDbService [getDeletedUser]");
-		throw error
+		throw locateError(error, "UserDbService : getDeletedUser");
 	}
 };
 

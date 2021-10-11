@@ -104,7 +104,7 @@ describe('POST /auth/logout', () => {
 			expect(response.body.code).toEqual(403);
 			expect(response.body).toHaveProperty("name");
 			expect(response.body.message).toEqual("Access token is in the blacklist");
-			expect(response.body.description).toBe("Process failed in Authorization middleware");
+			expect(response.body).toHaveProperty("description");
 			expect(response.body).not.toHaveProperty("errors");
 		});
 

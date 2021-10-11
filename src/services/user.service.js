@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 
-const ApiError = require('../utils/ApiError');
+const { ApiError, locateError } = require('../utils/ApiError');
 
 //for database operations for users
 const userDbService = require('./user.db.service');
@@ -42,8 +42,7 @@ const paginaryService = require('./paginary.service');
 		return user;
   
 	} catch (error) {
-		error.description || (error.description = "Get User by id failed in UserService");
-	  	throw error;
+		throw locateError(error, "UserDbService : getUserById");
 	}
 };
 
@@ -65,8 +64,7 @@ const paginaryService = require('./paginary.service');
 		return await paginaryService.paginary(query, fields, userDbService.getUsers);
   
 	} catch (error) {
-		error.description || (error.description = "Get Users in paginary failed in UserService");
-	  	throw error;
+		throw locateError(error, "UserDbService : getUsers");
 	}
 };
 
@@ -93,8 +91,7 @@ const paginaryService = require('./paginary.service');
 		return await paginaryService.paginaryForJoinQuery(query, fieldsLeft, fieldsRight, userDbService.getUsersJoined);
   
 	} catch (error) {
-		error.description || (error.description = "Get Users joined in paginary failed in UserService");
-	  	throw error;
+		throw locateError(error, "UserDbService : getUsersJoined");
 	}
 };
 
@@ -113,8 +110,7 @@ const paginaryService = require('./paginary.service');
 			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
   
 	} catch (error) {
-		error.description || (error.description = "Delete User failed in UserService");
-	  	throw error;
+		throw locateError(error, "UserDbService : deleteUser");
 	}
 };
 
@@ -133,8 +129,7 @@ const paginaryService = require('./paginary.service');
 		return user;
   
 	} catch (error) {
-		error.description || (error.description = "Get deleted User by id failed in UserService");
-	  	throw error;
+		throw locateError(error, "UserDbService : getDeletedUserById");
 	}
 };
 

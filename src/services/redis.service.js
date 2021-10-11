@@ -2,9 +2,8 @@ const httpStatus = require('http-status');
 
 const config = require('../config');
 const logger = require('../core/logger');
-const ApiError = require('../utils/ApiError');
 const { getRedisClient } = require('../core/redis');
-
+const { ApiError, locateError } = require('../utils/ApiError');
 
 
 /**
@@ -34,8 +33,7 @@ const put_jti_into_blacklist = async (jti)  => {
 		}
 
 	} catch (error) {
-		error.description || (error.description = "Redis setex operation failed in RedisService");
-		throw error;
+		throw locateError(error, "RedisService : put_jti_into_blacklist");
 	}
 }
 
@@ -68,8 +66,7 @@ const check_jti_in_blacklist = async (jti)  => {
 		}
 
 	} catch (error) {
-		error.description || (error.description = "Redis get operation failed in RedisService");
-		throw error;
+		throw locateError(error, "RedisService : check_jti_in_blacklist");
 	}
 }
 

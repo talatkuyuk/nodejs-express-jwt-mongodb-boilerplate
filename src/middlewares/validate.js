@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
-const ApiError = require('../utils/ApiError');
 const { validationResult } = require('express-validator')
 
+const { ApiError, locateError } = require('../utils/ApiError');
 
 const validate = (rulesSchema) => async (req, res, next) => {
 	try {
@@ -31,12 +31,13 @@ const validate = (rulesSchema) => async (req, res, next) => {
 			null, // no need error description
 			xerrors, // converted validation errors
 			true, // isOperational
-		); 
+		);
+
+		console.log(validationError)
 		next(validationError);
 
 	} catch (error) {
-		error.description || (error.description = "Process failed in Validation middleware");
-		throw error;
+		throw locateError(error, "ValidationMiddleware : validate");
 	}
 }
 

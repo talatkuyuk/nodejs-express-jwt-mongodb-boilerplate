@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 
-const ApiError = require('../../src/utils/ApiError');
+const { ApiError } = require('../../src/utils/ApiError');
 
 const { tokenService, tokenDbService } = require('../../src/services');
 const { Token } = require('../../src/models');

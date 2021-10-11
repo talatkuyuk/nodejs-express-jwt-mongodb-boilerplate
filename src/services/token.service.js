@@ -5,7 +5,7 @@ const httpStatus = require('http-status');
 
 const config = require('../config');
 
-const ApiError = require('../utils/ApiError');
+const { ApiError, locateError } = require('../utils/ApiError');
 const { Token } = require('../models');
 const { tokenTypes } = require('../config/tokens');
 
@@ -47,8 +47,7 @@ const generateToken = (userId, expires, type, jti = "n/a", userAgent = "n/a", no
 		return jwt.sign(payload, secret, { notBefore: notValidBefore });
 
 	} catch (error) {
-		error.description || (error.description = "Token Generation failed in TokenService");
-		throw error;
+		throw locateError(error, "TokenService : generateToken");
 	}
 };
 
@@ -75,8 +74,7 @@ const verifyToken = async (token, type) => {
 		return tokenDoc;
 
 	} catch (error) {
-		error.description || (error.description = "Token Verification failed in TokenService");
-		throw error;
+		throw locateError(error, "TokenService : verifyToken");
 	}
 };
 
@@ -163,8 +161,7 @@ const verifyToken = async (token, type) => {
 			error = new ApiError(httpStatus.UNAUTHORIZED, `The refresh token is expired. You have to re-login to get authentication.`);
 		}
 
-		error.description || (error.description = "Refresh Token Rotation failed in TokenService");
-		throw error;
+		throw locateError(error, "TokenService : refreshTokenRotation");
 	}
 };
 
@@ -211,8 +208,7 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 		}
 
 	} catch (error) {
-		error.description || (error.description = "Refresh Token family disable action failed in TokenService");
-		throw error;
+		throw locateError(error, "TokenService : disableFamilyRefreshToken");
 	}
 }
 
@@ -245,8 +241,7 @@ const generateAuthTokens = async (userId, userAgent, family) => {
 		};
 
 	} catch (error) {
-		error.description || (error.description = "Generate Auth Tokens failed in TokenService");
-		throw error;
+		throw locateError(error, "TokenService : generateAuthTokens");
 	}
 };
 
@@ -269,8 +264,7 @@ const generateAccessToken = (userId, userAgent, jti) => {
 		return { accessToken, accessTokenExpires };
 
 	} catch (error) {
-		error.description || (error.description = "Generate Access Token failed in TokenService");
-		throw error;
+		throw locateError(error, "TokenService : generateAccessToken");
 	}
 }
 
@@ -306,8 +300,7 @@ const generateRefreshToken = async (userId, userAgent, jti, family) => {
 		return { refreshToken, refreshTokenExpires };
 
 	} catch (error) {
-		error.description || (error.description = "Generate Refresh Token failed in TokenService");
-		throw error;
+		throw locateError(error, "TokenService : generateRefreshToken");
 	}
 }
 
@@ -334,8 +327,7 @@ const generateResetPasswordToken = async (userId) => {
 		return resetPasswordToken;
 
 	} catch (error) {
-		error.description || (error.description = "Generate Reset Password Token failed in TokenService");
-		throw error;
+		throw locateError(error, "TokenService : generateResetPasswordToken");
 	}
 };
 
@@ -362,8 +354,7 @@ const generateVerifyEmailToken = async (userId) => {
 		return verifyEmailToken;
 
 	} catch (error) {
-		error.description || (error.description = "Generate Verify Email Token failed in TokenService");
-		throw error;
+		throw locateError(error, "TokenService : generateVerifyEmailToken");
 	}
 };
 
@@ -381,8 +372,7 @@ const removeToken = async (id) => {
 				  : console.log("No token is deleted.");
 
 	} catch (error) {
-		error.description || (error.description = "Remove Token failed in TokenService");
-		throw error;
+		throw locateError(error, "TokenService : removeToken");
 	}
 }
 
@@ -400,8 +390,7 @@ const removeTokens = async (query) => {
 				  : console.log("No token deleted.");
 
 	} catch (error) {
-		error.description || (error.description = "Remove Tokens failed in TokenService");
-		throw error;
+		throw locateError(error, "TokenService : removeTokens");
 	}
 }
 
@@ -437,8 +426,7 @@ const findTokenAndRemoveFamily = async (query, command) => {
 			await removeTokens({ user: tokenDoc.user });
 
 	} catch (error) {
-		error.description || (error.description = "Find And Remove Family Tokens failed in TokenService");
-		throw error;
+		throw locateError(error, "TokenService : findTokenAndRemoveFamily");
 	}
 }
 

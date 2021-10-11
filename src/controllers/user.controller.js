@@ -1,8 +1,6 @@
 const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler');
 
-const Utils = require('../utils/Utils');
-
 // SERVICE DEPENDENCY
 const { userService, userDbService } = require('../services');
 

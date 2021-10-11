@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
 
-const ApiError = require('../utils/ApiError');
+const { ApiError, locateError } = require('../utils/ApiError');
 
 // for redis operations
 const redisService = require('./redis.service');
@@ -37,8 +37,7 @@ const signupWithEmailAndPassword = async (email, password) => {
 		return authuser;
 
 	} catch (error) {
-		error.description || (error.description = "Signup with Email-Password failed in AuthService");
-		throw error;
+		throw locateError(error, "AuthService : signupWithEmailAndPassword");
 	}
 }
  			
@@ -69,8 +68,7 @@ const loginWithEmailAndPassword = async (email, password) => {
 		return authuser;
 
 	} catch (error) {
-		error.description || (error.description = "Login with Email-Password failed in AuthService");
-		throw error;
+		throw locateError(error, "AuthService : loginWithEmailAndPassword");
 	}
 };
 
@@ -106,8 +104,7 @@ const loginWith_oAuth = async (service, id, email) => {
 		return authuser;
 		
 	} catch (error) {
-		error.description || (error.description = "Login with oAuth failed in AuthService");
-		throw error;
+		throw locateError(error, "AuthService : loginWith_oAuth");
 	}
 };
 
@@ -128,8 +125,7 @@ const logout = async (id, jti) => {
 
 		
 	} catch (error) {
-		error.description || (error.description = "Logout failed in AuthService");
-		throw error;
+		throw locateError(error, "AuthService : logout");
 	}
 };
 
@@ -154,8 +150,7 @@ const logout = async (id, jti) => {
 		// TODO: delete user data or do it via another request
 		
 	} catch (error) {
-		error.description || (error.description = "Signout failed in AuthService");
-		throw error;
+		throw locateError(error, "AuthService : signout");
 	}
 };
 
@@ -184,8 +179,7 @@ const refreshAuth = async (refreshToken, userAgent) => {
 	return { authuser, refreshTokenFamily: family };
 
   } catch (error) {
-	error.description || (error.description = "Refresh Auth Tokens failed in AuthService");
-	throw error;
+	throw locateError(error, "AuthService : refreshAuth");
   }
 };
 
@@ -216,8 +210,7 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
 	return authuser;
 
   } catch (error) {
-    error.description || (error.description = "Reset Password failed in AuthService");
-	throw error;
+	throw locateError(error, "AuthService : resetPassword");
   }
 };
 
@@ -241,8 +234,7 @@ const verifyEmail = async (verifyEmailToken) => {
 	return authuser;
 
   } catch (error) {
-	error.description || (error.description = "Email Verification failed in AuthService");
-	throw error;
+	throw locateError(error, "AuthService : verifyEmail");
   }
 };
 
@@ -255,8 +247,7 @@ const verifyEmail = async (verifyEmailToken) => {
  const handleEmailIsAlreadyVerified = function (isEmailVerified) {
 	if (isEmailVerified) {
 		const error = new ApiError(httpStatus.BAD_REQUEST, "Email is already verified");
-		error.description || (error.description = "Email Is Already Verified happened in AuthService");
-		throw error;
+		throw locateError(error, "AuthService : handleEmailIsAlreadyVerified");
 	}
 };
 

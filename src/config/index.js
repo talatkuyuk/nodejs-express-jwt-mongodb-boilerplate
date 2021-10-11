@@ -39,7 +39,7 @@ const { value: envVars, error } = envVarsSchema.prefs({ errors: { label: 'key' }
 
 if (error) {
   delete error._original;
-  error.description || (error.description = "Environment variable validation failed in Config");
+  error.description = "Environment variable validation failed in Config";
   throw error;
 }
 

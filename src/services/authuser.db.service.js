@@ -2,6 +2,7 @@ const mongodb = require('../core/mongodb');
 const ObjectId = require('mongodb').ObjectId;
 
 const { AuthUser } = require('../models');
+const { locateError } = require('../utils/ApiError');
 
 
 /**
@@ -21,8 +22,7 @@ const addAuthUser = async (authuser) => {
 		return AuthUser.fromDoc(result.ops[0]); // inserted document
 
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in AuthUserDbService [addAuthUser]");
-		throw error;
+		throw locateError(error, "AuthUserDbService : addAuthUser");
 	}
 };
 
@@ -54,8 +54,7 @@ const addAuthUser = async (authuser) => {
 		return AuthUser.fromDoc(doc);
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in AuthUserDbService [get_oAuthUser]");
-		throw error;
+		throw locateError(error, "AuthUserDbService : get_oAuthUser");
 	}
 };
 
@@ -79,8 +78,7 @@ const getAuthUser = async (query) => {
 		return AuthUser.fromDoc(doc);
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in AuthUserDbService [getAuthUser]");
-		throw error;
+		throw locateError(error, "AuthUserDbService : getAuthUser");
 	}
 };
 
@@ -137,8 +135,7 @@ const getAuthUser = async (query) => {
 	   return await db.collection("authusers").aggregate(pipeline).toArray();
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in AuthUserDbService [getAuthUsers]");
-		throw error;
+		throw locateError(error, "AuthUserDbService : getAuthUsers");
 	}
 };
 
@@ -213,8 +210,7 @@ const getAuthUser = async (query) => {
 	   return await db.collection("authusers").aggregate(pipeline).toArray();
 		
 	} catch (error) {
-	   error.description || (error.description = "Database Operation failed in UserDbService [getUsersJoined]");
-		throw error;
+		throw locateError(error, "AuthUserDbService : getAuthUsersJoined");
 	}
 };
 
@@ -243,8 +239,7 @@ const updateAuthUser = async (id, updateBody) => {
 		return AuthUser.fromDoc(result.value);
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in AuthUserDbService [updateAuthUser]");
-		throw error
+		throw locateError(error, "AuthUserDbService : updateAuthUser");
 	}
 };
 
@@ -279,8 +274,7 @@ const deleteAuthUser = async (id) => {
 		return true;
 
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in AuthUserDbService [deleteAuthUser]");
-		throw error;
+		throw locateError(error, "AuthUserDbService : deleteAuthUser");
 	}
 };
 
@@ -310,8 +304,7 @@ const deleteAuthUser = async (id) => {
 		return result.ops[0]; // deleted AuthUser
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in AuthUserDbService [toDeletedAuthUsers]");
-		throw error;
+		throw locateError(error, "AuthUserDbService : toDeletedAuthUsers");
 	}
 };
 
@@ -337,8 +330,7 @@ const deleteAuthUser = async (id) => {
 		return AuthUser.fromDoc(doc);
 		
 	} catch (error) {
-		error.description || (error.description = "Database Operation failed in AuthUserDbService [getDeletedAuthUser]");
-		throw error
+		throw locateError(error, "AuthUserDbService : getDeletedAuthUser");
 	}
 };
 

@@ -2,11 +2,10 @@ const nodemailer = require('nodemailer');
 
 const config = require('../config');
 const logger = require('../core/logger');
-
+const { locateError } = require('../utils/ApiError');
 
 
 const transporter = nodemailer.createTransport(config.email.smtp);
-
 
 if (config.env !== 'test') {
   transporter
@@ -55,8 +54,7 @@ const sendResetPasswordEmail = async (to, token) => {
 		return await sendEmail(to, subject, text);
 
 	} catch (error) {
-		error.description || (error.description = "Send Reset Password Email failed in EmailService");
-		throw error;
+		throw locateError(error, "EmailService : sendResetPasswordEmail");
 	}
 };
 
@@ -75,8 +73,7 @@ const sendVerificationEmail = async (to, token) => {
 		return await sendEmail(to, subject, text);
 
 	} catch (error) {
-		error.description || (error.description = "Send Verification Email failed in EmailService");
-		throw error;
+		throw locateError(error, "EmailService : sendVerificationEmail");
 	}
 };
 

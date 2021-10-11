@@ -8,8 +8,8 @@ const request = require('supertest');
 const app = require('../../src/core/express');
 
 const config = require('../../src/config');
-const ApiError = require('../../src/utils/ApiError');
 const { auth } = require('../../src/middlewares/auth');
+const { ApiError } = require('../../src/utils/ApiError');
 
 const { authuserDbService, userDbService, tokenService, redisService } = require('../../src/services');
 const { AuthUser } = require('../../src/models');
