@@ -2,7 +2,11 @@ const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler');
 
 // SERVICE DEPENDENCY
-const { userService, userDbService } = require('../services');
+const { 
+	userService,
+	userDbService,
+	joinedService,
+} = require('../services');
 
 
 
@@ -40,7 +44,7 @@ const getUsers = asyncHandler(async (req, res) => {
 const getUsersJoined = asyncHandler(async (req, res) => {
 	const query = req.query;
 
-	const result = await userService.getUsersJoined(query);
+	const result = await joinedService.getUsersJoined(query);
 	
 	res.status(httpStatus.OK).send(result);
 });

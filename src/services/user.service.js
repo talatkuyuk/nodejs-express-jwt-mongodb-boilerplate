@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 
 const { ApiError, locateError } = require('../utils/ApiError');
+const composeFilter = require('../utils/composeFilter');
 
 //for database operations for users
 const userDbService = require('./user.db.service');
@@ -60,38 +61,13 @@ const paginaryService = require('./paginary.service');
 			stringFields: ['email', 'role', 'name', 'country', 'gender'],
 			booleanFields: [],
 		}
+
+		const filter = composeFilter(query, fields);
 		
-		return await paginaryService.paginary(query, fields, userDbService.getUsers);
+		return await paginaryService.paginary(query, filter, userDbService.getUsers);
   
 	} catch (error) {
 		throw locateError(error, "UserDbService : getUsers");
-	}
-};
-
-
-
-/**
- * Get Users Joined with Authusers in a paginary
- * @param {Object} query
- * @returns {Promise<Object>}
- */
- const getUsersJoined = async (query) => {
-	try {
-
-		const fieldsLeft = {
-			stringFields: ['email', 'role', 'name', 'country', 'gender'],
-			booleanFields: [],
-		}
-
-		const fieldsRight = {
-			stringFields: [],
-			booleanFields: ['isEmailVerified', 'isDisabled'],
-		}
-		
-		return await paginaryService.paginaryForJoinQuery(query, fieldsLeft, fieldsRight, userDbService.getUsersJoined);
-  
-	} catch (error) {
-		throw locateError(error, "UserDbService : getUsersJoined");
 	}
 };
 
@@ -140,7 +116,6 @@ module.exports = {
 
 	getUserById,
 	getUsers,
-	getUsersJoined,
 
 	deleteUser,
 	getDeletedUserById,

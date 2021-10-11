@@ -5,7 +5,8 @@ const asyncHandler = require('express-async-handler')
 const {
 	authService, 		// addAuthUser
 	authuserService, 	// getAuthUser, getAuthUsers, deleteAuthUser, changePassword, toggleAbility
-	tokenService 		// deleteAuthUser
+	tokenService, 		// deleteAuthUser
+	joinedService,		// getAuthUsersJoined
 } = require('../services');
 
 
@@ -46,7 +47,7 @@ const getAuthUsers = asyncHandler(async (req, res) => {
 const getAuthUsersJoined = asyncHandler(async (req, res) => {
 	const query = req.query;
 
-	const result = await authuserService.getAuthUsersJoined(query);
+	const result = await joinedService.getAuthUsersJoined(query);
 	
 	res.status(httpStatus.OK).send(result);
 });
