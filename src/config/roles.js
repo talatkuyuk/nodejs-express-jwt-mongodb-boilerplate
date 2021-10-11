@@ -23,6 +23,7 @@ module.exports.roleRights = {
 		"add-authuser",
 		"get-authuser",
 		"query-authusers",
+		"query-authusers-joined",
 		"toggle-authuser",
 		"delete-authuser",
 		//self related

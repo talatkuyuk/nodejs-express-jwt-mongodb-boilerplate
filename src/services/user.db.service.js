@@ -95,13 +95,20 @@ const { User } = require('../models');
 			},
 			{
 			   $facet:{
-				   users: [{ $skip: skip }, { $limit: limit}],
-				   totalCount: [
-					   {
-						   $count: 'count'
-					   }
-				   ]
-				 }
+					users: [
+						{ 
+							$skip: skip 
+						}, 
+						{ 
+							$limit: limit
+						}
+					],
+					total: [
+						{
+							$count: 'count'
+						}
+					]
+				}
 			}
 		]
 	
@@ -118,8 +125,8 @@ const { User } = require('../models');
 
 /**
  * Query for users joined with authusers
- * @param {Object} filterLeft - Mongo filter for authusers
- * @param {Object} filterRight - Mongo filter for users
+ * @param {Object} filterLeft - Mongo filter for users
+ * @param {Object} filterRight - Mongo filter for authusers
  * @param {Object} sort - Sort option in the format: { field1: 1, field2: -1}
  * @param {number} limit - Maximum number of results per page (default = 20)
  * @param {number} page - Current page (default = 1)
@@ -135,7 +142,7 @@ const { User } = require('../models');
 			 },
 			 { 
 				 $lookup: {
-					 from: 'users',
+					 from: 'authusers',
 					 localField: '_id',
 					 foreignField: '_id',
 					 as: 'details',
@@ -146,13 +153,13 @@ const { User } = require('../models');
 			 },
 			 {
 				 $project:{
-					 email: "$details.email",
-					 isEmailVerified: 1,
-					 isDisabled: 1,
-					 role: "$details.role",
-					 name: "$details.name",
-					 gender: "$details.gender",
-					 country: "$details.country",
+					 email: 1,
+					 role: 1,
+					 name: 1,
+					 gender: 1,
+					 country: 1,
+					 isEmailVerified: "$details.isEmailVerified",
+					 isDisabled: "$details.isDisabled",
 					 createdAt: 1,
 				 }
 			 },
@@ -164,8 +171,15 @@ const { User } = require('../models');
 			 },
 			 {
 				$facet:{
-					users: [{ $skip: skip }, { $limit: limit}],
-					totalCount: [
+					users: [
+						{ 
+							$skip: skip 
+						}, 
+						{ 
+							$limit: limit
+						}
+					],
+					total: [
 						{
 							$count: 'count'
 						}
@@ -174,7 +188,7 @@ const { User } = require('../models');
 			 }
 		 ]
 	 
-		return await db.collection("authusers").aggregate(pipeline).toArray();
+		return await db.collection("users").aggregate(pipeline).toArray();
 		 
 	 } catch (error) {
 		error.description || (error.description = "Database Operation failed in UserDbService [getUsersJoined]");

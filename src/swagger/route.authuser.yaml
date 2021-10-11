@@ -28,11 +28,11 @@
                 pagination:
                   type: object
                   properties:
-                    perPage:
-                      type: number
                     currentPage:
                       type: number
                     totalPages:
+                      type: number
+                    perPage:
                       type: number
             examples:
               _:
