@@ -9,27 +9,27 @@ const { roleRights } = require('../config/roles');
 const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pass, info) => {
 	try {
 		if (err || info) {
-			return reject(new ApiError(httpStatus.UNAUTHORIZED, `TokenError: ${err?.message || info?.message}` ));
+			throw new ApiError(httpStatus.UNAUTHORIZED, err || info );
 		}
 		
 		const { authuser, payload } = pass;
 	
 		if (!authuser) {
-			return reject(new ApiError(httpStatus.UNAUTHORIZED, "Access token does not refer any user"));
+			throw new ApiError(httpStatus.UNAUTHORIZED, "Access token does not refer any user");
 		}
 	
 		if (authuser.isDisabled) {
-			return reject(new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`));
+			throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
 		}
 	
 		// control if the request is coming from the same useragent - for preventing mitm
 		if (req.useragent.source !== payload.ua) {
-			return reject(new ApiError(httpStatus.UNAUTHORIZED, `Your browser/agent seems changed or updated, you have to re-login to get authentication`));
+			throw new ApiError(httpStatus.UNAUTHORIZED, `Your browser/agent seems changed or updated, you have to re-login to get authentication`);
 		}
 	
 		// control if the token is in blacklist
 		if (await redisService.check_jti_in_blacklist(payload.jti)) {
-			return reject(new ApiError(httpStatus.FORBIDDEN, `Access token is in the blacklist`));
+			throw new ApiError(httpStatus.FORBIDDEN, `Access token is in the blacklist`);
 		}
 			
 		req.user = authuser;
@@ -49,11 +49,11 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 				const index = userRightsWithoutSelf.findIndex(right => right === requiredRight);
 	
 				if (index === -1)
-					return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden, (you don\'t have appropriate right)'));
+					throw new ApiError(httpStatus.FORBIDDEN, 'Forbidden, (you don\'t have appropriate right)');
 	
 				if (userRights[index].includes("self") && req.params && req.params.id)
 					if (req.params.id.toString() !== authuser.id.toString()) 
-						return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden, (only self-data)'));
+						throw new ApiError(httpStatus.FORBIDDEN, 'Forbidden, (only self-data)');
 			});
 		}
 	
