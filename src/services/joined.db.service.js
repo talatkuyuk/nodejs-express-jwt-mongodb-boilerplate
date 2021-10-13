@@ -2,7 +2,43 @@ const mongodb = require('../core/mongodb');
 const ObjectId = require('mongodb').ObjectId;
 
 const { locateError } = require('../utils/ApiError');
+const { AuthUser } = require('../models');
 
+const getAuthUserWithRole = async (id) => {
+	try {
+		const db = mongodb.getDatabase();
+	
+		const pipeline = [
+			{
+			   	$match: { _id: ObjectId(id) }
+			},
+			{ 
+				$lookup: {
+					from: 'users',
+					localField: '_id',
+					foreignField: '_id',
+					as: 'details',
+				}
+			},
+			{
+				$project:{
+					email: 1,
+					isEmailVerified: 1,
+					isDisabled: 1,
+					createdAt: 1,
+					services: 1,
+					role: { $arrayElemAt: [ "$details.role", 0 ] },
+				}
+			},
+		]
+	
+		const authuserDocContainer = await db.collection("authusers").aggregate(pipeline).toArray();
+	   	return AuthUser.fromDoc(authuserDocContainer[0]);
+		
+	} catch (error) {
+		throw locateError(error, "JoinedDbService : getAuthUserWithRole");
+	}
+};
 /**
  * Query for authusers joined with users
  * @param {Object} filterLeft - Mongo filter for authusers
@@ -33,6 +69,8 @@ const { locateError } = require('../utils/ApiError');
 			},
 			{
 				$project:{
+					_id: 0,
+					id: "$_id",
 					email: 1,
 					isEmailVerified: 1,
 					isDisabled: 1,
@@ -107,6 +145,8 @@ const { locateError } = require('../utils/ApiError');
 			},
 			{
 				$project:{
+					_id: 0,
+					id: "$_id",
 					email: 1,
 					role: 1,
 					name: 1,
@@ -152,6 +192,7 @@ const { locateError } = require('../utils/ApiError');
 
 
 module.exports = {
+	getAuthUserWithRole,
 	getAuthUsersJoined,
 	getUsersJoined,
 };

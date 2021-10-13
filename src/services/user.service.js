@@ -113,6 +113,23 @@ const paginaryService = require('./paginary.service');
 
 
 
+/**
+ * Get the user's role
+ * @param {String} id
+ * @returns {Promise<String?>}
+ */
+ const getUserRole = async function (id) {
+	try {
+		const user = await userDbService.getUser({ id });
+
+		return user?.role;
+
+	} catch (error) {
+	   throw error;
+	}
+};
+
+
 module.exports = {
 	isValidUser,
 
@@ -121,4 +138,6 @@ module.exports = {
 
 	deleteUser,
 	getDeletedUserById,
+
+	getUserRole,
 };
