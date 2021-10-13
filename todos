@@ -10,42 +10,18 @@
 //TODO: implement authuserDAO
 //TODO: implement userDAO
 
-//TODO: add swagger documentation+
-//TODO: swagger docs for auth routes+
-//TODO: swagger docs for authuser routes+
 //TODO: swagger docs for user routes
+//TODO: swagger docs for for joined queries
 
-//TODO: add description field to ApiError+
-//TODO: seperate authuserservice with authuser.db operations+
-//TODO: add userService apart from userDbService+
-//TODO: decide access and refresh token requirement during logout/login; and update services accordingly+
-//TODO: email service add try catch+
-//TODO: seperate db services from services+
-//TODO: add redis service+
-//TODO: add pagination service+
-//TODO: add pagination service into user query as well like authusers query+
-//TODO: handle deprecation for mongodb collection.findOneAndUpdate option [returnOriginal]+
-//TODO: change the routes with plural names+
-//TODO: create a centralized catching errors to finf the lov-cation of error or the path+
-//TODO: add mechanism for query authuser or user using pipedelimeter for the query param sort+
-//TODO: seperate joined queries from authuser and user+
-//TODO: create a special joined query for auth middleware to get authuser and user role as well from users collection
-
+//TODO: update joined queries considering full outer join (currently they are in behavior of left outer join)
+//TODO: update unhandledRejection and uncaughtException mechanism
+//TODO: update ErrorHandler strategy and isOperational logic
 //TODO: update mongodb native driver to 4.x.x
-
-//TODO: arrange errors and handle all correctly+
-//TODO: arrange http status+
-//TODO: update winston that if the user is not identified then dont it log like this "user:-", keep it empty+
 //TODO: add loggers for mongo operations
 
 //TODO: add todo part
 //TODO: add socket io
 //TODO: add collection named logs to mongodb
-
-//TODO: handle errors for syntax or null/undefined in auth middleware+
-//TODO: handle mongoDB errors properly in error middleware+
-//TODO: update unhandledRejection and uncaughtException mechanism
-//TODO: update ErrorHandler strategy and isOperational logic
 
 //TODO: revoke the access token when the user session is closed
 //TODO: implement the Schema Versioning pattern, add a schema_version
