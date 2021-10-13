@@ -10,7 +10,7 @@ class Utils {
 	 */
 	static pick (object, keys) {
 		try {
-			if (!keys || !object) return {};
+			if (!object || !keys) return {};
 			return keys.reduce((obj, key) => {
 				if (Object.prototype.hasOwnProperty.call(object, key)) {
 					if (typeof(object[key]) === "string")
@@ -89,7 +89,7 @@ class Utils {
 	 */
 	 static pickSort (querySort, sortingFields) {
 		try {
-			if (!sortingFields || !querySort) return { createdAt: -1 };
+			if (querySort == null || sortingFields == null) return { createdAt: -1 };
 
 			const obj = {};
 			const parts = querySort.split("|");
