@@ -1,10 +1,12 @@
 const Utils = require('../utils/Utils');
 const { locateError } = require('../utils/ApiError');
 
-const paginary = async (query, filter, dbQueryCallback) => {
+const paginary = async (query, filter, sort, dbQueryCallback) => {
 
 	try {
-		const { page, sort, skip, limit } = composePaginary(query);
+		const { page, skip, limit } = composePaginary(query);
+
+		console.log({filter, sort, page, skip, limit});
 	
 		// query from db
 		const result = await dbQueryCallback(filter, sort, skip, limit);
@@ -20,10 +22,12 @@ const paginary = async (query, filter, dbQueryCallback) => {
 }
 
 
-const paginaryForJoinQuery = async (query, filterLeft, filterRight, dbQueryCallback) => {
+const paginaryForJoinQuery = async (query, filterLeft, filterRight, sort, dbQueryCallback) => {
 
 	try {
-		const { page, sort, skip, limit } = composePaginary(query);
+		const { page, skip, limit } = composePaginary(query);
+
+		console.log({filterLeft, filterRight, sort, page, skip, limit});
 	
 		// query from db
 		const result = await dbQueryCallback(filterLeft, filterRight, sort, skip, limit);
@@ -59,15 +63,12 @@ const prepareResponse = (content, page, limit) => {
 const composePaginary = (query) => {
 	const DEFAULT_PAGE_SIZE = 20;
 	const DEFAULT_PAGE = 1;
-	
-	const page = parseInt(query.page) || DEFAULT_PAGE;
-	
-	const sort = Utils.pickSort(query.sort);
 
+	const page = parseInt(query.page) || DEFAULT_PAGE;
 	const limit = parseInt(query.size) || DEFAULT_PAGE_SIZE;
 	const skip = (page - 1) * limit;
 
-	return { page, sort, skip, limit };
+	return { page, skip, limit };
 }
 
 

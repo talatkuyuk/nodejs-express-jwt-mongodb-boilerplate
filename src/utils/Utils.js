@@ -10,10 +10,11 @@ class Utils {
 	 */
 	static pick (object, keys) {
 		try {
-			if (!keys) return {};
+			if (!keys || !object) return {};
 			return keys.reduce((obj, key) => {
-				if (object && Object.prototype.hasOwnProperty.call(object, key)) {
-					obj[key] = object[key];
+				if (Object.prototype.hasOwnProperty.call(object, key)) {
+					if (typeof(object[key]) === "string")
+						obj[key] = object[key];
 				}
 				return obj;
 			}, {});
@@ -23,30 +24,85 @@ class Utils {
 		}
 	};
 
+
 	/**
-	 * Create an object composed of the sort property
-	 * @param {Object|string} sort
+	 * Create an object composed of the picked object's boolean properties parsed
+	 * @param {Object} object
+	 * @param {string[]} keys
 	 * @returns {Object}
 	 */
-	 static pickSort (querySort) {
+	 static pickBooleans (object, keys) {
 		try {
+			if (!object || !keys) return {};
+			return keys.reduce((obj, key) => {
+				switch(typeof(object[key])) {
+					case "boolean":
+						obj[key] = object[key];
+					  	break;
+					case "string":
+						if (['true', 'false'].includes(object[key]))
+							obj[key] =  JSON.parse(object[key]);
+					  	break;
+				}
+				return obj;
+
+			}, {});
+
+		} catch (error) {
+			throw locateError(error, "Util : pickBooleans");
+		}
+	};
+
+	/**
+	 * Create an object composed of the picked object's number properties parsed
+	 * @param {Object} object
+	 * @param {string[]} keys
+	 * @returns {Object}
+	 */
+	static pickNumbers (object, keys) {
+		try {
+			if (!keys || !object) return {};
+			return keys.reduce((obj, key) => {
+				switch(typeof(object[key])) {
+					case "number":
+						obj[key] = object[key];
+						break;
+					case "string":
+						if (!isNaN(object[key]))
+							obj[key] =  Number(object[key]);
+						break;
+				}
+				return obj;
+
+			}, {});
+
+		} catch (error) {
+			throw locateError(error, "Util : pickNumbers");
+		}
+	};
+
+
+	/**
+	 * Create an object composed of the sort property
+	 * @param {string} sort
+	 * @returns {Object}
+	 */
+	 static pickSort (querySort, sortingFields) {
+		try {
+			if (!sortingFields || !querySort) return { createdAt: -1 };
+
 			const obj = {};
+			const parts = querySort.split("|");
 
-			// if it is array
-			if (typeof(querySort) === "object") {
-				querySort.map( item => {
-					const [sort, by] = item.split(".");
+			for (const part of parts) {
+				const [sort, by] = part.trim().split(".");
+
+				if (sortingFields.includes(sort)) {
 					obj[sort] = by?.toLowerCase() === "desc" ? -1 : 1;
-				});
-			}
+				}
+			} 
 
-			// if it is string
-			else if (typeof(querySort) === "string") {
-				const [sort, by] = querySort.split(".");
-				obj[sort] = by?.toLowerCase() === "desc" ? -1 : 1;
-			}
-
-			// add default sorting field
+			// add default sorting field for each query
 			obj["createdAt"] || (obj["createdAt"] = -1);
 			
 			return obj;
@@ -56,32 +112,7 @@ class Utils {
 		}
 	};
 
-	/**
-	 * Parse object keys as boolean: string => boolean
-	 * @param {Object} object
-	 * @param {string[]} keys
-	 * @returns {Object}
-	 */
-	static parseBooleans (object, keys) {
-		try {
-			keys.forEach( key => {
-				if (object.hasOwnProperty(key)) {
-					if (typeof object[key] === "string")
-						object[key] = object[key].toLowerCase();
 
-					if (['true', 'false', true, false].includes(object[key]))
-						object[key] =  JSON.parse(object[key]);
-					else
-						delete object[key];
-				}
-				
-			});
-			return object;
-
-		} catch (error) {
-			throw locateError(error, "Util : parseBooleans");
-		}
-	};
 
 	/**
 	 * Split a string into two parts at the first occurance of the seperator

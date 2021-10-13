@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 
 const { ApiError, locateError } = require('../utils/ApiError');
 const composeFilter = require('../utils/composeFilter');
+const composeSort = require('../utils/composeSort');
 
 //for database operations for users
 const userDbService = require('./user.db.service');
@@ -59,12 +60,13 @@ const paginaryService = require('./paginary.service');
 
 		const fields = {
 			stringFields: ['email', 'role', 'name', 'country', 'gender'],
-			booleanFields: [],
 		}
-
 		const filter = composeFilter(query, fields);
+
+		const sortingFields = ['email', 'role', 'name', 'country', 'gender'];
+		const sort = composeSort(query, sortingFields);
 		
-		return await paginaryService.paginary(query, filter, userDbService.getUsers);
+		return await paginaryService.paginary(query, filter, sort, userDbService.getUsers);
   
 	} catch (error) {
 		throw locateError(error, "UserDbService : getUsers");

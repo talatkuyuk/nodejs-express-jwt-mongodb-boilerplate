@@ -15,6 +15,7 @@ describe('Utils pick function', () => {
 	expect(Utils.pick(querystring.parse(querystrings[0]), ['email', 'sizex'])).toEqual({ email: "xxx@xxx.com" });
 	expect(Utils.pick(querystring.parse(querystrings[0]), ['emailx'])).toEqual({});
 	expect(Utils.pick(querystring.parse(querystrings[1]), ['email'])).toEqual({});
+	expect(Utils.pick(querystring.parse(querystrings[1]), ['page'])).toEqual({ page: "2" });
 	expect(Utils.pick(querystring.parse(querystrings[1]), [])).toEqual({});
 	expect(Utils.pick(null, [])).toEqual({});
 	expect(Utils.pick(null, null)).toEqual({});

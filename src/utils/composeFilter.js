@@ -4,18 +4,21 @@ const Utils = require('./Utils');
 
 const composeFilter = (query, fields) => {
 	try {
-		let stringFilters = {}, booleanFilters = {};
+		let stringFilters = {}, booleanFilters = {}, numberFilters = {};
 
 		if (fields.stringFields) {
 			stringFilters = Utils.pick(query, fields.stringFields);
 		}
 		
 		if (fields.booleanFields) {
-			const booleans = Utils.pick(query, fields.booleanFields);
-			booleanFilters = Utils.parseBooleans(booleans, fields.booleanFields);
+			booleanFilters = Utils.pickBooleans(query, fields.booleanFields);
 		}
 
-		return {...stringFilters, ...booleanFilters};
+		if (fields.numberFields) {
+			numberFilters = Utils.pickNumbers(query, fields.booleanFields);
+		}
+
+		return {...stringFilters, ...booleanFilters, ...numberFilters};
 
 	} catch (error) {
 		throw locateError(error, "Utils : composeFilter");

@@ -1,5 +1,6 @@
-const composeFilter = require('../utils/composeFilter');
 const { locateError } = require('../utils/ApiError');
+const composeFilter = require('../utils/composeFilter');
+const composeSort = require('../utils/composeSort');
 
 const joinedDbService = require('./joined.db.service');
 const paginaryService = require('./paginary.service');
@@ -22,13 +23,15 @@ const paginaryService = require('./paginary.service');
 
 		const fieldsRight = {
 			stringFields: ['role', 'name', 'country', 'gender'],
-			booleanFields: [],
 		}
 
 		const filterLeft = composeFilter(query, fieldsLeft);
 		const filterRight = composeFilter(query, fieldsRight);
+
+		const sortingFields = ['email', 'role', 'name', 'country', 'gender', 'isEmailVerified', 'isDisabled'];
+		const sort = composeSort(query, sortingFields);
 		
-		return await paginaryService.paginaryForJoinQuery(query, filterLeft, filterRight, joinedDbService.getAuthUsersJoined);
+		return await paginaryService.paginaryForJoinQuery(query, filterLeft, filterRight, sort, joinedDbService.getAuthUsersJoined);
   
 	} catch (error) {
 		throw locateError(error, "JoinedService : getAuthUsersJoined");
@@ -47,18 +50,19 @@ const paginaryService = require('./paginary.service');
 
 		const fieldsLeft = {
 			stringFields: ['email', 'role', 'name', 'country', 'gender'],
-			booleanFields: [],
 		}
 
 		const fieldsRight = {
-			stringFields: [],
 			booleanFields: ['isEmailVerified', 'isDisabled'],
 		}
 
 		const filterLeft = composeFilter(query, fieldsLeft);
 		const filterRight = composeFilter(query, fieldsRight);
+
+		const sortingFields = ['email', 'role', 'name', 'country', 'gender', 'isEmailVerified', 'isDisabled'];
+		const sort = composeSort(query, sortingFields);
 		
-		return await paginaryService.paginaryForJoinQuery(query, filterLeft, filterRight, joinedDbService.getUsersJoined);
+		return await paginaryService.paginaryForJoinQuery(query, filterLeft, filterRight, sort, joinedDbService.getUsersJoined);
   
 	} catch (error) {
 		throw locateError(error, "JoinedService : getUsersJoined");
