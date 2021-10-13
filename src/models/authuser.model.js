@@ -28,14 +28,15 @@ class AuthUser {
 	static fromDoc(doc){
 		if (!doc) return null;
 		const authuser = new AuthUser(
-			doc?.email,
-			doc?.password,
-			doc?.isEmailVerified,
-			doc?.isDisabled,
-			doc?.createdAt,
-			doc?.services
+			doc.email,
+			doc.password,
+			doc.isEmailVerified,
+			doc.isDisabled,
+			doc.createdAt,
+			doc.services
 		)
 		authuser.transformId(doc._id);
+		doc.role && (authuser.role = doc.role); // for joined query in joinedDbService 
 		return authuser;
 	}
 

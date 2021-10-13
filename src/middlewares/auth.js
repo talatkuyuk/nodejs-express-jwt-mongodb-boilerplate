@@ -38,10 +38,12 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 		
 		if (requiredRights.length) {
 			
-			const user = await userDbService.getUser({ id: authuser.id });
-			const role = user?.role ?? "user"; // there is no role yet forexample while adding an authuser
-			req.user.role = role;
-	
+			// before the joined query for authuser in passport, I had to get the role
+			// Actually, the role might be obtained using joined query in passport/jwtVerify
+			// const req.user.role = await userService.getUserRole(authuser.id);
+
+			const role = req.user.role ??= "user"; // there is no role yet forexample just after adding an authuser
+
 			const userRights = roleRights[role];
 			const userRightsWithoutSelf = roleRights[role].map(right => right.split("@")[0]);
 	

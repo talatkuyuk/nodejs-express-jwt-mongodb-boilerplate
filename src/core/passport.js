@@ -4,7 +4,7 @@ const BearerStrategy = require('passport-http-bearer').Strategy;
 const config = require('../config');
 const { tokenTypes } = require('../config/tokens');
 const { locateError } = require('../utils/ApiError');
-const { authuserDbService, authProviders } = require('../services');
+const { authuserDbService, authProviders, joinedDbService } = require('../services');
 
 
 const jwtVerify = async (payload, done) => {
@@ -13,7 +13,11 @@ const jwtVerify = async (payload, done) => {
 			throw new Error('Invalid token type');
 		}
 
-		const authuser = await authuserDbService.getAuthUser({ id: payload.sub });
+		// Below, was only fetched the authuser without the role from mongoDb
+		// const authuser = await authuserDbService.getAuthUser({ id: payload.sub });
+
+		// I created an outer join query in mongoDb to obtain the role of the user as well
+		const authuser = await joinedDbService.getAuthUserWithRole(payload.sub);
 
 		if (!authuser) return done(null, false);
 		
