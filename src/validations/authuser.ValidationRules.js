@@ -9,18 +9,14 @@ const check_param_id_with_custom = [
 		.isLength({ min: 24, max: 24 }).withMessage('The param id must be a 24-character number')
 		.bail()
 		.custom(async (value) => {
-			try {
-				if (await authuserService.isValidAuthUser(value)) 
-					return true; // indicates validation is success: the id is valid
-				throw new Error('No user found');
-				
-			} catch (error) {
-				throw error;
-			}
+			if (await authuserService.isValidAuthUser(value)) 
+				return true; // indicates validation is success: the id is valid
+			throw new Error('No user found');
 		}),
 ];
 
-// Option-2: authuser validation is handled in service not here (I've choosen this option for now)
+// Option-2: authuser validation is handled in service not here 
+// I've choosen this option in order to throw notfound error im service not validation error
 const check_param_id = [
 	param("id")
 		.isLength({ min: 24, max: 24 })
@@ -29,29 +25,58 @@ const check_param_id = [
 
 
 ////////////////////////////////////////////////////////////////////////
-
+const once = (value) => {
+	if (typeof(value) === "object")
+		throw new Error("The parameter can only appear once in the query string")
+	return true;
+}
 
 const getAuthUsers = [
+	query("email")
+		.custom(once)
+		.trim()
+		.toLowerCase()
+		.isEmail()
+		.withMessage("The query param 'email' must be in valid form")
+		.optional(),
+
 	query("isDisabled")
+		.custom(once)
+		.trim()
+		.toLowerCase()
 		.isBoolean()
 		.withMessage("The query param 'isDisabled' must be boolean value")
 		.optional(),
 	
 	query("isEmailVerified")
+		.custom(once)
+		.trim()
+		.toLowerCase()
 		.isBoolean()
 		.withMessage("The query param 'isEmailVerified' must be boolean value")
 		.optional(),
 
 	query("page")
+		.custom(once)
+		.trim()
 		.isNumeric()
 		.withMessage("The query param 'page' must be numeric value")
 		.optional(),
 	
 	query("size")
+		.custom(once)
+		.trim()
 		.isNumeric()
 		.withMessage("The query param 'size' must be numeric value")
 		.isLength({ max: 50 })
 		.withMessage("The query param 'size' can be at most 50")
+		.optional(),
+	
+	query("sort")
+		.custom(once)
+		.trim()
+		.matches(/[azAZ.|]/i)
+		.withMessage("The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter")
 		.optional(),
 ];
 

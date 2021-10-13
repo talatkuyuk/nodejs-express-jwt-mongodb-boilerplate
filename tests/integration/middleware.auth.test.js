@@ -48,55 +48,55 @@ describe('Auth Middleware', () => {
 
 		test('should throw ApiError with code 401, if Authorization Header is absent', async () => {
 			const requestHeader = null;
-			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: No auth token");
+			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: No auth token");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
 		test('should throw ApiError with code 401, if Authorization Header is bad formed without Bearer', async () => {
 			const requestHeader = { headers: { Authorization: `${testData.ACCESS_TOKEN_EXPIRED}` }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: No auth token");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: No auth token");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
 		test('should throw ApiError with code 401, if Authorization Header is bad formed mistyping Baerer', async () => {
 			const requestHeader = { headers: { Authorization: `Baerer ${testData.ACCESS_TOKEN_EXPIRED}` }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: No auth token");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: No auth token");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
 		test('should throw ApiError with code 401, if Authorization Header is bad formed with no space between Bearer and Token', async () => {
 			const requestHeader = { headers: { Authorization: `Bearer${testData.ACCESS_TOKEN_EXPIRED}` }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: No auth token");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: No auth token");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
 		test('should throw ApiError with code 401, if access token is not in the Authorization Header', async () => {
 			const requestHeader = { headers: { Authorization: `Bearer ` }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: No auth token");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: No auth token");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
 		test('should throw ApiError with code 401, if access token is expired', async () => {
 			const requestHeader = { headers: { Authorization: `Bearer ${testData.ACCESS_TOKEN_EXPIRED}` }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: jwt expired");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenExpiredError: jwt expired");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 
 		test('should throw ApiError with code 401, if access token has invalid signature', async () => {
 			const requestHeader = { headers: { Authorization: `Bearer ${testData.ACCESS_TOKEN_WITH_INVALID_SIGNATURE}` }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: invalid signature");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "JsonWebTokenError: invalid signature");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
 		test('should throw ApiError with code 401, if access token is malformed (Undefined)', async () => {
 			const requestHeader = { headers: { Authorization: `Bearer ${testData.ACCESS_TOKEN_UNDEFINED}` }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: jwt malformed");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "JsonWebTokenError: jwt malformed");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 	});
@@ -136,7 +136,7 @@ describe('Auth Middleware', () => {
 			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${tokens.refresh.token}` }, useragent: { source: userAgent }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: jwt not active"); // since Refresh Token is used before "not valid before"
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "NotBeforeError: jwt not active"); // since Refresh Token is used before "not valid before"
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
@@ -153,7 +153,7 @@ describe('Auth Middleware', () => {
 			const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser.id);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${verifyEmailToken}` }, useragent: { source: userAgent }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: Invalid token type");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: Invalid token type");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 
@@ -190,7 +190,7 @@ describe('Auth Middleware', () => {
 			const accessToken = tokenService.generateToken(authuser.id, moment().add(5, 'minutes'), tokenTypes.ACCESS, "jti", userAgent, 0, "INVALID-SECRET");
 
 			const requestHeader = { headers: { Authorization: `Bearer ${accessToken}` }, useragent: { source: userAgent }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "TokenError: invalid signature");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "JsonWebTokenError: invalid signature");
 			await commonHeaderTestProcess(requestHeader, expectedError);
 		});
 

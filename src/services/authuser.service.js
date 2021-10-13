@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const { ApiError, locateError } = require('../utils/ApiError');
 const composeFilter = require('../utils/composeFilter');
+const composeSort = require('../utils/composeSort');
 
 //for database operations for authusers
 const authuserDbService = require('./authuser.db.service');
@@ -160,10 +161,12 @@ const isPair_EmailAndId = async function (id, email) {
 			stringFields: ['email'],
 			booleanFields: ['isEmailVerified', 'isDisabled'],
 		}
-
 		const filter = composeFilter(query, fields);
 		
-		return await paginaryService.paginary(query, filter, authuserDbService.getAuthUsers);
+		const sortingFields = ['email', 'isEmailVerified', 'isDisabled'];
+		const sort = composeSort(query, sortingFields);
+
+		return await paginaryService.paginary(query, filter, sort, authuserDbService.getAuthUsers);
   
 	} catch (error) {
 		throw locateError(error, "AuthUserService : getAuthUsers");

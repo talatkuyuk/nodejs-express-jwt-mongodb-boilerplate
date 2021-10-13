@@ -1,4 +1,4 @@
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
 const { authuserService, userService } = require('../services');
 const { roles } = require('../config/roles');
 
@@ -7,18 +7,8 @@ const iso_3166_alpha_3 = `/^A(BW|FG|GO|IA|L[AB]|ND|R[EGM]|SM|T[AFG]|U[ST]|ZE)|B(
 
 const check_param_id = [
 	param("id")
-		.isLength({ min: 24, max: 24}).withMessage('param id is wrong')
-		.custom(async (value) => {
-			try {
-				console.log("value:", value);
-				if (await userService.isValidUser(value)) 
-					return true; // indicates validation is success: the id is valid
-				throw new Error('param id does not refer any user. (User not found)');
-				
-			} catch (error) {
-				throw error;
-			}
-	}),
+		.isLength({ min: 24, max: 24 })
+		.withMessage('The param id must be a 24-character number')
 ];
 
 const check_body_name = [
@@ -41,18 +31,76 @@ const check_body_country = [
 	body('country')
 		.trim()
 		.toUpperCase()
-		.matches(iso_3166_alpha_3).withMessage("country code must be in the form of iso_3166_alpha_3")
-		.isLength({ max: 3 }).withMessage("country code can't exceed 3 characters")
-		.isLength({ min: 3 }).withMessage("country code can't less than 3 characters")
+		.matches(iso_3166_alpha_3)
+		.withMessage("country code must be 3-letter standart iso code")
 ];
 
 ////////////////////////////////////////////////////////////////////////
-
+const once = (value) => {
+	if (typeof(value) === "object")
+		throw new Error("The parameter can only appear once in the query string")
+	return true;
+}
 
 const getUsers = [
-	param("country").toUpperCase(),
-	param("page").default(1),
-	param("size").default(20),
+	query("email")
+		.custom(once)
+		.trim()
+		.escape()
+		.optional(),
+	
+	query("name")
+		.custom(once)
+		.trim()
+		.toLowerCase()
+		.isIn(["male", "female", "none"])
+		.withMessage('gender could be male, female or none')
+		.optional(),
+	
+	query("gender")
+		.custom(once)
+		.trim()
+		.toLowerCase()
+		.isIn(["male", "female", "none"])
+		.withMessage('gender could be male, female or none')
+		.optional(),
+
+	query("country")
+		.custom(once)
+		.trim()
+		.toUpperCase()
+		.matches(iso_3166_alpha_3)
+		.withMessage("country code must be in the form of iso_3166_alpha_3")
+		.optional(),
+
+	query("page")
+		.custom(once)
+		.trim()
+		.isNumeric()
+		.withMessage("The query param 'page' must be numeric value")
+		.optional(),
+	
+	query("role")
+		.trim()
+		.toLowerCase()
+		.isIn(roles)
+		.withMessage(`role could be one of ${roles}`),
+	
+	query("size")
+		.custom(once)
+		.trim()
+		.isNumeric()
+		.withMessage("The query param 'size' must be numeric value")
+		.isLength({ max: 50 })
+		.withMessage("The query param 'size' can be at most 50")
+		.optional(),
+	
+	query("sort")
+		.custom(once)
+		.trim()
+		.matches(/[azAZ.|]/i)
+		.withMessage("The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter")
+		.optional(),
 ];
 
 
@@ -67,42 +115,36 @@ const addUser = [
 
 	// check there is an authenticated user with that id, and there is no user with the same id.
 	body("id")
-		.exists({checkFalsy: true}).withMessage('id must not be empty or falsy value')
+		.exists({checkFalsy: true})
+		.withMessage('id must not be empty or falsy value')
 		.bail()
-		.isLength({ min: 24, max: 24}).withMessage('id is wrong')
+		.isLength({ min: 24, max: 24})
+		.withMessage('The param id must be a 24-character number')
 		.bail()
 		.custom(async (value) => {
-			try {
-				if (!await authuserService.isValidAuthUser(value)) 
-					throw new Error('Id does not match with any authenticated user');
+			if (!await authuserService.isValidAuthUser(value)) 
+				throw new Error('Id does not match with any authenticated user');
 
-				if (await userService.isValidUser(value)) 
-					throw new Error('There is another user with the same id.');
+			if (await userService.isValidUser(value)) 
+				throw new Error('There is another user with the same id.');
 
-				return true;
-				
-			} catch (error) {
-				throw error;
-			}
+			return true;
 	}),
 
 	// check e-mail is valid and is matched with the id in authenticated users
 	body('email')
 		.trim()
-		.exists({checkFalsy: true}).withMessage('email must not be empty or falsy value')
+		.exists({checkFalsy: true})
+		.withMessage('email must not be empty or falsy value')
 		.bail()
-		.isEmail().withMessage('email must be in valid form')
+		.isEmail()
+		.withMessage('email must be in valid form')
 		.toLowerCase()
 		.custom(async (value, { req }) => {
-			try {
-				if (!await authuserService.isPair_EmailAndId(req.body.id, value))
-					throw new Error('Email does not match with the auth id.');
-				
-				return true; // Indicates the success
-
-			} catch (error) {
-				throw error;
-			}
+			if (!await authuserService.isPair_EmailAndId(req.body.id, value))
+				throw new Error('Email does not match with the auth id.');
+			
+			return true; // Indicates the success
 		}),
 
 	body('role')
@@ -115,10 +157,12 @@ const addUser = [
 	check_body_gender[0].optional(),
 	check_body_country[0].optional(),
 
-	body().custom( (body, { req }) => {
-		const validKeys = ['id', 'email', 'role', 'name', 'gender', 'country'];
-		return Object.keys(req.body).every(key => validKeys.includes(key));
-	}).withMessage(`Any extra parameter is not allowed other than ${['id', 'email', 'role', 'name', 'gender', 'country']}`),
+	body()
+		.custom((body, { req }) => {
+			const validKeys = ['id', 'email', 'role', 'name', 'gender', 'country'];
+			return Object.keys(req.body).every(key => validKeys.includes(key));
+		})
+		.withMessage(`Any extra parameter is not allowed other than ${['id', 'email', 'role', 'name', 'gender', 'country']}`),
 
 ];
 
@@ -147,12 +191,19 @@ const deleteUser = [
 const changeRole = [
 	...check_param_id,
 
-	body('role', `role could be one of ${roles}`).trim().isIn(roles),
+	body("role")
+		.trim()
+		.toLowerCase()
+		.isIn(roles)
+		.withMessage(`role could be one of ${roles}`),
 
-	body().custom( (body, { req }) => {
-		const validKey = 'role';
-		return Object.keys(req.body).every(key => validKey === key);
-	}).withMessage(`Any extra parameter is not allowed other than 'role'`),
+	// TODO: extract req, you can use only body, test it
+	body()
+		.custom((body, { req }) => {
+			const validKey = 'role';
+			return Object.keys(req.body).every(key => validKey === key);
+		})
+		.withMessage(`Any extra parameter is not allowed other than 'role'`),
 ];
 
 

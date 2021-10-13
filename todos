@@ -27,7 +27,7 @@
 //TODO: handle deprecation for mongodb collection.findOneAndUpdate option [returnOriginal]+
 //TODO: change the routes with plural names+
 //TODO: create a centralized catching errors to finf the lov-cation of error or the path+
-//TODO: add mechanism for query authuser or user using pipedelimeter for the query param sort
+//TODO: add mechanism for query authuser or user using pipedelimeter for the query param sort+
 //TODO: seperate joined queries from authuser and user+
 //TODO: create a special joined query for auth middleware to get authuser and user role as well from users collection
 
@@ -35,8 +35,8 @@
 
 //TODO: arrange errors and handle all correctly+
 //TODO: arrange http status+
-//TODO: add loggers for mongo operations
 //TODO: update winston that if the user is not identified then dont it log like this "user:-", keep it empty+
+//TODO: add loggers for mongo operations
 
 //TODO: add todo part
 //TODO: add socket io
