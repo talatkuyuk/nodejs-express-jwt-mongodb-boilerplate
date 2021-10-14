@@ -6,6 +6,11 @@ const { ApiError } = require('../utils/ApiError');
 
 
 
+// Throw ApiError for the routes that are not defined
+const notFound = (req, res, next) => next( new ApiError(httpStatus.NOT_FOUND, 'Not found') );
+
+
+
 // Convert errors to ApiError if it is not
 const errorConverter = (err, req, res, next) => {
   
@@ -62,6 +67,7 @@ const errorHandler = (err, req, res, next) => {
 
 
 module.exports = {
+  notFound,
   errorConverter,
   errorHandler,
 };

@@ -71,7 +71,7 @@ describe('POST /auth/forgot-password', () => {
 		});
 
 
-		test.only('should return status 500, if the email service does not respond', async () => {
+		test('should return status 500, if the email service does not respond', async () => {
 			const authuserx = AuthUser.fromObject({
 				email: 'talat@gmail.com',
 				password: await bcrypt.hash('Pass1word.', 8),
