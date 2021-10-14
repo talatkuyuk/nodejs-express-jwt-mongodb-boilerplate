@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
 const httpMocks = require('node-mocks-http');
+var shell = require('shelljs'); // in order to shotdown and restart redis to test behavior
 
 // without these two lines which are actually not necessary the test stucks, I don't know the reason
 const request = require('supertest');
@@ -233,8 +234,10 @@ describe('Auth Middleware', () => {
 		});
 
 
-		test('should throw ApiError with code 500, if redis cache server is down while checking blacklist', async () => {
-			console.log("Stop Redis manually");
+		test.only('should throw ApiError with code 500, if redis cache server is down while checking blacklist', async () => {
+			
+			console.log("Redis is getting closed intentionally for the test...");
+			shell.exec('npm run redis:stop');
 			await new Promise(resolve => setTimeout(resolve, 10000));
 
 			const authUserInstance = AuthUser.fromObject({
@@ -258,8 +261,10 @@ describe('Auth Middleware', () => {
 
 	describe('Success Authentication', () => {
 		
-		test('should continue next middleware with user is attached to the request', async () => {
-			console.log("Restart Redis manually if it is stopped");
+		test.only('should continue next middleware with user is attached to the request', async () => {
+
+			console.log("Redis is getting re-started intentionally for the test...");
+			shell.exec('npm run redis:restart');
 			await new Promise(resolve => setTimeout(resolve, 10000));
 
 			const authUserInstance = AuthUser.fromObject({
