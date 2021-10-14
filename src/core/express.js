@@ -14,9 +14,8 @@ const config     = require('../config');
 const morgan     = require('./morgan');
 
 const { jwtStrategy, googleStrategy, facebookStrategy } = require('./passport');
-const { errorConverter, errorHandler } = require('../middlewares/error');
+const { notFound, errorConverter, errorHandler } = require('../middlewares/error');
 const { authLimiter } = require('../middlewares/rateLimiter');
-const { ApiError } = require('../utils/ApiError');
 
 // *****************************************************************
 function initViewEngine(app) {
@@ -113,7 +112,7 @@ app.use(xss());
 app.use('/', routes);
 
 // send back a 404 error for any unknown api request
-app.use((req, res, next) => next( new ApiError(httpStatus.NOT_FOUND, 'Not found') ));
+app.use(notFound);
 
 // convert error to ApiError
 app.use(errorConverter);
