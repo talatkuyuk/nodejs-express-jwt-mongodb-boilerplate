@@ -22,20 +22,17 @@ if (config.env !== 'test') {
  * @param {string} text
  * @returns {Promise}
  */
-const sendEmail = (to, subject, text) => {
+const sendEmail = async (to, subject, text) => {
 	const message = { from: config.email.from, to, subject, text };
 
-	return new Promise(function (resolve, reject) {
-		transporter.sendMail(message, (error, info) => {
-			if (error) {
-				const {code, response, responseCode, command} = error;
-				console.log({code, response, responseCode, command});
-				return reject(error);
-			} 
-			console.log(info);
-			resolve();
-		});
-	});
+	try {
+		await transporter.sendMail(message).then(console.log);
+
+	} catch (error) {
+		const {code, response, responseCode, command} = error;
+		console.log({code, response, responseCode, command});
+		throw locateError(error, "EmailService : sendEmail");
+	}
 };
 
 
@@ -51,7 +48,7 @@ const sendResetPasswordEmail = async (to, token) => {
 	const text = `Dear user,\n\nTo reset your password, click on this link: ${resetPasswordUrl}\n\nIf you did not request any password resets, then ignore this email.`;
 
 	try {
-		return await sendEmail(to, subject, text);
+		await sendEmail(to, subject, text);
 
 	} catch (error) {
 		throw locateError(error, "EmailService : sendResetPasswordEmail");
@@ -70,7 +67,7 @@ const sendVerificationEmail = async (to, token) => {
 	const text = `Dear user,\n\nTo verify your email, click on this link: ${verificationEmailUrl}\n\nIf you did not create an account, then ignore this email.`;
 
 	try {
-		return await sendEmail(to, subject, text);
+		await sendEmail(to, subject, text);
 
 	} catch (error) {
 		throw locateError(error, "EmailService : sendVerificationEmail");
@@ -78,8 +75,7 @@ const sendVerificationEmail = async (to, token) => {
 };
 
 module.exports = {
-  transporter,
-  sendEmail,
+  transporter, // it is exported for mocking in jest
   sendResetPasswordEmail,
   sendVerificationEmail,
 };

@@ -96,15 +96,15 @@ const resetPasswordValidationRules = [
 	...check_body_password,
 	...check_body_passwordConfirmation,
 
-	query('token')
-      .notEmpty().withMessage('The query parameter token must not be empty'),
+	body('token')
+      .notEmpty().withMessage('token must not be empty'),
 ];
 
 
 
 const verifyEmailValidationRules = [
-	query('token')
-      .notEmpty().withMessage('The query parameter token must not be empty'),
+	body('token')
+      .notEmpty().withMessage('token must not be empty'),
 ];
 
 

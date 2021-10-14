@@ -7,7 +7,7 @@ const { locateError } = require('../utils/ApiError');
 /**
  * Save the token to db
  * @param {Token} tokenDoc 
- * @returns {Promise}
+ * @returns {Promise<Token?>}
  */
 const addToken = async (tokenDoc) => {
 	try {
@@ -16,7 +16,11 @@ const addToken = async (tokenDoc) => {
 		const db = mongodb.getDatabase();
 		const result = await db.collection("tokens").insertOne(tokenDoc);
 
-		console.log(`${result.insertedCount} record is created in tokens.`);
+		if (result.result.ok !== 1) return null;
+
+		console.log(`${result.insertedCount} record is created in tokens. (${result.insertedId})`);
+
+		return Token.fromDoc(result.ops[0]); // inserted document
 		
 	} catch (error) {
 		throw locateError(error, "TokenDbService : addToken");
@@ -93,8 +97,7 @@ const updateToken = async (id, updateBody) => {
 
 		console.log(`${result.ok} record is updated in tokens`);
 
-		const token = Token.fromDoc(result.value);
-		return token;
+		return Token.fromDoc(result.value);
 		
 	} catch (error) {
 		throw locateError(error, "TokenDbService : updateToken");

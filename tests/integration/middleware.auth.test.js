@@ -151,7 +151,7 @@ describe('Auth Middleware', () => {
 			const userAgent = "from-jest-test";
 				
 			const authuser = await authuserDbService.addAuthUser(authUserInstance);
-			const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser.id);
+			const { verifyEmailToken } = await tokenService.generateVerifyEmailToken(authuser.id);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${verifyEmailToken}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: Invalid token type");
@@ -234,7 +234,7 @@ describe('Auth Middleware', () => {
 		});
 
 
-		test.only('should throw ApiError with code 500, if redis cache server is down while checking blacklist', async () => {
+		test('should throw ApiError with code 500, if redis cache server is down while checking blacklist', async () => {
 			
 			console.log("Redis is getting closed intentionally for the test...");
 			shell.exec('npm run redis:stop');
@@ -261,7 +261,7 @@ describe('Auth Middleware', () => {
 
 	describe('Success Authentication', () => {
 		
-		test.only('should continue next middleware with user is attached to the request', async () => {
+		test('should continue next middleware with user is attached to the request', async () => {
 
 			console.log("Redis is getting re-started intentionally for the test...");
 			shell.exec('npm run redis:restart');

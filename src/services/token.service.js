@@ -63,7 +63,7 @@ const verifyToken = async (token, type) => {
 	try {
 		const payload = jwt.verify(token, config.jwt.secret);
 
-		const tokenDoc = await tokenDbService.getToken({ token, type, user: payload.sub });
+		const tokenDoc = await tokenDbService.getToken({ token, user: payload.sub, type });
 
 		if (!tokenDoc)
 			throw new ApiError(httpStatus.UNAUTHORIZED, `${type} token is not valid`);
@@ -74,7 +74,11 @@ const verifyToken = async (token, type) => {
 		return tokenDoc;
 
 	} catch (error) {
-		throw locateError(error, "TokenService : verifyToken");
+		if (error.name.includes("Token")) {
+			const err = new ApiError(httpStatus.UNAUTHORIZED, error);
+			throw locateError(err, "TokenService : verifyToken");
+		} else
+			throw locateError(error, "TokenService : verifyToken");
 	}
 };
 
@@ -120,8 +124,6 @@ const verifyToken = async (token, type) => {
 
 		// Step-3: control if that RT is valid
 		const payload = jwt.verify(refreshToken, config.jwt.secret);
-		console.log(payload);
-
 
 		// Step-4: control if it comes from different user agent
 		if (payload.ua !== userAgent) {
@@ -131,7 +133,7 @@ const verifyToken = async (token, type) => {
 		}
 
 		// okey then, success refresh token rotation happened; update the refresh token with the { blacklisted: true }
-		await tokenDbService.updateToken(refreshTokenDoc.id, { blacklisted: true });
+		await updateTokenAsBlacklisted(refreshTokenDoc.id);
 		
 		return refreshTokenDoc;
 		
@@ -200,7 +202,7 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 				console.log(`disableFamilyRefreshToken: in loop: ${tokenRecord._id}`);
 	
 				// Update each refresh token with the { blacklisted: true }
-				await tokenDbService.updateToken(tokenRecord._id, { blacklisted: true });
+				await updateTokenAsBlacklisted(tokenRecord._id);
 
 				// put the related access token's jti into the blacklist
 				await redisService.put_jti_into_blacklist(tokenRecord.jti);
@@ -313,18 +315,25 @@ const generateRefreshToken = async (userId, userAgent, jti, family) => {
 const generateResetPasswordToken = async (userId) => {
 	try {
 		const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
-		const resetPasswordToken = generateToken(userId, expires, tokenTypes.RESET_PASSWORD);
+		const resetPasswordToken = generateToken(
+			userId, 
+			expires, 
+			tokenTypes.RESET_PASSWORD
+		);
 
-		const tokenDoc = new Token(
+		const token = new Token(
 			resetPasswordToken,
 			userId,
 			expires.toDate(),
 			tokenTypes.RESET_PASSWORD
 		);
 
-		await tokenDbService.addToken(tokenDoc);
+		const resetPasswordTokenDoc = await tokenDbService.addToken(token);
+
+		if (!resetPasswordTokenDoc)
+			throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
 		
-		return resetPasswordToken;
+		return { resetPasswordToken, tokenId: resetPasswordTokenDoc.id };
 
 	} catch (error) {
 		throw locateError(error, "TokenService : generateResetPasswordToken");
@@ -340,18 +349,25 @@ const generateResetPasswordToken = async (userId) => {
 const generateVerifyEmailToken = async (userId) => {
 	try {
 		const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
-		const verifyEmailToken = generateToken(userId, expires, tokenTypes.VERIFY_EMAIL);
+		const verifyEmailToken = generateToken(
+			userId, 
+			expires, 
+			tokenTypes.VERIFY_EMAIL
+		);
 
-		const tokenDoc = new Token(
+		const token = new Token(
 			verifyEmailToken,
 			userId,
 			expires.toDate(),
 			tokenTypes.VERIFY_EMAIL
 		);
 
-		await tokenDbService.addToken(tokenDoc);
+		const verifyEmailTokenDoc = await tokenDbService.addToken(token);
 
-		return verifyEmailToken;
+		if (!verifyEmailTokenDoc)
+			throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
+
+		return { verifyEmailToken, tokenId: verifyEmailTokenDoc.id };
 
 	} catch (error) {
 		throw locateError(error, "TokenService : generateVerifyEmailToken");
@@ -391,6 +407,21 @@ const removeTokens = async (query) => {
 
 	} catch (error) {
 		throw locateError(error, "TokenService : removeTokens");
+	}
+}
+
+
+/**
+ * Update the token as blacklisted
+ * @param {string} id
+ * @returns {Promise}
+ */
+ const updateTokenAsBlacklisted = async (id) => {
+	try {
+		await tokenDbService.updateToken(id, { blacklisted: true });
+
+	} catch (error) {
+		throw locateError(error, "TokenService : updateTokenAsBlacklisted");
 	}
 }
 
@@ -442,5 +473,6 @@ module.exports = {
 	generateVerifyEmailToken,
 	removeToken,
 	removeTokens,
+	updateTokenAsBlacklisted,
 	findTokenAndRemoveFamily,
 };

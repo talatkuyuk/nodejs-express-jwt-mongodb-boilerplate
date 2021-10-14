@@ -32,7 +32,7 @@ const signupWithEmailAndPassword = async (email, password) => {
 		const authuser = await authuserDbService.addAuthUser(authuserx);
 		
 		if (!authuser)
-			throw new ApiError(httpStatus.BAD_REQUEST, "Internal Server Problem (Database)");
+			throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
 
 		return authuser;
 
@@ -196,7 +196,14 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
     const resetPasswordTokenDoc = await tokenService.verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
 
     const authuser = await authuserDbService.getAuthUser({ id: resetPasswordTokenDoc.user });
-    if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+
+    if (!authuser) {
+		throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+	}
+
+	if (authuser.isDisabled) {
+		throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
+	}
 
 	const password = await bcrypt.hash(newPassword, 8);
     
@@ -226,7 +233,14 @@ const verifyEmail = async (verifyEmailToken) => {
     const verifyEmailTokenDoc = await tokenService.verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
 
     const authuser = await authuserDbService.getAuthUser({ id: verifyEmailTokenDoc.user });
-    if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+    
+	if (!authuser) {
+		throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+	}
+
+	if (authuser.isDisabled) {
+		throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
+	}
     
     await authuserDbService.updateAuthUser(authuser.id, { isEmailVerified: true });
 	await tokenService.removeTokens({ user: authuser.id, type: tokenTypes.VERIFY_EMAIL });
