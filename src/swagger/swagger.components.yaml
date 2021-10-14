@@ -162,6 +162,7 @@ components:
       # required:
       #   - password
       #   - passwordConfirmation
+      #   - token
       properties:
         password:
           type: string
@@ -172,10 +173,13 @@ components:
           type: string
           format: password
           description: same value with the password
+        token:
+          type: string
+          description: reset password token
       example:
         password: Pass1word!
         passwordConfirmation: Pass1word!
-
+        token: lkfkldE-reset-password-token-öflkmFDDkf
 
     # ERROR
     Error:

@@ -184,8 +184,6 @@
   post:
     summary: Reset password
     tags: [Auth]
-    parameters:
-      - $ref: '#/components/parameters/query-param-token'
     requestBody:
       required: true
       content:

@@ -77,7 +77,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 	const email = req.body.email;
 	
 	const authuser = await authuserService.getAuthUserByEmail(email);
-	const resetPasswordToken = await tokenService.generateResetPasswordToken(authuser.id);
+	const { resetPasswordToken } = await tokenService.generateResetPasswordToken(authuser.id);
 	await emailService.sendResetPasswordEmail(email, resetPasswordToken);
 
 	req.user = authuser; // for morgan logger to tokenize it as user
@@ -88,8 +88,9 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
 
 const resetPassword = asyncHandler(async (req, res) => {
-	const token = req.query.token;
-	const password = req.body.password;
+	const { token, password } = req.body;
+
+	console.log({ token, password })
 
 	const authuser = await authService.resetPassword(token, password);
 
@@ -104,7 +105,7 @@ const sendVerificationEmail = asyncHandler(async (req, res, next) => {
 	const { id, email, isEmailVerified } = req.user;
 
 	authService.handleEmailIsAlreadyVerified(isEmailVerified);
-	const verifyEmailToken = await tokenService.generateVerifyEmailToken(id);
+	const { verifyEmailToken } = await tokenService.generateVerifyEmailToken(id);
 	await emailService.sendVerificationEmail(email, verifyEmailToken);
 
 	res.status(httpStatus.NO_CONTENT).send();
@@ -113,7 +114,7 @@ const sendVerificationEmail = asyncHandler(async (req, res, next) => {
 
 
 const verifyEmail = asyncHandler(async (req, res) => {
-	const token = req.query.token;
+	const token = req.body.token;
 
 	const authuser = await authService.verifyEmail(token);
 

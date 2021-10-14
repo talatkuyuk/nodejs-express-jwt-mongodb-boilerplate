@@ -97,9 +97,9 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 			commonExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("email");
+			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 			expect(response.body.errors.password.length).toBe(1);
 			expect(response.body.errors.password).toEqual(["password must not be empty or falsy value"]); 
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 		});
 
 
@@ -112,9 +112,9 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 			commonExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("email");
+			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 			expect(response.body.errors.password.length).toBe(1);
 			expect(response.body.errors.password).toEqual(["password must be minimum 8 characters"]); 
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 	  	});
 
 
@@ -127,9 +127,9 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 			commonExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("email");
+			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 			expect(response.body.errors.password.length).toBe(1);
 			expect(response.body.errors.password).toEqual(["password must contain at least one uppercase, one lowercase, one number and one special char"]); 
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 	  	});
 
 
@@ -144,7 +144,7 @@ describe('POST /auth/signup', () => {
 			expect(response.body.errors).not.toHaveProperty("email");
 			expect(response.body.errors).not.toHaveProperty("password");
 			expect(response.body.errors.passwordConfirmation.length).toBe(1);
-			expect(response.body.errors).toHaveProperty("passwordConfirmation");
+			expect(response.body.errors.passwordConfirmation).toEqual(["password confirmation does not match with the password"]); 
 		});
 
 

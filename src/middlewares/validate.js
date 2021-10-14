@@ -33,7 +33,6 @@ const validate = (rulesSchema) => async (req, res, next) => {
 			true, // isOperational
 		);
 
-		console.log(validationError)
 		next(validationError);
 
 	} catch (error) {
