@@ -1,22 +1,5 @@
 const config = require('../config');
 
-// interface Error {
-//     name: string, // always "Error"
-//     message: string,
-//     stack?: string,
-// }
-// There is only one constructor: new Error(message);
-
-
-// interface ApiError {
-//     name: string,
-//     message: string,
-//     statusCode: Number,
-//     errors: Object,
-//     isOperational: string,
-//     stack?: string,
-// }
-
 
 class ApiError extends Error {
     constructor(statusCode, error, description = null, errors = null, isOperational = true, stack) {
@@ -86,3 +69,47 @@ module.exports = {
   ApiError,
   locateError
 };
+
+
+/*
+interface Error {
+    name: "Error",
+    message: string,
+    stack?: string,
+}
+
+There is only one constructor: new Error(message);
+
+interface ApiError {
+    name: string,
+    message: string,
+    statusCode: Number,
+    errors: Object,
+    isOperational: string,
+    stack?: string,
+}
+
+Operational Errors: represent runtime problems. These errors are expected in the Node.js runtime and should be dealt with in a proper way. This does not mean the application itself has bugs. It means they need to be handled properly. Here’s a list of common operational errors:
+
+failed to connect to server
+failed to resolve hostname
+invalid user input
+resource not found
+forbidden/unauthorized requests
+request timeout
+socket hang-up
+system is out of memory
+
+Programmer Errors: are what we call bugs. They represent issues in the code itself. Here are a few more:
+
+reading a property of an undefined object
+called an asynchronous function without a callback
+did not resolve a promise
+did not catch a rejected promise
+passed a string where an object was expected
+passed an object where a string was expected
+passed incorrect parameters in a function
+
+
+Operational errors are part of the runtime and application while programmer errors are bugs you introduce in your codebase.
+*/
