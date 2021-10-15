@@ -107,8 +107,9 @@ const verifyToken = async (token, type) => {
 		// Step-1: control if that RT is in DB
 		refreshTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH });
 
-		if (!refreshTokenDoc)
+		if (!refreshTokenDoc) {
 			throw new ApiError(httpStatus.UNAUTHORIZED, "refresh token is not valid");
+		}
 
 
 		// Step-2: control if that RT is blacklisted
@@ -118,7 +119,7 @@ const verifyToken = async (token, type) => {
 			// disable the refresh token family
 			await disableFamilyRefreshToken(refreshTokenDoc);
 
-			throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized usage of refresh token has been detected.");
+			throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized usage of refresh token has been detected");
 		}
 
 
@@ -147,7 +148,7 @@ const verifyToken = async (token, type) => {
 			// Disable the refresh token family since someone else could use it
 			await disableFamilyRefreshToken(refreshTokenDoc);
 
-			error = new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized usage of refresh token has been detected.");
+			error = new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized usage of refresh token has been detected");
 		} 
 		
 		if (error.name === "TokenExpiredError") {

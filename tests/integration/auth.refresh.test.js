@@ -68,7 +68,6 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(response.status).toBe(status);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.body.code).toEqual(status);
-			expect(response.body).toHaveProperty("name");
 			expect(response.body).toHaveProperty("description");
 			expect(response.body).not.toHaveProperty("errors");
 		}
@@ -81,20 +80,21 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken: testData.REFRESH_TOKEN_VALID });
 
 			commonExpectations(response, httpStatus.UNAUTHORIZED);
+			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("refresh token is not valid");
 		});
 
 		
-		test('should return 401 and disable family if refresh token is blacklisted (if first time violation)', async () => {
+		test('should return 401 and disable family if refresh token is blacklisted (first time violation)', async () => {
 
 			// find the refresh token in db to get id
 			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
 
 			// Update the refresh token with the { blacklisted: true }
-			await tokenDbService.updateToken(refrehTokenDoc.id, { blacklisted: true });
+			await tokenService.updateTokenAsBlacklisted(refrehTokenDoc.id);
 
 			// add two refresh tokens into db for the user and with the same family, keep them not blacklisted
-			// to make further expect is more reasonable related with disable family tokens, and store both jti into cache as blacklisted
+			// to make further expect is more reasonable related with disable below family tokens, and store both jti into cache as blacklisted
 			await tokenDbService.addToken({
 				token: testData.REFRESH_TOKEN_VALID,
 				user: authuser.id,
@@ -120,13 +120,14 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			commonExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected.");
+			expect(response.body.name).toEqual("ApiError");
+			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected");
 
-			// check the whole refresh token's family are in db // up to now, 3 refresh tokens are added
+			// check the whole refresh token's family are in db // up to now, 3 refresh tokens would be added above
 			const data = await tokenDbService.getTokens({ family: refrehTokenDoc.family });
 			expect(data.length).toBe(3);
 
-			// check the all refresh tokens that belong the family are blacklisted
+			// check the all refresh tokens that belong to the family are blacklisted
 			const control = data.every( token => token.blacklisted );
 			expect(control).toBe(true);
 
@@ -140,15 +141,15 @@ describe('POST /auth/refresh-tokens', () => {
 		});
 
 
-		test('should return 401 and delete family if refresh token is blacklisted (if second time violation)', async () => {
+		test('should return 401 and delete family if refresh token is blacklisted (second time violation)', async () => {
 
 			// find the refresh token in db to get id
 			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
 
 			// Update the refresh token with the { blacklisted: true }
-			await tokenDbService.updateToken(refrehTokenDoc.id, { blacklisted: true });
+			await tokenService.updateTokenAsBlacklisted(refrehTokenDoc.id);
 
-			// add two refresh tokens into db for the user and with the same family, keep all as blacklisted
+			// add two refresh tokens into db for the user and with the same family, but set all as blacklisted for this time
 			// to make further expect is more reasonable related with delete family tokens.
 			await tokenDbService.addToken({
 				token: testData.REFRESH_TOKEN_VALID,
@@ -175,13 +176,14 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			commonExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected.");
+			expect(response.body.name).toEqual("ApiError");
+			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected");
 
-			// check the whole refresh token's family are removed from db // up to now, 3 refresh tokens are added
+			// check the whole refresh token's family are removed from db // up to now, 3 refresh tokens would be added above
 			const data = await tokenDbService.getTokens({ family: refrehTokenDoc.family });
 			expect(data.length).toBe(0);
 
-			// no need to check cache, since access tokens' jtis are already in the blacklist, see the test above 
+			// no need to check cache, since access tokens' jtis are already in the blacklist, see the test above
 		});
 
 
@@ -210,6 +212,7 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			commonExpectations(response, httpStatus.UNAUTHORIZED);
+			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("The refresh token is expired. You have to re-login to get authentication.");
 
 			// check the whole refresh token's family are removed from db
@@ -220,13 +223,14 @@ describe('POST /auth/refresh-tokens', () => {
 
 		test('should return 401 if refresh token is used before "not before than" value', async () => {
 
-			// if the refresh token generated newly is send, "not before than" situation happens.
+			// if the refresh token that is generated newly, "not before than" situation happens.
 			const response = await request(app).post('/auth/refresh-tokens')
 												.set('User-Agent', userAgent)
 												.send({ refreshToken });
 
 			commonExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected.");
+			expect(response.body.name).toEqual("ApiError");
+			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected");
 
 			// no need to check family of the refresh token is removed or blacklisted here since this control is handled in the above tests
 			// (means that disableFamilyRefreshToken in Token Service is tested, it is fine.)
@@ -241,17 +245,18 @@ describe('POST /auth/refresh-tokens', () => {
 
 
 
-	describe('Failed refresh process after Refresh Token Rotation', () => {
+	describe('Failed refresh process after Refresh Token JWT Verification', () => {
 
 		let authuser, refreshToken;
 		
 		beforeEach(async () => {
-			// add an authuser into db
+			
 			const authUserInstance = AuthUser.fromObject({
 				email: 'talat@google.com',
 				password: 'HashedPass1word.HashedString.HashedPass1word'
 			});
 
+			// add an authuser into db
 			authuser = await authuserDbService.addAuthUser(authUserInstance);
 
 			// create for that authuser refreshtoken (not expired but "not valid before" is 0 in order not to be trapped)
@@ -274,7 +279,6 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(response.status).toBe(status);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.body.code).toEqual(status);
-			expect(response.body).toHaveProperty("name");
 			expect(response.body).toHaveProperty("description");
 			expect(response.body).not.toHaveProperty("errors");
 		}
@@ -287,9 +291,10 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			commonExpectations(response, httpStatus.UNAUTHORIZED);
+			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("Your browser/agent seems changed or updated, you have to re-login to get authentication.");
 		});
-
+		
 
 		test('should return 404 if any authuser could not found', async () => {
 
@@ -301,6 +306,7 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			commonExpectations(response, httpStatus.NOT_FOUND);
+			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("No user found");
 		});
 
@@ -314,6 +320,7 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			commonExpectations(response, httpStatus.FORBIDDEN);
+			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("You are disabled. Call the system administrator.");
 		});
 	});
@@ -323,7 +330,7 @@ describe('POST /auth/refresh-tokens', () => {
 
 	describe('Success refresh token response', () => {
 
-		test('should return status 201 and valid tokens in json form', async () => {
+		test('should return status 201; and return valid tokens in json form', async () => {
 
 			// add an authuser into db
 			const authUserInstance = AuthUser.fromObject({
