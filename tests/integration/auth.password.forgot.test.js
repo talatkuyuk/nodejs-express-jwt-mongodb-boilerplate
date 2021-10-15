@@ -63,11 +63,11 @@ describe('POST /auth/forgot-password', () => {
 
 			expect(response.status).toBe(httpStatus.NOT_FOUND);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(404);
-			expect(response.body).toHaveProperty("name");
+			expect(response.body.code).toBe(404);
+			expect(response.body.name).toBe("ApiError");
+			expect(response.body.message).toEqual("No user found");
 			expect(response.body).toHaveProperty("description");
 			expect(response.body).not.toHaveProperty("errors");
-			expect(response.body.message).toEqual("No user found");
 		});
 
 
@@ -121,7 +121,7 @@ describe('POST /auth/forgot-password', () => {
 
 			expect(spyOnSendResetPasswordEmail).toHaveBeenCalledWith(authuser.email, expect.any(String));
 			
-			// obtain the token from function on that spied 
+			// obtain the token from the function on that spied 
 			const resetPasswordToken = spyOnSendResetPasswordEmail.mock.calls[0][1];
 
 			// check the reset password token belongs to the authuser

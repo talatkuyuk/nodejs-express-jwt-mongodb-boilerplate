@@ -125,7 +125,7 @@ describe('POST /auth/reset-password', () => {
 
 
 
-	describe('Reset Password Token Errors', () => {
+	describe('Reset-Password Token Errors', () => {
 
 		function commonExpectations(response) {
 			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
@@ -134,7 +134,7 @@ describe('POST /auth/reset-password', () => {
 			expect(response.body).toHaveProperty("description");
 		}
 
-		test('should throw ApiError with code 401 if the reset password token is expired', async () => {
+		test('should throw ApiError with code 401 if the reset-password token is expired', async () => {
 
 			resetPasswordForm = {
 				password: '11aaAA88$',
@@ -150,12 +150,12 @@ describe('POST /auth/reset-password', () => {
 		});
 
 		
-		test('should throw ApiError with code 401 if the verify-email token has wrong signature', async () => {
+		test('should throw ApiError with code 401 if the reset-password token has wrong signature', async () => {
 
 			resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
-				token: testData.VERIFY_EMAIL_TOKEN_WITH_INVALID_SIGNATURE
+				token: testData.TOKEN_WITH_INVALID_SIGNATURE
 			};
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
@@ -196,7 +196,7 @@ describe('POST /auth/reset-password', () => {
 		}
 
 		test('should return status 401, if there is no such token in the database', async () => {
-			const authuser_id = "123456789012345678901234"
+			const authuser_id = "123456789012345678901234";
 
 			// generate and add valid reset-password token into db
 			const { resetPasswordToken, tokenId } = await tokenService.generateResetPasswordToken(authuser_id);
@@ -218,7 +218,7 @@ describe('POST /auth/reset-password', () => {
 
 
 		test('should return status 401, if the token is blacklisted in the database', async () => {
-			const authuser_id = "123456789012345678901234"
+			const authuser_id = "123456789012345678901234";
 
 			// generate and add valid reset-password token into db
 			const { resetPasswordToken, tokenId } = await tokenService.generateResetPasswordToken(authuser_id);
@@ -254,20 +254,10 @@ describe('POST /auth/reset-password', () => {
 
 
 		test('should return status 404, if there is no user', async () => {
-
-			const authuserx = AuthUser.fromObject({
-				email: 'talat@gmail.com',
-				password: 'no-matters-for-this-test',
-			});
-
-			// add the authuser into db
-			const authuser = await authuserDbService.addAuthUser(authuserx);
+			const authuser_id = "123456789012345678901234";
 
 			// generate and add valid reset-password token into db
-			const { resetPasswordToken } = await tokenService.generateResetPasswordToken(authuser.id);
-
-			// delete the authuser from db
-			await authuserDbService.deleteAuthUser(authuser.id);
+			const { resetPasswordToken } = await tokenService.generateResetPasswordToken(authuser_id);
 
 			resetPasswordForm = {
 				password: '11aaAA88$',
@@ -338,7 +328,7 @@ describe('POST /auth/reset-password', () => {
 
 			expect(response.status).toBe(httpStatus.NO_CONTENT);
 
-			// check the database if the authuser's reset password tokens are deleted
+			// check the database if the authuser's reset-password tokens are deleted
 			const data = await tokenDbService.getTokens({ user: authuser.id, type: tokenTypes.RESET_PASSWORD });
 			expect(data.length).toBe(0);
 
