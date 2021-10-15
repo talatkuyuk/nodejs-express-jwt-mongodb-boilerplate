@@ -37,7 +37,7 @@ describe('Test for Refresh Token Rotation', () => {
 
 		
 		test('should throw ApiError with code 401 if the refresh token has wrong signature', async () => {
-			const token = testData.VERIFY_EMAIL_TOKEN_WITH_INVALID_SIGNATURE;
+			const token = testData.TOKEN_WITH_INVALID_SIGNATURE;
 			const type = tokenTypes.VERIFY_EMAIL;
 
 			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "JsonWebTokenError: invalid signature");
