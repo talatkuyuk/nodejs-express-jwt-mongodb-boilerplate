@@ -1,8 +1,8 @@
 //TODO: add test for forgotpassword/resetpassword +
 //TODO: add test for verifyemail/sendverificationemail +
-//TODO: add test for validation middleware 
-//TODO: add test for refresh token rotation process
+//TODO: add test for refresh token rotation process +
 //TODO: add test for oAuth routes
+//TODO: add test for validation middleware
 //TODO: add test for authuser routes
 //TODO: add test for user routes
 
