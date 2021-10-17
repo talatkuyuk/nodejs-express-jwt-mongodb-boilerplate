@@ -109,21 +109,14 @@ const verifyEmailValidationRules = [
 
 
 
-const oAuthValidationRules = [
-	body('token')
-		.exists({checkFalsy: true}).withMessage('oAuth Provider\'s token must not be empty or falsy value')
-];
 
-
-
-module.exports = { 
+module.exports = {
 	loginValidationRules, 
 	signupValidationRules,
 	refreshTokensValidationRules,
 	forgotPasswordValidationRules,
 	resetPasswordValidationRules,
 	verifyEmailValidationRules,
-	oAuthValidationRules
 };
 
 
