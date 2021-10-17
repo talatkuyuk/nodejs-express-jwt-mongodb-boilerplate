@@ -19,8 +19,8 @@ const setupTestDatabase = () => {
 
 	
 	afterAll(async () => {
-		await mongodb.disconnect(() => {
-			console.log("Mongodb connection is closed.tk");
+		await mongodb.disconnect((result) => {
+			console.log(`Mongodb connection is closed with ${result}`);
 		});
 
 		// lets give sometime to all db connections closed.

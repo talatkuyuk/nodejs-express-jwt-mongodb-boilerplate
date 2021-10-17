@@ -30,19 +30,19 @@ const retry_strategy = function(options) {
     return reconnectAfter;
 }
 
-
-let redisClient = null;
+// compose redis connection parameters from the redis url in config
 const redis_connection_parameters = redisUrlParse(config.redis_url);
 if (!redis_connection_parameters?.password) delete redis_connection_parameters?.password;
 
+let redisClient = null;
 
-const establisConnection = async () => {
+const connect = async () => {
 
     return new Promise((resolve, reject) => {
 
         let onetimeguard = false;
 
-        // Connect to redis at 127.0.0.1 port 6379 no password.
+        // Connect to redis at 127.0.0.1 port 6379 with no password.
         redisClient = redis.createClient({ 
             ...redis_connection_parameters, 
             retry_strategy, 
@@ -61,7 +61,7 @@ const establisConnection = async () => {
             logger.error("ON_ERROR The server cannot connect to redis. Error:", err);
 
             if (!onetimeguard) {
-                reject("Timeout happened with error");
+                reject("Timeout happened with error in Redis");
                 onetimeguard = true;
             }
         });
@@ -74,8 +74,8 @@ const establisConnection = async () => {
             logger.warn("ON_END Redis down!");
 
             if (!onetimeguard) {
-                reject("Timeout happened with end");
-                onetimeguard = true;    
+                reject("Timeout happened with end in Redis");
+                onetimeguard = true;
             }
         });
 
@@ -101,7 +101,21 @@ const getRedisClient = () => {
     }
 }
 
+const disconnect = function(callback) {
+    if (redisClient?.connected){
+        return new Promise((resolve, reject) => {
+            redisClient.quit((err, res) => {
+                if (err) reject(err);
+                
+                callback(res);
+                resolve();
+            });
+        });
+    }
+}
+
 module.exports = {
-    establisConnection,
+    connect,
 	getRedisClient,
+    disconnect
 };

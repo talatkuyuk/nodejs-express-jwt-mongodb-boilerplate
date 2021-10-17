@@ -13,8 +13,11 @@ let httpServer, httpsServer;
 const SSLdirectory = path.join(__dirname , '/ssl/');
 
 
-redis.establisConnection().then(() => {
-	mongodb.connect().then(() => {
+async function start() {
+	try {
+		await redis.connect();
+
+		await mongodb.connect();
 
 		if (config.server === "https" || config.server === "both") {
 			const key  = fs.readFileSync(SSLdirectory + 'server.decrypted.key', 'utf8');
@@ -38,39 +41,37 @@ redis.establisConnection().then(() => {
 			// 	logger.info('Http Server started on port ' + config.porthttp);
 			// });
 		}
-	})
-	.catch((error) => {
-		logger.error(`Mongodb connection error: ${error}`);
+
+	} catch (error) {
+		logger.error(`${error}`);
 		exitHandler();
-	});
+	}
+}
 
-}).catch((error) => {
-	logger.error(`redis connection error: ${error}`);
-	exitHandler();
-});
-
-
-
+start();
 
 const exitHandler = async () => {
+	try {
+		process.exitCode = 1;
 
-	process.exitCode = 1;
+		await httpServer?.close(() => {
+			logger.info('exithandler: Http Server closed.tk');
+		});
 
-	await httpServer?.close(() => {
-		logger.info('Http Server closed.exithandler.tk');
-	});
+		await httpsServer?.close(() => {
+			logger.info('exithandler: Https Server closed.tk');
+		});
 
-	await httpsServer?.close(() => {
-		logger.info('Https Server closed.exithandler.tk');
-	});
+		await mongodb.disconnect((result) => {
+			logger.info(`exithandler: Mongodb connection is closed with ${result}.tk`);
+		});
 
-	await mongodb.disconnect(() => {
-		logger.info("Mongodb connection is closed.exithandler.tk");
-	});
-
-	await redis.getRedisClient()?.quit(function() {
-		logger.info(`redis client quit.exithandler.tk`);
-	});
+		await redis.disconnect((result) => {
+			logger.info(`exithandler: Redis client quit with ${result}.tk`);
+		});
+	} catch (error) {
+		logger.error(error);
+	}
 };
   
   

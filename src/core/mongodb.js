@@ -47,30 +47,37 @@ const connect = async function() {
 		//db.createCollection("tokens", { validator: { $jsonSchema: tokenSchema } });
 		
 	} catch (error) {
-		logger.error("MongoClient connection error. tk.");
+		logger.error("MongoClient connection error while connecting.tk.");
 		throw error;
 	}
 }
+
 
 const getDatabase = function() {
     return db;
 }
 
-const disconnect = async function(callback) {
 
+const disconnect = async function(callback) {
 	try {
-		if (client.isConnected) {
+		if (client.isConnected()) {
 			await client.close();
-			callback(); 
+			callback("OK");
 		}
+
 	} catch (error) {
-		logger.error("MongoClient connection error. tk.");
+		logger.error("MongoClient connection error while disconnecting.tk.");
 		throw error;
 	}
 }
-      
+
+
+const isConnected = () => client.isConnected();
+
+
 module.exports = {
 	connect,
 	getDatabase,
-	disconnect
+	disconnect,
+	isConnected,
 }
