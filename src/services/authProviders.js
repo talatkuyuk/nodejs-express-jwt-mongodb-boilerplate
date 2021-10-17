@@ -15,7 +15,7 @@ const google = async (idToken) => {
 		});
 
 		const {sub: id, email} = ticket.getPayload();
-		return { provider: "google", user: {id, email} };
+		return { provider: "google", user: { id, email } };
 
 	} catch (error) {
 		throw locateError(error, "AuthProviders : google");
@@ -30,7 +30,7 @@ const facebook = async (access_token) => {
 		const response = await axios.get(url, { params });
 
 		const {id, email} = response.data;
-		return { provider: "facebook", user: {id, email} };
+		return { provider: "facebook", user: { id, email } };
 
 	} catch (error) {
 		throw locateError(error, "AuthProviders : facebook");

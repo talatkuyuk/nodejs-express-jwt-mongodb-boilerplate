@@ -81,30 +81,31 @@ const loginWithEmailAndPassword = async (email, password) => {
  * @param {string} email
  * @returns {Promise<AuthUser>}
  */
-const loginWith_oAuth = async (service, id, email) => {
+const loginWithAuthProvider = async (provider, id, email) => {
 	try {
-		let authuser = await authuserDbService.get_oAuthUser(service, id, email);
+		const authuser = await authuserDbService.getAuthUser({ email });
 
-		if (authuser?.isDisabled) {
-			throw new ApiError(httpStatus.UNAUTHORIZED, `You are disabled. Call the system administrator.`);
+		if (authuser) {
+
+			if (authuser.isDisabled)
+				throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
+
+			if (authuser.services[provider] === undefined)
+				return await authuserDbService.updateAuthUser(authuser.id, { services: { ...authuser.services, [provider]: id }, isEmailVerified: true });
 		}
 
-		if (authuser) return authuser;
-		
-		// new user
-		const authuserx = new AuthUser(email);
+		// if there is no authuser, then create a new one
+		const authuserx = new AuthUser(email, null);
 		authuserx.isEmailVerified = true;
 		authuserx.services = { 
-			emailpassword: "not registered", 
-			[`${service}`]: id   // { google: 46598364598354983 }
+			emailpassword: "not registered",
+			[provider]: id   // { google: 46598364598354983 }
 		};
 
-		authuser = await authuserDbService.addAuthUser(authuserx);
-
-		return authuser;
+		return await authuserDbService.addAuthUser(authuserx);
 		
 	} catch (error) {
-		throw locateError(error, "AuthService : loginWith_oAuth");
+		throw locateError(error, "AuthService : loginWithAuthProvider");
 	}
 };
 
@@ -173,7 +174,7 @@ const refreshAuth = async (refreshToken, userAgent) => {
 		throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 	if (authuser.isDisabled)
-		throw new ApiError(httpStatus.FORBIDDEN, `You are disabled. Call the system administrator.`);
+		throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
 
 	// returns the family as well since it is going to be used while re-generating new refresh token
 	return { authuser, refreshTokenFamily: family };
@@ -270,7 +271,7 @@ const verifyEmail = async (verifyEmailToken) => {
 module.exports = {
   signupWithEmailAndPassword,
   loginWithEmailAndPassword,
-  loginWith_oAuth,
+  loginWithAuthProvider,
   logout,
   signout,
   refreshAuth,
