@@ -29,37 +29,6 @@ const addAuthUser = async (authuser) => {
 
 
 /**
- * Get authuser logged in with oAuth
- * @param {String} service
- * @param {String} id
- * @param {String} email
- * @returns {Promise<AuthUser>}
- */
- const get_oAuthUser = async (service, id, email) => {
-	try {
-		const db = mongodb.getDatabase();
-		const doc = await db.collection("authusers").findOne({ 
-			$or: [
-				{ email },
-				{ [`services.${service}`]: id }
-			] 
-		});
-
-		if (!doc) return;
-
-		if (doc?.services?.[`${service}`] !== id)
-			return await updateAuthUser(doc._id, { services: { ...doc.services, [service]: id }, isEmailVerified: true });
-
-
-		return AuthUser.fromDoc(doc);
-		
-	} catch (error) {
-		throw locateError(error, "AuthUserDbService : get_oAuthUser");
-	}
-};
-
-
-/**
  * Get authuser
  * @param {Object} query {id | email}
  * @returns {Promise<AuthUser>}
@@ -159,7 +128,7 @@ const updateAuthUser = async (id, updateBody) => {
 		);
 	  
 		const count = result.value === null ? 0 : 1;
-		console.log(`${count} record is updated in authusers.`);
+		console.log(`${count} record is updated in authusers. (${id})`);
 	  
 		return AuthUser.fromDoc(result.value);
 		
@@ -267,6 +236,4 @@ module.exports = {
 	updateAuthUser,
 	deleteAuthUser,
 	getDeletedAuthUser,
-
-	get_oAuthUser,
 };

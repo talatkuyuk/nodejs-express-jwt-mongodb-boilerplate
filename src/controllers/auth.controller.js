@@ -174,10 +174,10 @@ const verifyEmail = asyncHandler(async (req, res) => {
 const oAuth = asyncHandler(async (req, res) => {
 	try {
 		const { id, email } = req.oAuth.user;
-		const oAuthProvider = req.oAuth.provider;
+		const authProvider = req.oAuth.provider;
 		const userAgent = req.useragent.source;
 	
-		const authuser = await authService.loginWith_oAuth(oAuthProvider, id, email);
+		const authuser = await authService.loginWithAuthProvider(authProvider, id, email);
 		const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 	
 		res.status(httpStatus.OK).send({ user: authuser.filter(), tokens });
