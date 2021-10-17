@@ -1,15 +1,13 @@
 const request = require('supertest');
 const httpStatus = require('http-status');
-const moment = require('moment');
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 const app = require('../../src/core/express');
-const config = require('../../src/config');
 
-const { authuserDbService, tokenDbService } = require('../../src/services');
+const { authuserDbService } = require('../../src/services');
 const { AuthUser } = require('../../src/models');
-const { tokenTypes } = require('../../src/config/tokens');
+
+const TestUtil = require('../testutil/TestUtil');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');
@@ -156,16 +154,16 @@ describe('POST /auth/login', () => {
 		test('should return status 200, user and valid tokens in json form; successfully login user if the request is valid', async () => {
 			const hashedPassword = await bcrypt.hash('Pass1word.', 8);
 			
-			const authuser = AuthUser.fromObject({
+			const authuserDoc = AuthUser.fromObject({
 				email: 'talat@gmail.com',
 				password: hashedPassword,
 				services: { emailpassword: "registered" }
 			});
 				
-			await authuserDbService.addAuthUser(authuser);
+			const authuser = await authuserDbService.addAuthUser(authuserDoc);
 			
 			let loginForm = {
-				email: 'talat@gmail.com',
+				email: authuser.email,
 				password: 'Pass1word.',
 			};
 
@@ -174,58 +172,25 @@ describe('POST /auth/login', () => {
 			expect(response.status).toBe(httpStatus.OK);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 
-			const accessToken = response.body.tokens.access.token;
-			const refreshToken = response.body.tokens.refresh.token;
-
-			// access token verification and consistency check within the response data
-			const { sub, iat, exp, jti, type} = jwt.verify(accessToken, config.jwt.secret);
-			expect(sub && iat && exp && jti && type).toBe(tokenTypes.ACCESS);
-			expect(sub).toBe(response.body.user.id);
-			expect(exp).toBe(moment(response.body.tokens.access.expires).unix());
-
-			// refresh token verification and consistency check within the response data
-			const { sub: subx, iat:iatx, exp: expx, jti:jtix, type:typex} = jwt.decode(refreshToken, config.jwt.secret);
-			expect(subx && iatx && expx && jtix && typex).toBe(tokenTypes.REFRESH);
-			expect(subx).toBe(response.body.user.id);
-			expect(expx).toBe(moment(response.body.tokens.refresh.expires).unix());
-
-			// check the dates in the esponse are valid dates
-			expect(moment(response.body.tokens.access.expires, moment.ISO_8601, true).isValid()).toBe(true);
-			expect(moment(response.body.tokens.refresh.expires, moment.ISO_8601, true).isValid()).toBe(true);
-			expect(response.body.user.createdAt).toBeGreaterThan(moment().unix());
+			TestUtil.CheckTokenConsistency(response.body.tokens, response.body.user.id);
 
 			// check the whole response body expected
 			expect(response.body).toEqual({
 				"user": {
 					"createdAt": expect.any(Number), // 1631868212022
-					"email": "talat@gmail.com",
-					"id": expect.stringMatching(/^[0-9a-fA-F]{24}$/), // valid mongodb ObjectID: 24-size hex value
+					"email": authuser.email,
+					"id": authuser.id.toString(),
 					"isEmailVerified": false,
 					"isDisabled": false,
 					"services": {
 					  "emailpassword": "registered",
 					},
 				},
-				"tokens": {
-					"access": {
-					  "token": expect.any(String),
-					  "expires": expect.any(String), // ex. "2021-10-17T09:49:26.735Z"
-					},
-					"refresh": {
-					  "token": expect.any(String),
-					  "expires": expect.any(String), 
-					},
-				},
+				"tokens": TestUtil.ExpectedTokens,
 			});
 
 			// check the refresh token is stored into database
-			const tokenDoc = await tokenDbService.getToken({
-				user: response.body.user.id,
-				token: refreshToken,
-				expires: moment(response.body.tokens.refresh.expires).toDate(),
-				type: tokenTypes.REFRESH,
-			});
-			expect(tokenDoc?.id).toBeDefined();
+			TestUtil.CheckRefreshTokenStoredInDB(response);
 		});
 	});
 })

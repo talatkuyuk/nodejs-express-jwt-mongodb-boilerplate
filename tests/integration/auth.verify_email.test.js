@@ -1,10 +1,7 @@
 const request = require('supertest');
 const httpStatus = require('http-status');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 
 const app = require('../../src/core/express');
-const config = require('../../src/config');
 
 const { authuserService, authuserDbService, tokenService, tokenDbService } = require('../../src/services');
 const { AuthUser } = require('../../src/models');
