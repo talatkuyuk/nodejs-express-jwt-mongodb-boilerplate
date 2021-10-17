@@ -12,7 +12,7 @@ const docsRoute = require('./docs.route');
 const mongodb = require('../core/mongodb');
 const redis = require('../core/redis');
 const config = require('../config');
-const { locateError } = require('../middlewares/error');
+const { locateError } = require('../utils/ApiError');
 
 // for testing purpose in development environment
 router.get('/list', asyncHandler( async (req, res) => {

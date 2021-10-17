@@ -3,11 +3,13 @@ const redis = require('../../src/core/redis');
 const setupRedis = () => {
 
 	beforeAll(async () => {
-		await redis.establisConnection();
+		await redis.connect();
 	});
 
 	afterAll(async () => {
-		redis.getRedisClient().quit();
+		await redis.disconnect((result) => {
+			console.log(`setupRedis: Redis client quit with ${result}`);
+		});
 	});
 };
 
