@@ -294,7 +294,7 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("Your browser/agent seems changed or updated, you have to re-login to get authentication.");
 		});
-		
+
 
 		test('should return 404 if any authuser could not found', async () => {
 
@@ -321,7 +321,7 @@ describe('POST /auth/refresh-tokens', () => {
 
 			commonExpectations(response, httpStatus.FORBIDDEN);
 			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("You are disabled. Call the system administrator.");
+			expect(response.body.message).toEqual("You are disabled, call the system administrator");
 		});
 	});
 

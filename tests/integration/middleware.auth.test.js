@@ -4,8 +4,7 @@ const jwt = require('jsonwebtoken');
 const httpMocks = require('node-mocks-http');
 var shell = require('shelljs'); // in order to shotdown and restart redis to test behavior
 
-// without these two lines which are actually not necessary the test stucks, I don't know the reason
-const request = require('supertest');
+// without the express app which is actually not necessary, the tests stucks, I don't know the reason
 const app = require('../../src/core/express');
 
 const config = require('../../src/config');
@@ -50,35 +49,35 @@ describe('Auth Middleware', () => {
 
 		test('should throw ApiError with code 401, if Authorization Header is absent', async () => {
 			const requestHeader = null;
-			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: No auth token");
+			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "No auth token");
 			await commonFailedTestProcess(requestHeader, expectedError);
 		});
 
 
 		test('should throw ApiError with code 401, if Authorization Header is bad formed without Bearer', async () => {
 			const requestHeader = { headers: { Authorization: `${testData.ACCESS_TOKEN_EXPIRED}` }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: No auth token");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "No auth token");
 			await commonFailedTestProcess(requestHeader, expectedError);
 		});
 
 
 		test('should throw ApiError with code 401, if Authorization Header is bad formed mistyping Baerer', async () => {
 			const requestHeader = { headers: { Authorization: `Baerer ${testData.ACCESS_TOKEN_EXPIRED}` }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: No auth token");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "No auth token");
 			await commonFailedTestProcess(requestHeader, expectedError);
 		});
 
 
 		test('should throw ApiError with code 401, if Authorization Header is bad formed with no space between Bearer and Token', async () => {
 			const requestHeader = { headers: { Authorization: `Bearer${testData.ACCESS_TOKEN_EXPIRED}` }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: No auth token");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "No auth token");
 			await commonFailedTestProcess(requestHeader, expectedError);
 		});
 
 
 		test('should throw ApiError with code 401, if access token is not in the Authorization Header', async () => {
 			const requestHeader = { headers: { Authorization: `Bearer ` }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: No auth token");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "No auth token");
 			await commonFailedTestProcess(requestHeader, expectedError);
 		});
 
@@ -128,7 +127,7 @@ describe('Auth Middleware', () => {
 			await authuserDbService.deleteAuthUser(authuser.id);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${accessToken}` }, useragent: { source: userAgent }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: Access token does not refer any user");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "Access token does not refer any user");
 
 			await commonFailedTestProcess(requestHeader, expectedError);
 		});
@@ -147,7 +146,7 @@ describe('Auth Middleware', () => {
 			const { verifyEmailToken } = await tokenService.generateVerifyEmailToken(authuser.id);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${verifyEmailToken}` }, useragent: { source: userAgent }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: Invalid token type");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "Invalid token type");
 
 			await commonFailedTestProcess(requestHeader, expectedError);
 		});
@@ -167,7 +166,7 @@ describe('Auth Middleware', () => {
 
 			// authuser tries to use authuser2's access token but using different user agent
 			const requestHeader = { headers: { Authorization: `Bearer ${tokens2.access.token}` }, useragent: { source: userAgent }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "ApiError: Your browser/agent seems changed or updated, you have to re-login to get authentication");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "Your browser/agent seems changed or updated, you have to re-login to get authentication");
 
 			await commonFailedTestProcess(requestHeader, expectedError);
 		});
@@ -189,7 +188,7 @@ describe('Auth Middleware', () => {
 			await authuserService.toggleAbility(authuser.id);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${accessToken}` }, useragent: { source: userAgent }};
-			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "ApiError: You are disabled, call the system administrator");
+			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "You are disabled, call the system administrator");
 
 			await commonFailedTestProcess(requestHeader, expectedError);
 		});
@@ -201,7 +200,7 @@ describe('Auth Middleware', () => {
 			await redisService.put_jti_into_blacklist(jti);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${accessToken}` }, useragent: { source: userAgent }};
-			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "ApiError: Access token is in the blacklist");
+			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "Access token is in the blacklist");
 			
 			await commonFailedTestProcess(requestHeader, expectedError);
 		});
@@ -214,7 +213,7 @@ describe('Auth Middleware', () => {
 			await new Promise(resolve => setTimeout(resolve, 10000));
 
 			const requestHeader = { headers: { Authorization: `Bearer ${accessToken}` }, useragent: { source: userAgent }};
-			const expectedError  = new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "ApiError: We've encountered a server internal problem (Redis)");
+			const expectedError  = new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "We've encountered a server internal problem (Redis)");
 
 			if (config.raiseErrorWhenRedisDown)
 				await commonFailedTestProcess(requestHeader, expectedError);
