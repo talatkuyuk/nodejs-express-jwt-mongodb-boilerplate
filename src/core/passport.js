@@ -4,7 +4,7 @@ const BearerStrategy = require('passport-http-bearer').Strategy;
 const config = require('../config');
 const { tokenTypes } = require('../config/tokens');
 const { locateError } = require('../utils/ApiError');
-const { authuserDbService, authProviders, joinedDbService } = require('../services');
+const { authProviders, joinedDbService } = require('../services');
 
 
 const jwtVerify = async (payload, done) => {
@@ -20,7 +20,7 @@ const jwtVerify = async (payload, done) => {
 		const authuser = await joinedDbService.getAuthUserWithRole(payload.sub);
 
 		if (!authuser) return done(null, false);
-		
+
 		done(null, { authuser, payload });
 
 	} catch (error) {
@@ -28,16 +28,17 @@ const jwtVerify = async (payload, done) => {
 	}
 };
 
+
+// oAuth strategy is simply a BaererStrategy, so the token is extracted from req.headers by passport
 const oAuthVerify = (service) => async (req, token, done) => {
 	try {
-	  const oAuth = await authProviders[service](token);
 
-	  if (!oAuth && !oAuth.user) return done(null, false, { message: `${service} oAuth token error occured.` });
-	  if (!oAuth.user.email) return done(null, false, { message: `Check ${service} oAuth scope consists e-mail.` });
+		const oAuth = await authProviders[service](token);
 
-	  req.oAuth = oAuth;
-	  
-	  return done(null, oAuth.user);
+		// authProviders always return an object which is { provider, user: { id, email }}
+		// but there is possibility that user.id and user.email could be null or undefined
+		
+		return done(null, oAuth);
 
 	} catch (error) {
 		done( locateError(error, "Passport : oAuthVerify") );

@@ -1,72 +1,53 @@
 const passport = require('passport');
-const axios = require('axios');
-const {OAuth2Client} = require('google-auth-library');
+const httpStatus = require('http-status');
 
-const config = require('../config');
-const { locateError } = require('../utils/ApiError');
+const { ApiError, locateError } = require('../utils/ApiError');
 
 
-const oAuth = (service) => (req, res, next) => passport.authenticate(
-	service, 
-	{ session: false },
-	function(err, user, info) {
-		if (err) {
-			next( locateError(err, "oAuthMiddleware : oAuth(err)") );
-		}
+// Strategy related with the "service" are registered into passport in express(app), 
+// and the strategy is going to be processed in passport oAuthVerify considering "service"
+const oAuth = (service) => async (req, res, next) => {
+	return new Promise((resolve, reject) => {
+		passport.authenticate( service,	 { session: false }, function(err, oAuth, info) {
+			try {
+				if (err) {
+					throw new ApiError(httpStatus.UNAUTHORIZED, err);
+				}
 
-		//passport-authentication error
-        if (!user) {
-			const err = new Error('Invalid-Formed Bearer Token. ' + (info ?? ""));
-			next( locateError(err, "oAuthMiddleware : oAuth(user)") );
-		}
-        
-		next();
-	}
-)(req, res, next);
-
-
-const google_oAuth = async (req, res, next) => {
-	try {
-		// expected google idToken as token in request body 
-		const idToken = req.body.token;
+				if (info) {
+					if (typeof(info) === "string")
+						throw new ApiError(httpStatus.BAD_REQUEST, `Badly formed Authorization Header with Bearer. [${info}]`);
+					
+					if (info instanceof Error)
+						throw new ApiError(httpStatus.BAD_REQUEST, info);
+				}
 		
-		const client = new OAuth2Client(config.google_client_id);
+				if (!oAuth) {
+					throw new ApiError(httpStatus.BAD_REQUEST, 'Badly formed Authorization Header with Bearer.');
+				}
 
-		const ticket = await client.verifyIdToken({
-			idToken,
-			audience: config.google_client_id, // if multiple clients [id1, id2, ...]
-		});
+				if (!oAuth.user.id) {
+					throw new ApiError(httpStatus.UNAUTHORIZED, `${service} oAuth token could not be associated with any identification.`);
+				}
 
-		const {sub: id, email} = ticket.getPayload();
+				if (!oAuth.user.email) {
+					throw new ApiError(httpStatus.UNAUTHORIZED, `${service} oAuth token does not contain necessary email information.`);
+				}
 
-		req.oAuth = { provider: "google", user: {id, email} };
+				req.oAuth = oAuth;
+				
+				resolve();
 
-		next();
-	
-	} catch (error) {
-		throw locateError(error, "oAuthMiddleware : google_oAuth");
-	}
+			} catch (error) {
+				reject( locateError(error, "oAuthMiddleware : oAuth(callback)") );
+			}
+		})(req, res, next)
+	})
+	.then(() => next())
+	.catch((error) => { 
+		next( locateError(error, "AuthMiddleware : oAuth") );
+	});
 }
 
-const facebook_oAuth = async (req, res, next) => {
-	try {
-		// expected facebook access_token as token in request body 
-		const access_token = req.body.token;
 
-		const url = 'https://graph.facebook.com/v11.0/me';
-		const params = { access_token, fields: 'id, email' };
-
-		const response = await axios.get(url, { params });
-		
-		const {id, email} = response.data;
-
-		req.oAuth = { provider: "facebook", user: {id, email} };
-
-		next();
-	
-	} catch (error) {
-		throw locateError(error, "oAuthMiddleware : facebook_oAuth");
-	}
-}
-
-module.exports = { oAuth, google_oAuth, facebook_oAuth };
+module.exports = { oAuth };
