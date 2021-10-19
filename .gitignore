@@ -47,3 +47,5 @@ coverage/
 # dotenv environment variables file
 .env
 .env.test
+src/public/oauth2-redirect.html
+src/public/oauth2-redirect.js

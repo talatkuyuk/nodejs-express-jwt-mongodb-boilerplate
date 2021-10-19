@@ -61,8 +61,8 @@ app.use(crossdomain())
 // if need to server side rendering (optional)
 initViewEngine(app)
 
-// if need to sent any static file to client (needs "public" directory and optional)
-app.use(express.static(path.join(__dirname, 'public')));
+// if need to sent any static file to client (needs "public" directory in "src" folder; it is optional)
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // parse JSON bodies (application/json)
 app.use(express.json());
