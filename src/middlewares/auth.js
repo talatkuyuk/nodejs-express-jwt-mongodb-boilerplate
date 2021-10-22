@@ -27,7 +27,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 			throw new ApiError(httpStatus.UNAUTHORIZED, `Your browser/agent seems changed or updated, you have to re-login to get authentication`);
 		}
 	
-		// control if the token is in blacklist
+		// control if the token is in the blacklist
 		if (await redisService.check_jti_in_blacklist(payload.jti)) {
 			throw new ApiError(httpStatus.FORBIDDEN, `Access token is in the blacklist`);
 		}

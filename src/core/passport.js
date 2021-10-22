@@ -37,6 +37,8 @@ const oAuthVerify = (service) => async (req, token, done) => {
 
 		// authProviders always return an object which is { provider, user: { id, email }}
 		// but there is possibility that user.id and user.email could be null or undefined
+
+		oAuth.token = token; // authProvider's token will be used in oAuth middleware
 		
 		return done(null, oAuth);
 
