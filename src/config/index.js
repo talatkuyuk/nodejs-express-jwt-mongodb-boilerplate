@@ -24,6 +24,7 @@ const envVarsSchema = Joi.object()
     JWT_RESET_PASSWORD_EXPIRATION_MINUTES: Joi.number().default(60).description('minutes after which reset-password tokens expire'),
     JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: Joi.number().default(3600).description('minutes after which verify-email tokens expire'),
 	  GOOGLE_OAUTH_CLIENTID: Joi.string().description('Google ClientID for google-sign-in'),
+    GOOGLE_OAUTH_CLIENTSECRET: Joi.string().description('Google ClientSecret for google-sign-in'),
     SMTP_HOST: Joi.string().description('server that will send the emails'),
     SMTP_PORT: Joi.number().description('port to connect to the email server'),
     SMTP_USERNAME: Joi.string().description('username for email server'),
@@ -58,6 +59,7 @@ module.exports = {
     resetPasswordExpirationMinutes: envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,verifyEmailExpirationMinutes: envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
   },
   google_client_id:envVars.GOOGLE_OAUTH_CLIENTID,
+  google_client_secret:envVars.GOOGLE_OAUTH_CLIENTSECRET,
   email: {
     smtp: {
       host: envVars.SMTP_HOST,
