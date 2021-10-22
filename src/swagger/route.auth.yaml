@@ -256,4 +256,72 @@
         $ref: '#/components/responses/InternalServerError'
 
 
+### GOOGLE ###
+/auth/google:
+  post:
+    summary: Login with Google
+    description: receives the google id token in header; and returns the authuser info and tokens
+    tags: [Auth]
+    security:
+      - BearerAuth_WithGoogleIdToken: []
+      # - google_id_token: ["email", "profile"]
+      # - google_oAuth_2: ["email", "profile"]
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/authuser'
+                  example:
+                    $ref: '#components/examples/response-authuser'
+                tokens:
+                  $ref: '#/components/schemas/tokens'
+                  example:
+                    $ref: '#components/examples/response-tokens'
+      400:
+        $ref: '#/components/responses/oAuthLoginBadRequests'
+      401:
+        $ref: '#/components/responses/oAuthLoginUnauthorizedFailures'
+      403:
+        $ref: '#/components/responses/oAuthLoginForbiddenErrors'
+      500:
+        $ref: '#/components/responses/InternalServerError'
 
+
+
+### FACEBOOK ###
+/auth/facebook:
+  post:
+    summary: Login with Facebook
+    description: receives the facebook access token in header; and returns the authuser info and tokens
+    tags: [Auth]
+    security:
+      - BearerAuth_WithFacebookAccessToken: []
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/authuser'
+                  example:
+                    $ref: '#components/examples/response-authuser'
+                tokens:
+                  $ref: '#/components/schemas/tokens'
+                  example:
+                    $ref: '#components/examples/response-tokens'
+      400:
+        $ref: '#/components/responses/oAuthLoginBadRequests'
+      401:
+        $ref: '#/components/responses/oAuthLoginUnauthorizedFailures'
+      403:
+        $ref: '#/components/responses/oAuthLoginForbiddenErrors'
+      500:
+        $ref: '#/components/responses/InternalServerError'

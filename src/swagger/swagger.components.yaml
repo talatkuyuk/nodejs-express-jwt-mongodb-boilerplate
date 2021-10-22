@@ -362,6 +362,56 @@ components:
             description: "the service name where the error occured"
 
 
+    oAuthLoginForbiddenErrors:
+      description: | 
+        FORBIDDEN
+
+        #### ApiErrors
+        * _You are disabled, call the system administrator_
+        * _The token of the auth provider is allowed to be used only once_
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 403
+            name: "ApiError"
+            message: "One of the api errors appears here"
+            description: "the service name where the error occured"
+
+        
+    oAuthLoginUnauthorizedFailures:
+      description: | 
+        UNAUTHORIZED
+
+        #### Login Unauthorized Failures
+        * _Passport Bearer Strategy related errors._
+        * _provider oAuth token could not be associated with any identification._
+        * _provider oAuth token does not contain necessary email information._
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            name: "ApiError"
+            message: "one of the error messages appears here"
+            description: "the service name where the error occured"
+
+
+    oAuthLoginBadRequests:
+      description: BAD_REQUEST
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            name: "ApiError"
+            message: "Badly formed Authorization Header with Bearer."
+            description: "oAuthMiddleware : oAuth(callback) --> AuthMiddleware : oAuth"
+
+
     LogoutSignoutUnauthorizedErrors:
       description: | 
         UNAUTHORIZED
@@ -779,3 +829,36 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    BearerAuth_WithGoogleIdToken:
+      type: http
+      scheme: bearer
+      bearerFormat: google idToken or facebook accessToken
+    BearerAuth_WithFacebookAccessToken:
+      type: http
+      scheme: bearer
+      bearerFormat: google idToken or facebook accessToken
+    google_id_token:
+      type: "oauth2"
+      description: This API uses OAuth 2 with the implicit grand flow.
+      flows:
+        implicit:
+          authorizationUrl: "https://accounts.google.com/o/oauth2/v2/auth"
+          tokenUrl: https://www.googleapis.com/oauth2/v4/token
+          x-google-issuer: "https://accounts.google.com"
+          x-google-jwks_uri: "https://www.googleapis.com/oauth2/v3/certs"
+          # Optional. Replace YOUR-CLIENT-ID with your client ID
+          x-google-audiences: "831846632-gsn4gqhumc1dmgv1tjupkivqo16g3330.apps.googleusercontent.com"
+          scopes:
+            email: https://www.googleapis.com/auth/userinfo.email
+            profile: https://www.googleapis.com/auth/userinfo.profile
+    google_oAuth_2:
+      type: oauth2
+      description: This API uses OAuth 2 with the authorizationCode flow.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.google.com/o/oauth2/v2/auth
+          tokenUrl: https://www.googleapis.com/oauth2/v4/token
+          scopes:
+            email: https://www.googleapis.com/auth/userinfo.email
+            profile: https://www.googleapis.com/auth/userinfo.profile
+            
