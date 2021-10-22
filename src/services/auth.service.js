@@ -90,8 +90,10 @@ const loginWithAuthProvider = async (provider, id, email) => {
 			if (authuser.isDisabled)
 				throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
 
-			if (authuser.services[provider] === undefined)
-				return await authuserDbService.updateAuthUser(authuser.id, { services: { ...authuser.services, [provider]: id }, isEmailVerified: true });
+			if (authuser.services[provider] === id)
+				return authuser;
+
+			return await authuserDbService.updateAuthUser(authuser.id, { services: { ...authuser.services, [provider]: id }, isEmailVerified: true });
 		}
 
 		// if there is no authuser, then create a new one
