@@ -1,6 +1,7 @@
 const request = require('supertest');
 const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const app = require('../../src/core/express');
 
@@ -58,6 +59,36 @@ describe('POST /auth/google & auth/facebook', () => {
 		});
 
 
+		test('should return status 403, if the oAuth provider token is used multiple times', async () => {
+			const userAgent = "from-jest-test";
+
+			const provider = "google";
+			const provider_token = crypto.randomBytes(16).toString('hex');
+			const provider_id = "365487263597623948576";
+			const provider_email = "talat@gmail.com";
+
+			const customImplementation = () => ({ provider, user: { id: provider_id, email: provider_email } });
+			jest.spyOn(authProviders, 'google').mockImplementation(customImplementation);
+
+			const response1 = await request(app).post('/auth/google')
+												.set('Authorization', `Bearer ${provider_token}`) 
+												.set('User-Agent', userAgent)
+												.send();
+
+			expect(response1.status).toBe(httpStatus.OK);
+
+			// but the second time (the same provider_token)
+			const response2 = await request(app).post('/auth/google')
+												.set('Authorization', `Bearer ${provider_token}`) 
+												.set('User-Agent', userAgent)
+												.send();
+
+			commonExpectations(response2, httpStatus.FORBIDDEN);
+			expect(response2.body.name).toBe("ApiError");
+			expect(response2.body.message).toEqual(`The token of the auth provider (${provider}) is allowed to be used only once`);
+		});
+
+
 		test('should return status 403, if the authuser is disabled', async () => {
 			const authuser = AuthUser.fromObject({
 				email: 'talat@gmail.com',
@@ -68,7 +99,7 @@ describe('POST /auth/google & auth/facebook', () => {
 			await authuserDbService.addAuthUser(authuser);
 
 			const provider = "google";
-			const google_id_token = "the-id-token-coming-from-google";
+			const google_id_token = crypto.randomBytes(16).toString('hex');
 			const google_id = "365487263597623948576";
 			const google_email = authuser.email;
 
@@ -96,11 +127,11 @@ describe('POST /auth/google & auth/facebook', () => {
 			jest.clearAllMocks();
 		});
 		
-		test('should return status 201; return the authuser and valid tokens in json form; successfully register if the user is not registered before', async () => {
+		test('should return status 200; return the authuser and valid tokens in json form; successfully register if the user is not registered before', async () => {
 			const userAgent = "from-jest-test";
 
 			const provider = "google";
-			const google_id_token = "the-id-token-coming-from-google";
+			const google_id_token = crypto.randomBytes(16).toString('hex');
 			const google_id = "365487263597623948576";
 			const google_email = "talat@gmail.com";
 
@@ -155,7 +186,7 @@ describe('POST /auth/google & auth/facebook', () => {
 			const userAgent = "from-jest-test";
 			
 			const provider = "facebook";
-			const facebook_access_token = "the-access-token-coming-from-facebook";
+			const facebook_access_token = crypto.randomBytes(16).toString('hex');
 			const facebook_id = "365487263597623948576";
 			const facebook_email = authuser.email;
 
