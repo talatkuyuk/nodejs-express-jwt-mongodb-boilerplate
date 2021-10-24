@@ -12,7 +12,7 @@ const notFound = (req, res, next) => next( new ApiError(httpStatus.NOT_FOUND, 'N
 
 
 // Convert errors to ApiError if it is not
-const errorConverter = (err, req, res, next) => {
+const converter = (err, req, res, next) => {
   
   if (!(err instanceof ApiError)) {
     let statusCode, description;
@@ -36,7 +36,7 @@ const errorConverter = (err, req, res, next) => {
 
 
 // Prepare the response having the error
-const errorHandler = (err, req, res, next) => {
+const handler = (err, req, res, next) => {
   let { name, statusCode, message, description, errors, stack } = err;
 
   if (config.env === 'production' && !err.isOperational) {
@@ -68,6 +68,6 @@ const errorHandler = (err, req, res, next) => {
 
 module.exports = {
   notFound,
-  errorConverter,
-  errorHandler,
+  converter,
+  handler,
 };
