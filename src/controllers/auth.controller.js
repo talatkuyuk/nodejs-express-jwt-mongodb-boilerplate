@@ -21,7 +21,7 @@ const signup = asyncHandler(async (req, res) => {
 		const authuser = await authService.signupWithEmailAndPassword(email, password);
 		const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 	
-		req.user = authuser; // for morgan logger to tokenize it as user
+		req.authuser = authuser; // for morgan logger to tokenize it as user
 	
 		res.status(httpStatus.CREATED).send({ user: authuser.filter(), tokens });
 		
@@ -40,7 +40,7 @@ const login = asyncHandler(async (req, res) => {
 		const authuser = await authService.loginWithEmailAndPassword(email, password);
 		const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 	
-		req.user = authuser; // for morgan logger to tokenize it as user
+		req.authuser = authuser; // for morgan logger to tokenize it as user
 	
 		res.status(httpStatus.OK).send({ user: authuser.filter(), tokens });
 		
@@ -53,7 +53,7 @@ const login = asyncHandler(async (req, res) => {
 
 const logout = asyncHandler(async (req, res) => {
 	try {
-		const { id, jti } = req.user; // jti added in the auth middleware
+		const { id, jti } = req.authuser; // jti added in the auth middleware
 	
 		await authService.logout(id, jti);
 	
@@ -68,7 +68,7 @@ const logout = asyncHandler(async (req, res) => {
 
 const signout = asyncHandler(async (req, res) => {
 	try {
-		const { id, jti } = req.user; // jti added in the auth middleware
+		const { id, jti } = req.authuser; // jti added in the auth middleware
 	
 		await authService.signout(id, jti);
 	
@@ -89,7 +89,7 @@ const refreshTokens = asyncHandler(async (req, res) => {
 		const { authuser, refreshTokenFamily } = await authService.refreshAuth(refreshtoken, userAgent);
 		const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent, refreshTokenFamily);
 	
-		req.user = authuser; // for morgan logger to tokenize it as user
+		req.authuser = authuser; // for morgan logger to tokenize it as user
 		
 		res.status(httpStatus.OK).send({ ...tokens });
 		
@@ -108,7 +108,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 		const { resetPasswordToken } = await tokenService.generateResetPasswordToken(authuser.id);
 		await emailService.sendResetPasswordEmail(email, resetPasswordToken);
 	
-		req.user = authuser; // for morgan logger to tokenize it as user
+		req.authuser = authuser; // for morgan logger to tokenize it as user
 	
 		res.status(httpStatus.NO_CONTENT).send();
 		
@@ -127,7 +127,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 	
 		const authuser = await authService.resetPassword(token, password);
 	
-		req.user = authuser; // for morgan logger to tokenize it as user
+		req.authuser = authuser; // for morgan logger to tokenize it as user
 	
 		res.status(httpStatus.NO_CONTENT).send();
 		
@@ -140,7 +140,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 
 const sendVerificationEmail = asyncHandler(async (req, res, next) => {
 	try {
-		const { id, email, isEmailVerified } = req.user;
+		const { id, email, isEmailVerified } = req.authuser;
 	
 		authService.handleEmailIsAlreadyVerified(isEmailVerified);
 		const { verifyEmailToken } = await tokenService.generateVerifyEmailToken(id);
@@ -161,7 +161,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
 	
 		const authuser = await authService.verifyEmail(token);
 	
-		req.user = authuser; // for morgan logger to tokenize it as user
+		req.authuser = authuser; // for morgan logger to tokenize it as user
 	
 		res.status(httpStatus.NO_CONTENT).send();
 		

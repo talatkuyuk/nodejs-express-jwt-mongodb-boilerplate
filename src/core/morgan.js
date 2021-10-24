@@ -4,7 +4,7 @@ const config = require('../config');
 const logger = require('./logger');
 
 // it tokenizes errorMessage in res.locals as message. It is set via errorHandler in error.js
-morgan.token('user', (req, res) => req?.user?.email || 'anonymous');
+morgan.token('user', (req, res) => req?.authuser?.email || 'anonymous');
 morgan.token('error', (req, res) => res.locals.error || '');
 
 const getIpFormat = () => (config.env === 'production' ? ':remote-addr - ' : '');
