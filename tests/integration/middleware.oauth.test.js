@@ -3,12 +3,13 @@ const httpMocks = require('node-mocks-http');
 // without the express app which is actually not necessary, the tests stucks, I don't know the reason
 const app = require('../../src/core/express');
 
-const { oAuth } = require('../../src/middlewares/oauth');
-const authProviders = require('../../src/services/authProviders');
-const redisService = require('../../src/services/redis.service');
+const { oAuth } = require('../../src/middlewares');
+const { authProviders, redisService } = require('../../src/services');
 const { ApiError } = require('../../src/utils/ApiError');
 
 const { setupRedis } = require('../setup/setupRedis');
+
+
 setupRedis();
 
 
