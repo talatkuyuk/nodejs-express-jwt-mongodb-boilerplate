@@ -95,9 +95,9 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 			commonExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("email");
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 			expect(response.body.errors.password.length).toBe(1);
-			expect(response.body.errors.password).toEqual(["password must not be empty or falsy value"]); 
+			expect(response.body.errors.password).toEqual(["password must not be empty or falsy value"]);
+			expect(response.body.errors.passwordConfirmation).toEqual(["password confirmation must not be empty or falsy value"]); 
 		});
 
 
