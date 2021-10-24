@@ -1,4 +1,7 @@
 {
 	"testRegex": "((\\.|/*.)(spec|test))\\.js?$",
-	"testEnvironment": "node"
+	"testEnvironment": "node",
+	"verbose": true,
+	"restoreMocks": true,
+	"resetModules": true
 }
