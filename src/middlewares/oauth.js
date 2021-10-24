@@ -61,4 +61,4 @@ const oAuth = (service) => async (req, res, next) => {
 }
 
 
-module.exports = { oAuth };
+module.exports = oAuth;
