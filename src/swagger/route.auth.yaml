@@ -88,11 +88,11 @@
       204:
         description: NO CONTENT
       401:
-        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       402:
         $ref: '#/components/responses/LogoutSignoutUnauthorizedErrors'
       403:
-        $ref: '#/components/responses/AuthMiddlewareForbiddenErrorsWithoutRightCheck'
+        $ref: '#/components/responses/AuthenticateMiddlewareForbiddenErrors'
       500:
         $ref: '#/components/responses/InternalServerError'
 
@@ -109,9 +109,9 @@
       204:
         description: NO CONTENT
       401:
-        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
-        $ref: '#/components/responses/AuthMiddlewareForbiddenErrorsWithoutRightCheck'
+        $ref: '#/components/responses/AuthenticateMiddlewareForbiddenErrors'
       500:
         $ref: '#/components/responses/InternalServerError'
 
@@ -229,9 +229,9 @@
               message: Email is already verified
               description: "the service name where the error occured"
       401:
-        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
-        $ref: '#/components/responses/AuthMiddlewareForbiddenErrorsWithoutRightCheck'
+        $ref: '#/components/responses/AuthenticateMiddlewareForbiddenErrors'
       500:
         $ref: '#/components/responses/InternalServerError'
 

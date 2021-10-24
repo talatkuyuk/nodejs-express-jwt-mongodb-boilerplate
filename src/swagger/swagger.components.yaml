@@ -290,7 +290,7 @@ components:
             message: "one of the error messages appears here"
             description: "the service name where the error occured"
 
-    AuthMiddlewareUnauthorizedErrors:
+    AuthenticateMiddlewareUnauthorizedErrors:
       description: | 
         UNAUTHORIZED
 
@@ -324,7 +324,7 @@ components:
                 description: "the service name where the error occured"
 
 
-    AuthMiddlewareForbiddenErrors:
+    AuthenticateAndAuthorizeMiddlewaresForbiddenErrors:
       description: | 
         FORBIDDEN
 
@@ -344,13 +344,31 @@ components:
             description: "the service name where the error occured"
 
 
-    AuthMiddlewareForbiddenErrorsWithoutRightCheck:
+    AuthenticateMiddlewareForbiddenErrors:
       description: | 
         FORBIDDEN
 
         #### ApiErrors
         * _You are disabled, call the system administrator_
         * _The token is in the blacklist_
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 403
+            name: "ApiError"
+            message: "One of the api errors appears here"
+            description: "the service name where the error occured"
+
+
+    AuthorizeMiddlewareForbiddenErrors:
+      description: | 
+        FORBIDDEN
+
+        #### ApiErrors
+        * _Forbidden, (only self-data)_
+        * _Forbidden, (you don't have appropriate right)_
       content:
         application/json:
           schema:
@@ -409,7 +427,7 @@ components:
             code: 400
             name: "ApiError"
             message: "Badly formed Authorization Header with Bearer."
-            description: "oAuthMiddleware : oAuth(callback) --> AuthMiddleware : oAuth"
+            description: "oAuthMiddleware : oAuth(callback) --> AuthenticateMiddleware : oAuth"
 
 
     LogoutSignoutUnauthorizedErrors:
