@@ -38,9 +38,9 @@
               _:
                 $ref: '#/components/examples/response-query-authusers'
       401:
-        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
-        $ref: '#/components/responses/AuthMiddlewareForbiddenErrors'
+        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
       404:
         $ref: '#/components/responses/NoUserFound'
       422:
@@ -75,9 +75,9 @@
                   example:
                     $ref: '#components/examples/response-authuser'
       401:
-        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
-        $ref: '#/components/responses/AuthMiddlewareForbiddenErrors'
+        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
       422:
         $ref: '#/components/responses/SignUpValidationErrors'
       500:
@@ -103,9 +103,9 @@
               _:
                 $ref: '#components/examples/response-authuser'
       401:
-        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
-        $ref: '#/components/responses/AuthMiddlewareForbiddenErrors'
+        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
       404:
         $ref: '#/components/responses/NoUserFound'
       422:
@@ -122,9 +122,9 @@
       204:
         description: NO CONTENT
       401:
-        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
-        $ref: '#/components/responses/AuthMiddlewareForbiddenErrors'
+        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
       404:
         $ref: '#/components/responses/NoUserFound'
       422:
@@ -141,9 +141,9 @@
       204:
         description: NO CONTENT
       401:
-        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
-        $ref: '#/components/responses/AuthMiddlewareForbiddenErrors'
+        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
       404:
         $ref: '#/components/responses/NoUserFound'
       422:
@@ -172,9 +172,9 @@
       204:
         description: NO CONTENT
       401:
-        $ref: '#/components/responses/AuthMiddlewareUnauthorizedErrors'
+        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
-        $ref: '#/components/responses/AuthMiddlewareForbiddenErrors'
+        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
       404:
         $ref: '#/components/responses/NoUserFound'
       422:
