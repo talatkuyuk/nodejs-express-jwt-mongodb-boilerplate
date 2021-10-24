@@ -1,19 +1,19 @@
 const express = require('express');
 const router = express.Router();
 
-const { auth } = require('../middlewares/auth');
-const validate = require('../middlewares/validate');
+const { authenticate, authorize, validate } = require('../middlewares');
 
 const { authuserController } = require('../controllers');
+
 const authuserValidation = require('../validations/authuser.ValidationRules');
 
 
-router.get('/', auth('query-authusers'), validate(authuserValidation.getAuthUsers), authuserController.getAuthUsers);
-router.get('/joined', auth('query-authusers-joined'), validate(authuserValidation.getAuthUsers), authuserController.getAuthUsersJoined);
-router.post('/', auth('add-authuser'), validate(authuserValidation.addAuthUser), authuserController.addAuthUser);
-router.get('/:id', auth('get-authuser'), validate(authuserValidation.getAuthUser), authuserController.getAuthUser);
-router.put('/:id', auth('toggle-authuser'), validate(authuserValidation.toggleAuthUser), authuserController.toggleAbility);
-router.delete('/:id', auth('delete-authuser'), validate(authuserValidation.deleteAuthUser), authuserController.deleteAuthUser);
-router.patch('/password', auth("change-password"), validate(authuserValidation.changePassword), authuserController.changePassword);
+router.get('/', authenticate, authorize('query-authusers'), validate(authuserValidation.getAuthUsers), authuserController.getAuthUsers);
+router.get('/joined', authenticate, authorize('query-authusers-joined'), validate(authuserValidation.getAuthUsers), authuserController.getAuthUsersJoined);
+router.post('/', authenticate, authorize('add-authuser'), validate(authuserValidation.addAuthUser), authuserController.addAuthUser);
+router.get('/:id', authenticate, authorize('get-authuser'), validate(authuserValidation.getAuthUser), authuserController.getAuthUser);
+router.put('/:id', authenticate, authorize('toggle-authuser'), validate(authuserValidation.toggleAuthUser), authuserController.toggleAbility);
+router.delete('/:id', authenticate, authorize('delete-authuser'), validate(authuserValidation.deleteAuthUser), authuserController.deleteAuthUser);
+router.patch('/password', authenticate, authorize("change-password"), validate(authuserValidation.changePassword), authuserController.changePassword);
 
 module.exports = router;
