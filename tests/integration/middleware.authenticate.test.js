@@ -8,10 +8,10 @@ var shell = require('shelljs'); // in order to shotdown and restart redis to tes
 const app = require('../../src/core/express');
 
 const config = require('../../src/config');
-const { auth } = require('../../src/middlewares/auth');
+const { authenticate } = require('../../src/middlewares');
 const { ApiError } = require('../../src/utils/ApiError');
 
-const { authuserDbService, authuserService, userDbService, tokenService, redisService } = require('../../src/services');
+const { authuserDbService, authuserService, tokenService, redisService } = require('../../src/services');
 const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 
@@ -38,7 +38,7 @@ describe('Auth Middleware', () => {
 		const res = httpMocks.createResponse();
 		const next = jest.fn();
 		
-		await auth()(req, res, next);
+		await authenticate(req, res, next);
 		
 		expect(next).toHaveBeenCalledWith(expect.any(ApiError));
 		expect(next).toHaveBeenCalledWith(expect.toBeMatchedWithError(expectedError));
@@ -223,10 +223,10 @@ describe('Auth Middleware', () => {
 				const res = httpMocks.createResponse();
 				const next = jest.fn();
 				
-				await auth()(req, res, next);
+				await authenticate(req, res, next);
 				
 				expect(next).toHaveBeenCalledWith();
-				expect(req.user.id).toEqual(authuser.id);
+				expect(req.authuser.id).toEqual(authuser.id);
 			}
 				
 			console.log("Redis is getting re-started intentionally for the test...");
@@ -257,124 +257,10 @@ describe('Auth Middleware', () => {
 			const res = httpMocks.createResponse();
 			const next = jest.fn();
 			
-			await auth()(req, res, next);
+			await authenticate(req, res, next);
 			
 			expect(next).toHaveBeenCalledWith();
-			expect(req.user.id).toEqual(authuser.id);
-		});
-	});
-
-
-
-	describe('Check Authorization whether the user has specific right(s) or not', () => {
-
-		let accessToken;
-		let authuser, tokens;
-		const userAgent = "from-jest-test";
-		
-		beforeEach(async () => {
-			const authUserInstance = AuthUser.fromObject({
-				email: 'talat@google.com',
-				password: 'HashedPass1word.HashedString.HashedPass1word'
-			});
-
-			authuser = await authuserDbService.addAuthUser(authUserInstance);
-			tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
-
-			accessToken = tokens.access.token;
-		});
-
-		
-		test('should throw ApiError with code 403 if the user has appropriate right but self (param id does not match)', async () => {
-	
-			const requestHeader = {
-				method: 'GET',
-				headers: { Authorization: `Bearer ${accessToken}` }, 
-				useragent: { source: userAgent },
-				params: { id: "123456789012345678901234" },
-			};
-
-			const req = httpMocks.createRequest(requestHeader);
-			const res = httpMocks.createResponse();
-			const next = jest.fn();
-
-			await auth("change-password")(req, res, next);
-
-			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "Forbidden, (only self-data)");
-			
-			expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-			expect(next).toHaveBeenCalledWith(expect.toBeMatchedWithError(expectedError));
-			expect(req.user.id).toEqual(authuser.id);
-			expect(req.user.role).toEqual("user");
-		});
-
-
-		test('should throw ApiError with code 403 if the user does not have appropriate right', async () => {
-	
-			const requestHeader = {
-				method: 'GET',
-				headers: { Authorization: `Bearer ${accessToken}` }, 
-				useragent: { source: userAgent },
-				params: { id: "123456789012345678901234" },
-			};
-
-			const req = httpMocks.createRequest(requestHeader);
-			const res = httpMocks.createResponse();
-			const next = jest.fn();
-
-			await auth("query-users")(req, res, next);
-
-			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "Forbidden, (you do not have appropriate right)");
-			
-			expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-			expect(next).toHaveBeenCalledWith(expect.toBeMatchedWithError(expectedError));
-			expect(req.user.id).toEqual(authuser.id);
-			expect(req.user.role).toEqual("user");
-		});
-
-
-		test('should continue next middleware if the user has appropriate right related himself', async () => {
-	
-			var request  = httpMocks.createRequest({
-				method: 'POST',
-				headers: { Authorization: `Bearer ${accessToken}` }, 
-				useragent: { source: userAgent },
-				params: { id: authuser.id },
-			});
-
-			const req = httpMocks.createRequest(request);
-			const res = httpMocks.createResponse();
-			const next = jest.fn();
-
-			await auth("change-password")(req, res, next);
-			
-			expect(next).toHaveBeenCalledWith();
-			expect(req.user.id).toEqual(authuser.id);
-			expect(req.user.role).toEqual("user");
-		});
-
-
-		test('should continue next middleware if the user has appropriate right which is not dependent on himself', async () => {
-			
-			// let's an admin user to check he/she has appropriate right
-			await userDbService.addUser(authuser.id, {name: "User", role: "admin" });
-	
-			var request  = httpMocks.createRequest({
-				method: 'POST',
-				headers: { Authorization: `Bearer ${accessToken}` }, 
-				useragent: { source: userAgent },
-				params: { id: authuser.id },
-			});
-
-			const req = httpMocks.createRequest(request);
-			const res = httpMocks.createResponse();
-			const next = jest.fn();
-
-			await auth("query-users")(req, res, next);
-			
-			expect(next).toHaveBeenCalledWith();
-			expect(req.user.id).toEqual(authuser.id);
-			expect(req.user.role).toEqual("admin");
+			expect(req.authuser.id).toEqual(authuser.id);
 		});
 	});
 })
