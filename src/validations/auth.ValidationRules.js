@@ -1,4 +1,4 @@
-const { body, query } = require('express-validator');
+const { body } = require('express-validator');
 const { authuserService } = require('../services');
 
 
@@ -39,12 +39,15 @@ const check_body_password = [
 ];
 
 const check_body_passwordConfirmation = [
-	body('passwordConfirmation').custom((value, { req }) => {
-		if (!Object.is(value, req.body.password)) {
-		  throw new Error('password confirmation does not match with the password');
-		}
-		return true; // Indicates the success
-	}),
+	body('passwordConfirmation')
+		.exists({checkFalsy: true}).withMessage('password confirmation must not be empty or falsy value')
+		.bail()
+		.custom((value, { req }) => {
+			if (!Object.is(value, req.body.password)) {
+				throw new Error('password confirmation does not match with the password');
+			}
+			return true; // Indicates the success
+		}),
 ];
 
 

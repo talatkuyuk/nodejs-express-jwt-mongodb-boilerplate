@@ -68,14 +68,15 @@ const getAuthUsers = [
 		.trim()
 		.isNumeric()
 		.withMessage("The query param 'size' must be numeric value")
-		.isLength({ max: 50 })
-		.withMessage("The query param 'size' can be at most 50")
+		.bail()
+		.isInt({ min: 1, max: 50 })
+		.withMessage("The query param 'size' can be between 1-50")
 		.optional(),
 	
 	query("sort")
 		.custom(once)
 		.trim()
-		.matches(/[azAZ.|]/i)
+		.matches(/^[a-zA-Z/./|\s]+$/i)
 		.withMessage("The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter")
 		.optional(),
 ];
@@ -114,7 +115,7 @@ const changePassword = [
 		.bail()
 		.custom(async (value, { req }) => {
 			try {
-				if (await req.user.isPasswordMatch(value))
+				if (await req.authuser.isPasswordMatch(value))
 					return true; // indicates validation is success: the id is valid
 				throw new Error('incorrect current password');
 				
