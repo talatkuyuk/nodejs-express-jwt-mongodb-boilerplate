@@ -1,22 +1,7 @@
 const { body, param, query } = require('express-validator');
-const { authuserService } = require('../services');
 const { commonRules } = require('./auth.ValidationRules');
 
 
-// Option-1: authuser validation is handled here in custom validation 
-const check_param_id_with_custom = [
-	param("id")
-		.isLength({ min: 24, max: 24 }).withMessage('The param id must be a 24-character number')
-		.bail()
-		.custom(async (value) => {
-			if (await authuserService.isValidAuthUser(value)) 
-				return true; // indicates validation is success: the id is valid
-			throw new Error('No user found');
-		}),
-];
-
-// Option-2: authuser validation is handled in service not here 
-// I've choosen this option in order to throw notfound error im service not validation error
 const check_param_id = [
 	param("id")
 		.isLength({ min: 24, max: 24 })
