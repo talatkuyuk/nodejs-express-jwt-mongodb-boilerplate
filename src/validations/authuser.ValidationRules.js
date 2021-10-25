@@ -81,12 +81,10 @@ const addAuthUser = [
 	...commonRules.check_body_password,
 	...commonRules.check_body_passwordConfirmation,
 
-	// just for experimental custom validation
 	body().custom( (body, { req }) => {
 		const validKeys = ['email', 'password', 'passwordConfirmation'];
 		return Object.keys(req.body).every(key => validKeys.includes(key));
 	}).withMessage(`Any extra parameter is not allowed other than ${['email', 'password', 'passwordConfirmation']}`),
-
 ];
 
 
