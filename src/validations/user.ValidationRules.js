@@ -1,4 +1,6 @@
-const { body, param, query } = require('express-validator');
+const validator = require('validator');
+
+const { body, param, query, check, oneOf } = require('express-validator');
 const { authuserService, userService } = require('../services');
 const { roles } = require('../config/roles');
 
@@ -46,15 +48,17 @@ const getUsers = [
 	query("email")
 		.custom(once)
 		.trim()
-		.escape()
+		.toLowerCase()
+		.isEmail()
+		.withMessage("The query param 'email' must be in valid form")
 		.optional(),
 	
 	query("name")
 		.custom(once)
 		.trim()
 		.toLowerCase()
-		.isIn(["male", "female", "none"])
-		.withMessage('gender could be male, female or none')
+		.isLength({min: 2})
+		.withMessage("The query param 'name' must be minumum 2-length charachter")
 		.optional(),
 	
 	query("gender")
@@ -62,7 +66,7 @@ const getUsers = [
 		.trim()
 		.toLowerCase()
 		.isIn(["male", "female", "none"])
-		.withMessage('gender could be male, female or none')
+		.withMessage("The query param 'gender' could be only male, female or none")
 		.optional(),
 
 	query("country")
@@ -70,7 +74,15 @@ const getUsers = [
 		.trim()
 		.toUpperCase()
 		.matches(iso_3166_alpha_3)
-		.withMessage("country code must be in the form of iso_3166_alpha_3")
+		.withMessage("The query param 'country' code must be in the form of 3-letter standart country code")
+		.optional(),
+	
+	query("role")
+		.custom(once)
+		.trim()
+		.toLowerCase()
+		.isIn(roles)
+		.withMessage(`The query param 'role' could be one of ${roles}`)
 		.optional(),
 
 	query("page")
@@ -80,25 +92,20 @@ const getUsers = [
 		.withMessage("The query param 'page' must be numeric value")
 		.optional(),
 	
-	query("role")
-		.trim()
-		.toLowerCase()
-		.isIn(roles)
-		.withMessage(`role could be one of ${roles}`),
-	
 	query("size")
 		.custom(once)
 		.trim()
 		.isNumeric()
 		.withMessage("The query param 'size' must be numeric value")
-		.isLength({ max: 50 })
-		.withMessage("The query param 'size' can be at most 50")
+		.bail()
+		.isInt({ min: 1, max: 50 })
+		.withMessage("The query param 'size' can be between 1-50")
 		.optional(),
 	
 	query("sort")
 		.custom(once)
 		.trim()
-		.matches(/[azAZ.|]/i)
+		.matches(/^[a-zA-Z/./|\s]+$/i)
 		.withMessage("The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter")
 		.optional(),
 ];
@@ -119,14 +126,11 @@ const addUser = [
 		.withMessage('id must not be empty or falsy value')
 		.bail()
 		.isLength({ min: 24, max: 24})
-		.withMessage('The param id must be a 24-character number')
+		.withMessage('id must be a 24-character number')
 		.bail()
 		.custom(async (value) => {
-			if (!await authuserService.isValidAuthUser(value)) 
-				throw new Error('Id does not match with any authenticated user');
-
 			if (await userService.isValidUser(value)) 
-				throw new Error('There is another user with the same id.');
+				throw new Error('There is another user with the same id');
 
 			return true;
 	}),
@@ -139,25 +143,32 @@ const addUser = [
 		.bail()
 		.isEmail()
 		.withMessage('email must be in valid form')
-		.toLowerCase()
-		.custom(async (value, { req }) => {
-			if (!await authuserService.isPair_EmailAndId(req.body.id, value))
-				throw new Error('Email does not match with the auth id.');
-			
-			return true; // Indicates the success
-		}),
+		.toLowerCase(),
 
 	body('role')
 		.trim()
 		.toLowerCase()
 		.equals('user')
-		.withMessage("The role must be setted as 'user' while creating."),
+		.withMessage("The role must be setted as 'user' while creating")
+		.bail(),
 
 	check_body_name[0].optional(),
 	check_body_gender[0].optional(),
 	check_body_country[0].optional(),
 
 	body()
+		.custom(async (body, { req }) => {
+			const id = req.body.id;
+			const email = req.body.email;
+
+			// I needed to validate id and email again here, since the chains above are isolatated in express-validator
+			if ( id && email && validator.isEmail(email?.trim()?.toLowerCase()) && validator.isLength(id, {min: 24, max: 24})) {
+				if (!await authuserService.isExistAuthUser(id, email))
+					throw new Error('There is no correspondent authenticated user with the same id and email');
+			}
+				
+			return true;
+		})
 		.custom((body, { req }) => {
 			const validKeys = ['id', 'email', 'role', 'name', 'gender', 'country'];
 			return Object.keys(req.body).every(key => validKeys.includes(key));
@@ -170,10 +181,17 @@ const addUser = [
 
 const updateUser = [
 	...check_param_id,
-	...check_body_name,
-	...check_body_gender,
-	...check_body_country,
 
+	check_body_name[0],
+	check_body_gender[0],
+	check_body_country[0],
+
+	oneOf([
+		check('name').exists(),
+		check('gender').exists(),
+		check('country').exists()
+	], 'The request body should contain at least one of the name, gender, country'),
+	
 	body().custom( (body, { req }) => {
 		const validKeys = ['name', 'gender', 'country'];
 		return Object.keys(req.body).every(key => validKeys.includes(key));
