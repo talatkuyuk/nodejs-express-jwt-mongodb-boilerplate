@@ -68,7 +68,12 @@ const loginValidationRules = [
 	...check_body_email,
 
 	body('password')
-		.exists({checkFalsy: true}).withMessage('password must not be empty or falsy value')
+		.exists({checkFalsy: true}).withMessage('password must not be empty or falsy value'),
+
+	body().custom( (body, { req }) => {
+		const validKeys = ['email', 'password'];
+		return Object.keys(req.body).every(key => validKeys.includes(key));
+	}).withMessage(`Any extra parameter is not allowed other than ${['email', 'password']}`),
 ];
 
 
@@ -78,6 +83,11 @@ const signupValidationRules = [
 	...check_body_email_custom_isTaken,
 	...check_body_password,
     ...check_body_passwordConfirmation,
+
+	body().custom( (body, { req }) => {
+		const validKeys = ['email', 'password', 'passwordConfirmation'];
+		return Object.keys(req.body).every(key => validKeys.includes(key));
+	}).withMessage(`Any extra parameter is not allowed other than ${['email', 'password', 'passwordConfirmation']}`),
 ];
 
 
