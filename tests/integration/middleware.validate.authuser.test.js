@@ -23,7 +23,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 	describe('getAuthUsers validation', () => {
 
 		test('getAuthUsers: should throw error 422, if a query param has multiple value', async () => {
-
 			const request = { 
 				query: { 
 					email: ["email@xxx.com", "email@yyy.com"], // multiple value
@@ -53,7 +52,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('getAuthUsers: should throw error 422, if the query param email is not valid email', async () => {
-
 			const request = { 
 				query: { email: "email@xxx" } // invalid email form
 			};
@@ -76,7 +74,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('getAuthUsers: should throw error 422, if the query param isDisabled is not boolean value', async () => {
-
 			const request = { 
 				query: { isDisabled: "5" } // is not boolean
 			};
@@ -99,7 +96,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('getAuthUsers: should throw error 422, if the query param isEmailVerified is not boolean value', async () => {
-
 			const request = { 
 				query: { isEmailVerified: "truex" } // is not boolean
 			};
@@ -122,7 +118,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('getAuthUsers: should throw error 422, if the query param page is not numeric value', async () => {
-
 			const request = { 
 				query: { page: "" } // is not numeric
 			};
@@ -145,7 +140,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('getAuthUsers: should throw error 422, if the query param size is not numeric value', async () => {
-
 			const request = { 
 				query: { size: "a" } // is not numeric
 			};
@@ -168,7 +162,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('getAuthUsers: should throw error 422, if the query param size is not between 1-50', async () => {
-
 			const request = { 
 				query: { size: "0" } // is not between 1-50
 			};
@@ -191,7 +184,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('getAuthUsers: should throw error 422, if the query param sort contains an invalid character', async () => {
-
 			const request = { 
 				query: { sort: "email, createdAt" } // includes comma (only . period and | pipedelimeter allowed)
 			};
@@ -214,7 +206,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('getAuthUsers: should continue next middleware if the query params are valid', async () => {
-
 			const request = { 
 				query: { 
 					email: 'email@xxx.com',
@@ -235,12 +226,24 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			expect(next).toHaveBeenCalledTimes(1);
 			expect(next).toHaveBeenCalledWith();
 		});
+
+
+		test('getAuthUsers: should continue next middleware even if the request query is absent', async () => {
+
+			const req = httpMocks.createRequest(); // means that "get all authusers"
+			const res = httpMocks.createResponse();
+			const next = jest.fn();
+			
+			await validate(authuserValidation.getAuthUsers)(req, res, next);
+
+			expect(next).toHaveBeenCalledTimes(1);
+			expect(next).toHaveBeenCalledWith();
+		});
 	});
 
 
 
 	describe('addAuthUser validation', () => {
-
 
 		test('addAuthUser: should throw error 422, if the body is empty', async () => {
 			const request = { 
@@ -303,7 +306,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 		});
 
 
-		test('addAuthUser: should throw error 422, if the email and password is not valid', async () => {
+		test('addAuthUser: should throw error 422, if the email and password are not in valid form', async () => {
 			const request = {
 				body: {
 					email: "user@gmail", // invalid email form
@@ -459,7 +462,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 	describe('getAuthUser validation', () => {
 
 		test('getAuthUser: should throw error 422, if the param id is not 24-length character', async () => {
-
 			const request = { 
 				params: { id: "1234567890" } // 10-length string, invalid id
 			};
@@ -482,7 +484,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('getAuthUser: should continue next middleware if the param id is valid', async () => {
-
 			const request = { 
 				params: { id: "123456789012345678901234" } // 24-length string, valid id
 			};
@@ -503,7 +504,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 	describe('toggleAuthUser validation', () => {
 
 		test('toggleAuthUser: should throw error 422, if the param id is not 24-length character', async () => {
-
 			const request = { 
 				params: { id: "1234567890" } // 10-length string, invalid id
 			};
@@ -526,7 +526,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('toggleAuthUser: should continue next middleware if the param id is valid', async () => {
-
 			const request = { 
 				params: { id: "123456789012345678901234" } // 24-length string, valid id
 			};
@@ -547,7 +546,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 	describe('deleteAuthUser validation', () => {
 
 		test('deleteAuthUser: should throw error 422, if the param id is not 24-length character', async () => {
-
 			const request = { 
 				params: { id: "1234567890" } // 10-length string, invalid id
 			};
@@ -570,7 +568,6 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('deleteAuthUser: should continue next middleware if the param id is valid', async () => {
-
 			const request = { 
 				params: { id: "123456789012345678901234" } // 24-length string, valid id
 			};

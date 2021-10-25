@@ -31,28 +31,12 @@ const isEmailTaken = async function (email) {
 
 
 /**
- * Check if the authuser exists
- * @param {String} id
- * @returns {Promise<Boolean>}
- */
- const isValidAuthUser = async function (id) {
-	try {
-		const authuser = await authuserDbService.getAuthUser({ id });
-		return !!authuser;
-
-	} catch (error) {
-		throw error;
-	}
-};
-
-
-/**
  * Check if the email and the id matches
  * @param {String} id
  * @param {String} email
  * @returns {Promise<Boolean>}
  */
-const isPair_EmailAndId = async function (id, email) {
+const isExistAuthUser = async function (id, email) {
 	try {
 		const authuser = await authuserDbService.getAuthUser({ id, email });
 		return !!authuser;
@@ -215,8 +199,7 @@ const isPair_EmailAndId = async function (id, email) {
 
 module.exports = {
 	isEmailTaken,
-	isValidAuthUser,
-	isPair_EmailAndId,
+	isExistAuthUser,
 
 	toggleAbility,
 	changePassword,
