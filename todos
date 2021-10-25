@@ -1,8 +1,13 @@
 //TODO: add test for forgotpassword/resetpassword +
 //TODO: add test for verifyemail/sendverificationemail +
 //TODO: add test for refresh token rotation process +
-//TODO: add test for oAuth routes
-//TODO: add test for validation middleware
+//TODO: add test for oAuth middleware +
+//TODO: add test for oAuth routes +
+//TODO: add test for authorize middleware +
+
+//TODO: add test for validation middleware for authuser +
+//TODO: add test for validation middleware for user +
+//TODO: add test for validation middleware for auth +
 //TODO: add test for authuser routes
 //TODO: add test for user routes
 
@@ -10,9 +15,12 @@
 //TODO: implement authuserDAO
 //TODO: implement userDAO
 
+//TODO: swagger docs for login with google and facebook routes +
 //TODO: swagger docs for user routes
 //TODO: swagger docs for for joined queries
 
+//TODO: seperate authentication and authorization middleware +
+//TODO: put Auth Providers token into redis for a different time, create put_token, and check_token functions in the redis service
 //TODO: update joined queries considering full outer join (currently they are in behavior of left outer join)
 //TODO: update unhandledRejection and uncaughtException mechanism
 //TODO: update ErrorHandler strategy and isOperational logic
@@ -21,7 +29,7 @@
 
 //TODO: add todo part
 //TODO: add socket io
-//TODO: add collection named logs to mongodb
+//TODO: add "logs" collection to mongodb
 
 //TODO: revoke the access token when the user session is closed
 //TODO: implement the Schema Versioning pattern, add a schema_version
