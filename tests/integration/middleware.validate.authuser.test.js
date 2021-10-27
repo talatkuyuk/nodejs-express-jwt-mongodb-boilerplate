@@ -720,7 +720,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 		});
 
 
-		test('changePassword: should throw error 422, if the email is already taken', async () => {
+		test('changePassword: should throw error 422, if the current password is wrong', async () => {
 			const authuser = new AuthUser("user@gmail.com", "password");
 			const request = {
 				body: {

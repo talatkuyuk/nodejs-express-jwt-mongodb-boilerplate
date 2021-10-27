@@ -5,8 +5,8 @@ const { ApiError, locateError } = require('../utils/ApiError');
 const { redisService } = require('../services');
 
 
-// Strategy related with the "service" are registered into passport in express(app), 
-// and the strategy is going to be processed in passport oAuthVerify considering "service"
+// The Strategies which is related with the "service" are registered into the passport in express(app), 
+// and the strategy is going to be processed in the passport oAuthVerify, considering the "service"
 const oAuth = (service) => async (req, res, next) => {
 	return new Promise((resolve, reject) => {
 		passport.authenticate( service,	 { session: false }, async function(err, oAuth, info) {
@@ -40,8 +40,7 @@ const oAuth = (service) => async (req, res, next) => {
 					throw new ApiError(httpStatus.FORBIDDEN, `The token of the auth provider (${oAuth.provider}) is allowed to be used only once`);
 				}
 
-
-				// if everything is okey, then put the token into the blacklist for one-shot usage
+				// if everything is okey, then put the token into the blacklist aiming one-shot usage
 				// this time we put the token itself not jti, since all authProviders' tokens does not contain a jti claim
 				await redisService.put_jti_into_blacklist(oAuth.token);
 
