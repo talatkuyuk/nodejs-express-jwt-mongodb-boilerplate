@@ -4,7 +4,7 @@ const httpMocks = require('node-mocks-http');
 const { authorize } = require('../../src/middlewares');
 const { ApiError } = require('../../src/utils/ApiError');
 
-const userService = require('../../src/services/user.service');
+const userDbService = require('../../src/services/user.db.service');
 
 const TestUtil = require('../testutil/TestUtil');
 
@@ -39,7 +39,7 @@ describe('Authorization Middleware: Check the user right(s)', () => {
 		const next = jest.fn();
 
 		// lets assume that the user has "user" role
-		jest.spyOn(userService, 'getUserRole').mockResolvedValue("user");
+		jest.spyOn(userDbService, 'getUser').mockResolvedValue({ role: "user" });
 
 		await authorize("get-user")(req, res, next);
 
@@ -71,7 +71,7 @@ describe('Authorization Middleware: Check the user right(s)', () => {
 		const next = jest.fn();
 
 		// lets assume that the user is admin
-		jest.spyOn(userService, 'getUserRole').mockResolvedValue("admin");
+		jest.spyOn(userDbService, 'getUser').mockResolvedValue({ role: "admin" });
 
 		await authorize("change-password")(req, res, next);
 
@@ -96,7 +96,7 @@ describe('Authorization Middleware: Check the user right(s)', () => {
 		const next = jest.fn();
 
 		// lets assume that there is no user in users yet just after registration
-		jest.spyOn(userService, 'getUserRole').mockResolvedValue(null);
+		jest.spyOn(userDbService, 'getUser').mockResolvedValue(null);
 
 		await authorize("query-users")(req, res, next);
 
@@ -123,7 +123,7 @@ describe('Authorization Middleware: Check the user right(s)', () => {
 		const next = jest.fn();
 
 		// lets assume that there is no user in users yet just after registration
-		jest.spyOn(userService, 'getUserRole').mockResolvedValue(null);
+		jest.spyOn(userDbService, 'getUser').mockResolvedValue(null);
 
 		await authorize("change-password")(req, res, next);
 
@@ -145,7 +145,7 @@ describe('Authorization Middleware: Check the user right(s)', () => {
 		const next = jest.fn();
 
 		// lets assume that the user is admin
-		jest.spyOn(userService, 'getUserRole').mockResolvedValue("admin");
+		jest.spyOn(userDbService, 'getUser').mockResolvedValue({ role: "admin" });
 
 		await authorize("query-users")(req, res, next);
 		
@@ -166,7 +166,7 @@ describe('Authorization Middleware: Check the user right(s)', () => {
 		const res = httpMocks.createResponse();
 		const next = jest.fn();
 
-		jest.spyOn(userService, 'getUserRole').mockResolvedValue("user");
+		jest.spyOn(userDbService, 'getUser').mockResolvedValue({ role: "user" });
 
 		await authorize()(req, res, next); // no parameter means that there is no required rights and will grant to do regardles of the user role.
 		

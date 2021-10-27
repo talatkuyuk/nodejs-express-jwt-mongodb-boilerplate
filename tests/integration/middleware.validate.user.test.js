@@ -390,10 +390,10 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			const res = httpMocks.createResponse();
 			const next = jest.fn();
 
-			const spyOnValid = jest.spyOn(userService, 'isValidUser');
+			const spyOnValid = jest.spyOn(userService, 'isExist');
 			spyOnValid.mockResolvedValue(false);
 
-			const spyOnExist = jest.spyOn(authuserService, 'isExistAuthUser');
+			const spyOnExist = jest.spyOn(authuserService, 'isExist');
 			spyOnExist.mockResolvedValue(true);
 			
 			await validate(userValidation.addUser)(req, res, next);
@@ -425,10 +425,10 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			const res = httpMocks.createResponse();
 			const next = jest.fn();
 
-			const spyOnValid = jest.spyOn(userService, 'isValidUser');
+			const spyOnValid = jest.spyOn(userService, 'isExist');
 			spyOnValid.mockResolvedValue(false);
 
-			const spyOnExist = jest.spyOn(authuserService, 'isExistAuthUser');
+			const spyOnExist = jest.spyOn(authuserService, 'isExist');
 			spyOnExist.mockResolvedValue(true);
 			
 			await validate(userValidation.addUser)(req, res, next);
@@ -460,10 +460,10 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			const res = httpMocks.createResponse();
 			const next = jest.fn();
 
-			const spyOnValid = jest.spyOn(userService, 'isValidUser');
+			const spyOnValid = jest.spyOn(userService, 'isExist');
 			spyOnValid.mockResolvedValue(false);
 
-			const spyOnExist = jest.spyOn(authuserService, 'isExistAuthUser');
+			const spyOnExist = jest.spyOn(authuserService, 'isExist');
 			spyOnExist.mockResolvedValue(true);
 			
 			await validate(userValidation.addUser)(req, res, next);
@@ -494,10 +494,10 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			const res = httpMocks.createResponse();
 			const next = jest.fn();
 
-			const spyOnValid = jest.spyOn(userService, 'isValidUser');
+			const spyOnValid = jest.spyOn(userService, 'isExist');
 			spyOnValid.mockResolvedValue(false);
 
-			const spyOnExist = jest.spyOn(authuserService, 'isExistAuthUser');
+			const spyOnExist = jest.spyOn(authuserService, 'isExist');
 			spyOnExist.mockResolvedValue(false);  // here created the validation error
 			
 			await validate(userValidation.addUser)(req, res, next);
@@ -528,10 +528,10 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			const res = httpMocks.createResponse();
 			const next = jest.fn();
 
-			const spyOnValid = jest.spyOn(userService, 'isValidUser');
+			const spyOnValid = jest.spyOn(userService, 'isExist');
 			spyOnValid.mockResolvedValue(true); // here created the validation error
 
-			const spyOnExist = jest.spyOn(authuserService, 'isExistAuthUser');
+			const spyOnExist = jest.spyOn(authuserService, 'isExist');
 			spyOnExist.mockResolvedValue(true);
 			
 			await validate(userValidation.addUser)(req, res, next);
@@ -563,10 +563,10 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			const res = httpMocks.createResponse();
 			const next = jest.fn();
 
-			const spyOnValid = jest.spyOn(userService, 'isValidUser');
+			const spyOnValid = jest.spyOn(userService, 'isExist');
 			spyOnValid.mockResolvedValue(false);
 
-			const spyOnExist = jest.spyOn(authuserService, 'isExistAuthUser');
+			const spyOnExist = jest.spyOn(authuserService, 'isExist');
 			spyOnExist.mockResolvedValue(true);
 			
 			await validate(userValidation.addUser)(req, res, next);
@@ -597,10 +597,10 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			const res = httpMocks.createResponse();
 			const next = jest.fn();
 
-			const spyOnValid = jest.spyOn(userService, 'isValidUser');
+			const spyOnValid = jest.spyOn(userService, 'isExist');
 			spyOnValid.mockResolvedValue(false);
 
-			const spyOnExist = jest.spyOn(authuserService, 'isExistAuthUser');
+			const spyOnExist = jest.spyOn(authuserService, 'isExist');
 			spyOnExist.mockResolvedValue(true);
 			
 			await validate(userValidation.addUser)(req, res, next);
@@ -626,10 +626,10 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			const res = httpMocks.createResponse();
 			const next = jest.fn();
 
-			const spyOnValid = jest.spyOn(userService, 'isValidUser');
+			const spyOnValid = jest.spyOn(userService, 'isExist');
 			spyOnValid.mockResolvedValue(false);
 
-			const spyOnExist = jest.spyOn(authuserService, 'isExistAuthUser');
+			const spyOnExist = jest.spyOn(authuserService, 'isExist');
 			spyOnExist.mockResolvedValue(true);
 			
 			await validate(userValidation.addUser)(req, res, next);

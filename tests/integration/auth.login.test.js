@@ -98,18 +98,18 @@ describe('POST /auth/login', () => {
 		}
 		
 
-		test('should return status 401, if the user is not registered', async () => {
+		test('should return status 404, if the user is not registered', async () => {
 			let loginForm = {
 				email: 'talat@gmail.com',
 				password: 'Pass1word.',
 			};
 			const response = await request(app).post('/auth/login').send(loginForm);
-			commonExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.message).toEqual("You are not registered user");
+			commonExpectations(response, httpStatus.NOT_FOUND);
+			expect(response.body.message).toEqual("No user found");
 		});
 
 
-		test('should return status 401, if the user is disabled', async () => {
+		test('should return status 403, if the user is disabled', async () => {
 			const hashedPassword = await bcrypt.hash('Pass1word.', 8);
 			const authuser = AuthUser.fromObject({
 				email: 'talat@gmail.com',

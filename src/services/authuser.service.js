@@ -4,15 +4,14 @@ const bcrypt = require('bcryptjs');
 const { ApiError, locateError } = require('../utils/ApiError');
 const composeFilter = require('../utils/composeFilter');
 const composeSort = require('../utils/composeSort');
-
-//for database operations for authusers
-const authuserDbService = require('./authuser.db.service');
 const { AuthUser } = require('../models');
 
+// SERVICE DEPENDENCIES
 const paginaryService = require('./paginary.service');
+const authuserDbService = require('./authuser.db.service');
+
 
 /////////////////////////  UTILS  ///////////////////////////////////////
-
 
 /**
  * Check if the email is already taken
@@ -25,24 +24,24 @@ const isEmailTaken = async function (email) {
 		return !!authuser;
 
 	} catch (error) {
-		throw error;
+		throw locateError(error, "AuthUserService : isEmailTaken");
 	}
 };
 
 
 /**
- * Check if the email and the id matches
+ * Check if the authuser exists; and check the id and the email match
  * @param {String} id
  * @param {String} email
  * @returns {Promise<Boolean>}
  */
-const isExistAuthUser = async function (id, email) {
+const isExist = async function (id, email) {
 	try {
 		const authuser = await authuserDbService.getAuthUser({ id, email });
 		return !!authuser;
 
 	} catch (error) {
-		throw error;
+		throw locateError(error, "AuthUserService : isExist");
 	}
 };
 
@@ -51,45 +50,28 @@ const isExistAuthUser = async function (id, email) {
 
 
 /**
- * Enable & Disable AuthUser
- * @param {string} id
- * @returns {Promise}
+ * Add authuser with email and password
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<AuthUser>}
  */
- const toggleAbility = async (id) => {
+ const addAuthUser = async (email, password) => {
 	try {
-		// to get authuser first is necessary to toggle disable further
-		const authuser = await authuserDbService.getAuthUser({ id });
-		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+		const hashedPassword = await bcrypt.hash(password, 8);
+		const authuserx = new AuthUser(email, hashedPassword);
+		authuserx.services = { emailpassword: "registered" };
 
-		await authuserDbService.updateAuthUser(id, {isDisabled: !authuser.isDisabled});
-  
-	} catch (error) {
-		throw locateError(error, "AuthUserService : toggleAbility");
-	}
-};
+		const authuser = await authuserDbService.addAuthUser(authuserx);
+		
+		if (!authuser)
+			throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
 
-
-
-/**
- * Change password
- * @param {AuthUser} authuser
- * @param {string} currentPassword
- * @param {string} newPassword
- * @returns {Promise}
- */
- const changePassword = async (authuser, newPassword) => {
-	try {
-		const password = await bcrypt.hash(newPassword, 8);
-    	const result = await authuserDbService.updateAuthUser(authuser.id, { password });
-
-		if (result === null)
-			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+		return authuser;
 
 	} catch (error) {
-		throw locateError(error, "AuthUserService : changePassword");
+		throw locateError(error, "AuthUserService : addAuthUser");
 	}
-};
-
+}
 
 
 /**
@@ -100,7 +82,9 @@ const isExistAuthUser = async function (id, email) {
  const getAuthUserById = async (id) => {
 	try {
 		const authuser = await authuserDbService.getAuthUser({ id });
-		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+		
+		if (!authuser)
+			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 		
 		return authuser;
   
@@ -119,10 +103,9 @@ const isExistAuthUser = async function (id, email) {
  const getAuthUserByEmail = async (email) => {
 	try {
 		const authuser = await authuserDbService.getAuthUser({ email });
-		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
-		
-		// or fake message for security, forexample when forgotPassword
-		// if (!authuser) throw new ApiError(httpStatus.OK, 'An email has been sent for reseting password.');
+
+		if (!authuser)
+			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 		return authuser;
   
@@ -147,13 +130,57 @@ const isExistAuthUser = async function (id, email) {
 		}
 		const filter = composeFilter(query, fields);
 		
-		const sortingFields = ['email', 'isEmailVerified', 'isDisabled'];
+		const sortingFields = ['email', 'isEmailVerified', 'isDisabled', 'createdAt'];
 		const sort = composeSort(query, sortingFields);
 
 		return await paginaryService.paginary(query, filter, sort, authuserDbService.getAuthUsers);
   
 	} catch (error) {
 		throw locateError(error, "AuthUserService : getAuthUsers");
+	}
+};
+
+
+
+/**
+ * Enable & Disable AuthUser
+ * @param {string} id
+ * @returns {Promise}
+ */
+ const toggleAbility = async (id) => {
+	try {
+		// to get authuser first is necessary to toggle disable further
+		const authuser = await authuserDbService.getAuthUser({ id });
+		
+		if (!authuser)
+			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+
+		await authuserDbService.updateAuthUser(id, {isDisabled: !authuser.isDisabled});
+  
+	} catch (error) {
+		throw locateError(error, "AuthUserService : toggleAbility");
+	}
+};
+
+
+
+/**
+ * Change password
+ * @param {string} id
+ * @param {string} currentPassword
+ * @param {string} newPassword
+ * @returns {Promise}
+ */
+ const changePassword = async (id, newPassword) => {
+	try {
+		const password = await bcrypt.hash(newPassword, 8);
+    	const authuser = await authuserDbService.updateAuthUser(id, { password });
+
+		if (!authuser)
+			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+
+	} catch (error) {
+		throw locateError(error, "AuthUserService : changePassword");
 	}
 };
 
@@ -170,6 +197,8 @@ const isExistAuthUser = async function (id, email) {
 
 		if (!result)
 			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+
+		// delete user data through another request
   
 	} catch (error) {
 		throw locateError(error, "AuthUserService : deleteAuthUser");
@@ -186,7 +215,9 @@ const isExistAuthUser = async function (id, email) {
  const getDeletedAuthUserById = async (id) => {
 	try {
 		const authuser = await authuserDbService.getDeletedAuthUser({ id });
-		if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+		
+		if (!authuser) 
+			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 		return authuser;
   
@@ -199,15 +230,14 @@ const isExistAuthUser = async function (id, email) {
 
 module.exports = {
 	isEmailTaken,
-	isExistAuthUser,
+	isExist,
 
-	toggleAbility,
-	changePassword,
-
+	addAuthUser,
 	getAuthUserById,
 	getAuthUserByEmail,
 	getAuthUsers,
-
+	toggleAbility,
+	changePassword,
 	deleteAuthUser,
 	getDeletedAuthUserById,
 };

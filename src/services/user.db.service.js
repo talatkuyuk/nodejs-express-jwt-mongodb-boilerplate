@@ -6,16 +6,13 @@ const { locateError } = require('../utils/ApiError');
 
 
 /**
- * Add an user into db with the same id of the authuser
+ * Add an user into db
  * @param {String} id
- * @param {Object} addBody
- * @returns {Promise}
+ * @param {User} user
+ * @returns {Promise<User?>}
  */
- const addUser = async (id, addBody) => {
+ const addUser = async (id, user) => {
 	try {
-		const {email, role, name, gender, country} = addBody;
-		const user = new User(email, role, name, gender, country);
-		
 		const db = mongodb.getDatabase();
 		const result = await db.collection("users").insertOne({
 			_id: ObjectId(id), 
@@ -43,13 +40,12 @@ const { locateError } = require('../utils/ApiError');
  */
  const getUser = async (query) => {
 	try {
-		const db = mongodb.getDatabase();
-
 		if (query.id) {
 			query = { ...query, _id: ObjectId(query.id) };
 			delete query.id;
 		}
 
+		const db = mongodb.getDatabase();
 		const doc = await db.collection("users").findOne(query);
 
 		return User.fromDoc(doc);
@@ -72,14 +68,14 @@ const { locateError } = require('../utils/ApiError');
  */
  const getUsers = async (filter, sort, skip, limit) => {
 	try {
-		const db = mongodb.getDatabase();
-	
 		const pipeline = [
 			{
 			   $match: filter
 			},
 			{
 				$project:{
+					_id: 0,
+					id: "$_id",
 					email: 1,
 					role: 1,
 					name: 1,
@@ -109,8 +105,9 @@ const { locateError } = require('../utils/ApiError');
 				}
 			}
 		]
-	
-	   return await db.collection("users").aggregate(pipeline).toArray();
+
+		const db = mongodb.getDatabase();
+	   	return await db.collection("users").aggregate(pipeline).toArray();
 		
 	} catch (error) {
 		throw locateError(error, "UserDbService : getUsers");

@@ -23,6 +23,7 @@ const getAuthUserWithRole = async (id) => {
 			{
 				$project:{
 					email: 1,
+					password: 1,
 					isEmailVerified: 1,
 					isDisabled: 1,
 					createdAt: 1,
