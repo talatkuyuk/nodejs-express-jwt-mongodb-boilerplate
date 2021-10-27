@@ -6,7 +6,7 @@ const { ApiError, locateError } = require('../utils/ApiError');
 
 const validate = (rules) => async (req, res, next) => {
 	try {
-		// it validates all related validation rules
+		// validate all related validation rules
 		await Promise.all(rules.map((rule) => rule.run(req)));
 
 		const errors = validationResult(req);
@@ -27,7 +27,7 @@ const validate = (rules) => async (req, res, next) => {
 		const validationError = new ApiError(
 			httpStatus.UNPROCESSABLE_ENTITY, // error.statusCode (422)
 			"ValidationError: The request could not be validated", // error.name: error.message
-			null, // error.description (no need)
+			null, // error.description
 			myerrors, // converted validation errors
 			true, // error.isOperational
 		);
