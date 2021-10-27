@@ -15,7 +15,8 @@ const envVarsSchema = Joi.object()
     PORT_HTTP: Joi.number().default(3000),
 	  PORT_HTTPS: Joi.number().default(8443),
     WHICH_SERVER: Joi.string().valid('http', 'https', 'both').default('http'),
-    MONGODB_URL: Joi.string().required().description('Mongodb url'),
+    MONGODB_URL: Joi.string().required().description('Mongodb pure url without dbname and query options ending with slash'),
+    MONGODB_DBNAME: Joi.string().required().description('Mongodb database name'),
     MONGODB_URL_QUERY_OPTIONS: Joi.string().description('Mongodb url query options that is going to be added'),
     REDIS_URL: Joi.string().required().description('Redis url'),
     JWT_SECRET: Joi.string().required().description('JWT secret key'),
@@ -49,8 +50,8 @@ module.exports = {
   porthttp: envVars.PORT_HTTP,
   porthttps: envVars.PORT_HTTPS,
   server: envVars.WHICH_SERVER,
-  mongodb_url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : '') + envVars.MONGODB_URL_QUERY_OPTIONS,
-  mongodb_database: envVars.MONGODB_URL.split("/").pop(), // get the db name from url string
+  mongodb_url: envVars.MONGODB_URL + (envVars.MONGODB_URL.includes('127.0.0.1') ? '' : envVars.MONGODB_URL_QUERY_OPTIONS),
+  mongodb_database: envVars.MONGODB_DBNAME,
   redis_url: envVars.REDIS_URL,
   jwt: {
     secret: envVars.JWT_SECRET,
