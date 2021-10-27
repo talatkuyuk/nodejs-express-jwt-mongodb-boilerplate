@@ -129,7 +129,7 @@ const addUser = [
 		.withMessage('id must be a 24-character number')
 		.bail()
 		.custom(async (value) => {
-			if (await userService.isValidUser(value)) 
+			if (await userService.isExist(value)) 
 				throw new Error('There is another user with the same id');
 
 			return true;
@@ -163,7 +163,7 @@ const addUser = [
 
 			// I needed to validate id and email again here, since the chains above are isolatated in express-validator
 			if ( id && email && validator.isEmail(email?.trim()?.toLowerCase()) && validator.isLength(id, {min: 24, max: 24})) {
-				if (!await authuserService.isExistAuthUser(id, email))
+				if (!await authuserService.isExist(id, email))
 					throw new Error('There is no correspondent authenticated user with the same id and email');
 			}
 				

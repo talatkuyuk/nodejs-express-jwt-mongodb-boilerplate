@@ -72,6 +72,8 @@ const getAuthUser = async (query) => {
 			},
 			{
 				$project:{
+					_id: 0,
+					id: "$_id",
 					email: 1,
 					isEmailVerified: 1,
 					isDisabled: 1,

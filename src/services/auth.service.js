@@ -2,22 +2,39 @@ const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
 
 const { ApiError, locateError } = require('../utils/ApiError');
-
-// for redis operations
-const redisService = require('./redis.service');
-
-//for database operations for authusers
-const authuserDbService = require('./authuser.db.service');
 const { AuthUser } = require('../models');
 
-//for verifying and removing token(s)
-const tokenService = require('./token.service'); 
-const { tokenTypes } = require('../config/tokens');
+// SERVICE DEPENDENCIES
+const redisService = require('./redis.service');
+const authuserDbService = require('./authuser.db.service');
 
+
+/////////////////////////  UTILS  ///////////////////////////////////////
+
+/**
+ * This function occurs in multiple places, just for preventing to code dublication
+ * @param {AuthUser} authuser
+ * @returns {void}
+ */
+ const checkAuthuser = function (authuser) {
+	 try {
+		 if (!authuser)
+			 throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+	 
+		 if (authuser.isDisabled)
+			 throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
+		 
+	 } catch (error) {
+		 throw error;
+	 }
+};
+
+
+/////////////////////////////////////////////////////////////////////
 
 
 /**
- * Signup with username and password
+ * Signup with email and password
  * @param {string} email
  * @param {string} password
  * @returns {Promise<AuthUser>}
@@ -53,13 +70,7 @@ const loginWithEmailAndPassword = async (email, password) => {
 	try {
 		const authuser = await authuserDbService.getAuthUser({ email });
 
-		if (!authuser) {
-			throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not registered user');
-		}
-
-		if (authuser.isDisabled) {
-			throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
-		}
+		checkAuthuser(authuser);
 
 		if (!(await authuser.isPasswordMatch(password))) {
 			throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
@@ -114,18 +125,16 @@ const loginWithAuthProvider = async (provider, id, email) => {
 
 
 /**
- * Logout
- * @param {string} refreshToken
+ * Handle the logout process
+ * @param {string} id
+ * @param {string} jti
  * @returns {Promise}
  */
 const logout = async (id, jti) => {
 	try {
-		// delete the refresh token family from db
-		await tokenService.findTokenAndRemoveFamily({ user: id, jti }, "family");
-
+		
 		// put the access token's jti into the blacklist
 		await redisService.put_jti_into_blacklist(jti);
-
 		
 	} catch (error) {
 		throw locateError(error, "AuthService : logout");
@@ -135,22 +144,20 @@ const logout = async (id, jti) => {
 
 
 /**
- * Signout from the system
- * @param {string} refreshToken
+ * Handle the signout process
+ * @param {string} id
+ * @param {string} jti
  * @returns {Promise}
  */
  const signout = async (id, jti) => {
 	try {
-		// delete the whole tokens of the user from db
-		await tokenService.findTokenAndRemoveFamily({ user: id, jti }, "user");
-
 		// put the access token's jti into the blacklist
 		await redisService.put_jti_into_blacklist(jti);
 
-		// delete authuser by id; no need to check id in database since he/she has passed the authorization soon ago
+		// delete authuser by id; no need to check id in database since passed the authorization soon ago
 		await authuserDbService.deleteAuthUser(id);
 
-		// TODO: delete user data or do it via another request
+		// delete user data through another request
 		
 	} catch (error) {
 		throw locateError(error, "AuthService : signout");
@@ -161,25 +168,16 @@ const logout = async (id, jti) => {
 
 /**
  * Refresh auth tokens
- * @param {string} refreshToken
- * @param {string} userAgent
- * @returns {Promise<Object>}
+ * @param {string} id
+ * @returns {Promise<Authuser>}
  */
-const refreshAuth = async (refreshToken, userAgent) => {
+const refreshAuth = async (id) => {
   try {
-	// ensure the refresh token blacklisted during RTR and get back the document
-	const { user: id, family } = await tokenService.refreshTokenRotation(refreshToken, userAgent);
-
 	const authuser = await authuserDbService.getAuthUser({ id });
 
-	if (!authuser) 
-		throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+	checkAuthuser(authuser);
 
-	if (authuser.isDisabled)
-		throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
-
-	// returns the family as well since it is going to be used while re-generating new refresh token
-	return { authuser, refreshTokenFamily: family };
+	return authuser;
 
   } catch (error) {
 	throw locateError(error, "AuthService : refreshAuth");
@@ -189,35 +187,45 @@ const refreshAuth = async (refreshToken, userAgent) => {
 
 
 /**
+ * Forgot password
+ * @param {string} email
+ * @returns {Promise<AuthUser>}
+ */
+ const forgotPassword = async (email) => {
+	try {
+	  const authuser = await authuserDbService.getAuthUser({ email });
+  
+	  checkAuthuser(authuser);
+  
+	  return authuser;
+  
+	} catch (error) {
+	  throw locateError(error, "AuthService : forgotPassword");
+	}
+  };
+
+
+
+/**
  * Reset password
- * @param {string} resetPasswordToken
+ * @param {string} id
  * @param {string} newPassword
  * @returns {Promise<AuthUser>}
  */
-const resetPassword = async (resetPasswordToken, newPassword) => {
+const resetPassword = async (id, newPassword) => {
   try {
-    const resetPasswordTokenDoc = await tokenService.verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
+    const authuser = await authuserDbService.getAuthUser({ id });
 
-    const authuser = await authuserDbService.getAuthUser({ id: resetPasswordTokenDoc.user });
-
-    if (!authuser) {
-		throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
-	}
-
-	if (authuser.isDisabled) {
-		throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
-	}
+    checkAuthuser(authuser);
 
 	const password = await bcrypt.hash(newPassword, 8);
     
-    await authuserDbService.updateAuthUser(authuser.id, { 
+    const updatedAuthuser = await authuserDbService.updateAuthUser(authuser.id, { 
 		password, 
 		services: { ...authuser.services, emailpassword: "registered" }
 	});
 	
-	await tokenService.removeTokens({ user: authuser.id, type: tokenTypes.RESET_PASSWORD });
-
-	return authuser;
+	return updatedAuthuser;
 
   } catch (error) {
 	throw locateError(error, "AuthService : resetPassword");
@@ -227,45 +235,37 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
 
 
 /**
- * Verify email
- * @param {string} verifyEmailToken
- * @returns {Promise<AuthUser>}
- */
-const verifyEmail = async (verifyEmailToken) => {
-  try {
-    const verifyEmailTokenDoc = await tokenService.verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
-
-    const authuser = await authuserDbService.getAuthUser({ id: verifyEmailTokenDoc.user });
-    
-	if (!authuser) {
-		throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
-	}
-
-	if (authuser.isDisabled) {
-		throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
-	}
-    
-    await authuserDbService.updateAuthUser(authuser.id, { isEmailVerified: true });
-	await tokenService.removeTokens({ user: authuser.id, type: tokenTypes.VERIFY_EMAIL });
-
-	return authuser;
-
-  } catch (error) {
-	throw locateError(error, "AuthService : verifyEmail");
-  }
-};
-
-
-/**
  * Check if the authuser's email is already verified
  * @param {boolean} isEmailVerified
  * @returns {any}
  */
- const handleEmailIsAlreadyVerified = function (isEmailVerified) {
+ const handleEmailIsVerified = function (isEmailVerified) {
 	if (isEmailVerified) {
 		const error = new ApiError(httpStatus.BAD_REQUEST, "Email is already verified");
 		throw locateError(error, "AuthService : handleEmailIsAlreadyVerified");
 	}
+};
+
+
+
+/**
+ * Verify email
+ * @param {string} id
+ * @returns {Promise<AuthUser>}
+ */
+const verifyEmail = async (id) => {
+  try {
+    const authuser = await authuserDbService.getAuthUser({ id });
+    
+	checkAuthuser(authuser);
+    
+    const updatedAuthuser = await authuserDbService.updateAuthUser(authuser.id, { isEmailVerified: true });
+
+	return updatedAuthuser;
+
+  } catch (error) {
+	throw locateError(error, "AuthService : verifyEmail");
+  }
 };
 
 
@@ -277,7 +277,8 @@ module.exports = {
   logout,
   signout,
   refreshAuth,
+  forgotPassword,
   resetPassword,
+  handleEmailIsVerified,
   verifyEmail,
-  handleEmailIsAlreadyVerified,
 };
