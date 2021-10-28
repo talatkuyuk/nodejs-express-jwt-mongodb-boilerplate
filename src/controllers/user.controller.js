@@ -13,7 +13,8 @@ const {
 
 const addUser = asyncHandler(async (req, res) => {
 	try {
-		const {id, ...addBody} = req.body;
+		const addBody = req.body;
+		const id = req.params.id;
 	
 		const user = await userService.addUser(id, addBody);
 	
@@ -75,11 +76,11 @@ const getUsersJoined = asyncHandler(async (req, res) => {
 const updateUser = asyncHandler(async (req, res) => {
 	try {
 		const id = req.params.id;
-		  const {name, gender, country} = req.body;
-	
-		  const user = await userService.updateUser(id, {name, gender, country});
-	
-		  res.status(httpStatus.OK).send(user.filter());
+		const updateBody = req.body;
+
+		const user = await userService.updateUser(id, updateBody);
+
+		res.status(httpStatus.OK).send(user.filter());
 		
 	} catch (error) {
 		throw locateError(error, "UserController : updateUser");

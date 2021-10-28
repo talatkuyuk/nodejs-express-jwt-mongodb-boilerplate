@@ -20,7 +20,7 @@ const addAuthUser = asyncHandler(async (req, res) => {
 	
 		// no need to generate tokens since the user is going to login self
 	
-		res.status(httpStatus.CREATED).send({ user: authuser.filter() });
+		res.status(httpStatus.CREATED).send(authuser.filter());
 		
 	} catch (error) {
 		throw locateError(error, "AuthUserController : addAuthUser");
