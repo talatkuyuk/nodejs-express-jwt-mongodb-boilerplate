@@ -130,6 +130,8 @@ const userDbService = require('./user.db.service');
 		if (user === null)
 			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 		
+		return user;
+		
 	} catch (error) {
 	   throw locateError(error, "UserService : updateUser");
 	}
@@ -170,24 +172,6 @@ const userDbService = require('./user.db.service');
   
 	} catch (error) {
 		throw locateError(error, "UserService : getDeletedUserById");
-	}
-};
-
-
-
-/**
- * Get the user's role
- * @param {String} id
- * @returns {Promise<String?>}
- */
- const getUserRole = async function (id) {
-	try {
-		const user = await userDbService.getUser({ id });
-
-		return user?.role;
-
-	} catch (error) {
-	   throw error;
 	}
 };
 

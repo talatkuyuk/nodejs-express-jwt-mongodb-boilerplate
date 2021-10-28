@@ -143,7 +143,7 @@ const addUser = [
 	check_body_gender().optional(),
 	check_body_country().optional(),
 
-	// check e-mail is matched with the id in authenticated users
+	// check if there is no an authenticated user with the email and the id
 	body()
 		.custom(async (body, { req }) => {
 			const id = req.params.id;

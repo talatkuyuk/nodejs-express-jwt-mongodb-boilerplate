@@ -4,7 +4,6 @@ const { validate } = require('../../src/middlewares');
 const userValidation = require('../../src/validations/user.ValidationRules');
 const { ApiError } = require('../../src/utils/ApiError');
 const { authuserService, userService } = require('../../src/services');
-const { AuthUser } = require('../../src/models');
 
 describe('Validate Middleware : Athuser validation rules', () => {
 
@@ -292,9 +291,13 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 	describe('addUser validation', () => {
 
-		test('addUser: should throw error 422, if the body is empty', async () => {
+		test('addUser: should throw error 422, if the param id is not 24-length character', async () => {
 			const request = { 
-				body: {}
+				params: { id: "1234567890" }, // 10-length string, invalid id
+				body: {
+					email: "user@gmail.com",
+					role: "user",
+				}
 			};
 
 			const req = httpMocks.createRequest(request);
@@ -310,18 +313,42 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			const err = next.mock.calls[0][0];
 
 			commonValidationErrorExpectation(err);
+			expect(err.errors).toEqual({ "id": ['The param id must be a 24-character number'] });
+		});
+
+		test('addUser: should throw error 422, if the body is empty', async () => {
+			const request = {
+				params: { id: "123456789012345678901234" },
+				body: {}
+			};
+
+			const req = httpMocks.createRequest(request);
+			const res = httpMocks.createResponse();
+			const next = jest.fn();
+
+			const spyOnValid = jest.spyOn(userService, 'isExist');
+			spyOnValid.mockResolvedValue(false);
+			
+			await validate(userValidation.addUser)(req, res, next);
+
+			expect(next).toHaveBeenCalledTimes(1);
+			expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+			
+			// obtain the error from the next function
+			const err = next.mock.calls[0][0];
+
+			commonValidationErrorExpectation(err);
 			expect(err.errors).toEqual({
-				"id": ['id must not be empty or falsy value'],
 				"email": ['email must not be empty or falsy value'],
 				"role": ['The role must be setted as \'user\' while creating'],
 			});
 		});
 
 
-		test('addUser: should throw error 422, if the id and email is empty', async () => {
-			const request = { 
+		test('addUser: should throw error 422, if the email and the role are empty', async () => {
+			const request = {
+				params: { id: "123456789012345678901234" },
 				body: {
-					id: "",
 					email: "",
 				}
 			};
@@ -329,6 +356,9 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			const req = httpMocks.createRequest(request);
 			const res = httpMocks.createResponse();
 			const next = jest.fn();
+
+			const spyOnValid = jest.spyOn(userService, 'isExist');
+			spyOnValid.mockResolvedValue(false);
 			
 			await validate(userValidation.addUser)(req, res, next);
 
@@ -340,25 +370,27 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 			commonValidationErrorExpectation(err);
 			expect(err.errors).toEqual({
-				"id": ['id must not be empty or falsy value'],
 				"email": ['email must not be empty or falsy value'],
 				"role": ['The role must be setted as \'user\' while creating'],
 			});
 		});
 
 
-		test('addUser: should throw error 422, if the id and email are not in valid form', async () => {
-			const request = { 
+		test('addUser: should throw error 422, if the email is invalid form and the role is admin', async () => {
+			const request = {
+				params: { id: "123456789012345678901234" },
 				body: {
-					id: "1234567890",  // 10-length numeric, invalid id
 					email: "user@gmail",  // invalid email form
-					role: "user"
+					role: "admin"
 				}
 			};
 
 			const req = httpMocks.createRequest(request);
 			const res = httpMocks.createResponse();
 			const next = jest.fn();
+
+			const spyOnValid = jest.spyOn(userService, 'isExist');
+			spyOnValid.mockResolvedValue(false);
 			
 			await validate(userValidation.addUser)(req, res, next);
 
@@ -370,16 +402,16 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 			commonValidationErrorExpectation(err);
 			expect(err.errors).toEqual({
-				"id": ['id must be a 24-character number'],
 				"email": ['email must be in valid form'],
+				"role": ['The role must be setted as \'user\' while creating'],
 			});
 		});
 
 
 		test('addUser: should throw error 422, if the name is less than 2-length', async () => {
 			const request = { 
+				params: { id: "123456789012345678901234" },
 				body: {
-					id: "123456789012345678901234",
 					email: "user@gmail.com",
 					role: "user",
 					name: "a"  // less than 2-length
@@ -412,9 +444,9 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 		
 		test('addUser: should throw error 422, if the gender is not one of male, female, none', async () => {
-			const request = { 
+			const request = {
+				params: { id: "123456789012345678901234" },
 				body: {
-					id: "123456789012345678901234",
 					email: "user@gmail.com",
 					role: "user",
 					gender: "no"  // is not valid
@@ -447,9 +479,9 @@ describe('Validate Middleware : Athuser validation rules', () => {
 		
 		
 		test('addUser: should throw error 422, if the country code is not valid 3-letter iso code', async () => {
-			const request = { 
+			const request = {
+				params: { id: "123456789012345678901234" },
 				body: {
-					id: "123456789012345678901234",
 					email: "user@gmail.com",
 					role: "user",
 					country: "tr"  // should be tur, or TUR
@@ -482,9 +514,9 @@ describe('Validate Middleware : Athuser validation rules', () => {
 		
 		
 		test('addUser: should throw error 422, if there is no authuser correspondent with the same id and email', async () => {
-			const request = { 
+			const request = {
+				params: { id: "123456789012345678901234" },
 				body: {
-					id: "123456789012345678901234",
 					email: "user@gmail.com",
 					role: "user"
 				}
@@ -516,9 +548,9 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('addUser: should throw error 422, if there is another user with the same id', async () => {
-			const request = { 
+			const request = {
+				params: { id: "123456789012345678901234" },
 				body: {
-					id: "123456789012345678901234",
 					email: "user@gmail.com",
 					role: "user"
 				}
@@ -550,9 +582,9 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('addUser: should throw error 422, if there is another parameter in the request body', async () => {
-			const request = { 
+			const request = {
+				params: { id: "123456789012345678901234" },
 				body: {
-					id: "123456789012345678901234",
 					email: "user@gmail.com",
 					role: "user",
 					anotherfield: "",
@@ -579,15 +611,15 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 			commonValidationErrorExpectation(err);
 			expect(err.errors).toEqual({
-				"body": ['Any extra parameter is not allowed other than id,email,role,name,gender,country'],
+				"body": ['Any extra parameter is not allowed other than email,role,name,gender,country'],
 			});
 		});
 
 
 		test('addUser: should continue next middleware if the body elements are valid; and no optional fields', async () => {
-			const request = { 
+			const request = {
+				params: { id: "123456789012345678901234" },
 				body: {
-					id: "123456789012345678901234",
 					email: "user@gmail.com",
 					role: "user",
 				}
@@ -611,9 +643,9 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 
 		test('addUser: should continue next middleware if the body elements including optionals are valid', async () => {
-			const request = { 
+			const request = {
+				params: { id: "123456789012345678901234" },
 				body: {
-					id: "123456789012345678901234",
 					email: "user@gmail.com",
 					role: "  user  ", // sanitized, trimmed, no problem
 					name: "Talat",
