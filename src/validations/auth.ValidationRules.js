@@ -1,67 +1,11 @@
 const { body } = require('express-validator');
-const { authuserService } = require('../services');
+const {
+	check_body_email,
+	check_body_email_isTaken,
+	check_body_password,
+	check_body_passwordConfirmation,
+} = require('./common.ValidationRules');
 
-
-const check_body_email = [
-	body('email')
-	  .trim()
-	  //.normalizeEmail()
-      .exists({checkFalsy: true}).withMessage('email must not be empty or falsy value')
-	  .bail()
-      .isEmail().withMessage('email must be in valid form')
-	  .toLowerCase()
-];
-
-const check_body_email_custom_isTaken = [
-	// check E-mail is already in use
-    body('email').custom(async (value) => {
-		try {
-			if (await authuserService.isEmailTaken(value)) {
-				throw new Error('email is already taken');
-			} else {
-				return true;
-			}
-
-		} catch (error) {
-			throw error;
-		}
-    }),
-];
-
-const check_body_password = [
-	body('password')
-		.exists({checkFalsy: true}).withMessage('password must not be empty or falsy value')
-		.bail()
-		.isLength({ min: 8 }).withMessage('password must be minimum 8 characters')
-		.bail()
-		.matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W\_])[A-Za-z\d\W\_]{8,}$/)
-		.withMessage('password must contain at least one uppercase, one lowercase, one number and one special char'),
-];
-
-const check_body_passwordConfirmation = [
-	body('passwordConfirmation')
-		.exists({checkFalsy: true}).withMessage('password confirmation must not be empty or falsy value')
-		.bail()
-		.custom((value, { req }) => {
-			if (!Object.is(value, req.body.password)) {
-				throw new Error('password confirmation does not match with the password');
-			}
-			return true; // Indicates the success
-		}),
-];
-
-
-// just for archive in case need any url validation
-const check_body_url = [
-	body('url')
-		.notEmpty()
-		.withMessage('You have to set callback URL')
-		.isURL({require_tld: false}) // consider later on .isURL({ protocols: ['https'] })
-		.withMessage('The callback URL must be valid URL')
-];
-
-
-////////////////////////////////////////////////////////////////////////
 
 
 const loginValidationRules = [
@@ -80,7 +24,7 @@ const loginValidationRules = [
 
 const signupValidationRules = [
     ...check_body_email,
-	...check_body_email_custom_isTaken,
+	...check_body_email_isTaken,
 	...check_body_password,
     ...check_body_passwordConfirmation,
 
@@ -122,7 +66,6 @@ const verifyEmailValidationRules = [
 
 
 
-
 module.exports = {
 	loginValidationRules, 
 	signupValidationRules,
@@ -131,11 +74,3 @@ module.exports = {
 	resetPasswordValidationRules,
 	verifyEmailValidationRules,
 };
-
-
-module.exports.commonRules = {
-	check_body_email,
-	check_body_email_custom_isTaken,
-	check_body_password,
-	check_body_passwordConfirmation
-}

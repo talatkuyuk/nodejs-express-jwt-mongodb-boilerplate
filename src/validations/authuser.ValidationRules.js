@@ -1,15 +1,15 @@
-const { body, param, query } = require('express-validator');
-const { commonRules } = require('./auth.ValidationRules');
-
-
-const check_param_id = [
-	param("id")
-		.isLength({ min: 24, max: 24 })
-		.withMessage('The param id must be a 24-character number')
-];
+const { body, query } = require('express-validator');
+const {
+	check_param_id,
+	check_body_email,
+	check_body_email_isTaken,
+	check_body_password,
+	check_body_passwordConfirmation,
+} = require('./common.ValidationRules');
 
 
 ////////////////////////////////////////////////////////////////////////
+
 const once = (value) => {
 	if (typeof(value) === "object")
 		throw new Error("The parameter can only appear once in the query string")
@@ -69,17 +69,17 @@ const getAuthUsers = [
 
 
 const getAuthUser = [
-	...check_param_id,
+	...check_param_id
 ];
 
 
 
 const addAuthUser = [
 
-	...commonRules.check_body_email,
-	...commonRules.check_body_email_custom_isTaken,
-	...commonRules.check_body_password,
-	...commonRules.check_body_passwordConfirmation,
+	...check_body_email,
+	...check_body_email_isTaken,
+	...check_body_password,
+	...check_body_passwordConfirmation,
 
 	body().custom( (body, { req }) => {
 		const validKeys = ['email', 'password', 'passwordConfirmation'];
@@ -90,8 +90,8 @@ const addAuthUser = [
 
 
 const changePassword = [
-	...commonRules.check_body_password,
-	...commonRules.check_body_passwordConfirmation,
+	...check_body_password,
+	...check_body_passwordConfirmation,
 
 	body('currentPassword')
 		.exists({checkFalsy: true}).withMessage('current password must not be empty or falsy value')
@@ -107,6 +107,7 @@ const changePassword = [
 			}
 		}),
 ];
+
 
 
 const toggleAuthUser = [

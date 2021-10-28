@@ -1,43 +1,41 @@
 const validator = require('validator');
-
 const { body, param, query, check, oneOf } = require('express-validator');
+
 const { authuserService, userService } = require('../services');
 const { roles } = require('../config/roles');
+
+const {
+	check_param_id,
+	check_body_email,
+} = require('./common.ValidationRules');
 
 
 const iso_3166_alpha_3 = `/^A(BW|FG|GO|IA|L[AB]|ND|R[EGM]|SM|T[AFG]|U[ST]|ZE)|B(DI|E[LNS]|FA|G[DR]|H[RS]|IH|L[MRZ]|MU|OL|R[ABN]|TN|VT|WA)|C(A[FN]|CK|H[ELN]|IV|MR|O[DGKLM]|PV|RI|U[BW]|XR|Y[MP]|ZE)|D(EU|JI|MA|NK|OM|ZA)|E(CU|GY|RI|S[HPT]|TH)|F(IN|JI|LK|R[AO]|SM)|G(AB|BR|EO|GY|HA|I[BN]|LP|MB|N[BQ]|R[CDL]|TM|U[FMY])|H(KG|MD|ND|RV|TI|UN)|I(DN|MN|ND|OT|R[LNQ]|S[LR]|TA)|J(AM|EY|OR|PN)|K(AZ|EN|GZ|HM|IR|NA|OR|WT)|L(AO|B[NRY]|CA|IE|KA|SO|TU|UX|VA)|M(A[CFR]|CO|D[AGV]|EX|HL|KD|L[IT]|MR|N[EGP]|OZ|RT|SR|TQ|US|WI|Y[ST])|N(AM|CL|ER|FK|GA|I[CU]|LD|OR|PL|RU|ZL)|OMN|P(A[KN]|CN|ER|HL|LW|NG|OL|R[IKTY]|SE|YF)|QAT|R(EU|OU|US|WA)|S(AU|DN|EN|G[PS]|HN|JM|L[BEV]|MR|OM|PM|RB|SD|TP|UR|V[KN]|W[EZ]|XM|Y[CR])|T(C[AD]|GO|HA|JK|K[LM]|LS|ON|TO|U[NRV]|WN|ZA)|U(GA|KR|MI|RY|SA|ZB)|V(AT|CT|EN|GB|IR|NM|UT)|W(LF|SM)|YEM|Z(AF|MB|WE)$/`;
 
-const check_param_id = [
-	param("id")
-		.isLength({ min: 24, max: 24 })
-		.withMessage('The param id must be a 24-character number')
-];
 
-const check_body_name = [
+const check_body_name = () =>
 	body('name')
 		.trim()
 		.escape()
 		.isLength({ min: 2 })
-		.withMessage('name must be minimum 2 characters')
-];
+		.withMessage('name must be minimum 2 characters');
 
-const check_body_gender = [
+const check_body_gender = () =>
 	body('gender')
 		.trim()
 		.toLowerCase()
 		.isIn(["male", "female", "none"])
-		.withMessage('gender could be male, female or none')
-];
+		.withMessage('gender could be male, female or none');
 
-const check_body_country = [
+const check_body_country = () =>
 	body('country')
 		.trim()
 		.toUpperCase()
 		.matches(iso_3166_alpha_3)
-		.withMessage("country code must be 3-letter standart iso code")
-];
+		.withMessage("country code must be 3-letter standart iso code");
 
 ////////////////////////////////////////////////////////////////////////
+
 const once = (value) => {
 	if (typeof(value) === "object")
 		throw new Error("The parameter can only appear once in the query string")
@@ -120,30 +118,19 @@ const getUser = [
 
 const addUser = [
 
-	// check there is an authenticated user with that id, and there is no user with the same id.
-	body("id")
-		.exists({checkFalsy: true})
-		.withMessage('id must not be empty or falsy value')
-		.bail()
-		.isLength({ min: 24, max: 24})
-		.withMessage('id must be a 24-character number')
+	// check the id is valid and check if there is another user with the same id.
+	param("id")
+		.isLength({ min: 24, max: 24 })
+		.withMessage('The param id must be a 24-character number')
 		.bail()
 		.custom(async (value) => {
 			if (await userService.isExist(value)) 
 				throw new Error('There is another user with the same id');
 
 			return true;
-	}),
+		}),
 
-	// check e-mail is valid and is matched with the id in authenticated users
-	body('email')
-		.trim()
-		.exists({checkFalsy: true})
-		.withMessage('email must not be empty or falsy value')
-		.bail()
-		.isEmail()
-		.withMessage('email must be in valid form')
-		.toLowerCase(),
+	...check_body_email,
 
 	body('role')
 		.trim()
@@ -152,13 +139,14 @@ const addUser = [
 		.withMessage("The role must be setted as 'user' while creating")
 		.bail(),
 
-	check_body_name[0].optional(),
-	check_body_gender[0].optional(),
-	check_body_country[0].optional(),
+	check_body_name().optional(),
+	check_body_gender().optional(),
+	check_body_country().optional(),
 
+	// check e-mail is matched with the id in authenticated users
 	body()
 		.custom(async (body, { req }) => {
-			const id = req.body.id;
+			const id = req.params.id;
 			const email = req.body.email;
 
 			// I needed to validate id and email again here, since the chains above are isolatated in express-validator
@@ -170,10 +158,10 @@ const addUser = [
 			return true;
 		})
 		.custom((body, { req }) => {
-			const validKeys = ['id', 'email', 'role', 'name', 'gender', 'country'];
+			const validKeys = ['email', 'role', 'name', 'gender', 'country'];
 			return Object.keys(req.body).every(key => validKeys.includes(key));
 		})
-		.withMessage(`Any extra parameter is not allowed other than ${['id', 'email', 'role', 'name', 'gender', 'country']}`),
+		.withMessage(`Any extra parameter is not allowed other than ${['email', 'role', 'name', 'gender', 'country']}`),
 
 ];
 
@@ -182,9 +170,9 @@ const addUser = [
 const updateUser = [
 	...check_param_id,
 
-	check_body_name[0],
-	check_body_gender[0],
-	check_body_country[0],
+	check_body_name().optional(),
+	check_body_gender().optional(),
+	check_body_country().optional(),
 
 	oneOf([
 		check('name').exists(),
@@ -216,12 +204,10 @@ const changeRole = [
 		.withMessage(`role could be one of ${roles}`),
 
 	// TODO: extract req, you can use only body, test it
-	body()
-		.custom((body, { req }) => {
-			const validKey = 'role';
-			return Object.keys(req.body).every(key => validKey === key);
-		})
-		.withMessage(`Any extra parameter is not allowed other than 'role'`),
+	body().custom((body, { req }) => {
+		const validKey = "role";
+		return Object.keys(req.body).every(key => validKey === key);
+	}).withMessage(`Any extra parameter is not allowed other than 'role'`),
 ];
 
 
