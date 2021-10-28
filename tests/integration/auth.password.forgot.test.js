@@ -126,11 +126,11 @@ describe('POST /auth/forgot-password', () => {
 
 			// check the reset password token belongs to the authuser
 			const { sub } = jwt.decode(resetPasswordToken, config.jwt.secret);
-			expect(sub).toEqual(authuser.id.toString());
+			expect(sub).toEqual(authuser.id);
 
 			// check the reset password token is stored in db
 			const resetPasswordTokenDoc = await tokenDbService.getToken({ token: resetPasswordToken, user: authuser.id, type: tokenTypes.RESET_PASSWORD });
-			expect(resetPasswordTokenDoc.user).toEqual(authuser.id);
+			expect(resetPasswordTokenDoc.user.toString()).toEqual(authuser.id);
  		})
 	});
 

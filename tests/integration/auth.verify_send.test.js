@@ -105,11 +105,11 @@ describe('POST /auth/send-verification-email', () => {
 
 			// check the verify email token belongs to the authuser
 			const { sub } = jwt.decode(verifyEmailToken, config.jwt.secret);
-			expect(sub).toEqual(authuser.id.toString());
+			expect(sub).toEqual(authuser.id);
 
 			// check the verify email token is stored in db
 			const verifyEmailTokenDoc = await tokenDbService.getToken({ token: verifyEmailToken, user: authuser.id, type: tokenTypes.VERIFY_EMAIL });
-			expect(verifyEmailTokenDoc.user).toEqual(authuser.id);
+			expect(verifyEmailTokenDoc.user.toString()).toEqual(authuser.id);
  		})
 	});
 

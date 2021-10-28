@@ -11,7 +11,8 @@ const authorize = (...requiredRights) => async (req, res, next) => {
 
 		if (!role) {
 			const user = await userDbService.getUser({ id: req.authuser.id });
-			role = user ? user.role : "user"; // if there is no user's role yet forexample just after adding an authuser, assign it as "user"
+
+			role = user ? user.role : "user"; // if there is no user record yet forexample just after signup, assign it as "user"
 			req.authuser.role = role;
 			user && (req.user = user);
 		}
@@ -32,8 +33,9 @@ const authorize = (...requiredRights) => async (req, res, next) => {
 			if (index === -1)
 				throw new ApiError(httpStatus.FORBIDDEN, 'Forbidden, (you do not have appropriate right)');
 
+			// if no param.id, let it is handled by validator !!!, not here but take care in validator
 			if (userRights[index].includes("self") && req.params && req.params.id)
-				if (req.params.id.toString() !== req.authuser.id.toString()) 
+				if (req.params.id !== req.authuser.id)
 					throw new ApiError(httpStatus.FORBIDDEN, 'Forbidden, (only self-data)');
 		});
 

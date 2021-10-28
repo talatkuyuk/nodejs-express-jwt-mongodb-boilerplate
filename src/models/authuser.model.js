@@ -21,7 +21,7 @@ class AuthUser {
 	transformId(id){
 		//delete this._id;
 		//return Object.assign({ id }, this);
-		this.id = id;
+		this.id = id.toString();
 		delete this._id;
 	}
 
