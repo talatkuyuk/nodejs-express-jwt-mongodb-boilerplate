@@ -18,7 +18,8 @@ setupRedis();
 describe('PATH /authusers', () => {
 
 	const userAgent = "from-jest-test";
-	let adminAccessToken, adminAuthuser;
+	let adminAccessToken, adminAuthuserId;
+	const localDb = {}; // reflects the database authusers collection
 
 	jest.setTimeout(50000);
 
@@ -33,7 +34,12 @@ describe('PATH /authusers', () => {
 			});
 
 		adminAccessToken = response.body.tokens.access.token;
-		adminAuthuser = response.body.user;
+		adminAuthuserId = response.body.user.id; // used in below test
+
+		const adminAuthuser = response.body.user;
+
+		// add admin authusers to localDb
+		localDb[adminAuthuser.email] = adminAuthuser;
 
 		// create an admin user correspondent with the authuser
 		await userService.addUser(adminAuthuser.id, { email: adminAuthuser.email, role: "admin",  name: "Mr.Admin"});
@@ -62,12 +68,8 @@ describe('PATH /authusers', () => {
 		*/
 
 		test('success scenario', async () => {
-			let response, data;
+			let response, data, authuser;
 			const authusers = []; // holds the static data of the 10 authusers to be created
-			const localDb = {}; // reflects the actual database (live)
-
-			// add admin authusers to localDb
-			localDb[adminAuthuser.email] = adminAuthuser;
 
 			const addForm = {
 				email: "test@gmail.com",
@@ -80,12 +82,11 @@ describe('PATH /authusers', () => {
 				.post('/authusers')
 				.set('User-Agent', userAgent) 
 				.set('Authorization', `Bearer ${adminAccessToken}`)
-				.send(addForm)
-				.expect(httpStatus.CREATED);
+				.send(addForm);
 
-			const testAuthuser = response.body.user;
+			const testAuthuser = response.body;
 
-			// check the tets authuser created above
+			// check the testAuthuser created above
 			expect(response.status).toBe(httpStatus.CREATED);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.body).not.toHaveProperty("tokens");
@@ -113,10 +114,14 @@ describe('PATH /authusers', () => {
 					.post('/authusers')
 					.set('User-Agent', userAgent) 
 					.set('Authorization', `Bearer ${adminAccessToken}`)
-					.send({email: `user${i}@gmail.com`, password: "Pass1word!", passwordConfirmation: "Pass1word!"});
+					.send({
+						email: `user${i}@gmail.com`,
+						password: "Pass1word!",
+						passwordConfirmation: "Pass1word!"
+					});
 
-				authusers.push(response.body.user);
-				localDb[response.body.user.email] = response.body.user;
+				authusers.push(response.body);
+				localDb[response.body.email] = response.body;
 			}
 			
 			// check random 8th authuser exists in db
@@ -187,7 +192,7 @@ describe('PATH /authusers', () => {
 				.send()
 				.expect(httpStatus.OK);
 
-			// chack the last added one is the first authuser, the default sort is descending createdAt
+			// check the last added one is the first authuser, the default sort is descending createdAt
 			expect(response.body.users.length).toBe(9);
 			expect(response.body.users[0]["email"]).toBe("user10@gmail.com");
 
@@ -303,7 +308,7 @@ describe('PATH /authusers', () => {
 				.expect(httpStatus.NO_CONTENT);
 
 			// check the admin authuser's new password is hashed
-			const { password: hashedPassword } = await authuserDbService.getAuthUser({ id: adminAuthuser.id});
+			const { password: hashedPassword } = await authuserDbService.getAuthUser({ id: adminAuthuserId });
 			data = await bcrypt.compare(newPassword, hashedPassword);
 			expect(data).toBeTruthy();
 	  	});
@@ -317,8 +322,9 @@ describe('PATH /authusers', () => {
 		--------------------------
 		- add an authuser
 		- try to add another authuser with the same email, get the error
+		- try to get an authuser with invalid id
 		- try to get an authuser that not exists
-		- try to get authusers with wronh parameter
+		- try to get authusers with wrong parameters
 		- try to disable an authuser that not exists
 		- try to delete an authuser that not exists
 		- try to change another authuser's password
@@ -343,7 +349,7 @@ describe('PATH /authusers', () => {
 		}
 
 		test('failure scenario', async () => {
-			let response, data;
+			let response;
 
 			const addForm = {
 				email: "test@gmail.com",
@@ -352,14 +358,12 @@ describe('PATH /authusers', () => {
 			};
 
 			// add an authuser
-			response = await request(app)
+			await request(app)
 				.post('/authusers')
 				.set('User-Agent', userAgent) 
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send(addForm)
 				.expect(httpStatus.CREATED);
-
-			const testAuthuser = response.body.user;
 
 			// try to add another authuser with the same email, get the error
 			response = await request(app)
@@ -392,7 +396,7 @@ describe('PATH /authusers', () => {
 			expect(response.body.name).toBe("ApiError");
 			expect(response.body.message).toBe("No user found");
 
-			// try to get authusers with wronh parameter
+			// try to get authusers with wrong parameters
 			response = await request(app)
 				.get('/authusers')
 				.set('User-Agent', userAgent) 
