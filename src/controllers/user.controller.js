@@ -4,10 +4,7 @@ const asyncHandler = require('express-async-handler');
 const { locateError } = require('../utils/ApiError');
 
 // SERVICE DEPENDENCIES
-const {
-	userService,
-	joinedService, // getUsersJoined
-} = require('../services');
+const { userService } = require('../services');
 
 
 
@@ -53,21 +50,6 @@ const getUsers = asyncHandler(async (req, res) => {
 		
 	} catch (error) {
 		throw locateError(error, "UserController : getUsers");
-	}
-});
-
-
-
-const getUsersJoined = asyncHandler(async (req, res) => {
-	try {
-		const query = req.query;
-	
-		const result = await joinedService.getUsersJoined(query);
-		
-		res.status(httpStatus.OK).send(result);
-		
-	} catch (error) {
-		throw locateError(error, "UserController : getUsersJoined");
 	}
 });
 
@@ -124,7 +106,6 @@ module.exports = {
 	addUser,
 	getUser,
 	getUsers,
-	getUsersJoined,
 	updateUser,
 	changeRole,
 	deleteUser,

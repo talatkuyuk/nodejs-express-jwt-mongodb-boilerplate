@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router({ strict: true }); // to handle /joined/ path
+const router = express.Router();
 
 const { authenticate, authorize, validate } = require('../middlewares');
 
@@ -9,7 +9,6 @@ const userValidation = require('../validations/user.ValidationRules');
 
 
 router.get('/', authenticate, authorize('query-users'), validate(userValidation.getUsers), userController.getUsers);
-router.get('/joined', authenticate, authorize('query-users-joined'), validate(userValidation.getUsers), userController.getUsersJoined);
 router.post('/:id', authenticate, authorize('add-user'), validate(userValidation.addUser), userController.addUser);
 router.get('/:id', authenticate, authorize('get-user'), validate(userValidation.getUser), userController.getUser);
 router.put('/:id', authenticate, authorize('update-user'), validate(userValidation.updateUser), userController.updateUser);

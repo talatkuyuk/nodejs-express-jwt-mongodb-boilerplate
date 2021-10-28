@@ -12,7 +12,7 @@ class Token {
 	}
 
 	transformId(id){
-		this.id = id;
+		this.id = id.toString();
 		delete this._id;
 	}
 

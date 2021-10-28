@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+//const router = express.Router({ strict: true });
 
 const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler')
@@ -7,12 +8,15 @@ const asyncHandler = require('express-async-handler')
 const authRoute = require('./auth.route');
 const authuserRoute = require('./authuser.route');
 const userRoute = require('./user.route');
+const joinedRoute = require('./joined.route');
 const docsRoute = require('./docs.route');
 
 const mongodb = require('../core/mongodb');
 const redis = require('../core/redis');
 const config = require('../config');
 const { locateError } = require('../utils/ApiError');
+
+
 
 // for testing purpose in development environment
 router.get('/list', asyncHandler( async (req, res) => {
@@ -36,6 +40,7 @@ router.get('/list', asyncHandler( async (req, res) => {
 		throw locateError(error, "RouteIndex : getList");
 	}
 }));
+
 
 
 // for testing purpose in development environment
@@ -71,6 +76,7 @@ router.get('/console', (req, res) => {
 });
 
 
+
 // see the mongodb and redis client status
 router.get('/status', asyncHandler( async (req, res) => {
 
@@ -97,10 +103,13 @@ router.get('/status', asyncHandler( async (req, res) => {
 }));
 
 
+
 router.use('/docs', docsRoute);
 router.use('/auth', authRoute);
 router.use('/authusers', authuserRoute);
 router.use('/users', userRoute);
+router.use('/joined', joinedRoute);
+
 
 
 module.exports = router;
