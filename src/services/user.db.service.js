@@ -191,7 +191,7 @@ const { locateError } = require('../utils/ApiError');
 	try {
 		console.log("toDeletedAuthUsers: ", deletedUser.id);
 
-		deletedUser["_id"] = deletedUser.id;
+		deletedUser["_id"] = ObjectId(deletedUser.id);
 		delete deletedUser.id;
 		deletedUser["deletedAt"] = Date.now();
 

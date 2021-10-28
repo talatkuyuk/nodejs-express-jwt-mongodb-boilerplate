@@ -72,11 +72,11 @@ describe('POST /auth/signout', () => {
 			expect(data.length).toBe(0);
 
 			// check the authuser is removed from authuser collection in db
-			const data1 = await authuserDbService.getAuthUser({ _id: authuser.id });
+			const data1 = await authuserDbService.getAuthUser({ id: authuser.id });
 			expect(data1).toBeNull();
 
 			// check the authuser is moved to deleted authuser collection in db
-			const data2 = await authuserDbService.getDeletedAuthUser({ _id: authuser.id });
+			const data2 = await authuserDbService.getDeletedAuthUser({ id: authuser.id });
 			expect(data2).not.toBeNull();
 			expect(data2.deletedAt).not.toBeNull();
 		});

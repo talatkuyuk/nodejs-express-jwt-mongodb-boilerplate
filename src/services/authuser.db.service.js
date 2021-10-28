@@ -35,13 +35,12 @@ const addAuthUser = async (authuser) => {
  */
 const getAuthUser = async (query) => {
 	try {
-		const db = mongodb.getDatabase();
-
 		if (query.id) {
 			query = { ...query, _id: ObjectId(query.id) };
 			delete query.id;
 		}
 
+		const db = mongodb.getDatabase();
 		const doc = await db.collection("authusers").findOne(query);
 
 		return AuthUser.fromDoc(doc);
@@ -64,8 +63,6 @@ const getAuthUser = async (query) => {
  */
  const getAuthUsers = async (filter, sort, skip, limit) => {
 	try {
-		const db = mongodb.getDatabase();
-	
 		const pipeline = [
 			{
 			   $match: filter
@@ -103,7 +100,8 @@ const getAuthUser = async (query) => {
 			}
 		]
 	
-	   return await db.collection("authusers").aggregate(pipeline).toArray();
+		const db = mongodb.getDatabase();
+	   	return await db.collection("authusers").aggregate(pipeline).toArray();
 		
 	} catch (error) {
 		throw locateError(error, "AuthUserDbService : getAuthUsers");
@@ -186,7 +184,7 @@ const deleteAuthUser = async (id) => {
 	try {
 		console.log("toDeletedAuthUsers: ", deletedAuthUser.id);
 
-		deletedAuthUser["_id"] = deletedAuthUser.id;
+		deletedAuthUser["_id"] = ObjectId(deletedAuthUser.id);
 		delete deletedAuthUser.id;
 		deletedAuthUser["deletedAt"] = Date.now();
 

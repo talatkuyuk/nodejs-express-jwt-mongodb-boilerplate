@@ -179,7 +179,7 @@ describe('POST /auth/login', () => {
 				"user": {
 					"createdAt": expect.any(Number), // 1631868212022
 					"email": authuser.email,
-					"id": authuser.id.toString(),
+					"id": authuser.id,
 					"isEmailVerified": false,
 					"isDisabled": false,
 					"services": {
