@@ -142,7 +142,7 @@ describe('POST /auth/google & auth/facebook', () => {
 				"user": {
 					"createdAt": expect.any(Number), // 1631868212022
 					"email": google_email,
-					"id": authuser.id.toString(),
+					"id": authuser.id,
 					"isEmailVerified": true,
 					"isDisabled": false,
 					"services": {

@@ -137,9 +137,9 @@ describe('Auth Middleware', () => {
 
 
 		test('should throw ApiError with code 401, if verify email token is used as access token', async () => {
-			const { verifyEmailToken } = await tokenService.generateVerifyEmailToken(authuserId);
+			const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuserId);
 
-			const requestHeader = { headers: { Authorization: `Bearer ${verifyEmailToken}` }, useragent: { source: userAgent }};
+			const requestHeader = { headers: { Authorization: `Bearer ${verifyEmailToken.token}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "Invalid token type");
 
 			await commonFailedTestProcess(requestHeader, expectedError);

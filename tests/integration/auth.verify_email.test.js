@@ -92,12 +92,12 @@ describe('POST /auth/verify-email', () => {
 			const authuser_id = "123456789012345678901234";
 
 			// generate and add valid verify-email token into db
-			const { verifyEmailToken, tokenId } = await tokenService.generateVerifyEmailToken(authuser_id);
+			const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser_id);
 
 			// delete the token
-			await tokenService.removeToken(tokenId);
+			await tokenService.removeToken(verifyEmailToken.id);
 
-			const verifyEmailForm = { token: verifyEmailToken };
+			const verifyEmailForm = { token: verifyEmailToken.token };
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
@@ -111,12 +111,12 @@ describe('POST /auth/verify-email', () => {
 			const authuser_id = "123456789012345678901234";
 
 			// generate and add valid verify-email token into db
-			const { verifyEmailToken, tokenId } = await tokenService.generateVerifyEmailToken(authuser_id);
+			const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser_id);
 
 			// update the token as blacklisted
-			await tokenService.updateTokenAsBlacklisted(tokenId);
+			await tokenService.updateTokenAsBlacklisted(verifyEmailToken.id);
 
-			const verifyEmailForm = { token: verifyEmailToken };
+			const verifyEmailForm = { token: verifyEmailToken.token };
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
@@ -134,9 +134,9 @@ describe('POST /auth/verify-email', () => {
 			const authuser_id = "123456789012345678901234";
 
 			// generate and add valid verify-email token into db
-			const { verifyEmailToken } = await tokenService.generateVerifyEmailToken(authuser_id);
+			const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser_id);
 
-			const verifyEmailForm = { token: verifyEmailToken };
+			const verifyEmailForm = { token: verifyEmailToken.token };
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
@@ -157,12 +157,12 @@ describe('POST /auth/verify-email', () => {
 			const authuser = await authuserDbService.addAuthUser(authuserx);
 
 			// generate and add valid verify-email token into db
-			const { verifyEmailToken } = await tokenService.generateVerifyEmailToken(authuser.id);
+			const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser.id);
 
 			// update the authuser as disabled
 			await authuserService.toggleAbility(authuser.id);
 
-			const verifyEmailForm = { token: verifyEmailToken };
+			const verifyEmailForm = { token: verifyEmailToken.token };
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
@@ -187,9 +187,9 @@ describe('POST /auth/verify-email', () => {
 			const authuser = await authuserDbService.addAuthUser(authuserx);
 
 			// generate and add valid verify-email token into db
-			const { verifyEmailToken } = await tokenService.generateVerifyEmailToken(authuser.id);
+			const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser.id);
 
-			const verifyEmailForm = { token: verifyEmailToken };
+			const verifyEmailForm = { token: verifyEmailToken.token };
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 

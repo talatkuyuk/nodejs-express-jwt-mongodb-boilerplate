@@ -95,7 +95,7 @@ describe('POST /auth/send-verification-email', () => {
 
 			// check the verify email token is stored in db
 			const verifyEmailTokenDoc = await tokenDbService.getToken({ token: verifyEmailToken, user: authuserId, type: tokenTypes.VERIFY_EMAIL });
-			expect(verifyEmailTokenDoc.user.toString()).toEqual(authuserId);
+			expect(verifyEmailTokenDoc.user).toEqual(authuserId);
  		})
 	});
 

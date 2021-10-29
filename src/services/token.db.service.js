@@ -38,14 +38,17 @@ const getToken = async (query) => {
 	try {
 		console.log("getToken: ", query);
 
+		if (query.id) {
+			query = { ...query, _id: ObjectId(query.id) };
+			delete query.id;
+		}
+
 		query.user && (query.user = ObjectId(query.user));
 
 		const db = mongodb.getDatabase();
 		const result =  await db.collection("tokens").findOne(query);
 
-		const tokenDoc = Token.fromDoc(result);
-
-		return tokenDoc;
+		return Token.fromDoc(result);
 
 	} catch (error) {
 		throw locateError(error, "TokenDbService : getToken");

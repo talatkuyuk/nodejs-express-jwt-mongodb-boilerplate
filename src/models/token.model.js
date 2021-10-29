@@ -20,7 +20,7 @@ class Token {
 		if (!doc) return null;
 		const tokenDoc = new Token(
 			doc.token,
-			doc.user,
+			doc.user.toString(),
 			doc.expires,
 			doc.type,
 			doc.jti,
@@ -30,6 +30,16 @@ class Token {
 		)
 		tokenDoc.transformId(doc._id);
 		return tokenDoc;
+	}
+
+	// eleminates private keys
+	filter() {
+		const token = Object.assign({}, this);
+		const notAllowedKeys = ["id", "user", "type", "jti", "family", "blacklisted", "createdAt"];
+		for (const key of Object.keys(token)) {
+			if (notAllowedKeys.includes(key)) delete token[key];
+		}
+		return token;
 	}
 }
 
