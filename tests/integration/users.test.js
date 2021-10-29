@@ -5,7 +5,7 @@ const app = require('../../src/core/express');
 
 const { userService } = require('../../src/services');
 
-const TestUtil = require('../testutil/TestUtil');
+const TestUtil = require('../testutils/TestUtil');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');

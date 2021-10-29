@@ -10,10 +10,13 @@ const { authuserDbService, tokenDbService, emailService } = require('../../src/s
 const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 
+const TestUtil = require('../testutils/TestUtil');
+
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
-const TestUtil = require('../testutil/TestUtil');
+
 
 setupTestDatabase();
+
 
 describe('POST /auth/forgot-password', () => {
 

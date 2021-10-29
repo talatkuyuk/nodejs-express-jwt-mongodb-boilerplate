@@ -5,11 +5,10 @@ const jwt = require('jsonwebtoken');
 const app = require('../../src/core/express');
 const config = require('../../src/config');
 
-const { authuserDbService, tokenDbService, tokenService, emailService } = require('../../src/services');
-const { AuthUser } = require('../../src/models');
+const { authuserDbService, tokenDbService, emailService } = require('../../src/services');
 const { tokenTypes } = require('../../src/config/tokens');
 
-const TestUtil = require('../testutil/TestUtil');
+const TestUtil = require('../testutils/TestUtil');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');

@@ -6,8 +6,8 @@ const { tokenService } = require('../../src/services');
 const { Token } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 
-const testData = require('../data/testdata');
-const TestUtil = require('../testutil/TestUtil');
+const testData = require('../testutils/testdata');
+const TestUtil = require('../testutils/TestUtil');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');
