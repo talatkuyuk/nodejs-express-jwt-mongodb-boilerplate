@@ -11,6 +11,7 @@ const { authuserDbService, tokenDbService, tokenService, redisService } = requir
 const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 
+const TestUtil = require('../testutil/TestUtil');
 const testData = require('../data/testdata');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
@@ -30,19 +31,12 @@ describe('POST /auth/refresh-tokens', () => {
 	describe('Refresh Token Validation Errors', () => {
 
 		test('should return 422 Validation Error if refresh token is not in the request body', async () => {
-
 			const response = await request(app).post('/auth/refresh-tokens').send({});
 
-			expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(422);
-			expect(response.body.name).toEqual("ValidationError");
-			expect(response.body.message).toEqual("The request could not be validated");
-			expect(response.body).not.toHaveProperty("description");
+			TestUtil.validationErrorExpectations(response);
 			expect(Object.keys(response.body.errors).length).toBe(1);
 			expect(response.body.errors.refreshToken).toEqual(["refresh token must not be empty"]); 
 		});
-
 	});
 
 
@@ -64,29 +58,19 @@ describe('POST /auth/refresh-tokens', () => {
 			refreshToken = tokens.refresh.token;
 		});
 
-		function commonExpectations(response, status) {
-			expect(response.status).toBe(status);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(status);
-			expect(response.body).toHaveProperty("description");
-			expect(response.body).not.toHaveProperty("errors");
-		}
-
 
 		test('should return 401 if refresh token is not in the db', async () => {
-
 			const response = await request(app).post('/auth/refresh-tokens')
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken: testData.REFRESH_TOKEN_VALID });
 
-			commonExpectations(response, httpStatus.UNAUTHORIZED);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("refresh token is not valid");
 		});
 
 		
 		test('should return 401 and disable family if refresh token is blacklisted (first time violation)', async () => {
-
 			// find the refresh token in db to get id
 			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
 
@@ -119,7 +103,7 @@ describe('POST /auth/refresh-tokens', () => {
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
 
-			commonExpectations(response, httpStatus.UNAUTHORIZED);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected");
 
@@ -142,7 +126,6 @@ describe('POST /auth/refresh-tokens', () => {
 
 
 		test('should return 401 and delete family if refresh token is blacklisted (second time violation)', async () => {
-
 			// find the refresh token in db to get id
 			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuser.id });
 
@@ -175,7 +158,7 @@ describe('POST /auth/refresh-tokens', () => {
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
 
-			commonExpectations(response, httpStatus.UNAUTHORIZED);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected");
 
@@ -188,7 +171,6 @@ describe('POST /auth/refresh-tokens', () => {
 
 
 		test('should return 401 if refresh token is expired', async () => {
-
 			// remove the existing refresh token from db for the test
 			await tokenService.removeTokens({ token: refreshToken, user: authuser.id, type: tokenTypes.REFRESH });
 
@@ -211,7 +193,7 @@ describe('POST /auth/refresh-tokens', () => {
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
 
-			commonExpectations(response, httpStatus.UNAUTHORIZED);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("The refresh token is expired. You have to re-login to get authentication.");
 
@@ -222,13 +204,12 @@ describe('POST /auth/refresh-tokens', () => {
 
 
 		test('should return 401 if refresh token is used before "not before than" value', async () => {
-
 			// if the refresh token that is generated newly, "not before than" situation happens.
 			const response = await request(app).post('/auth/refresh-tokens')
 												.set('User-Agent', userAgent)
 												.send({ refreshToken });
 
-			commonExpectations(response, httpStatus.UNAUTHORIZED);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected");
 
@@ -275,29 +256,19 @@ describe('POST /auth/refresh-tokens', () => {
 			});
 		});
 
-		function commonExpectations(response, status) {
-			expect(response.status).toBe(status);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(status);
-			expect(response.body).toHaveProperty("description");
-			expect(response.body).not.toHaveProperty("errors");
-		}
-
 
 		test('should return 401 if userAgent of refresh token is different from request userAgent', async () => {
-			
 			const response = await request(app).post('/auth/refresh-tokens')
 												.set('User-Agent', "something-different-userAgent") 
 												.send({ refreshToken });
 
-			commonExpectations(response, httpStatus.UNAUTHORIZED);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("Your browser/agent seems changed or updated, you have to re-login to get authentication.");
 		});
 
 
 		test('should return 404 if any authuser could not found', async () => {
-
 			// just to delete the authuser to see the result as not found user.
 			await authuserDbService.deleteAuthUser(authuser.id);
 
@@ -305,7 +276,7 @@ describe('POST /auth/refresh-tokens', () => {
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
 
-			commonExpectations(response, httpStatus.NOT_FOUND);
+			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
 			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("No user found");
 		});
@@ -319,7 +290,7 @@ describe('POST /auth/refresh-tokens', () => {
 												.set('User-Agent', userAgent) 
 												.send({ refreshToken });
 
-			commonExpectations(response, httpStatus.FORBIDDEN);
+			TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
 			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("You are disabled, call the system administrator");
 		});
@@ -331,7 +302,6 @@ describe('POST /auth/refresh-tokens', () => {
 	describe('Success refresh token response', () => {
 
 		test('should return status 201; and return valid tokens in json form', async () => {
-
 			// add an authuser into db
 			const authUserInstance = AuthUser.fromObject({
 				email: 'talat@google.com',
@@ -362,16 +332,7 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(response.status).toBe(httpStatus.OK);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 
-			expect(response.body).toEqual({
-					"access": {
-					  "token": expect.any(String),
-					  "expires": expect.any(String), // ex. "2021-10-17T09:49:26.735Z"
-					},
-					"refresh": {
-					  "token": expect.any(String),
-					  "expires": expect.any(String), 
-					},
-				});
+			expect(response.body).toEqual(TestUtil.ExpectedTokens);
 		});
 	});
 

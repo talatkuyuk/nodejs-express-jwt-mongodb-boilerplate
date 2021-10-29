@@ -23,61 +23,55 @@ describe('POST /auth/login', () => {
 
 		jest.setTimeout(50000);
 
-		let loginForm;
-
-		function commonExpectations(response) {
-			expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(422);
-			expect(response.body.name).toEqual("ValidationError");
-			expect(response.body.message).toEqual("The request could not be validated");
-			expect(response.body).not.toHaveProperty("description");
-		}
-
 	  	test('should return 422 Validation Error if email is empty or falsy value', async () => {
-			loginForm = {
+			const loginForm = {
 				password: 'Pass1word.',
 			};
+
 			const response = await request(app).post('/auth/login').send(loginForm);
-			commonExpectations(response);
-			expect(response.body.errors.email.length).toBe(1); // { ..., email: ["only one error message related with email"] }
+
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors.email).toEqual(["email must not be empty or falsy value"]); 
 			expect(response.body.errors).not.toHaveProperty("password");
 	  	});
 
 
 		test('should return 422 Validation Error if email is invalid form', async () => {
-			loginForm = {
+			const loginForm = {
 				email: 'talat1@com',
 				password: 'Pass1word.',
 			};
+
 			const response = await request(app).post('/auth/login').send(loginForm);
-			commonExpectations(response);
-			expect(response.body.errors.email.length).toBe(1);
+			
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors.email).toEqual(["email must be in valid form"]); 
 			expect(response.body.errors).not.toHaveProperty("password");
 		});
 
 		
 		test('should return 422 Validation Error if password is empty or falsy value', async () => {
-			loginForm = {
+			const loginForm = {
 				email: 'talat@gmail.com',
 			};
+
 			const response = await request(app).post('/auth/login').send(loginForm);
-			commonExpectations(response);
+
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("email");
-			expect(response.body.errors.password.length).toBe(1);
 			expect(response.body.errors.password).toEqual(["password must not be empty or falsy value"]); 
 		});
 
 
 		test('should return 422 Validation Error if occurs both email, password validation errors', async () => {
-			loginForm = {
+			const loginForm = {
 				email: 'talat@gmail',
 				password: '',
 			};
+
 			const response = await request(app).post('/auth/login').send(loginForm);
-			commonExpectations(response);
+
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({
 				"email": ["email must be in valid form"],
 				"password": ["password must not be empty or falsy value"],
@@ -88,23 +82,15 @@ describe('POST /auth/login', () => {
 
 	describe('Failed logins', () => {
 
-		function commonExpectations(response, status) {
-			expect(response.status).toBe(status);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(status);
-			expect(response.body).toHaveProperty("name");
-			expect(response.body).toHaveProperty("description");
-			expect(response.body).not.toHaveProperty("errors");
-		}
-		
-
 		test('should return status 404, if the user is not registered', async () => {
-			let loginForm = {
+			const loginForm = {
 				email: 'talat@gmail.com',
 				password: 'Pass1word.',
 			};
+
 			const response = await request(app).post('/auth/login').send(loginForm);
-			commonExpectations(response, httpStatus.NOT_FOUND);
+
+			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
 			expect(response.body.message).toEqual("No user found");
 		});
 
@@ -118,12 +104,14 @@ describe('POST /auth/login', () => {
 			});
 			await authuserDbService.addAuthUser(authuser);
 
-			let loginForm = {
+			const loginForm = {
 				email: 'talat@gmail.com',
 				password: 'Pass1word.',
 			};
+
 			const response = await request(app).post('/auth/login').send(loginForm);
-			commonExpectations(response, httpStatus.FORBIDDEN);
+
+			TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
 			expect(response.body.message).toEqual("You are disabled, call the system administrator");
 
 		});
@@ -135,14 +123,17 @@ describe('POST /auth/login', () => {
 				email: 'talat@gmail.com',
 				password: hashedPassword,
 			});
+
 			await authuserDbService.addAuthUser(authuser);
 
-			let loginForm = {
+			const loginForm = {
 				email: 'talat@gmail.com',
 				password: 'Pass1word',
 			};
+
 			const response = await request(app).post('/auth/login').send(loginForm);
-			commonExpectations(response, httpStatus.UNAUTHORIZED);
+
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.message).toEqual("Incorrect email or password");
 		});
 	});
@@ -162,7 +153,7 @@ describe('POST /auth/login', () => {
 				
 			const authuser = await authuserDbService.addAuthUser(authuserDoc);
 			
-			let loginForm = {
+			const loginForm = {
 				email: authuser.email,
 				password: 'Pass1word.',
 			};

@@ -6,19 +6,12 @@ const { ApiError } = require('../../src/utils/ApiError');
 const { authuserService } = require('../../src/services');
 const { AuthUser } = require('../../src/models');
 
+const TestUtil = require('../testutil/TestUtil');
 
 
 describe('Validate Middleware : Athuser validation rules', () => {
 
 	jest.setTimeout(50000);
-
-	const commonValidationErrorExpectation = (err) => {
-		expect(err.statusCode).toBe(422);
-		expect(err.name).toBe("ValidationError");
-		expect(err.message).toEqual("The request could not be validated");
-		expect(err.description).toBeNull();
-	}
-
 
 	describe('getAuthUsers validation', () => {
 
@@ -43,7 +36,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({ 
 				"email": ['The parameter can only appear once in the query string'],
 				"page": ['The parameter can only appear once in the query string'],
@@ -68,7 +61,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({ "email": ['The query param \'email\' must be in valid form']});
 		});
 
@@ -90,7 +83,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({ "isDisabled": ['The query param \'isDisabled\' must be boolean value']});
 		});
 
@@ -112,7 +105,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({ "isEmailVerified": ['The query param \'isEmailVerified\' must be boolean value']});
 		});
 
@@ -134,7 +127,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({ "page": ['The query param \'page\' must be numeric value']});
 		});
 
@@ -156,7 +149,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({ "size": ['The query param \'size\' must be numeric value']});
 		});
 
@@ -178,7 +171,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({ "size": ['The query param \'size\' can be between 1-50']});
 		});
 
@@ -200,7 +193,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({ "sort": ['The query param \'sort\' can contains a-zA-Z letters . dot and | pipedelimeter']});
 		});
 
@@ -265,7 +258,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email must not be empty or falsy value'],
 				"password": ['password must not be empty or falsy value'],
@@ -297,7 +290,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email must not be empty or falsy value'],
 				"password": ['password must not be empty or falsy value'],
@@ -330,7 +323,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email must be in valid form'],
 				"password": ['password must be minimum 8 characters'],
@@ -363,7 +356,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"password": ['password must contain at least one uppercase, one lowercase, one number and one special char'],
 				"passwordConfirmation": ['password confirmation does not match with the password'],
@@ -395,7 +388,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email is already taken'],
 			});
@@ -427,7 +420,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"body": ['Any extra parameter is not allowed other than email,password,passwordConfirmation'],
 			});
@@ -478,7 +471,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({ "id": ['The param id must be a 24-character number']});
 		});
 
@@ -520,7 +513,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({ "id": ['The param id must be a 24-character number']});
 		});
 
@@ -562,7 +555,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({ "id": ['The param id must be a 24-character number']});
 		});
 
@@ -609,7 +602,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"currentPassword": ['current password must not be empty or falsy value'],
 				"password": ['password must not be empty or falsy value'],
@@ -643,7 +636,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"currentPassword": ['current password must not be empty or falsy value'],
 				"password": ['password must not be empty or falsy value'],
@@ -678,7 +671,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"password": ['password must be minimum 8 characters'],
 				"passwordConfirmation": ['password confirmation must not be empty or falsy value'],
@@ -712,7 +705,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"password": ['password must contain at least one uppercase, one lowercase, one number and one special char'],
 				"passwordConfirmation": ['password confirmation does not match with the password'],
@@ -746,7 +739,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"currentPassword": ['incorrect current password'],
 			});

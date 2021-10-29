@@ -1,11 +1,11 @@
 const request = require('supertest');
 const httpStatus = require('http-status');
-const bcrypt = require('bcryptjs');
 
 const app = require('../../src/core/express');
 
-const { authuserService, userService, authuserDbService } = require('../../src/services');
-const { AuthUser } = require('../../src/models');
+const { userService } = require('../../src/services');
+
+const TestUtil = require('../testutil/TestUtil');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');
@@ -338,23 +338,6 @@ describe('PATH /users', () => {
 		- try to change user's role validation errors
 		*/
 
-		function apiErrorExpectations(response, status) {
-			expect(response.status).toBe(status);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(status);
-			expect(response.body).toHaveProperty("description");
-			expect(response.body).not.toHaveProperty("errors");
-		}
-
-		function validationErrorExpectations(response) {
-			expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(422);
-			expect(response.body.name).toEqual("ValidationError");
-			expect(response.body.message).toEqual("The request could not be validated");
-			expect(response.body).not.toHaveProperty("description");
-		}
-
 		test('failure scenario', async () => {
 			let response;
 
@@ -392,7 +375,7 @@ describe('PATH /users', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send(addForm);
 
-			validationErrorExpectations(response);
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({ id: ["There is another user with the same id"]});
 
 			// try to add an user which has not correspondent authuser, get the error
@@ -402,7 +385,7 @@ describe('PATH /users', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send(addForm);
 
-			validationErrorExpectations(response);
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({ body: ["There is no correspondent authenticated user with the same id and email"]});
 
 			// try to get an user with invalid id
@@ -412,7 +395,7 @@ describe('PATH /users', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send();
 
-			validationErrorExpectations(response);
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({ id: ["The param id must be a 24-character number"]});
 
 			// try to get an user that not exists
@@ -422,7 +405,7 @@ describe('PATH /users', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send();
 
-			apiErrorExpectations(response, httpStatus.NOT_FOUND);
+			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
 			expect(response.body.name).toBe("ApiError");
 			expect(response.body.message).toBe("No user found");
 
@@ -434,7 +417,7 @@ describe('PATH /users', () => {
 				.query({ page: "a",  size: "b"})
 				.send();
 
-			validationErrorExpectations(response);
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({ 
 				page: ["The query param 'page' must be numeric value"],
 				size: ["The query param 'size' must be numeric value"],
@@ -447,7 +430,7 @@ describe('PATH /users', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send({ gender: "female" });
 
-			apiErrorExpectations(response, httpStatus.NOT_FOUND);
+			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
 			expect(response.body.name).toBe("ApiError");
 			expect(response.body.message).toBe("No user found");
 
@@ -458,7 +441,7 @@ describe('PATH /users', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send({ role: "admin", name: "", gender: "fmale", country: "tr" });
 
-				validationErrorExpectations(response);
+				TestUtil.validationErrorExpectations(response);
 				expect(response.body.errors).toEqual({ 
 					name: ["name must be minimum 2 characters"],
 					gender: ["gender could be male, female or none"],
@@ -473,7 +456,7 @@ describe('PATH /users', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send();
 
-			apiErrorExpectations(response, httpStatus.NOT_FOUND);
+			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
 			expect(response.body.name).toBe("ApiError");
 			expect(response.body.message).toBe("No user found");
 
@@ -484,7 +467,7 @@ describe('PATH /users', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send({ role: "admin" });
 
-			apiErrorExpectations(response, httpStatus.NOT_FOUND);
+			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
 			expect(response.body.name).toBe("ApiError");
 			expect(response.body.message).toBe("No user found");
 
@@ -495,7 +478,7 @@ describe('PATH /users', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send({ role: "client", additional: "" })
 
-			validationErrorExpectations(response);
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({ 
 				role: ["role could be one of user,admin"],
 				body: ["Any extra parameter is not allowed other than 'role'"],

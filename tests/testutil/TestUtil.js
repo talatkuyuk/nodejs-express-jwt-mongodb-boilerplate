@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const httpStatus = require('http-status');
 const moment = require('moment');
 const {serializeError} = require('serialize-error');
 
@@ -80,6 +81,32 @@ class TestUtil {
 		});
 		expect(tokenDoc?.id).toBeDefined();
 	}
+
+
+	static errorExpectations = (response, status) => {
+		expect(response.status).toBe(status);
+		expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
+		expect(response.body.code).toEqual(status);
+		expect(response.body).toHaveProperty("description");
+		expect(response.body).not.toHaveProperty("errors");
+	}
+
+	static validationErrorExpectations = (response) => {
+		expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
+		expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
+		expect(response.body.code).toEqual(422);
+		expect(response.body.name).toEqual("ValidationError");
+		expect(response.body.message).toEqual("The request could not be validated");
+		expect(response.body).not.toHaveProperty("description");
+	}
+
+	static validationErrorInMiddleware = (err) => {
+		expect(err.statusCode).toBe(422);
+		expect(err.name).toBe("ValidationError");
+		expect(err.message).toEqual("The request could not be validated");
+		expect(err.description).toBeNull();
+	}
+
 }
 
 module.exports =  TestUtil;

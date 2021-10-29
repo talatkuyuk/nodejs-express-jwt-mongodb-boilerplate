@@ -7,6 +7,7 @@ const { authuserService, authuserDbService, tokenService, tokenDbService } = req
 const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 
+const TestUtil = require('../testutil/TestUtil');
 const testData = require('../data/testdata');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
@@ -25,20 +26,11 @@ describe('POST /auth/verify-email', () => {
 
 	describe('Request Validation (token) Errors', () => {
 
-		function commonExpectations(response) {
-			expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(422);
-			expect(response.body.name).toEqual("ValidationError");
-			expect(response.body.message).toEqual("The request could not be validated");
-			expect(response.body.errors.token.length).toBe(1);
-			expect(response.body.errors.token).toEqual(["token must not be empty"]); 
-			expect(response.body).not.toHaveProperty("description");
-		}
-
 		test('should return 422 Validation Error if there is no token', async () => {
 			const response = await request(app).post('/auth/verify-email').send({});
-			commonExpectations(response);
+
+			TestUtil.validationErrorExpectations(response);
+			expect(response.body.errors.token).toEqual(["token must not be empty"]); 
 		});
 
 
@@ -47,19 +39,14 @@ describe('POST /auth/verify-email', () => {
 				token: testData.VERIFY_EMAIL_TOKEN_UNDEFINED // there is no such token in the testData in order to simulate "undefined"
 			};
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
-			commonExpectations(response);
+
+			TestUtil.validationErrorExpectations(response);
+			expect(response.body.errors.token).toEqual(["token must not be empty"]); 
 		});
 	});
 
 
 	describe('Verify-Email Token Errors', () => {
-
-		function commonExpectations(response) {
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
-			expect(response.body).toHaveProperty("description");
-		}
 
 		test('should throw ApiError with code 401 if the verify-email token is expired', async () => {
 
@@ -69,7 +56,7 @@ describe('POST /auth/verify-email', () => {
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
-			commonExpectations(response);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("TokenExpiredError");
 			expect(response.body.message).toEqual("jwt expired");
 		});
@@ -83,7 +70,7 @@ describe('POST /auth/verify-email', () => {
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
-			commonExpectations(response);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("JsonWebTokenError");
 			expect(response.body.message).toEqual("invalid signature");
 		});
@@ -95,7 +82,7 @@ describe('POST /auth/verify-email', () => {
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
-			commonExpectations(response);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("JsonWebTokenError");
 			expect(response.body.message).toEqual("jwt malformed");
 		});
@@ -104,15 +91,6 @@ describe('POST /auth/verify-email', () => {
 
 
 	describe('Failed verify-email process related with the database', () => {
-
-		function commonExpectations(response) {
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body).toHaveProperty("description");
-			expect(response.body).not.toHaveProperty("errors");
-		}
 
 		test('should return status 401, if there is no such token in the database', async () => {
 			const authuser_id = "123456789012345678901234";
@@ -127,7 +105,8 @@ describe('POST /auth/verify-email', () => {
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
-			commonExpectations(response);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
+			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("verify-email token is not valid");
 		});
 
@@ -145,7 +124,8 @@ describe('POST /auth/verify-email', () => {
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
-			commonExpectations(response);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
+			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("verify-email token is in the blacklist");
 		});
 	});
@@ -153,16 +133,6 @@ describe('POST /auth/verify-email', () => {
 
 
 	describe('Failed verify-email process related with the user', () => {
-
-		function commonExpectations(response, status) {
-			expect(response.status).toBe(status);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(status);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body).toHaveProperty("description");
-			expect(response.body).not.toHaveProperty("errors");
-		}
-
 
 		test('should return status 404, if there is no user', async () => {
 			const authuser_id = "123456789012345678901234";
@@ -174,7 +144,8 @@ describe('POST /auth/verify-email', () => {
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
-			commonExpectations(response, httpStatus.NOT_FOUND);
+			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
+			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("No user found");
 		});
 
@@ -199,7 +170,8 @@ describe('POST /auth/verify-email', () => {
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
-			commonExpectations(response, httpStatus.FORBIDDEN);
+			TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
+			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("You are disabled, call the system administrator");
 		});
 	});

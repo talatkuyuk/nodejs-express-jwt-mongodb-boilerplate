@@ -7,6 +7,7 @@ const { authuserService, authuserDbService, tokenService, tokenDbService } = req
 const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 
+const TestUtil = require('../testutil/TestUtil');
 const testData = require('../data/testdata');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
@@ -21,27 +22,18 @@ describe('POST /auth/reset-password', () => {
 
 	jest.setTimeout(50000);
 
-	let resetPasswordForm;
-
 	describe('Request Validation (password, passwordConfirmation, token) Errors', () => {
 
-		function commonExpectations(response) {
-			expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(422);
-			expect(response.body.name).toEqual("ValidationError");
-			expect(response.body.message).toEqual("The request could not be validated");
-			expect(response.body).not.toHaveProperty("description");
-		}
-
 		test('should return 422 Validation Error if password is empty or falsy value', async () => {
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '',
 				passwordConfirmation: '',
 				token: 'no-matters-for-this-test'
 			};
+
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
-			commonExpectations(response);
+
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors.password.length).toBe(1);
 			expect(response.body.errors.password).toEqual(["password must not be empty or falsy value"]); 
 			expect(response.body.errors.passwordConfirmation).toEqual(["password confirmation must not be empty or falsy value"]); 
@@ -49,13 +41,15 @@ describe('POST /auth/reset-password', () => {
 
 
 	  	test('should return 422 Validation Error if password length is less than 8 characters', async () => {
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '12aA',
 				passwordConfirmation: '12aA',
 				token: 'no-matters-for-this-test'
 			};
+
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
-			commonExpectations(response);
+
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors.password.length).toBe(1);
 			expect(response.body.errors.password).toEqual(["password must be minimum 8 characters"]); 
 			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
@@ -63,13 +57,15 @@ describe('POST /auth/reset-password', () => {
 
 
 	  	test('should return 422 Validation Error if password does not contain at least one uppercase, one lowercase, one number and one special char', async () => {
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '11aaAA88',
 				passwordConfirmation: '11aaAA88',
 				token: 'no-matters-for-this-test'
 			};
+
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
-			commonExpectations(response);
+
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors.password.length).toBe(1);
 			expect(response.body.errors.password).toEqual(["password must contain at least one uppercase, one lowercase, one number and one special char"]); 
 			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
@@ -77,13 +73,15 @@ describe('POST /auth/reset-password', () => {
 
 
 		test('should return 422 Validation Error if password confirmation does not match with the password', async () => {
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '11aaAA88+',
 				passwordConfirmation: '11aaAA88$',
 				token: 'no-matters-for-this-test'
 			};
+
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
-			commonExpectations(response);
+
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("password");
 			expect(response.body.errors.passwordConfirmation.length).toBe(1);
 			expect(response.body.errors.passwordConfirmation).toEqual(["password confirmation does not match with the password"]); 
@@ -91,12 +89,14 @@ describe('POST /auth/reset-password', () => {
 
 
 		test('should return 422 Validation Error if there is no token', async () => {
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
 			};
+
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
-			commonExpectations(response);
+
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("password");
 			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 			expect(response.body.errors.token.length).toBe(1);
@@ -105,13 +105,15 @@ describe('POST /auth/reset-password', () => {
 
 
 		test('should return 422 Validation Error if occurs all password, confirmation password and token validation errors', async () => {
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '11aaAA',
 				passwordConfirmation: '11aaAA88$',
 				token: testData.VERIFY_EMAIL_TOKEN_UNDEFINED // there is no such token in the testData in order to simulate "undefined"
 			};
+
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
-			commonExpectations(response);
+
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({
 				"password": ["password must be minimum 8 characters"],
 				"passwordConfirmation": ["password confirmation does not match with the password"],
@@ -124,16 +126,9 @@ describe('POST /auth/reset-password', () => {
 
 	describe('Reset-Password Token Errors', () => {
 
-		function commonExpectations(response) {
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
-			expect(response.body).toHaveProperty("description");
-		}
-
 		test('should throw ApiError with code 401 if the reset-password token is expired', async () => {
 
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
 				token: testData.RESET_PASSWORD_TOKEN_EXPIRED
@@ -141,7 +136,7 @@ describe('POST /auth/reset-password', () => {
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
-			commonExpectations(response);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("TokenExpiredError");
 			expect(response.body.message).toEqual("jwt expired");
 		});
@@ -149,7 +144,7 @@ describe('POST /auth/reset-password', () => {
 		
 		test('should throw ApiError with code 401 if the reset-password token has wrong signature', async () => {
 
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
 				token: testData.TOKEN_WITH_INVALID_SIGNATURE
@@ -157,7 +152,7 @@ describe('POST /auth/reset-password', () => {
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
-			commonExpectations(response);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("JsonWebTokenError");
 			expect(response.body.message).toEqual("invalid signature");
 		});
@@ -165,7 +160,7 @@ describe('POST /auth/reset-password', () => {
 
 		test('should throw ApiError with code 401 if the token is malformed', async () => {
 
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
 				token: "mal-formed-token"
@@ -173,7 +168,7 @@ describe('POST /auth/reset-password', () => {
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
-			commonExpectations(response);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("JsonWebTokenError");
 			expect(response.body.message).toEqual("jwt malformed");
 		});
@@ -182,15 +177,6 @@ describe('POST /auth/reset-password', () => {
 
 
 	describe('Failed reset-password process related with the database', () => {
-
-		function commonExpectations(response) {
-			expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(401);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body).toHaveProperty("description");
-			expect(response.body).not.toHaveProperty("errors");
-		}
 
 		test('should return status 401, if there is no such token in the database', async () => {
 			const authuser_id = "123456789012345678901234";
@@ -201,7 +187,7 @@ describe('POST /auth/reset-password', () => {
 			// delete the token
 			await tokenService.removeToken(tokenId);
 
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
 				token: resetPasswordToken
@@ -209,7 +195,8 @@ describe('POST /auth/reset-password', () => {
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
-			commonExpectations(response);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
+			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("reset-password token is not valid");
 		});
 
@@ -223,7 +210,7 @@ describe('POST /auth/reset-password', () => {
 			// update the token as blacklisted
 			await tokenService.updateTokenAsBlacklisted(tokenId);
 
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
 				token: resetPasswordToken
@@ -231,7 +218,8 @@ describe('POST /auth/reset-password', () => {
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
-			commonExpectations(response);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
+			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("reset-password token is in the blacklist");
 		});
 	});
@@ -240,23 +228,13 @@ describe('POST /auth/reset-password', () => {
 
 	describe('Failed reset-password process related with the user', () => {
 
-		function commonExpectations(response, status) {
-			expect(response.status).toBe(status);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(status);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body).toHaveProperty("description");
-			expect(response.body).not.toHaveProperty("errors");
-		}
-
-
 		test('should return status 404, if there is no user', async () => {
 			const authuser_id = "123456789012345678901234";
 
 			// generate and add valid reset-password token into db
 			const { resetPasswordToken } = await tokenService.generateResetPasswordToken(authuser_id);
 
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
 				token: resetPasswordToken
@@ -264,7 +242,8 @@ describe('POST /auth/reset-password', () => {
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
-			commonExpectations(response, httpStatus.NOT_FOUND);
+			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
+			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("No user found");
 		});
 
@@ -285,7 +264,7 @@ describe('POST /auth/reset-password', () => {
 			// update the authuser as disabled
 			await authuserService.toggleAbility(authuser.id);
 
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
 				token: resetPasswordToken
@@ -293,7 +272,8 @@ describe('POST /auth/reset-password', () => {
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
-			commonExpectations(response, httpStatus.FORBIDDEN);
+			TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
+			expect(response.body.name).toEqual("ApiError");
 			expect(response.body.message).toEqual("You are disabled, call the system administrator");
 		});
 	});
@@ -315,7 +295,7 @@ describe('POST /auth/reset-password', () => {
 			// generate and add valid reset-password token into db
 			const { resetPasswordToken } = await tokenService.generateResetPasswordToken(authuser.id);
 
-			resetPasswordForm = {
+			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
 				token: resetPasswordToken

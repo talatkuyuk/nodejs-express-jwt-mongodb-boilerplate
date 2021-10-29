@@ -5,7 +5,8 @@ const bcrypt = require('bcryptjs');
 const app = require('../../src/core/express');
 
 const { authuserService, userService, authuserDbService } = require('../../src/services');
-const { AuthUser } = require('../../src/models');
+
+const TestUtil = require('../testutil/TestUtil');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');
@@ -331,23 +332,6 @@ describe('PATH /authusers', () => {
 		- try to change password with validation errors
 		*/
 
-		function apiErrorExpectations(response, status) {
-			expect(response.status).toBe(status);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(status);
-			expect(response.body).toHaveProperty("description");
-			expect(response.body).not.toHaveProperty("errors");
-		}
-
-		function validationErrorExpectations(response) {
-			expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(422);
-			expect(response.body.name).toEqual("ValidationError");
-			expect(response.body.message).toEqual("The request could not be validated");
-			expect(response.body).not.toHaveProperty("description");
-		}
-
 		test('failure scenario', async () => {
 			let response;
 
@@ -372,7 +356,7 @@ describe('PATH /authusers', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send(addForm);
 
-			validationErrorExpectations(response);
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({ email: ["email is already taken"]});
 
 			// try to get an authuser with invalid id
@@ -382,7 +366,7 @@ describe('PATH /authusers', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send();
 
-			validationErrorExpectations(response);
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({ id: ["The param id must be a 24-character number"]});
 
 			// try to get an authuser that not exists
@@ -392,7 +376,7 @@ describe('PATH /authusers', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send();
 
-			apiErrorExpectations(response, httpStatus.NOT_FOUND);
+			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
 			expect(response.body.name).toBe("ApiError");
 			expect(response.body.message).toBe("No user found");
 
@@ -404,7 +388,7 @@ describe('PATH /authusers', () => {
 				.query({ page: "a",  size: "b"})
 				.send();
 
-			validationErrorExpectations(response);
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({ 
 				page: ["The query param 'page' must be numeric value"],
 				size: ["The query param 'size' must be numeric value"],
@@ -417,7 +401,7 @@ describe('PATH /authusers', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send();
 
-			apiErrorExpectations(response, httpStatus.NOT_FOUND);
+			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
 			expect(response.body.name).toBe("ApiError");
 			expect(response.body.message).toBe("No user found");
 
@@ -428,7 +412,7 @@ describe('PATH /authusers', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send();
 
-			apiErrorExpectations(response, httpStatus.NOT_FOUND);
+			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
 			expect(response.body.name).toBe("ApiError");
 			expect(response.body.message).toBe("No user found");
 
@@ -446,7 +430,7 @@ describe('PATH /authusers', () => {
 					passwordConfirmation: "nomatch"
 				})
 
-			validationErrorExpectations(response);
+			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({ 
 				currentPassword: ["incorrect current password"],
 				password: ["password must be minimum 8 characters"],

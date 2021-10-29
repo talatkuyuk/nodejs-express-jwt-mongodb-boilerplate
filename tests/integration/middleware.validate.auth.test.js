@@ -5,19 +5,12 @@ const authValidation = require('../../src/validations/auth.ValidationRules');
 const { ApiError } = require('../../src/utils/ApiError');
 const { authuserService } = require('../../src/services');
 
+const TestUtil = require('../testutil/TestUtil');
 
 
 describe('Validate Middleware : Auth validation rules', () => {
 
 	jest.setTimeout(50000);
-
-	const commonValidationErrorExpectation = (err) => {
-		expect(err.statusCode).toBe(422);
-		expect(err.name).toBe("ValidationError");
-		expect(err.message).toEqual("The request could not be validated");
-		expect(err.description).toBeNull();
-	}
-
 
 	describe('signup validation', () => {
 
@@ -41,7 +34,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email must not be empty or falsy value'],
 				"password": ['password must not be empty or falsy value'],
@@ -73,7 +66,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email must not be empty or falsy value'],
 				"password": ['password must not be empty or falsy value'],
@@ -106,7 +99,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email must be in valid form'],
 				"password": ['password must be minimum 8 characters'],
@@ -139,7 +132,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"password": ['password must contain at least one uppercase, one lowercase, one number and one special char'],
 				"passwordConfirmation": ['password confirmation does not match with the password'],
@@ -171,7 +164,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email is already taken'],
 			});
@@ -203,7 +196,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"body": ['Any extra parameter is not allowed other than email,password,passwordConfirmation'],
 			});
@@ -255,7 +248,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email must not be empty or falsy value'],
 				"password": ['password must not be empty or falsy value'],
@@ -283,7 +276,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email must not be empty or falsy value'],
 				"password": ['password must not be empty or falsy value'],
@@ -311,7 +304,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email must be in valid form'],
 			});
@@ -339,7 +332,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"body": ['Any extra parameter is not allowed other than email,password'],
 			});
@@ -386,7 +379,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"refreshToken": ['refresh token must not be empty'],
 			});
@@ -412,7 +405,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"refreshToken": ['refresh token must not be empty'],
 			});
@@ -458,7 +451,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email must not be empty or falsy value'],
 			});
@@ -484,7 +477,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email must not be empty or falsy value'],
 			});
@@ -510,7 +503,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['email must be in valid form'],
 			});
@@ -556,7 +549,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"password": ['password must not be empty or falsy value'],
 				"passwordConfirmation": ['password confirmation must not be empty or falsy value'],
@@ -586,7 +579,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"password": ['password must not be empty or falsy value'],
 				"passwordConfirmation": ['password confirmation must not be empty or falsy value'],
@@ -616,7 +609,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"password": ['password must be minimum 8 characters'],
 				"passwordConfirmation": ['password confirmation must not be empty or falsy value'],
@@ -645,7 +638,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"password": ['password must contain at least one uppercase, one lowercase, one number and one special char'],
 				"passwordConfirmation": ['password confirmation does not match with the password'],
@@ -694,7 +687,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"token": ['token must not be empty'],
 			});
@@ -720,7 +713,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 			// obtain the error from the next function
 			const err = next.mock.calls[0][0];
 
-			commonValidationErrorExpectation(err);
+			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"token": ['token must not be empty'],
 			});

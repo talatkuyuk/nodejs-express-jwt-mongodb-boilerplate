@@ -24,15 +24,6 @@ describe('POST /auth/google & auth/facebook', () => {
 
 	describe('Failed logins with AuthProvider', () => {
 
-		function commonExpectations(response, status) {
-			expect(response.status).toBe(status);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toEqual(status);
-			expect(response.body).toHaveProperty("description");
-			expect(response.body).not.toHaveProperty("errors");
-		}
-
-
 		test('should return status 401, if the oAuth provider (google) token is invalid', async () => {
 			const google_id_token = "the-id-token-coming-from-google";
 
@@ -40,7 +31,7 @@ describe('POST /auth/google & auth/facebook', () => {
 												.set('Authorization', `Bearer ${google_id_token}`) 
 												.send();
 
-			commonExpectations(response, httpStatus.UNAUTHORIZED);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toBe("ApiError");
 			expect(response.body.message).toEqual(`Wrong number of segments in token: ${google_id_token}`);
 		});
@@ -53,7 +44,7 @@ describe('POST /auth/google & auth/facebook', () => {
 												.set('Authorization', `Bearer ${facebook_access_token}`) 
 												.send();
 
-			commonExpectations(response, httpStatus.UNAUTHORIZED);
+			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toBe("ApiError");
 			expect(response.body.message).toEqual("Request failed with status code 400");
 		});
@@ -83,7 +74,7 @@ describe('POST /auth/google & auth/facebook', () => {
 												.set('User-Agent', userAgent)
 												.send();
 
-			commonExpectations(response2, httpStatus.FORBIDDEN);
+			TestUtil.errorExpectations(response2, httpStatus.FORBIDDEN);
 			expect(response2.body.name).toBe("ApiError");
 			expect(response2.body.message).toEqual(`The token of the auth provider (${provider}) is allowed to be used only once`);
 		});
@@ -110,7 +101,7 @@ describe('POST /auth/google & auth/facebook', () => {
 												.set('Authorization', `Bearer ${google_id_token}`) 
 												.send();
 
-			commonExpectations(response, httpStatus.FORBIDDEN);
+			TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
 			expect(response.body.name).toBe("ApiError");
 			expect(response.body.message).toEqual("You are disabled, call the system administrator");
 
@@ -122,10 +113,6 @@ describe('POST /auth/google & auth/facebook', () => {
 
 
 	describe('successful logins with AuthProvider', () => {
-
-		beforeEach(() => {
-			jest.clearAllMocks();
-		});
 		
 		test('should return status 200; return the authuser and valid tokens in json form; successfully register if the user is not registered before', async () => {
 			const userAgent = "from-jest-test";
