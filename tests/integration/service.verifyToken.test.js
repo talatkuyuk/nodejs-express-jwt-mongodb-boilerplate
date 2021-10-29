@@ -19,8 +19,6 @@ setupRedis();
 
 describe('Test for Refresh Token Rotation', () => {
 
-	jest.setTimeout(50000);
-
 	TestUtil.MatchErrors();
 
 	describe('Tests for Token Errors', () => {

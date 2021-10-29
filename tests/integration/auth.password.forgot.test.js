@@ -17,8 +17,6 @@ setupTestDatabase();
 
 describe('POST /auth/forgot-password', () => {
 
-	jest.setTimeout(50000);
-
 	describe('Request Validation (email) Errors', () => {
 
 		test('should return 422 Validation Error if email is empty or falsy value', async () => {

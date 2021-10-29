@@ -10,8 +10,6 @@ const TestUtil = require('../testutil/TestUtil');
 
 describe('Validate Middleware : Auth validation rules', () => {
 
-	jest.setTimeout(50000);
-
 	describe('signup validation', () => {
 
 		test('signup: should throw error 422, if the body is empty', async () => {

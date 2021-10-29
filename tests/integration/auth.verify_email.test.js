@@ -20,10 +20,6 @@ setupRedis();
 
 describe('POST /auth/verify-email', () => {
 
-	jest.setTimeout(50000);
-
-	let verifyEmailForm;
-
 	describe('Request Validation (token) Errors', () => {
 
 		test('should return 422 Validation Error if there is no token', async () => {
@@ -35,7 +31,7 @@ describe('POST /auth/verify-email', () => {
 
 
 		test('should return 422 Validation Error if the token is undefined', async () => {
-			verifyEmailForm = {
+			const verifyEmailForm = {
 				token: testData.VERIFY_EMAIL_TOKEN_UNDEFINED // there is no such token in the testData in order to simulate "undefined"
 			};
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
@@ -50,7 +46,7 @@ describe('POST /auth/verify-email', () => {
 
 		test('should throw ApiError with code 401 if the verify-email token is expired', async () => {
 
-			verifyEmailForm = {
+			const verifyEmailForm = {
 				token: testData.VERIFY_EMAIL_TOKEN_EXPIRED
 			};
 
@@ -64,7 +60,7 @@ describe('POST /auth/verify-email', () => {
 		
 		test('should throw ApiError with code 401 if the verify-email token has wrong signature', async () => {
 
-			verifyEmailForm = {
+			const verifyEmailForm = {
 				token: testData.TOKEN_WITH_INVALID_SIGNATURE
 			};
 
@@ -78,7 +74,7 @@ describe('POST /auth/verify-email', () => {
 
 		test('should throw ApiError with code 401 if the token is malformed', async () => {
 
-			verifyEmailForm = { token: "mal-formed-token" };
+			const verifyEmailForm = { token: "mal-formed-token" };
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
@@ -101,7 +97,7 @@ describe('POST /auth/verify-email', () => {
 			// delete the token
 			await tokenService.removeToken(tokenId);
 
-			verifyEmailForm = { token: verifyEmailToken };
+			const verifyEmailForm = { token: verifyEmailToken };
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
@@ -120,7 +116,7 @@ describe('POST /auth/verify-email', () => {
 			// update the token as blacklisted
 			await tokenService.updateTokenAsBlacklisted(tokenId);
 
-			verifyEmailForm = { token: verifyEmailToken };
+			const verifyEmailForm = { token: verifyEmailToken };
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
@@ -140,7 +136,7 @@ describe('POST /auth/verify-email', () => {
 			// generate and add valid verify-email token into db
 			const { verifyEmailToken } = await tokenService.generateVerifyEmailToken(authuser_id);
 
-			verifyEmailForm = { token: verifyEmailToken };
+			const verifyEmailForm = { token: verifyEmailToken };
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
@@ -166,7 +162,7 @@ describe('POST /auth/verify-email', () => {
 			// update the authuser as disabled
 			await authuserService.toggleAbility(authuser.id);
 
-			verifyEmailForm = { token: verifyEmailToken };
+			const verifyEmailForm = { token: verifyEmailToken };
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
@@ -193,7 +189,7 @@ describe('POST /auth/verify-email', () => {
 			// generate and add valid verify-email token into db
 			const { verifyEmailToken } = await tokenService.generateVerifyEmailToken(authuser.id);
 
-			verifyEmailForm = { token: verifyEmailToken };
+			const verifyEmailForm = { token: verifyEmailToken };
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 

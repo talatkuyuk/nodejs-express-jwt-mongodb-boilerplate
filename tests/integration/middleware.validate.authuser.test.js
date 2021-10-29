@@ -11,8 +11,6 @@ const TestUtil = require('../testutil/TestUtil');
 
 describe('Validate Middleware : Athuser validation rules', () => {
 
-	jest.setTimeout(50000);
-
 	describe('getAuthUsers validation', () => {
 
 		test('getAuthUsers: should throw error 422, if a query param has multiple value', async () => {
