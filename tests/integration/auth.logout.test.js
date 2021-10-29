@@ -9,7 +9,7 @@ const { tokenDbService, redisService } = require('../../src/services');
 
 const { tokenTypes } = require('../../src/config/tokens');
 
-const TestUtil = require('../testutil/TestUtil');
+const TestUtil = require('../testutils/TestUtil');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');

@@ -8,11 +8,10 @@ const app = require('../../src/core/express');
 const config = require('../../src/config');
 
 const { authuserDbService, tokenDbService, tokenService, redisService } = require('../../src/services');
-const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 
-const TestUtil = require('../testutil/TestUtil');
-const testData = require('../data/testdata');
+const TestUtil = require('../testutils/TestUtil');
+const testData = require('../testutils/testdata');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');

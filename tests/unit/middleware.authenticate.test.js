@@ -12,11 +12,10 @@ const { authenticate } = require('../../src/middlewares');
 const { ApiError } = require('../../src/utils/ApiError');
 
 const { authuserDbService, authuserService, tokenService, redisService } = require('../../src/services');
-const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 
-const TestUtil = require('../testutil/TestUtil');
-const testData = require('../data/testdata');
+const TestUtil = require('../testutils/TestUtil');
+const testData = require('../testutils/testdata');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');

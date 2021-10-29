@@ -5,7 +5,7 @@ const userValidation = require('../../src/validations/user.ValidationRules');
 const { ApiError } = require('../../src/utils/ApiError');
 const { authuserService, userService } = require('../../src/services');
 
-const TestUtil = require('../testutil/TestUtil');
+const TestUtil = require('../testutils/TestUtil');
 
 
 describe('Validate Middleware : Athuser validation rules', () => {

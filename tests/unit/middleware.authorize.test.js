@@ -6,7 +6,7 @@ const { ApiError } = require('../../src/utils/ApiError');
 
 const userDbService = require('../../src/services/user.db.service');
 
-const TestUtil = require('../testutil/TestUtil');
+const TestUtil = require('../testutils/TestUtil');
 
 
 describe('Authorization Middleware: Check the user right(s)', () => {
