@@ -9,6 +9,8 @@ const { authuserDbService, tokenDbService, tokenService, emailService } = requir
 const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 
+const TestUtil = require('../testutil/TestUtil');
+
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');
 
@@ -51,13 +53,9 @@ describe('POST /auth/send-verification-email', () => {
 												.set('User-Agent', userAgent) 
 												.send();
 			
-			expect(response.status).toBe(httpStatus.BAD_REQUEST);
-			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.code).toBe(400);
+			TestUtil.errorExpectations(response, httpStatus.BAD_REQUEST)
 			expect(response.body.name).toBe("ApiError");
 			expect(response.body.message).toEqual("Email is already verified");
-			expect(response.body).toHaveProperty("description");
-			expect(response.body).not.toHaveProperty("errors");
 		});
 
 
@@ -71,13 +69,9 @@ describe('POST /auth/send-verification-email', () => {
 												.set('User-Agent', userAgent) 
 												.send();
 
-			expect(response.status).toBe(httpStatus.INTERNAL_SERVER_ERROR);
-			expect(response.body).toEqual({
-				"code": 500,
-				"name": "ApiError",
-				"message": "email service does not respond",
-				"description": expect.any(String)
-			});
+			TestUtil.errorExpectations(response, httpStatus.INTERNAL_SERVER_ERROR)
+			expect(response.body.name).toBe("ApiError");
+			expect(response.body.message).toEqual("email service does not respond");
 		});
 	});
 

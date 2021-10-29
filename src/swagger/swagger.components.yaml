@@ -3,59 +3,6 @@ components:
   ##################### SCHEMES ***************************
   schemas:
 
-    # AUTHUSER IN RESPONSE
-    authuser:
-      type: object
-      properties:
-        id:
-          type: string
-          description: MongoDb.ObjectId
-        email:
-          type: string
-          format: email
-        isEmailVerified:
-          type: boolean
-        isDisabled:
-          type: boolean
-        createdAt:
-          type: date-time
-          description: unix time like 7635472654762
-        services: 
-          type: object
-          properties:
-            emailpassword:
-              type: string
-              enum: [registered, unregistered]
-            google:
-              type: string
-              description: google-oauth-id
-            facebook:
-              type: string
-              description: facebook-oauth-id   
-      
-
-    # ACCESS-REFRESH TOKENS IN RESPONSE
-    tokens:
-      type: object
-      properties:
-        access:
-          type: object
-          properties:
-            token:
-              type: string
-            expires:
-              type: string
-              format: date-time
-        refresh:
-          type: object
-          properties:
-            token:
-              type: string
-            expires:
-              type: string
-              format: date-time
-
-
     # SIGNUP FORM IN REQUEST.BODY
     form-signup:
       type: object
@@ -164,6 +111,37 @@ components:
           description: reset password token
           example: lkfkldE-verify-email-token-oflkmFDDkf
 
+
+    # AUTHUSER IN RESPONSE
+    authuser:
+      type: object
+      properties:
+        id:
+          type: string
+          description: MongoDb.ObjectId
+        email:
+          type: string
+          format: email
+        isEmailVerified:
+          type: boolean
+        isDisabled:
+          type: boolean
+        createdAt:
+          type: date-time
+          description: unix time like 7635472654762
+        services: 
+          type: object
+          properties:
+            emailpassword:
+              type: string
+              enum: [registered, unregistered]
+            google:
+              type: string
+              description: google-oauth-id
+            facebook:
+              type: string
+              description: facebook-oauth-id   
+      
 
     # ADD AUTHUSER FORM IN REQUEST.BODY
     form-add-authuser:
@@ -303,7 +281,7 @@ components:
         country: TUR
 
 
-    # CHANGE ROLE IN REQUEST.BODY
+    # CHANGE USER ROLE IN REQUEST.BODY
     form-change-role:
       type: object
       # required:
@@ -315,6 +293,28 @@ components:
           description: user role, admin/user
       example:
         role: admin
+
+
+    # ACCESS-REFRESH TOKENS IN RESPONSE
+    tokens:
+      type: object
+      properties:
+        access:
+          type: object
+          properties:
+            token:
+              type: string
+            expires:
+              type: string
+              format: date-time
+        refresh:
+          type: object
+          properties:
+            token:
+              type: string
+            expires:
+              type: string
+              format: date-time
 
 
     # ERROR
