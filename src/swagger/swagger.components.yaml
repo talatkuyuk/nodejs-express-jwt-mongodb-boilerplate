@@ -19,9 +19,7 @@ components:
           type: boolean
         createdAt:
           type: date-time
-          description: unix time
-          example:
-            value: 7635472654762
+          description: unix time like 7635472654762
         services: 
           type: object
           properties:
@@ -116,33 +114,6 @@ components:
           example: eyJhb.INPUT_YOUR_REFRESH_TOKEN_HERE.m1U63
 
 
-    # CHANGE PASSWORD FORM IN REQUEST.BODY
-    form-change-password:
-      type: object
-      # required:
-      #   - email
-      #   - password
-      #   - passwordConfirmation
-      properties:
-        currentPassword:
-          type: string
-          format: password
-          description: Current password
-        password:
-          type: string
-          format: password
-          # minLength: 8
-          description: minimum length is 8; and at least one number, uppercase, lowercase, and special char
-        passwordConfirmation:
-          type: string
-          format: password
-          description: same value with the password
-      example:
-        currentPassword: Curr9pasS+
-        password: Pass1word!
-        passwordConfirmation: Pass1word!
-
-
     # FORGOT PASSWORD FORM IN REQUEST.BODY
     form-forgot-password:
       type: object
@@ -179,7 +150,172 @@ components:
       example:
         password: Pass1word!
         passwordConfirmation: Pass1word!
-        token: lkfkldE-reset-password-token-öflkmFDDkf
+        token: lkfkldE-reset-password-token-oflkmFDDkf
+
+
+    # VERIFY EMAIL FORM IN REQUEST.BODY
+    form-verify-email:
+      type: object
+      # required:
+      #   - token
+      properties:
+        token:
+          type: string
+          description: reset password token
+          example: lkfkldE-verify-email-token-oflkmFDDkf
+
+
+    # ADD AUTHUSER FORM IN REQUEST.BODY
+    form-add-authuser:
+      type: object
+      # required:
+      #   - email
+      #   - password
+      #   - passwordConfirmation
+      properties:
+        email:
+          type: string
+          format: email
+          description: must be in valid form
+        password:
+          type: string
+          format: password
+          # minLength: 8
+          description: minimum length is 8; and at least one number, uppercase, lowercase, and special char
+        passwordConfirmation:
+          type: string
+          format: password
+          description: same value with the password
+      example:
+        email: talatkuyuk@gmail.com
+        password: Pass1word!
+        passwordConfirmation: Pass1word!
+
+
+    # CHANGE PASSWORD FORM IN REQUEST.BODY
+    form-change-password:
+      type: object
+      # required:
+      #   - currentPassword
+      #   - password
+      #   - passwordConfirmation
+      properties:
+        currentPassword:
+          type: string
+          format: password
+          description: Current password
+        password:
+          type: string
+          format: password
+          # minLength: 8
+          description: minimum length is 8; and at least one number, uppercase, lowercase, and special char
+        passwordConfirmation:
+          type: string
+          format: password
+          description: same value with the password
+      example:
+        currentPassword: Curr9pasS+
+        password: Pass1word!
+        passwordConfirmation: Pass1word!
+  
+
+    # USER IN RESPONSE
+    user:
+      type: object
+      properties:
+        id:
+          type: string
+          description: MongoDb.ObjectId
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+        name:
+          type: string
+        gender:
+          type: string
+        country:
+          type: string
+        createdAt:
+          type: date-time
+          description: unix time like 7635472654762
+
+
+    # ADD USER FORM IN REQUEST.BODY
+    form-add-user:
+      type: object
+      # required:
+      #   - email
+      #   - role
+      #   - name
+      #   - gender
+      #   - country
+      properties:
+        email:
+          type: string
+          format: email
+          description: must be in valid form
+        role:
+          type: string
+          description: user role, should be "user"
+        name:
+          type: string
+          # minLength: 2
+          description: user name, minimum 2-length
+        gender:
+          type: string
+          # enum: ["male", "female", "none"]
+          description: user gender, male/female/none
+        country:
+          type: string
+          description: 3-letter standart country code
+      example:
+        email: talatkuyuk@gmail.com
+        role: user
+        name: Talat
+        gender: male
+        country: TUR
+
+
+    # UPDATE USER FORM IN REQUEST.BODY
+    form-update-user:
+      type: object
+      # required:
+      #   - name
+      #   - gender
+      #   - country
+      properties:
+        name:
+          type: string
+          # minLength: 2
+          description: user name, minimum 2-length
+        gender:
+          type: string
+          # enum: ["male", "female", "none"]
+          description: user gender, male/female/none
+        country:
+          type: string
+          description: 3-letter standart country code
+      example:
+        name: Talat
+        gender: male
+        country: TUR
+
+
+    # CHANGE ROLE IN REQUEST.BODY
+    form-change-role:
+      type: object
+      # required:
+      #   - role
+      properties:
+        role:
+          type: string
+          # enum: ["admin", "user"]
+          description: user role, admin/user
+      example:
+        role: admin
+
 
     # ERROR
     Error:
@@ -226,6 +362,8 @@ components:
         UNPROCESSABLE ENTITY
 
         #### ValidationErrors
+        ###### General
+        * _Any extra parameter is not allowed other than ['email', 'password', 'passwordConfirmation']_
         ###### Email related
         * _email must not be empty or falsy value_
         * _email must be in valid form_
@@ -235,6 +373,7 @@ components:
         * _password must be minimum 8 characters_
         * _password must contain at least one uppercase, one lowercase, one number and one special char_
         ###### Password confirmation related
+        * _password confirmation must not be empty or falsy value_
         * _password confirmation does not match with the password_
       content:
         application/json:
@@ -545,8 +684,9 @@ components:
         * _password must not be empty or falsy value_
         * _password must be minimum 8 characters_
         * _password must contain at least one uppercase, one lowercase, one number and one special char_
+        * _password confirmation must not be empty or falsy value_
         * _password confirmation does not match with the password_
-        * _The query parameter "token" must not be empty_
+        * _token must not be empty_
       content:
         application/json:
           schema:
@@ -562,7 +702,7 @@ components:
             }
 
 
-    QueryParamTokenValidationError:
+    VerifyEmailTokenValidationError:
       description: UNPROCESSABLE ENTITY
       content:
         application/json:
@@ -610,11 +750,14 @@ components:
         UNPROCESSABLE ENTITY
 
         #### ValidationErrors
+        * _The parameter can only appear once in the query string_       
+        * _The query param 'email' must be in valid form_        
         * _The query param 'isDisabled' must be boolean value_
         * _The query param 'isEmailVerified' must be boolean value_
         * _The query param 'page' must be numeric value_
         * _The query param 'size' must be numeric value_
-        * _The query param 'size' can be at most 50_
+        * _The query param 'size' can be between 1-50_
+        * _The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter_
       content:
         application/json:
           schema:
@@ -624,10 +767,12 @@ components:
             name: ValidationError
             message: The request could not be validated
             errors: {
+              email: ["The query param 'email' must be in valid form"],
               isDisabled: ["The query param 'isDisabled' must be boolean value"],
               isEmailVerified: ["The query param 'isEmailVerified' must be boolean value"],
               page: ["The query param 'page' must be numeric value"],
-              size: ["The query param 'size' must be numeric value", "The query param 'size' can be at most 50"],
+              size: ["The query param 'size' can be at most 50"],
+              sort: ["The parameter can only appear once in the query string"],
             }
 
 
@@ -641,6 +786,7 @@ components:
         * _password must not be empty or falsy value_
         * _password must be minimum 8 characters_
         * _password must contain at least one uppercase, one lowercase, one number and one special char_
+        * _password confirmation must not be empty or falsy value_
         * _password confirmation does not match with the password_
       content:
         application/json:
@@ -654,6 +800,130 @@ components:
               currentPassword: ["current password must not be empty or falsy value", "incorrect current password"],
               password: ["password validation errors appear in a string array"],
               passwordConfirmation: ["password confirmation does not match with the password"]
+            }
+
+
+    UserQueryParamsValidationErrors:
+      description: |
+        UNPROCESSABLE ENTITY
+
+        #### ValidationErrors
+        * _The parameter can only appear once in the query string_
+        * _The query param 'email' must be in valid form_
+        * _The query param 'role' could be one of admin, user_
+        * _The query param 'name' must be minumum 2-length charachter_
+        * _The query param 'gender' could be only male, female or none_
+        * _The query param 'country' code must be in the form of 3-letter standart country code_
+        * _The query param 'page' must be numeric value_
+        * _The query param 'size' must be numeric value_
+        * _The query param 'size' can be between 1-50_
+        * _The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter_
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+          example:
+            code: 422
+            name: ValidationError
+            message: The request could not be validated
+            errors: {
+              email: ["The query param 'email' must be in valid form"],
+              role: ["The query param 'role' could be one of admin, user"],
+              name: ["The query param 'name' must be minumum 2-length charachter"],
+              page: ["The query param 'page' must be numeric value"],
+              size: ["The query param 'size' can be at most 50"],
+              sort: ["The parameter can only appear once in the query string"],
+            }
+
+
+    AddUserValidationErrors:
+      description: |
+        UNPROCESSABLE ENTITY
+
+        #### ValidationErrors
+        ###### Parameter Id related
+        * _The param id must be a 24-character number_
+        * _There is another user with the same id_
+        ###### General
+        * _There is no correspondent authenticated user with the same id and email_
+        * _Any extra parameter is not allowed other than ['email', 'role', 'name', 'gender', 'country']_
+        ###### Email related
+        * _email must not be empty or falsy value_
+        * _email must be in valid form_
+        ###### Others
+        * _The role must be setted as 'user' while creating_
+        * _name must be minimum 2 characters_
+        * _gender could be male, female or none_
+        * _country code must be 3-letter standart iso code_
+        * _gender could be male, female or none_
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+          example:
+            code: 422
+            name: ValidationError
+            message: The request could not be validated
+            errors: {
+              email: ["email validation errors appear in a string array"],
+              body: ["There is no correspondent authenticated user with the same id and email"],
+              name: ["name must be minimum 2 characters"]
+            }
+
+
+    UpdateUserValidationErrors:
+      description: |
+        UNPROCESSABLE ENTITY
+
+        #### ValidationErrors
+        ###### Parameter Id related
+        * _The param id must be a 24-character number_
+        ###### General
+        * _The request body should contain at least one of the name, gender, country_
+        * _Any extra parameter is not allowed other than ['name', 'gender', 'country']_
+        ###### Others
+        * _name must be minimum 2 characters_
+        * _gender could be male, female or none_
+        * _country code must be 3-letter standart iso code_
+        * _gender could be male, female or none_
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+          example:
+            code: 422
+            name: ValidationError
+            message: The request could not be validated
+            errors: {
+              body: ["The request body should contain at least one of the name, gender, country"],
+              gender: ["gender could be male, female or none"],
+              country: ["country code must be 3-letter standart iso code"],
+            }
+
+
+    ChangeRoleValidationErrors:
+      description: |
+        UNPROCESSABLE ENTITY
+
+        #### ValidationErrors
+        ###### Parameter Id related
+        * _The param id must be a 24-character number_
+        ###### General
+        * _Any extra parameter is not allowed other than 'role'_
+        ###### Role related
+        * _role could be one of admin,user_
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+          example:
+            code: 422
+            name: ValidationError
+            message: The request could not be validated
+            errors: {
+              body: ["Any extra parameter is not allowed other than 'role'"],
+              id: ["The param id must be a 24-character number"],
+              role: ["role could be one of admin,user"],
             }
 
 
@@ -768,15 +1038,46 @@ components:
         type: string
       description: optional, boolean
 
-    query-param-token:
+    param-user-id:
+      in: path
+      name: id
+      schema:
+        type: string
+      required: false
+      description: the user id
+      allowEmptyValue: true
+
+    query-param-role:
       in: query
-      name: token
+      name: role
       required: false
       schema:
         type: string
-      description: token string for the route operation
+      description: optional, admin or user
 
+    query-param-name:
+      in: query
+      name: name
+      required: false
+      schema:
+        type: string
+      description: optional, at least 2-length name
 
+    query-param-gender:
+      in: query
+      name: gender
+      required: false
+      schema:
+        type: string
+      description: optional, male, female or none
+
+    query-param-country:
+      in: query
+      name: country
+      required: false
+      schema:
+        type: string
+      description: optional, 3-letter standard country code
 
   ##################### EXAPLES *********************
   examples:
@@ -816,18 +1117,18 @@ components:
         users: [
           {
             id: 6152fde5c127504eab292d24,
-            email: talatkuyuk@gmail.com,
+            email: user1@gmail.com,
             isEmailVerified: false,
             isDisabled: false,
-            createdAt: 1632828901965,
+            createdAt: 1632828901111,
             services: { emailpassword: registered }
           },
           {
             id: 6152fde5c127504eab292d25,
-            email: seconduser@gmail.com,
+            email: user2@gmail.com,
             isEmailVerified: false,
             isDisabled: false,
-            createdAt: 1632828901965,
+            createdAt: 1632828902222,
             services: { emailpassword: unregistered, google: "63876327467767364" }
           },
         ]
@@ -839,7 +1140,44 @@ components:
         }
 
                     
+    response-query-users:
+      summary: it returns the authusers queried
+      value:
+        users: [
+          {
+            id: 6152fde5c127504eab292d24,
+            email: user1@gmail.com,
+            role: "admin",
+            name: "User1 Brown",
+            gender: "male",
+            country: "TUR",
+            createdAt: 1632828901111,
+          },
+          {
+            id: 6152fde5c127504eab292d25,
+            email: user2@gmail.com,
+            role: "admin",
+            name: "User2 Brown",
+            gender: "female",
+            country: "USA",
+            createdAt: 1632828902222,
+          },
+        ]
+        totalCount: 2
+        pagination: {
+          currentPage: 1,
+          totalPages: 1,
+          perPage: 20,
+        }
 
+    response-user:
+      id: 6152fde5c127504eab292d24
+      email: talatkuyuk@gmail.com
+      role: user
+      name: Talat Kuyuk
+      gender: male
+      country: TUR
+      createdAt: 1632828901965
 
   ##################### SECURITY SCHEMES ****************
   securitySchemes:

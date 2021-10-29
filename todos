@@ -16,7 +16,7 @@
 //TODO: implement userDAO
 
 //TODO: swagger docs for login with google and facebook routes +
-//TODO: swagger docs for user routes
+//TODO: swagger docs for user routes +
 //TODO: swagger docs for for joined routes
 
 //TODO: seperate authentication and authorization middleware +

@@ -241,8 +241,15 @@
   post:
     summary: Verify email
     tags: [Auth]
-    parameters:
-      - $ref: '#/components/parameters/query-param-token'
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/form-verify-email'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/form-verify-email'
     responses:
       204:
         description: NO CONTENT
@@ -251,7 +258,7 @@
       404:
         $ref: '#/components/responses/NoUserFound'
       422:
-        $ref: '#/components/responses/QueryParamTokenValidationError'
+        $ref: '#/components/responses/VerifyEmailTokenValidationError'
       500:
         $ref: '#/components/responses/InternalServerError'
 
