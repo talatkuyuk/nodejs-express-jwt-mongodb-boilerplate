@@ -74,9 +74,9 @@ describe('Test for Refresh Token Rotation', () => {
 
 			const userId = "613b417848981bfd6e91c662";
 		  
-			const { resetPasswordToken } = await tokenService.generateResetPasswordToken(userId);
+			const resetPasswordToken = await tokenService.generateResetPasswordToken(userId);
 
-			const data = await tokenService.verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
+			const data = await tokenService.verifyToken(resetPasswordToken.token, tokenTypes.RESET_PASSWORD);
 			expect(data).toEqual(expect.any(Token));
 		});
 
@@ -85,9 +85,9 @@ describe('Test for Refresh Token Rotation', () => {
 
 			const userId = "613b417848981bfd6e91c662";
 		  
-			const { verifyEmailToken } = await tokenService.generateVerifyEmailToken(userId);
+			const verifyEmailToken = await tokenService.generateVerifyEmailToken(userId);
 
-			const data = await tokenService.verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
+			const data = await tokenService.verifyToken(verifyEmailToken.token, tokenTypes.VERIFY_EMAIL);
 			expect(data).toEqual(expect.any(Token));
 		});
 	});

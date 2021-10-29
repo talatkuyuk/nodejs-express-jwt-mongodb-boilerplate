@@ -180,15 +180,15 @@ describe('POST /auth/reset-password', () => {
 			const authuser_id = "123456789012345678901234";
 
 			// generate and add valid reset-password token into db
-			const { resetPasswordToken, tokenId } = await tokenService.generateResetPasswordToken(authuser_id);
+			const resetPasswordToken = await tokenService.generateResetPasswordToken(authuser_id);
 
 			// delete the token
-			await tokenService.removeToken(tokenId);
+			await tokenService.removeToken(resetPasswordToken.id);
 
 			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
-				token: resetPasswordToken
+				token: resetPasswordToken.token,
 			};
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
@@ -203,15 +203,15 @@ describe('POST /auth/reset-password', () => {
 			const authuser_id = "123456789012345678901234";
 
 			// generate and add valid reset-password token into db
-			const { resetPasswordToken, tokenId } = await tokenService.generateResetPasswordToken(authuser_id);
+			const resetPasswordToken = await tokenService.generateResetPasswordToken(authuser_id);
 
 			// update the token as blacklisted
-			await tokenService.updateTokenAsBlacklisted(tokenId);
+			await tokenService.updateTokenAsBlacklisted(resetPasswordToken.id);
 
 			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
-				token: resetPasswordToken
+				token: resetPasswordToken.token,
 			};
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
@@ -230,12 +230,12 @@ describe('POST /auth/reset-password', () => {
 			const authuser_id = "123456789012345678901234";
 
 			// generate and add valid reset-password token into db
-			const { resetPasswordToken } = await tokenService.generateResetPasswordToken(authuser_id);
+			const resetPasswordToken = await tokenService.generateResetPasswordToken(authuser_id);
 
 			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
-				token: resetPasswordToken
+				token: resetPasswordToken.token,
 			};
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
@@ -257,7 +257,7 @@ describe('POST /auth/reset-password', () => {
 			const authuser = await authuserDbService.addAuthUser(authuserx);
 
 			// generate and add valid reset-password token into db
-			const { resetPasswordToken } = await tokenService.generateResetPasswordToken(authuser.id);
+			const resetPasswordToken = await tokenService.generateResetPasswordToken(authuser.id);
 
 			// update the authuser as disabled
 			await authuserService.toggleAbility(authuser.id);
@@ -265,7 +265,7 @@ describe('POST /auth/reset-password', () => {
 			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
-				token: resetPasswordToken
+				token: resetPasswordToken.token,
 			};
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
@@ -291,12 +291,12 @@ describe('POST /auth/reset-password', () => {
 			const authuser = await authuserDbService.addAuthUser(authuserx);
 
 			// generate and add valid reset-password token into db
-			const { resetPasswordToken } = await tokenService.generateResetPasswordToken(authuser.id);
+			const resetPasswordToken = await tokenService.generateResetPasswordToken(authuser.id);
 
 			const resetPasswordForm = {
 				password: '11aaAA88$',
 				passwordConfirmation: '11aaAA88$',
-				token: resetPasswordToken
+				token: resetPasswordToken.token,
 			};
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);

@@ -24,8 +24,6 @@ setupRedis();
 
 describe('POST /auth/refresh-tokens', () => {
 
-	const userAgent = "from-jest-test";
-
 	describe('Refresh Token Validation Errors', () => {
 
 		test('should return 422 Validation Error if refresh token is not in the request body', async () => {
@@ -42,6 +40,7 @@ describe('POST /auth/refresh-tokens', () => {
 
 		const userAgent = "from-jest-test";
 		let accessToken, refreshToken, authuserId;
+		let refreshTokenId, refreshTokenFamily;
 
 		beforeEach(async () => {
 			const { authuser, tokens } = await TestUtil.createAuthUser("talat@google.com", "Pass1word!", userAgent);
@@ -49,6 +48,8 @@ describe('POST /auth/refresh-tokens', () => {
 			authuserId = authuser.id;
 			accessToken = tokens.access.token;
 			refreshToken = tokens.refresh.token;
+			refreshTokenId = tokens.refresh.id;
+			refreshTokenFamily = tokens.refresh.family;
 		});
 
 
@@ -64,11 +65,8 @@ describe('POST /auth/refresh-tokens', () => {
 
 		
 		test('should return 401 and disable family if refresh token is blacklisted (first time violation)', async () => {
-			// find the refresh token in db to get id
-			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuserId });
-
 			// Update the refresh token with the { blacklisted: true }
-			await tokenService.updateTokenAsBlacklisted(refrehTokenDoc.id);
+			await tokenService.updateTokenAsBlacklisted(refreshTokenId);
 
 			// add two refresh tokens into db for the user and with the same family, keep them not blacklisted
 			// to make further expect is more reasonable related with disable below family tokens, and store both jti into cache as blacklisted
@@ -78,7 +76,7 @@ describe('POST /auth/refresh-tokens', () => {
 				type: tokenTypes.REFRESH,
 				expires: "no-matter-for-the-test",
 				jti: "i-am-supposed-to-be-blacklisted",
-				family: refrehTokenDoc.family,
+				family: refreshTokenFamily,
 				blacklisted: false
 			});
 
@@ -88,7 +86,7 @@ describe('POST /auth/refresh-tokens', () => {
 				type: tokenTypes.REFRESH,
 				expires: "no-matter-for-the-test",
 				jti: "i-am-supposed-to-be-blacklisted-too",
-				family: refrehTokenDoc.family,
+				family: refreshTokenFamily,
 				blacklisted: false
 			});
 
@@ -101,7 +99,7 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected");
 
 			// check the whole refresh token's family are in db // up to now, 3 refresh tokens would be added above
-			const data = await tokenDbService.getTokens({ family: refrehTokenDoc.family });
+			const data = await tokenDbService.getTokens({ family: refreshTokenFamily });
 			expect(data.length).toBe(3);
 
 			// check the all refresh tokens that belong to the family are blacklisted
@@ -119,11 +117,8 @@ describe('POST /auth/refresh-tokens', () => {
 
 
 		test('should return 401 and delete family if refresh token is blacklisted (second time violation)', async () => {
-			// find the refresh token in db to get id
-			const refrehTokenDoc = await tokenDbService.getToken({ token: refreshToken, type: tokenTypes.REFRESH, user: authuserId });
-
 			// Update the refresh token with the { blacklisted: true }
-			await tokenService.updateTokenAsBlacklisted(refrehTokenDoc.id);
+			await tokenService.updateTokenAsBlacklisted(refreshTokenId);
 
 			// add two refresh tokens into db for the user and with the same family, but set all as blacklisted for this time
 			// to make further expect is more reasonable related with delete family tokens.
@@ -133,7 +128,7 @@ describe('POST /auth/refresh-tokens', () => {
 				type: tokenTypes.REFRESH,
 				expires: "no-matter-for-the-test",
 				jti: "no-matter-for-the-test",
-				family: refrehTokenDoc.family,
+				family: refreshTokenFamily,
 				blacklisted: true
 			});
 
@@ -143,7 +138,7 @@ describe('POST /auth/refresh-tokens', () => {
 				type: tokenTypes.REFRESH,
 				expires: "no-matter-for-the-test",
 				jti: "no-matter-for-the-test",
-				family: refrehTokenDoc.family,
+				family: refreshTokenFamily,
 				blacklisted: true
 			});
 
@@ -156,7 +151,7 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected");
 
 			// check the whole refresh token's family are removed from db // up to now, 3 refresh tokens would be added above
-			const data = await tokenDbService.getTokens({ family: refrehTokenDoc.family });
+			const data = await tokenDbService.getTokens({ family: refreshTokenFamily });
 			expect(data.length).toBe(0);
 
 			// no need to check cache, since access tokens' jtis are already in the blacklist, see the test above
@@ -222,13 +217,12 @@ describe('POST /auth/refresh-tokens', () => {
 	describe('Failed refresh process after Refresh Token JWT Verification', () => {
 
 		const userAgent = "from-jest-test";
-		let accessToken, refreshToken, authuserId;
+		let refreshToken, authuserId;
 
 		beforeEach(async () => {
-			const { authuser, tokens } = await TestUtil.createAuthUser("talat@google.com", "Pass1word!", userAgent);
+			const { authuser } = await TestUtil.createAuthUser("talat@google.com", "Pass1word!", userAgent);
 
 			authuserId = authuser.id;
-			accessToken = tokens.access.token;
 
 			// create a new refreshtoken for that authuser (not expired but "not valid before" is 0 in order not to be trapped)
 			const jti = crypto.randomBytes(16).toString('hex');
@@ -290,6 +284,8 @@ describe('POST /auth/refresh-tokens', () => {
 
 
 	describe('Success refresh token response', () => {
+
+		const userAgent = "from-jest-test";
 
 		test('should return status 201; and return valid tokens in json form', async () => {
 			const { authuser } = await TestUtil.createAuthUser("talat@google.com", "Pass1word!", userAgent);

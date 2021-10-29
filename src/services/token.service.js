@@ -24,7 +24,7 @@ const redisService = require('./redis.service');
 
 /**
  * Generate token
- * @param {ObjectId} userId
+ * @param {string} userId
  * @param {Moment} expires
  * @param {tokenTypes} type
  * @param {string} jti
@@ -221,26 +221,20 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
  * @param {string} userId
  * @param {string} userAgent
  * @param {string} family
- * @returns {Promise<Object>}
+ * @returns {Promise<{ access: Object, refresh: Token }>}
  */
 const generateAuthTokens = async (userId, userAgent, family) => {
 	try {
 		// we will give the same jti to both (access & refresh) to make connection between
 		const jti = crypto.randomBytes(16).toString('hex');
 
-		const { accessToken, accessTokenExpires } = generateAccessToken(userId, userAgent, jti);
+		const accessToken = generateAccessToken(userId, userAgent, jti);
 
-		const { refreshToken, refreshTokenExpires } = await generateRefreshToken(userId, userAgent, jti, family);
+		const refreshToken = await generateRefreshToken(userId, userAgent, jti, family);
 
 		return {
-			access: {
-			token: accessToken,
-			expires: accessTokenExpires.toDate(),
-			},
-			refresh: {
-			token: refreshToken,
-			expires: refreshTokenExpires.toDate(),
-			},
+			access: accessToken,
+			refresh: refreshToken,
 		};
 
 	} catch (error) {
@@ -264,7 +258,7 @@ const generateAccessToken = (userId, userAgent, jti) => {
 			jti, 
 			userAgent
 		);
-		return { accessToken, accessTokenExpires };
+		return { token: accessToken, expires: accessTokenExpires };
 
 	} catch (error) {
 		throw locateError(error, "TokenService : generateAccessToken");
@@ -275,12 +269,12 @@ const generateAccessToken = (userId, userAgent, jti) => {
 /**
  * Generate refresh token and save the token document to db
  * @param {string} userId
- * @returns {Promise<Object>}
+ * @returns {Promise<Token>}
  */
 const generateRefreshToken = async (userId, userAgent, jti, family) => {
 	try {
 		const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
-		const refreshToken = generateToken(
+		const tokenString = generateToken(
 			userId, 
 			refreshTokenExpires, 
 			tokenTypes.REFRESH, 
@@ -289,8 +283,8 @@ const generateRefreshToken = async (userId, userAgent, jti, family) => {
 			config.jwt.accessExpirationMinutes * 60,  // not valid before is 60
 		);
 
-		const tokenDoc = new Token(
-			refreshToken,
+		const tokenObject = new Token(
+			tokenString,
 			userId,
 			refreshTokenExpires.toDate(),
 			tokenTypes.REFRESH,
@@ -298,9 +292,12 @@ const generateRefreshToken = async (userId, userAgent, jti, family) => {
 			(family ?? `${userId}-${jti}`)
 		);
 		
-		await tokenDbService.addToken(tokenDoc);
+		const refreshToken = await tokenDbService.addToken(tokenObject);
 
-		return { refreshToken, refreshTokenExpires };
+		if (!refreshToken)
+			throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
+
+		return refreshToken;
 
 	} catch (error) {
 		throw locateError(error, "TokenService : generateRefreshToken");
@@ -311,30 +308,30 @@ const generateRefreshToken = async (userId, userAgent, jti, family) => {
 /**
  * Generate reset password token and save the token document to db
  * @param {string} userId
- * @returns {Promise<string>}
+ * @returns {Promise<Token>}
  */
 const generateResetPasswordToken = async (userId) => {
 	try {
 		const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
-		const resetPasswordToken = generateToken(
+		const tokenString = generateToken(
 			userId, 
 			expires, 
 			tokenTypes.RESET_PASSWORD
 		);
 
-		const token = new Token(
-			resetPasswordToken,
+		const tokenObject = new Token(
+			tokenString,
 			userId,
 			expires.toDate(),
 			tokenTypes.RESET_PASSWORD
 		);
 
-		const resetPasswordTokenDoc = await tokenDbService.addToken(token);
+		const resetPasswordToken = await tokenDbService.addToken(tokenObject);
 
-		if (!resetPasswordTokenDoc)
+		if (!resetPasswordToken)
 			throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
 		
-		return { resetPasswordToken, tokenId: resetPasswordTokenDoc.id };
+		return resetPasswordToken;
 
 	} catch (error) {
 		throw locateError(error, "TokenService : generateResetPasswordToken");
@@ -345,30 +342,30 @@ const generateResetPasswordToken = async (userId) => {
 /**
  * Generate verify email token and save the token document to db
  * @param {string} userId
- * @returns {Promise<string>}
+ * @returns {Promise<Token>}
  */
 const generateVerifyEmailToken = async (userId) => {
 	try {
 		const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
-		const verifyEmailToken = generateToken(
+		const tokenString = generateToken(
 			userId, 
 			expires, 
 			tokenTypes.VERIFY_EMAIL
 		);
 
-		const token = new Token(
-			verifyEmailToken,
+		const tokenObject = new Token(
+			tokenString,
 			userId,
 			expires.toDate(),
 			tokenTypes.VERIFY_EMAIL
 		);
 
-		const verifyEmailTokenDoc = await tokenDbService.addToken(token);
+		const verifyEmailToken = await tokenDbService.addToken(tokenObject);
 
-		if (!verifyEmailTokenDoc)
+		if (!verifyEmailToken)
 			throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
 
-		return { verifyEmailToken, tokenId: verifyEmailTokenDoc.id };
+		return verifyEmailToken;
 
 	} catch (error) {
 		throw locateError(error, "TokenService : generateVerifyEmailToken");

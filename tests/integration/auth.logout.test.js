@@ -23,6 +23,7 @@ describe('POST /auth/logout', () => {
 
 	const userAgent = "from-jest-test";
 	let accessToken, refreshToken, authuserId;
+	let refreshTokenId, refreshTokenJti, refreshTokenFamily;
 
 	beforeEach(async () => {
 		const { authuser, tokens } = await TestUtil.createAuthUser("talat@google.com", "Pass1word!", userAgent);
@@ -30,6 +31,9 @@ describe('POST /auth/logout', () => {
 		authuserId = authuser.id;
 		accessToken = tokens.access.token;
 		refreshToken = tokens.refresh.token;
+		refreshTokenId = tokens.refresh.id;
+		refreshTokenJti = tokens.refresh.jti;
+		refreshTokenFamily = tokens.refresh.family;
 	});
 
 
@@ -40,8 +44,7 @@ describe('POST /auth/logout', () => {
 			// it requires also the redis down at the moment of refresh token rotation, causing the access token in not blacklisted
 
 			// Update the refresh token with the { blacklisted: true } in order to produce problem
-			const { id } = await tokenDbService.getToken({ token: refreshToken, user: authuserId, type: tokenTypes.REFRESH });
-			await tokenDbService.updateToken(id, { blacklisted: true });
+			await tokenDbService.updateToken(refreshTokenId, { blacklisted: true });
 
 			const response = await request(app).post('/auth/logout')
 												.set('Authorization', `Bearer ${accessToken}`) 
@@ -98,7 +101,6 @@ describe('POST /auth/logout', () => {
 		jest.setTimeout(50000);
 
 		test('should return 204 even if redis cache server is down during logout', async () => {
-			
 			console.log("Redis is getting closed intentionally for the test...");
 			shell.exec('npm run redis:stop');
 			await new Promise(resolve => setTimeout(resolve, 10000));
@@ -125,10 +127,6 @@ describe('POST /auth/logout', () => {
 
 
 		test('should return 204, remove refresh token family from db and revoke access tokens', async () => {
-			
-			// for further test, find authuser's refresh token from db, to get its family and jti before it is deleted
-			const { jti, family } = await tokenDbService.getToken({ token: refreshToken, user: authuserId, type: tokenTypes.REFRESH });
-
 			const response = await request(app).post('/auth/logout')
 												.set('Authorization', `Bearer ${accessToken}`) 
 												.set('User-Agent', userAgent) 
@@ -137,11 +135,11 @@ describe('POST /auth/logout', () => {
 			expect(response.status).toBe(httpStatus.NO_CONTENT);
 
 			// check the access token of the authuser is in the blacklist
-			const result = await redisService.check_jti_in_blacklist(jti);
+			const result = await redisService.check_jti_in_blacklist(refreshTokenJti);
 			expect(result).toBe(true);
 
 			// check whether there is any refresh token with refresToken's family in the db 
-			const data = await tokenDbService.getTokens({ family });
+			const data = await tokenDbService.getTokens({ family: refreshTokenFamily });
 			expect(data.length).toBe(0);
 		});
 	});

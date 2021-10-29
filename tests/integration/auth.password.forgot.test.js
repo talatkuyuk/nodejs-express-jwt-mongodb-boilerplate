@@ -110,7 +110,7 @@ describe('POST /auth/forgot-password', () => {
 
 			// check the reset password token is stored in db
 			const resetPasswordTokenDoc = await tokenDbService.getToken({ token: resetPasswordToken, user: authuser.id, type: tokenTypes.RESET_PASSWORD });
-			expect(resetPasswordTokenDoc.user.toString()).toEqual(authuser.id);
+			expect(resetPasswordTokenDoc.user).toEqual(authuser.id);
  		})
 	});
 
