@@ -3,8 +3,9 @@ const httpStatus = require('http-status');
 const moment = require('moment');
 const {serializeError} = require('serialize-error');
 
-const { tokenDbService } = require('../../src/services');
+const { tokenService, tokenDbService, authuserDbService } = require('../../src/services');
 const { tokenTypes } = require('../../src/config/tokens');
+const { AuthUser } = require('../../src/models');
 const { ApiError } = require('../../src/utils/ApiError');
 const config = require('../../src/config');
 
@@ -105,6 +106,15 @@ class TestUtil {
 		expect(err.name).toBe("ValidationError");
 		expect(err.message).toEqual("The request could not be validated");
 		expect(err.description).toBeNull();
+	}
+
+	static createAuthUser = async (email, password, userAgent) => {
+		const authUserInstance = AuthUser.fromObject({ email, password });
+
+		const authuser = await authuserDbService.addAuthUser(authUserInstance);
+		const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
+
+		return { authuser, tokens }
 	}
 
 }

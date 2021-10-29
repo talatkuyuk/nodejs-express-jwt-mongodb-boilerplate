@@ -19,10 +19,8 @@ setupRedis();
 describe('PATH /authusers', () => {
 
 	const userAgent = "from-jest-test";
-	let adminAccessToken, adminAuthuserId;
 	const localDb = {}; // reflects the database authusers collection
-
-	jest.setTimeout(50000);
+	let adminAccessToken, adminAuthuserId;
 
 	beforeEach(async () => {
 		// create an authuser

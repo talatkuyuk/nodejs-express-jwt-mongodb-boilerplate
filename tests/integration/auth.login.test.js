@@ -21,8 +21,6 @@ describe('POST /auth/login', () => {
 
 	describe('Request Validation Errors', () => {
 
-		jest.setTimeout(50000);
-
 	  	test('should return 422 Validation Error if email is empty or falsy value', async () => {
 			const loginForm = {
 				password: 'Pass1word.',

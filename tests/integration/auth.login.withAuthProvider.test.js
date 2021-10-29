@@ -20,8 +20,6 @@ setupRedis();
 
 describe('POST /auth/google & auth/facebook', () => {
 
-	jest.setTimeout(50000);
-
 	describe('Failed logins with AuthProvider', () => {
 
 		test('should return status 401, if the oAuth provider (google) token is invalid', async () => {

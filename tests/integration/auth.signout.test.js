@@ -9,6 +9,8 @@ const { authuserDbService, tokenDbService, tokenService, redisService } = requir
 const { AuthUser } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 
+const TestUtil = require('../testutil/TestUtil');
+
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');
 
@@ -19,21 +21,13 @@ setupRedis();
 
 describe('POST /auth/signout', () => {
 
-	jest.setTimeout(50000);
-
-	let accessToken, refreshToken;
-	let authuser, tokens;
 	const userAgent = "from-jest-test";
+	let accessToken, refreshToken, authuserId;
 
 	beforeEach(async () => {
-		const authUserInstance = AuthUser.fromObject({
-			email: 'talat@google.com',
-			password: 'HashedPass1word.HashedString.HashedPass1word'
-		});
+		const { authuser, tokens } = await TestUtil.createAuthUser("talat@google.com", "Pass1word!", userAgent);
 
-		authuser = await authuserDbService.addAuthUser(authUserInstance);
-		tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
-
+		authuserId = authuser.id;
 		accessToken = tokens.access.token;
 		refreshToken = tokens.refresh.token;
 	});
@@ -48,7 +42,7 @@ describe('POST /auth/signout', () => {
 			// add a token into db for the user, to make further expect is more reasonable related with removal the user's whole tokens.
 			await tokenDbService.addToken({
 				token: "no-matter-for-this-test",
-				user: authuser.id,
+				user: authuserId,
 				type: tokenTypes.VERIFY_EMAIL,
 				expires: "no-matter-for-this-test",
 				family: "no-matter-for-this-test",
@@ -68,15 +62,15 @@ describe('POST /auth/signout', () => {
 			expect(result).toBe(true);
 
 			// check the authuser's whole tokens and are removed from db
-			const data = await tokenDbService.getTokens({ user: authuser.id });
+			const data = await tokenDbService.getTokens({ user: authuserId });
 			expect(data.length).toBe(0);
 
 			// check the authuser is removed from authuser collection in db
-			const data1 = await authuserDbService.getAuthUser({ id: authuser.id });
+			const data1 = await authuserDbService.getAuthUser({ id: authuserId });
 			expect(data1).toBeNull();
 
 			// check the authuser is moved to deleted authuser collection in db
-			const data2 = await authuserDbService.getDeletedAuthUser({ id: authuser.id });
+			const data2 = await authuserDbService.getDeletedAuthUser({ id: authuserId });
 			expect(data2).not.toBeNull();
 			expect(data2.deletedAt).not.toBeNull();
 		});

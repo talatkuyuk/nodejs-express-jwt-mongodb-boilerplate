@@ -20,8 +20,6 @@ setupRedis();
 
 describe('POST /auth/reset-password', () => {
 
-	jest.setTimeout(50000);
-
 	describe('Request Validation (password, passwordConfirmation, token) Errors', () => {
 
 		test('should return 422 Validation Error if password is empty or falsy value', async () => {

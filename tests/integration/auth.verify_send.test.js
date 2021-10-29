@@ -21,23 +21,15 @@ setupRedis();
 
 describe('POST /auth/send-verification-email', () => {
 
-	jest.setTimeout(50000);
-
-	let accessToken, refreshToken;
-	let authuser, tokens;
 	const userAgent = "from-jest-test";
+	let accessToken, authuserId, authuseEmail;
 
 	beforeEach(async () => {
-		const authUserInstance = AuthUser.fromObject({
-			email: 'talat@google.com',
-			password: 'HashedPass1word.HashedString.HashedPass1word'
-		});
+		const { authuser, tokens } = await TestUtil.createAuthUser("talat@google.com", "Pass1word!", userAgent);
 
-		authuser = await authuserDbService.addAuthUser(authUserInstance);
-		tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
-
+		authuserId = authuser.id;
+		authuseEmail = authuser.email;
 		accessToken = tokens.access.token;
-		refreshToken = tokens.refresh.token;
 	});
 
 
@@ -46,7 +38,7 @@ describe('POST /auth/send-verification-email', () => {
 		test('should return status 400, if the email is already verified', async () => {
 
 			// update the authuser with isEmailVerifid true
-			await authuserDbService.updateAuthUser(authuser.id, { isEmailVerified: true });
+			await authuserDbService.updateAuthUser(authuserId, { isEmailVerified: true });
 
 			const response = await request(app).post('/auth/send-verification-email')
 												.set('Authorization', `Bearer ${accessToken}`) 
@@ -92,18 +84,18 @@ describe('POST /auth/send-verification-email', () => {
 
 			expect(response.status).toBe(httpStatus.NO_CONTENT);
 
-			expect(spyOnSendVerificationEmail).toHaveBeenCalledWith(authuser.email, expect.any(String));
+			expect(spyOnSendVerificationEmail).toHaveBeenCalledWith(authuseEmail, expect.any(String));
 			
 			// obtain the token from the function on that spied 
 			const verifyEmailToken = spyOnSendVerificationEmail.mock.calls[0][1];
 
 			// check the verify email token belongs to the authuser
 			const { sub } = jwt.decode(verifyEmailToken, config.jwt.secret);
-			expect(sub).toEqual(authuser.id);
+			expect(sub).toEqual(authuserId);
 
 			// check the verify email token is stored in db
-			const verifyEmailTokenDoc = await tokenDbService.getToken({ token: verifyEmailToken, user: authuser.id, type: tokenTypes.VERIFY_EMAIL });
-			expect(verifyEmailTokenDoc.user.toString()).toEqual(authuser.id);
+			const verifyEmailTokenDoc = await tokenDbService.getToken({ token: verifyEmailToken, user: authuserId, type: tokenTypes.VERIFY_EMAIL });
+			expect(verifyEmailTokenDoc.user.toString()).toEqual(authuserId);
  		})
 	});
 

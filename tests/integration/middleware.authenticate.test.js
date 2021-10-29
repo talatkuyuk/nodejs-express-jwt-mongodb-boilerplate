@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
 const httpMocks = require('node-mocks-http');
-var shell = require('shelljs'); // in order to shotdown and restart redis to test behavior
+const shell = require('shelljs'); // in order to shotdown and restart redis to test behavior
 
 // without the express app which is actually not necessary, the tests stucks, I don't know the reason
 const app = require('../../src/core/express');
@@ -27,8 +27,6 @@ setupRedis();
 
 
 describe('Auth Middleware', () => {
-
-	jest.setTimeout(50000);
 
 	TestUtil.MatchErrors();
 
@@ -106,25 +104,21 @@ describe('Auth Middleware', () => {
 
 	describe('Failed Authentications', () => {
 
-		let accessToken, refreshToken;
-		let authuser, tokens;
+		jest.setTimeout(50000);
+
 		const userAgent = "from-jest-test";
-		
+		let accessToken, refreshToken, authuserId;
+
 		beforeEach(async () => {
-			const authUserInstance = AuthUser.fromObject({
-				email: 'talat@google.com',
-				password: 'HashedPass1word.HashedString.HashedPass1word'
-			});
+			const { authuser, tokens } = await TestUtil.createAuthUser("talat@google.com", "Pass1word!", userAgent);
 
-			authuser = await authuserDbService.addAuthUser(authUserInstance);
-			tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
-
+			authuserId = authuser.id;
 			accessToken = tokens.access.token;
 			refreshToken = tokens.refresh.token;
 		});
 
 		test('should throw ApiError with code 401, if access token does not refer any user', async () => {
-			await authuserDbService.deleteAuthUser(authuser.id);
+			await authuserDbService.deleteAuthUser(authuserId);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${accessToken}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "Access token does not refer any user");
@@ -143,7 +137,7 @@ describe('Auth Middleware', () => {
 
 
 		test('should throw ApiError with code 401, if verify email token is used as access token', async () => {
-			const { verifyEmailToken } = await tokenService.generateVerifyEmailToken(authuser.id);
+			const { verifyEmailToken } = await tokenService.generateVerifyEmailToken(authuserId);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${verifyEmailToken}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "Invalid token type");
@@ -154,15 +148,9 @@ describe('Auth Middleware', () => {
 
 		test('should throw ApiError with code 401, if access token that belongs to other user is used', async () => {
 			// This means that it is stolen, the only prevention is to check the useragent which is embedded in the access token
-			const authUserInstance2 = AuthUser.fromObject({
-				email: 'kuyuk@google.com',
-				password: 'HashedPass1word.HashedString.HashedPass1word'
-			});
-
 			const userAgent2 = "from-google-chrome";
-
-			const authuser2 = await authuserDbService.addAuthUser(authUserInstance2);
-			const tokens2 = await tokenService.generateAuthTokens(authuser2.id, userAgent2);
+			
+			const { tokens: tokens2 } = await TestUtil.createAuthUser("talat@google.com", "Pass1word!", userAgent2);
 
 			// authuser tries to use authuser2's access token but using different user agent
 			const requestHeader = { headers: { Authorization: `Bearer ${tokens2.access.token}` }, useragent: { source: userAgent }};
@@ -174,7 +162,7 @@ describe('Auth Middleware', () => {
 
 		test('should throw ApiError with code 401, if access token is generated with an invalid secret', async () => {
 
-			accessToken = tokenService.generateToken(authuser.id, moment().add(5, 'minutes'), tokenTypes.ACCESS, "jti", userAgent, 0, "INVALID-SECRET");
+			accessToken = tokenService.generateToken(authuserId, moment().add(5, 'minutes'), tokenTypes.ACCESS, "jti", userAgent, 0, "INVALID-SECRET");
 
 			const requestHeader = { headers: { Authorization: `Bearer ${accessToken}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "JsonWebTokenError: invalid signature");
@@ -185,7 +173,7 @@ describe('Auth Middleware', () => {
 
 		test('should throw ApiError with code 403, if the user is disabled', async () => {
 			// update the authuser as disabled
-			await authuserService.toggleAbility(authuser.id);
+			await authuserService.toggleAbility(authuserId);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${accessToken}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "You are disabled, call the system administrator");
@@ -226,7 +214,7 @@ describe('Auth Middleware', () => {
 				await authenticate(req, res, next);
 				
 				expect(next).toHaveBeenCalledWith();
-				expect(req.authuser.id).toEqual(authuser.id);
+				expect(req.authuserId).toEqual(authuserId);
 			}
 				
 			console.log("Redis is getting re-started intentionally for the test...");
@@ -241,15 +229,9 @@ describe('Auth Middleware', () => {
 		
 		test('should continue next middleware with user is attached to the request', async () => {
 
-			const authUserInstance = AuthUser.fromObject({
-				email: 'talat@google.com',
-				password: 'HashedPass1word.HashedString.HashedPass1word'
-			});
-
 			const userAgent = "from-jest-test";
-				
-			const authuser = await authuserDbService.addAuthUser(authUserInstance);
-			const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
+
+			const { authuser, tokens } = await TestUtil.createAuthUser("talat@google.com", "Pass1word!", userAgent);
 			
 			const requestHeader = { headers: { Authorization: `Bearer ${tokens.access.token}` }, useragent: { source: userAgent }};
 
