@@ -136,8 +136,7 @@ const addUser = [
 		.trim()
 		.toLowerCase()
 		.equals('user')
-		.withMessage("The role must be setted as 'user' while creating")
-		.bail(),
+		.withMessage("The role must be setted as 'user' while creating"),
 
 	check_body_name().optional(),
 	check_body_gender().optional(),
