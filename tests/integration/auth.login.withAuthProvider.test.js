@@ -79,7 +79,7 @@ describe('POST /auth/google & auth/facebook', () => {
 
 
 		test('should return status 403, if the authuser is disabled', async () => {
-			const authuser = AuthUser.fromObject({
+			const authuser = AuthUser.fromDoc({
 				email: 'talat@gmail.com',
 				password: await bcrypt.hash('Pass1word.', 8),
 				isDisabled: true,
@@ -160,7 +160,7 @@ describe('POST /auth/google & auth/facebook', () => {
 
 		test('should return status 200; return the authuser and valid tokens in json form; successfully update services if the user is already registered before', async () => {
 
-			const authuserDoc = AuthUser.fromObject({
+			const authuserDoc = AuthUser.fromDoc({
 				email: 'talat@gmail.com',
 				password: await bcrypt.hash('Pass1word.', 8),
 				isEmailVerified: false,

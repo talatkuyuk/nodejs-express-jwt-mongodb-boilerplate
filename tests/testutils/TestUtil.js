@@ -109,7 +109,7 @@ class TestUtil {
 	}
 
 	static createAuthUser = async (email, password, userAgent) => {
-		const authUserInstance = AuthUser.fromObject({ email, password });
+		const authUserInstance = AuthUser.fromDoc({ email, password });
 
 		const authuser = await authuserDbService.addAuthUser(authUserInstance);
 		const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);

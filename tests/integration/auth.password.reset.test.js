@@ -248,7 +248,7 @@ describe('POST /auth/reset-password', () => {
 
 		test('should return status 404, if the user is disabled', async () => {
 
-			const authuserx = AuthUser.fromObject({
+			const authuserx = AuthUser.fromDoc({
 				email: 'talat@gmail.com',
 				password: 'no-matters-for-this-test',
 			});
@@ -282,7 +282,7 @@ describe('POST /auth/reset-password', () => {
 
 		test('should return status 204, delete reset-password tokens of the user', async () => {
 			
-			const authuserx = AuthUser.fromObject({
+			const authuserx = AuthUser.fromDoc({
 				email: 'talat@gmail.com',
 				password: 'no-matters-for-this-test',
 			});

@@ -157,7 +157,7 @@ const { locateError } = require('../utils/ApiError');
 		console.log("deleteUser: ", id);
 
 		const db = mongodb.getDatabase();
-		const result = await db.collection("users").findOneAndDelete({_id: ObjectId(id)});
+		const result = await db.collection("users").findOneAndDelete({ _id: ObjectId(id) });
 
 		if (result.ok !== 1) return false;
 		if (result.value === null) return false;

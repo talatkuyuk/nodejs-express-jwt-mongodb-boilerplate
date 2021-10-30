@@ -59,7 +59,7 @@ describe('POST /auth/forgot-password', () => {
 
 
 		test('should return status 500, if the email service does not respond', async () => {
-			const authuserx = AuthUser.fromObject({
+			const authuserx = AuthUser.fromDoc({
 				email: 'talat@gmail.com',
 				password: await bcrypt.hash('Pass1word.', 8),
 			});
@@ -85,7 +85,7 @@ describe('POST /auth/forgot-password', () => {
 
 		test('should return status 204, generate and store reset-password token in db', async () => {
 			
-			const authuserx = AuthUser.fromObject({
+			const authuserx = AuthUser.fromDoc({
 				email: 'talat@gmail.com',
 				password: await bcrypt.hash('Pass1word.', 8),
 			});

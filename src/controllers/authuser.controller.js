@@ -76,6 +76,8 @@ const toggleAbility = asyncHandler(async (req, res) => {
 		const id = req.params.id;
 	
 		await authuserService.toggleAbility(id);
+
+		// TODO: consider deleting the all tokens of the authuser after disabling
 	  
 		res.status(httpStatus.NO_CONTENT).send();
 		

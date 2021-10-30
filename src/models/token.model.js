@@ -28,7 +28,7 @@ class Token {
 			doc.blacklisted,
 			doc.createdAt,
 		)
-		tokenDoc.transformId(doc._id);
+		doc._id && tokenDoc.transformId(doc._id);
 		return tokenDoc;
 	}
 

@@ -200,10 +200,10 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 		// and each refresh token should be blacklisted and so related access token should too.
 		} else {
 			for (tokenRecord of not_blacklisted_family_member_refresh_tokens) {
-				console.log(`disableFamilyRefreshToken: in loop: ${tokenRecord._id}`);
+				console.log(`disableFamilyRefreshToken: in loop: ${tokenRecord.id}`);
 	
 				// Update each refresh token with the { blacklisted: true }
-				await updateTokenAsBlacklisted(tokenRecord._id);
+				await updateTokenAsBlacklisted(tokenRecord.id);
 
 				// put the related access token's jti into the blacklist
 				await redisService.put_into_blacklist("jti", tokenRecord.jti);

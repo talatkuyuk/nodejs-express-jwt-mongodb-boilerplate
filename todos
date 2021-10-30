@@ -21,8 +21,10 @@
 
 //TODO: seperate authentication and authorization middleware +
 //TODO: move joined routes to a seperate router; and create a dedicated controller for joined operations +
-//TODO: consider the tokens to be deleted while disable user
-//TODO: put Auth Providers token into redis for a different time, create put_token, and check_token functions in the redis service
+//TODO: consider the tokens to be deleted while disable user +
+//TODO: put Auth Providers token into redis for a different time, create put_token, and check_token functions in the redis service +
+//TODO: re-orginize test files creating some functions that being used throughout the tests in TestUtil +
+//TODO: update getTokens considering the results have id instead of _id +
 //TODO: update joined queries considering full outer join (currently they are in behavior of left outer join)
 //TODO: update unhandledRejection and uncaughtException mechanism
 //TODO: update ErrorHandler strategy and isOperational logic

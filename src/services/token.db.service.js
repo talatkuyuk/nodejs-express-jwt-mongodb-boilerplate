@@ -69,7 +69,12 @@ const getTokens = async (query) => {
 		query.user && (query.user = ObjectId(query.user));
 
 		const db = mongodb.getDatabase();
-		const tokens = await db.collection("tokens").find(query).toArray();
+		const tokens = await db.collection("tokens")
+			.find(query)
+			.project({ _id: 0, id: "$_id", token: 1, user: 1, expires: 1, type: 1, jti: 1, family: 1, blacklisted: 1,  createdAt: 1 })
+			.toArray();
+
+		console.log(tokens)
 
 		return tokens;
 
@@ -119,7 +124,7 @@ const deleteToken = async (id) => {
 		console.log("deleteToken: ", id);
 
 		const db = mongodb.getDatabase();
-		const result = await db.collection("tokens").deleteOne({_id: ObjectId(id)});
+		const result = await db.collection("tokens").deleteOne({ _id: ObjectId(id) });
 
 		return {isDeleted: result.result.ok === 1, deletedCount: result.deletedCount };
 		
