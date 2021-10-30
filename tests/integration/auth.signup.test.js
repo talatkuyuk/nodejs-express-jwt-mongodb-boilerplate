@@ -51,7 +51,7 @@ describe('POST /auth/signup', () => {
 
 		test('should return 422 Validation Error if email is already taken', async () => {
 
-			const authuser = AuthUser.fromObject({
+			const authuser = AuthUser.fromDoc({
 				email: 'talat@google.com',
 				password: 'HashedPass1word.HashedString.HashedPass1word'
 			})

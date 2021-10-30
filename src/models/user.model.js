@@ -24,7 +24,7 @@ class User {
 			doc.country,
 			doc.createdAt,
 		)
-		user.transformId(doc._id);
+		doc._id && user.transformId(doc._id);
 		doc.deletedAt && (user.deletedAt = doc.deletedAt) // for deletedusers
 		return user;
 	}

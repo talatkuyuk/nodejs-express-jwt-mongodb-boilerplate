@@ -95,7 +95,7 @@ describe('POST /auth/login', () => {
 
 		test('should return status 403, if the user is disabled', async () => {
 			const hashedPassword = await bcrypt.hash('Pass1word.', 8);
-			const authuser = AuthUser.fromObject({
+			const authuser = AuthUser.fromDoc({
 				email: 'talat@gmail.com',
 				password: hashedPassword,
 				isDisabled: true
@@ -117,7 +117,7 @@ describe('POST /auth/login', () => {
 
 		test('should return status 401, if the password is wrong', async () => {
 			const hashedPassword = await bcrypt.hash('Pass1word.', 8);
-			const authuser = AuthUser.fromObject({
+			const authuser = AuthUser.fromDoc({
 				email: 'talat@gmail.com',
 				password: hashedPassword,
 			});
@@ -143,7 +143,7 @@ describe('POST /auth/login', () => {
 		test('should return status 200, user and valid tokens in json form; successfully login user if the request is valid', async () => {
 			const hashedPassword = await bcrypt.hash('Pass1word.', 8);
 			
-			const authuserDoc = AuthUser.fromObject({
+			const authuserDoc = AuthUser.fromDoc({
 				email: 'talat@gmail.com',
 				password: hashedPassword,
 				services: { emailpassword: "registered" }
