@@ -134,7 +134,7 @@ const logout = async (id, jti) => {
 	try {
 		
 		// put the access token's jti into the blacklist
-		await redisService.put_jti_into_blacklist(jti);
+		await redisService.put_into_blacklist("jti", jti);
 		
 	} catch (error) {
 		throw locateError(error, "AuthService : logout");
@@ -152,7 +152,7 @@ const logout = async (id, jti) => {
  const signout = async (id, jti) => {
 	try {
 		// put the access token's jti into the blacklist
-		await redisService.put_jti_into_blacklist(jti);
+		await redisService.put_into_blacklist("jti", jti);
 
 		// delete authuser by id; no need to check id in database since passed the authorization soon ago
 		await authuserDbService.deleteAuthUser(id);

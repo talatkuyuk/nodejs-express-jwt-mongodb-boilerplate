@@ -27,7 +27,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 		}
 	
 		// control if the token is in the blacklist
-		if (await redisService.check_jti_in_blacklist(payload.jti)) {
+		if (await redisService.check_in_blacklist(payload.jti)) {
 			throw new ApiError(httpStatus.FORBIDDEN, `Access token is in the blacklist`);
 		}
 			

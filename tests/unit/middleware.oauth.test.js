@@ -194,8 +194,8 @@ describe('oAuth Middleware', () => {
 
 			const customImplementation = () => ({ provider, user: authuser });
 			const spyOnGoogle = jest.spyOn(authProviders, 'google').mockImplementation(customImplementation);
-			const spyOnRedisCheck = jest.spyOn(redisService, 'check_jti_in_blacklist').mockImplementation(()=>false);
-			const spyOnRedisPut = jest.spyOn(redisService, 'put_jti_into_blacklist').mockImplementation(()=>true);
+			const spyOnRedisCheck = jest.spyOn(redisService, 'check_in_blacklist').mockImplementation(()=>false);
+			const spyOnRedisPut = jest.spyOn(redisService, 'put_into_blacklist').mockImplementation(()=>true);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${google_id_token}` } };
 
@@ -207,7 +207,7 @@ describe('oAuth Middleware', () => {
 
 			expect(spyOnGoogle).toHaveBeenCalledWith(google_id_token);
 			expect(spyOnRedisCheck).toHaveBeenCalledWith(google_id_token);
-			expect(spyOnRedisPut).toHaveBeenCalledWith(google_id_token);
+			expect(spyOnRedisPut).toHaveBeenCalledWith("token", google_id_token);
 			expect(next).toHaveBeenCalledWith();
 			expect(req.oAuth).toEqual({
 				"provider": provider,
@@ -226,8 +226,8 @@ describe('oAuth Middleware', () => {
 
 			const customImplementation = () => ({ provider, user: authuser });
 			const spyOnFacebook = jest.spyOn(authProviders, "facebook").mockImplementation(customImplementation);
-			const spyOnRedisCheck = jest.spyOn(redisService, 'check_jti_in_blacklist').mockImplementation(()=>false);
-			const spyOnRedisPut = jest.spyOn(redisService, 'put_jti_into_blacklist').mockImplementation(()=>true);
+			const spyOnRedisCheck = jest.spyOn(redisService, 'check_in_blacklist').mockImplementation(()=>false);
+			const spyOnRedisPut = jest.spyOn(redisService, 'put_into_blacklist').mockImplementation(()=>true);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${facebook_access_token}` } };
 
@@ -239,7 +239,7 @@ describe('oAuth Middleware', () => {
 
 			expect(spyOnFacebook).toHaveBeenCalledWith(facebook_access_token);
 			expect(spyOnRedisCheck).toHaveBeenCalledWith(facebook_access_token);
-			expect(spyOnRedisPut).toHaveBeenCalledWith(facebook_access_token);
+			expect(spyOnRedisPut).toHaveBeenCalledWith("token", facebook_access_token);
 			expect(next).toHaveBeenCalledWith();
 			expect(req.oAuth).toEqual({
 				"provider": provider,

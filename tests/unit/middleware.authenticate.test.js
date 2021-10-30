@@ -184,7 +184,7 @@ describe('Auth Middleware', () => {
 		test('should throw ApiError with code 403, if access token is in the blacklist', async () => {
 
 			const { jti } = jwt.decode(accessToken, config.jwt.secret);
-			await redisService.put_jti_into_blacklist(jti);
+			await redisService.put_into_blacklist("jti", jti);
 
 			const requestHeader = { headers: { Authorization: `Bearer ${accessToken}` }, useragent: { source: userAgent }};
 			const expectedError  = new ApiError(httpStatus.FORBIDDEN, "Access token is in the blacklist");

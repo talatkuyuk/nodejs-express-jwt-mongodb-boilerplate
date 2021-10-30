@@ -36,13 +36,13 @@ const oAuth = (service) => async (req, res, next) => {
 				}
 
 				// control if the authProvider's token is in the blacklist 
-				if (await redisService.check_jti_in_blacklist(oAuth.token)) {
+				if (await redisService.check_in_blacklist(oAuth.token)) {
 					throw new ApiError(httpStatus.FORBIDDEN, `The token of the auth provider (${oAuth.provider}) is allowed to be used only once`);
 				}
 
 				// if everything is okey, then put the token into the blacklist aiming one-shot usage
 				// this time we put the token itself not jti, since all authProviders' tokens does not contain a jti claim
-				await redisService.put_jti_into_blacklist(oAuth.token);
+				await redisService.put_into_blacklist("token", oAuth.token);
 
 				req.oAuth = oAuth;
 				
