@@ -206,7 +206,7 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 				await updateTokenAsBlacklisted(tokenRecord._id);
 
 				// put the related access token's jti into the blacklist
-				await redisService.put_jti_into_blacklist(tokenRecord.jti);
+				await redisService.put_into_blacklist("jti", tokenRecord.jti);
 			}
 		}
 

@@ -135,7 +135,7 @@ describe('POST /auth/logout', () => {
 			expect(response.status).toBe(httpStatus.NO_CONTENT);
 
 			// check the access token of the authuser is in the blacklist
-			const result = await redisService.check_jti_in_blacklist(refreshTokenJti);
+			const result = await redisService.check_in_blacklist(refreshTokenJti);
 			expect(result).toBe(true);
 
 			// check whether there is any refresh token with refresToken's family in the db 

@@ -106,11 +106,11 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(control).toBe(true);
 
 			// check the first refresh token above is added into blacklist cache
-			const result1 = await redisService.check_jti_in_blacklist("i-am-supposed-to-be-blacklisted");
+			const result1 = await redisService.check_in_blacklist("i-am-supposed-to-be-blacklisted");
 			expect(result1).toBe(true);
 
 			// check the second refresh token above is added into blacklist cache as well
-			const result2 = await redisService.check_jti_in_blacklist("i-am-supposed-to-be-blacklisted-too");
+			const result2 = await redisService.check_in_blacklist("i-am-supposed-to-be-blacklisted-too");
 			expect(result2).toBe(true);
 		});
 
@@ -205,7 +205,7 @@ describe('POST /auth/refresh-tokens', () => {
 
 			// check the authuser's access token is added into blacklist cache
 			const { jti } = jwt.decode(accessToken, config.jwt.secret);
-			const result = await redisService.check_jti_in_blacklist(jti);
+			const result = await redisService.check_in_blacklist(jti);
 			expect(result).toBe(true);
 		});
 	});

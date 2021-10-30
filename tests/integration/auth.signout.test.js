@@ -57,7 +57,7 @@ describe('POST /auth/signout', () => {
 
 			// check the access token of the authuser is in the blacklist
 			const { jti } = jwt.decode(accessToken, config.jwt.secret);
-			const result = await redisService.check_jti_in_blacklist(jti);
+			const result = await redisService.check_in_blacklist(jti);
 			expect(result).toBe(true);
 
 			// check the authuser's whole tokens and are removed from db
