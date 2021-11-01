@@ -10,8 +10,11 @@ const { getUsers } = require('../validations/user.ValidationRules');
 
 
 
-router.get('/authusers', authenticate, authorize('query-authusers-joined'), validate(getAuthUsers), joinedController.getAuthUsersJoined);
-router.get('/users', authenticate, authorize('query-users-joined'), validate(getUsers), joinedController.getAuthUsersJoined);
+router.get('/authusers', authenticate, authorize('query-authusers-joined'), 
+							validate(getAuthUsers), validate(getUsers), joinedController.getAuthUsersJoined);
+
+router.get('/users', authenticate, authorize('query-users-joined'), 
+							validate(getUsers), validate(getAuthUsers), joinedController.getUsersJoined);
 
 
 

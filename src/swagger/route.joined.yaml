@@ -1,0 +1,104 @@
+/joined/authusers:
+  get:
+    summary: Get the list of the authusers with left outer join on users within a paginary
+    tags: [Joined]
+    security:
+      - BearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/query-param-page'
+      - $ref: '#/components/parameters/query-param-size'
+      - $ref: '#/components/parameters/query-param-sort'
+      - $ref: '#/components/parameters/query-param-email'
+      - $ref: '#/components/parameters/query-param-isEmailVerified'
+      - $ref: '#/components/parameters/query-param-isDisabled'
+      - $ref: '#/components/parameters/query-param-role'
+      - $ref: '#/components/parameters/query-param-name'
+      - $ref: '#/components/parameters/query-param-gender'
+      - $ref: '#/components/parameters/query-param-country'
+    responses:
+      200:
+        description: The list of the authusers with the user info if exists
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/authuser'
+                totalCount:
+                  type: number
+                pagination:
+                  type: object
+                  properties:
+                    currentPage:
+                      type: number
+                    totalPages:
+                      type: number
+                    perPage:
+                      type: number
+            examples:
+              _:
+                $ref: '#/components/examples/response-query-authusers'
+      401:
+        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
+      422:
+        $ref: '#/components/responses/AuthUserQueryParamsValidationErrors'
+      500:
+        $ref: '#/components/responses/InternalServerError'
+        
+
+/joined/users:
+  get:
+    summary: Get the list of the users with left outer join on authusers within a paginary
+    tags: [Joined]
+    security:
+      - BearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/query-param-page'
+      - $ref: '#/components/parameters/query-param-size'
+      - $ref: '#/components/parameters/query-param-sort'
+      - $ref: '#/components/parameters/query-param-email'
+      - $ref: '#/components/parameters/query-param-isEmailVerified'
+      - $ref: '#/components/parameters/query-param-isDisabled'
+      - $ref: '#/components/parameters/query-param-role'
+      - $ref: '#/components/parameters/query-param-name'
+      - $ref: '#/components/parameters/query-param-gender'
+      - $ref: '#/components/parameters/query-param-country'
+    responses:
+      200:
+        description: The list of the users with the authuser info if exists
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/user'
+                totalCount:
+                  type: number
+                pagination:
+                  type: object
+                  properties:
+                    currentPage:
+                      type: number
+                    totalPages:
+                      type: number
+                    perPage:
+                      type: number
+            examples:
+              _:
+                $ref: '#/components/examples/response-query-users'
+      401:
+        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
+      422:
+        $ref: '#/components/responses/UserQueryParamsValidationErrors'
+      500:
+        $ref: '#/components/responses/InternalServerError'

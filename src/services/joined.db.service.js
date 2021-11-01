@@ -2,12 +2,10 @@ const mongodb = require('../core/mongodb');
 const ObjectId = require('mongodb').ObjectId;
 
 const { locateError } = require('../utils/ApiError');
-const { AuthUser } = require('../models');
+const { AuthUser, User } = require('../models');
 
-const getAuthUserWithRole = async (id) => {
+const getAuthUserJoined = async (id) => {
 	try {
-		const db = mongodb.getDatabase();
-	
 		const pipeline = [
 			{
 			   	$match: { _id: ObjectId(id) }
@@ -20,6 +18,7 @@ const getAuthUserWithRole = async (id) => {
 					as: 'details',
 				}
 			},
+			{ $unwind: { path: "$details", preserveNullAndEmptyArrays: true } },
 			{
 				$project:{
 					email: 1,
@@ -28,20 +27,27 @@ const getAuthUserWithRole = async (id) => {
 					isDisabled: 1,
 					createdAt: 1,
 					services: 1,
-					role: { $arrayElemAt: [ "$details.role", 0 ] },
+					user: "$details",
 				}
 			},
 		]
 	
+		const db = mongodb.getDatabase();
 		const authuserDocContainer = await db.collection("authusers").aggregate(pipeline).toArray();
-	   	return AuthUser.fromDoc(authuserDocContainer[0]);
+
+		let authuser = null, user = null;
+
+		authuserDocContainer && (authuser = AuthUser.fromDoc(authuserDocContainer[0]));
+		authuserDocContainer && authuser && (user = User.fromDoc(authuserDocContainer[0]["user"]));
+
+		return { authuser, user };
 		
 	} catch (error) {
-		throw locateError(error, "JoinedDbService : getAuthUserWithRole");
+		throw locateError(error, "JoinedDbService : getAuthUserJoined");
 	}
 };
 /**
- * Query for authusers joined with users
+ * Query for authusers with left outer joined on users
  * @param {Object} filterLeft - Mongo filter for authusers
  * @param {Object} filterRight - Mongo filter for users
  * @param {Object} sort - Sort option in the format: { field1: 1, field2: -1}
@@ -51,8 +57,6 @@ const getAuthUserWithRole = async (id) => {
  */
  const getAuthUsersJoined = async (filterLeft, filterRight, sort, skip, limit) => {
 	try {
-		const db = mongodb.getDatabase();
-	
 		const pipeline = [
 			{
 			   $match: filterLeft
@@ -66,7 +70,7 @@ const getAuthUserWithRole = async (id) => {
 				}
 			},
 			{
-			   $unwind: "$details"
+				$unwind: { path: "$details", preserveNullAndEmptyArrays: true },
 			},
 			{
 				$project:{
@@ -75,11 +79,12 @@ const getAuthUserWithRole = async (id) => {
 					email: 1,
 					isEmailVerified: 1,
 					isDisabled: 1,
+					createdAt: 1,
+					services: 1,
 					role: "$details.role",
 					name: "$details.name",
 					gender: "$details.gender",
 					country: "$details.country",
-					createdAt: 1,
 				}
 			},
 			{
@@ -107,7 +112,8 @@ const getAuthUserWithRole = async (id) => {
 			}
 		]
 	
-	   return await db.collection("authusers").aggregate(pipeline).toArray();
+		const db = mongodb.getDatabase();
+	   	return await db.collection("authusers").aggregate(pipeline).toArray();
 		
 	} catch (error) {
 		throw locateError(error, "JoinedDbService : getAuthUsersJoined");
@@ -117,7 +123,7 @@ const getAuthUserWithRole = async (id) => {
 
 
 /**
- * Query for users joined with authusers
+ * Query for users with left outer joined on authusers
  * @param {Object} filterLeft - Mongo filter for users
  * @param {Object} filterRight - Mongo filter for authusers
  * @param {Object} sort - Sort option in the format: { field1: 1, field2: -1}
@@ -127,8 +133,6 @@ const getAuthUserWithRole = async (id) => {
  */
  const getUsersJoined = async (filterLeft, filterRight, sort, skip, limit) => {
 	try {
-		const db = mongodb.getDatabase();
-	
 		const pipeline = [
 			{
 			   $match: filterLeft
@@ -142,7 +146,7 @@ const getAuthUserWithRole = async (id) => {
 				}
 			},
 			{
-			   $unwind: "$details"
+				$unwind: { path: "$details", preserveNullAndEmptyArrays: true },
 			},
 			{
 				$project:{
@@ -153,9 +157,10 @@ const getAuthUserWithRole = async (id) => {
 					name: 1,
 					gender: 1,
 					country: 1,
+					createdAt: 1,
 					isEmailVerified: "$details.isEmailVerified",
 					isDisabled: "$details.isDisabled",
-					createdAt: 1,
+					services: "$details.services",
 				}
 			},
 			{
@@ -183,7 +188,8 @@ const getAuthUserWithRole = async (id) => {
 			}
 		]
 	
-	   return await db.collection("users").aggregate(pipeline).toArray();
+		const db = mongodb.getDatabase();
+	   	return await db.collection("users").aggregate(pipeline).toArray();
 		
 	} catch (error) {
 	   throw locateError(error, "JoinedDbService : getUsersJoined");
@@ -193,7 +199,7 @@ const getAuthUserWithRole = async (id) => {
 
 
 module.exports = {
-	getAuthUserWithRole,
+	getAuthUserJoined,
 	getAuthUsersJoined,
 	getUsersJoined,
 };
