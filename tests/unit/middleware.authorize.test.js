@@ -47,7 +47,7 @@ describe('Authorization Middleware: Check the user right(s)', () => {
 		
 		expect(next).toHaveBeenCalledWith(expect.any(ApiError));
 		expect(next).toHaveBeenCalledWith(expect.toBeMatchedWithError(expectedError));
-		expect(req.authuser.role).toEqual("user");
+		expect(req.user.role).toEqual("user");
 	});
 
 
@@ -79,7 +79,7 @@ describe('Authorization Middleware: Check the user right(s)', () => {
 		
 		expect(next).toHaveBeenCalledWith(expect.any(ApiError));
 		expect(next).toHaveBeenCalledWith(expect.toBeMatchedWithError(expectedError));
-		expect(req.authuser.role).toEqual("admin");
+		expect(req.user.role).toEqual("admin");
 	});
 
 
@@ -104,7 +104,7 @@ describe('Authorization Middleware: Check the user right(s)', () => {
 		
 		expect(next).toHaveBeenCalledWith(expect.any(ApiError));
 		expect(next).toHaveBeenCalledWith(expect.toBeMatchedWithError(expectedError));
-		expect(req.authuser.role).toEqual("user");
+		expect(req?.user?.role).toBeUndefined();
 	});
 
 
@@ -128,16 +128,14 @@ describe('Authorization Middleware: Check the user right(s)', () => {
 		await authorize("change-password")(req, res, next);
 
 		expect(next).toHaveBeenCalledWith();
-		//expect(req.user.id).toEqual(authuser.id);
-		expect(req.authuser.role).toEqual("user");
+		expect(req?.user?.role).toBeUndefined();
 	});
 
 
 	test('should continue next middleware if the user has admin right', async () => {
+		const id = "111111111111111111111111"
 		const request = {
-			authuser: {
-				id: "111111111111111111111111",
-			}
+			authuser: { id }
 		};
 
 		const req = httpMocks.createRequest(request);
@@ -145,13 +143,13 @@ describe('Authorization Middleware: Check the user right(s)', () => {
 		const next = jest.fn();
 
 		// lets assume that the user is admin
-		jest.spyOn(userDbService, 'getUser').mockResolvedValue({ role: "admin" });
+		jest.spyOn(userDbService, 'getUser').mockResolvedValue({ id, role: "admin" });
 
 		await authorize("query-users")(req, res, next);
 		
 		expect(next).toHaveBeenCalledWith();
-		//expect(req.user.id).toEqual(authuser.id);
-		expect(req.authuser.role).toEqual("admin");
+		expect(req.user.id).toEqual(id);
+		expect(req.user.role).toEqual("admin");
 	});
 
 
@@ -172,7 +170,7 @@ describe('Authorization Middleware: Check the user right(s)', () => {
 		
 		expect(next).toHaveBeenCalledWith();
 		//expect(req.user.id).toEqual(authuser.id);
-		expect(req.authuser.role).toEqual("user");
+		expect(req.user.role).toEqual("user");
 	});
 	
 });

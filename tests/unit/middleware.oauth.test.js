@@ -192,7 +192,7 @@ describe('oAuth Middleware', () => {
 			const provider = "google";
 			const google_id_token = "the-id-token-coming-from-google";
 
-			const customImplementation = () => ({ provider, user: authuser });
+			const customImplementation = () => ({ provider, token: google_id_token, expires: null, user: authuser });
 			const spyOnGoogle = jest.spyOn(authProviders, 'google').mockImplementation(customImplementation);
 			const spyOnRedisCheck = jest.spyOn(redisService, 'check_in_blacklist').mockImplementation(()=>false);
 			const spyOnRedisPut = jest.spyOn(redisService, 'put_into_blacklist').mockImplementation(()=>true);
@@ -211,8 +211,9 @@ describe('oAuth Middleware', () => {
 			expect(next).toHaveBeenCalledWith();
 			expect(req.oAuth).toEqual({
 				"provider": provider,
-				"user": authuser,
 				"token": google_id_token,
+				"expires": null,
+				"user": authuser,
 			});
 		});
 
@@ -224,7 +225,7 @@ describe('oAuth Middleware', () => {
 			const provider = "facebook";
 			const facebook_access_token = "the-access-token-coming-from-facebook";
 
-			const customImplementation = () => ({ provider, user: authuser });
+			const customImplementation = () => ({ provider, token: facebook_access_token, expires: null, user: authuser });
 			const spyOnFacebook = jest.spyOn(authProviders, "facebook").mockImplementation(customImplementation);
 			const spyOnRedisCheck = jest.spyOn(redisService, 'check_in_blacklist').mockImplementation(()=>false);
 			const spyOnRedisPut = jest.spyOn(redisService, 'put_into_blacklist').mockImplementation(()=>true);
@@ -243,8 +244,9 @@ describe('oAuth Middleware', () => {
 			expect(next).toHaveBeenCalledWith();
 			expect(req.oAuth).toEqual({
 				"provider": provider,
-				"user": authuser,
 				"token": facebook_access_token,
+				"expires": null,
+				"user": authuser,
 			});
 		});
 	});

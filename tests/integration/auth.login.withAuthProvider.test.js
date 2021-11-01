@@ -56,7 +56,12 @@ describe('POST /auth/google & auth/facebook', () => {
 			const provider_id = "365487263597623948576";
 			const provider_email = "talat@gmail.com";
 
-			const customImplementation = () => ({ provider, user: { id: provider_id, email: provider_email } });
+			const customImplementation = () => ({
+				provider,
+				token: provider_token,
+				expires: null,
+				user: { id: provider_id, email: provider_email }
+			});
 			jest.spyOn(authProviders, 'google').mockImplementation(customImplementation);
 
 			const response1 = await request(app).post('/auth/google')
@@ -92,7 +97,12 @@ describe('POST /auth/google & auth/facebook', () => {
 			const google_id = "365487263597623948576";
 			const google_email = authuser.email;
 
-			const customImplementation = () => ({ provider, user: { id: google_id, email: google_email } });
+			const customImplementation = () => ({
+				provider,
+				token: google_id_token,
+				expires: null,
+				user: { id: google_id, email: google_email }
+			});
 			jest.spyOn(authProviders, 'google').mockImplementation(customImplementation);
 
 			const response = await request(app).post('/auth/google')
@@ -120,7 +130,12 @@ describe('POST /auth/google & auth/facebook', () => {
 			const google_id = "365487263597623948576";
 			const google_email = "talat@gmail.com";
 
-			const customImplementation = () => ({ provider, user: { id: google_id, email: google_email } });
+			const customImplementation = () => ({
+				provider,
+				token: google_id_token,
+				expires: null,
+				user: { id: google_id, email: google_email }
+			});
 			jest.spyOn(authProviders, 'google').mockImplementation(customImplementation);
 
 			const response = await request(app).post('/auth/google')
@@ -175,7 +190,12 @@ describe('POST /auth/google & auth/facebook', () => {
 			const facebook_id = "365487263597623948576";
 			const facebook_email = authuser.email;
 
-			const customImplementation = () => ({ provider, user: { id: facebook_id, email: facebook_email } });
+			const customImplementation = () => ({ 
+				provider,
+				token: facebook_access_token,
+				expires: null,
+				user: { id: facebook_id, email: facebook_email }
+			});
 			jest.spyOn(authProviders, 'facebook').mockImplementation(customImplementation);
 
 			const response = await request(app).post('/auth/facebook')

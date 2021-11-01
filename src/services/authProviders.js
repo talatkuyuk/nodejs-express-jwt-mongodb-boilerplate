@@ -14,8 +14,16 @@ const google = async (idToken) => {
 			audience: config.google_client_id,
 		});
 
-		const {sub: id, email} = ticket.getPayload();
-		return { provider: "google", user: { id, email } };
+		const { sub: id, email, exp: expires } = ticket.getPayload();
+
+		const google_response = {
+			provider: "google",
+			token: idToken,
+			expires,
+			user: { id, email }
+		}
+
+		return google_response;
 
 	} catch (error) {
 		throw locateError(error, "AuthProviders : google");
@@ -29,8 +37,16 @@ const facebook = async (access_token) => {
 
 		const response = await axios.get(url, { params });
 
-		const {id, email} = response.data;
-		return { provider: "facebook", user: { id, email } };
+		const { id, email } = response.data;
+
+		const facebook_response = {
+			provider: "facebook",
+			token: access_token,
+			expires: 60 * 60 * 24 * 60, // facebook tokens has long life aproximetly 60 days
+			user: { id, email }
+		}
+
+		return facebook_response;
 
 	} catch (error) {
 		throw locateError(error, "AuthProviders : facebook");
