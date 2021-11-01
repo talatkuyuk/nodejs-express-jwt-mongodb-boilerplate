@@ -59,7 +59,7 @@ describe('POST /auth/google & auth/facebook', () => {
 			const customImplementation = () => ({
 				provider,
 				token: provider_token,
-				expires: null,
+				expiresIn: 60, // 1m
 				user: { id: provider_id, email: provider_email }
 			});
 			jest.spyOn(authProviders, 'google').mockImplementation(customImplementation);
@@ -100,7 +100,7 @@ describe('POST /auth/google & auth/facebook', () => {
 			const customImplementation = () => ({
 				provider,
 				token: google_id_token,
-				expires: null,
+				expiresIn: 60, // 1m
 				user: { id: google_id, email: google_email }
 			});
 			jest.spyOn(authProviders, 'google').mockImplementation(customImplementation);
@@ -133,7 +133,7 @@ describe('POST /auth/google & auth/facebook', () => {
 			const customImplementation = () => ({
 				provider,
 				token: google_id_token,
-				expires: null,
+				expiresIn: 60, // 1m
 				user: { id: google_id, email: google_email }
 			});
 			jest.spyOn(authProviders, 'google').mockImplementation(customImplementation);
@@ -193,7 +193,7 @@ describe('POST /auth/google & auth/facebook', () => {
 			const customImplementation = () => ({ 
 				provider,
 				token: facebook_access_token,
-				expires: null,
+				expiresIn: 60, // 1m
 				user: { id: facebook_id, email: facebook_email }
 			});
 			jest.spyOn(authProviders, 'facebook').mockImplementation(customImplementation);

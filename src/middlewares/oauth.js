@@ -42,7 +42,7 @@ const oAuth = (service) => async (req, res, next) => {
 
 				// if everything is okey, then put the token into the blacklist aiming one-shot usage
 				// this time we put the token itself not jti, since all authProviders' tokens does not contain a jti claim
-				await redisService.put_into_blacklist("token", oAuth.token);
+				await redisService.put_into_blacklist("token", oAuth);
 
 				req.oAuth = oAuth;
 				

@@ -1,4 +1,5 @@
 const axios = require('axios');
+const moment = require('moment');
 const {OAuth2Client} = require('google-auth-library');
 
 const config = require('../config');
@@ -14,14 +15,18 @@ const google = async (idToken) => {
 			audience: config.google_client_id,
 		});
 
-		const { sub: id, email, exp: expires } = ticket.getPayload();
+		const { sub: id, email, exp } = ticket.getPayload();
+
+		const expiresIn = exp - moment().unix(); // expires in: the difference
 
 		const google_response = {
 			provider: "google",
 			token: idToken,
-			expires,
+			expiresIn,
 			user: { id, email }
 		}
+
+		console.log(google_response)
 
 		return google_response;
 
@@ -39,10 +44,12 @@ const facebook = async (access_token) => {
 
 		const { id, email } = response.data;
 
+		const expiresIn = 60 * 60 * 24 * 60; // expires in: facebook tokens has long life aproximetly 60 days;
+
 		const facebook_response = {
 			provider: "facebook",
 			token: access_token,
-			expires: 60 * 60 * 24 * 60, // facebook tokens has long life aproximetly 60 days
+			expiresIn,
 			user: { id, email }
 		}
 

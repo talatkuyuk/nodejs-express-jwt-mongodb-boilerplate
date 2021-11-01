@@ -9,7 +9,7 @@ const { ApiError, locateError } = require('../utils/ApiError');
 /**
  * Put the key into Redis cache
  * @param {string} box // "jti" | "token"
- * @param {string} put
+ * @param {string|Object} put
  * @returns {Promise<boolean>}
  */
 const put_into_blacklist = async (box, put)  => {
@@ -26,7 +26,7 @@ const put_into_blacklist = async (box, put)  => {
 
 			if (box === "token") {
 				// some authproviders' tokens have long life up to 60days (see facebook access token)
-				var result = await redisClient.setex(`blacklist_${put}`, 60 * 60 * 24 * 60, "value"); // 60 days
+				var result = await redisClient.setex(`blacklist_${put.token}`, put.expiresIn, "value");
 			}
 
 			logger.info(`Redis Service [setex]: ${result} for ${box} ${put}`);
