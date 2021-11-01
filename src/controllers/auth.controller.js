@@ -89,7 +89,8 @@ const loginWithAuthProvider = asyncHandler(async (req, res) => {
 
 const logout = asyncHandler(async (req, res) => {
 	try {
-		const { id, jti } = req.authuser; // jti added in the auth middleware
+		const id = req.authuser.id; // added in the authenticate middleware
+		const jti = req.jti; // added in the authenticate middleware
 	
 		// delete the refresh token family from db
 		await tokenService.findTokenAndRemoveFamily({ user: id, jti }, "family");
@@ -107,7 +108,8 @@ const logout = asyncHandler(async (req, res) => {
 
 const signout = asyncHandler(async (req, res) => {
 	try {
-		const { id, jti } = req.authuser; // jti added in the auth middleware
+		const id = req.authuser.id; // added in the authenticate middleware
+		const jti = req.jti; // added in the authenticate middleware
 	
 		// delete the whole tokens of the user from db
 		await tokenService.findTokenAndRemoveFamily({ user: id, jti }, "user");

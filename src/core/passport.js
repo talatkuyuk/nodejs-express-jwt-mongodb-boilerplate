@@ -7,21 +7,21 @@ const { locateError } = require('../utils/ApiError');
 const { authProviders, joinedDbService } = require('../services');
 
 
-const jwtVerify = async (payload, done) => {
+const jwtVerify = async (req, payload, done) => {
 	try {
 		if (payload.type !== tokenTypes.ACCESS) {
 			throw new Error('Invalid token type');
 		}
 
-		// Below, was only fetched the authuser without the role from mongoDb
+		// Below, fetchs only the authuser without the related user from mongoDb
 		// const authuser = await authuserDbService.getAuthUser({ id: payload.sub });
 
-		// I created an outer join query in mongoDb to obtain the role of the user as well
-		const authuser = await joinedDbService.getAuthUserWithRole(payload.sub);
+		// Below, fetchs authuser and user via a left outer join query in mongoDb
+		const { authuser, user } = await joinedDbService.getAuthUserJoined(payload.sub);
 
 		if (!authuser) return done(null, false);
 
-		done(null, { authuser, payload });
+		done(null, { authuser, user, payload });
 
 	} catch (error) {
 		done( locateError(error, "Passport : jwtVerify") );
@@ -35,10 +35,7 @@ const oAuthVerify = (service) => async (req, token, done) => {
 
 		const oAuth = await authProviders[service](token);
 
-		// authProviders always return an object which is { provider, user: { id, email }}
-		// but there is possibility that user.id and user.email could be null or undefined
-
-		oAuth.token = token; // authProvider's token will be used in oAuth middleware
+		// oAuth object schema --> { provider, token, expires, user: { id, email } }
 		
 		return done(null, oAuth);
 
@@ -47,15 +44,17 @@ const oAuthVerify = (service) => async (req, token, done) => {
 	}
 };
 
+//****----------------------------------------------
 
 const jwtOptions = {
+	passReqToCallback: true,
 	secretOrKey: config.jwt.secret,
 	jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
 };
 
 const jwtStrategy = new JwtStrategy(jwtOptions, jwtVerify);
 
-
+//****---------------------------------------------
 
 const oAuthOptions = {
 	passReqToCallback: true
@@ -64,6 +63,7 @@ const oAuthOptions = {
 const googleStrategy = new BearerStrategy(oAuthOptions, oAuthVerify('google'));
 const facebookStrategy = new BearerStrategy(oAuthOptions, oAuthVerify('facebook'));
 
+//****-------------------------------------------
 
 module.exports = {
 	jwtStrategy,

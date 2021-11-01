@@ -11,7 +11,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 			throw new ApiError(httpStatus.UNAUTHORIZED, err || info );
 		}
 		
-		const { authuser, payload } = pass;
+		const { authuser, user, payload } = pass;
 	
 		if (!authuser) {
 			throw new ApiError(httpStatus.UNAUTHORIZED, "Access token does not refer any user");
@@ -30,12 +30,12 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 		if (await redisService.check_in_blacklist(payload.jti)) {
 			throw new ApiError(httpStatus.FORBIDDEN, `Access token is in the blacklist`);
 		}
-			
-		authuser.jti = payload.jti; // it refers to access token and refresh token paired
+
+		req.accesstoken = req.headers.authorization.split(' ')[1]
+		req.jti = payload.jti; // the jti will be utilized to revoke the access token
+		req.user = user; // the passport may return the user as well
 		req.authuser = authuser;
-		
-		// to get accessToken use req.headers.authorization.split(' ')[1];
-	
+			
 		resolve();
 		
 	} catch (error) {

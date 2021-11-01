@@ -36,7 +36,6 @@ class AuthUser {
 			doc.services
 		)
 		doc._id && authuser.transformId(doc._id);
-		doc.role && (authuser.role = doc.role); // for joined query in joinedDbService
 		doc.deletedAt && (authuser.deletedAt = doc.deletedAt) // for deletedauthusers
 		return authuser;
 	}
