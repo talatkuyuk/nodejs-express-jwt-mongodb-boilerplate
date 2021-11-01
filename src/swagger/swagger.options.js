@@ -34,6 +34,14 @@ const options = {
 				name: "AuthUsers",
 				description: 'Manuplates the AuthUsers',
 			},
+			{
+				name: "Users",
+				description: 'Manuplates the Users',
+			},
+			{
+				name: "Joined",
+				description: 'Queries on join AuthUsers & Users',
+			},
 		]
 	},
 	apis: [ `${__dirname}/*.yaml`, `${__dirname}/*.js` ], 
