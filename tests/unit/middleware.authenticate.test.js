@@ -153,7 +153,7 @@ describe('Auth Middleware', () => {
 
 			// authuser tries to use authuser2's access token but using different user agent
 			const requestHeader = { headers: { Authorization: `Bearer ${tokens2.access.token}` }, useragent: { source: userAgent }};
-			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "Your browser/agent seems changed or updated, you have to re-login to get authentication");
+			const expectedError  = new ApiError(httpStatus.UNAUTHORIZED, "Your browser/agent seems changed or updated, you have to re-login.");
 
 			await commonFailedTestProcess(requestHeader, expectedError);
 		});

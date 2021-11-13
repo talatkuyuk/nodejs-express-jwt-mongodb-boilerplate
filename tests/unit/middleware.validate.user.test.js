@@ -112,7 +112,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 		test('getUsers: should throw error 422, if the query param country code is not 3-letter standart country code', async () => {
 			const request = { 
-				query: { country: "tr" } // should be TUR
+				query: { country: "TURKEY" } // should be TUR
 			};
 
 			const req = httpMocks.createRequest(request);
@@ -332,7 +332,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"email": ['email must not be empty or falsy value'],
+				"email": ['must not be empty'],
 				"role": ['The role must be setted as \'user\' while creating'],
 			});
 		});
@@ -363,7 +363,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"email": ['email must not be empty or falsy value'],
+				"email": ['must not be empty'],
 				"role": ['The role must be setted as \'user\' while creating'],
 			});
 		});
@@ -395,7 +395,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"email": ['email must be in valid form'],
+				"email": ['must be valid email address'],
 				"role": ['The role must be setted as \'user\' while creating'],
 			});
 		});
@@ -431,7 +431,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"name": ['name must be minimum 2 characters'],
+				"name": ['requires minimum 2 characters'],
 			});
 		});
 
@@ -466,7 +466,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"gender": ['gender could be male, female or none'],
+				"gender": ['could be male, female or none'],
 			});
 		});
 		
@@ -501,7 +501,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"country": ['country code must be 3-letter standart iso code'],
+				"country": ['must be 3-letter standart country code'],
 			});
 		});
 		
@@ -735,9 +735,9 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"id": ['The param id must be a 24-character number'],
-				"name": ['name must be minimum 2 characters'],
-				"gender": ['gender could be male, female or none'],
-				"country": ['country code must be 3-letter standart iso code'],
+				"name": ['requires minimum 2 characters'],
+				"gender": ['could be male, female or none'],
+				"country": ['must be 3-letter standart country code'],
 			});
 		});
 
@@ -764,7 +764,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"country": ['country code must be 3-letter standart iso code'],
+				"country": ['must be 3-letter standart country code'],
 			});
 		});
 

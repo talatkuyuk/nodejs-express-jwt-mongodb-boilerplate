@@ -94,7 +94,7 @@ const changePassword = [
 	...check_body_passwordConfirmation,
 
 	body('currentPassword')
-		.exists({checkFalsy: true}).withMessage('current password must not be empty or falsy value')
+		.exists({checkFalsy: true}).withMessage('must not be empty')
 		.bail()
 		.custom(async (value, { req }) => {
 			try {

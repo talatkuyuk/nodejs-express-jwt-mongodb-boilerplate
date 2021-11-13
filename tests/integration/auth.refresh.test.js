@@ -247,7 +247,7 @@ describe('POST /auth/refresh-tokens', () => {
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("Your browser/agent seems changed or updated, you have to re-login to get authentication.");
+			expect(response.body.message).toEqual("Your browser/agent seems changed or updated, you have to re-login.");
 		});
 
 

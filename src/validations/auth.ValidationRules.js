@@ -12,7 +12,7 @@ const loginValidationRules = [
 	...check_body_email,
 
 	body('password')
-		.exists({checkFalsy: true}).withMessage('password must not be empty or falsy value'),
+		.exists({checkFalsy: true}).withMessage('must not be empty'),
 
 	body().custom( (body, { req }) => {
 		const validKeys = ['email', 'password'];
@@ -54,14 +54,14 @@ const resetPasswordValidationRules = [
 	...check_body_passwordConfirmation,
 
 	body('token')
-      .notEmpty().withMessage('token must not be empty'),
+      .notEmpty().withMessage('token is missing'),
 ];
 
 
 
 const verifyEmailValidationRules = [
 	body('token')
-      .notEmpty().withMessage('token must not be empty'),
+      .notEmpty().withMessage('token is missing'),
 ];
 
 

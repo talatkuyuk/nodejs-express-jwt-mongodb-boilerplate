@@ -61,7 +61,7 @@ describe('Test for Refresh Token Rotation', () => {
 			const token = testData.REFRESH_TOKEN_VALID; // There is no such token in the database
 			const type = tokenTypes.REFRESH;
 
-			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, `${type} token is not valid`);
+			const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "the token is not valid");
 			expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(expect.toBeMatchedWithError(expectedError));
 		});
 

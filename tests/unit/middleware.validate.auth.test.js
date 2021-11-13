@@ -34,9 +34,9 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"email": ['email must not be empty or falsy value'],
-				"password": ['password must not be empty or falsy value'],
-				"passwordConfirmation": ['password confirmation must not be empty or falsy value'],
+				"email": ['must not be empty'],
+				"password": ['must not be empty'],
+				"passwordConfirmation": ['must not be empty'],
 			});
 		});
 
@@ -66,9 +66,9 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"email": ['email must not be empty or falsy value'],
-				"password": ['password must not be empty or falsy value'],
-				"passwordConfirmation": ['password confirmation must not be empty or falsy value'],
+				"email": ['must not be empty'],
+				"password": ['must not be empty'],
+				"passwordConfirmation": ['must not be empty'],
 			});
 		});
 
@@ -99,9 +99,9 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"email": ['email must be in valid form'],
-				"password": ['password must be minimum 8 characters'],
-				"passwordConfirmation": ['password confirmation must not be empty or falsy value'],
+				"email": ['must be valid email address'],
+				"password": ['must be minimum 8 characters'],
+				"passwordConfirmation": ['must not be empty'],
 			});
 		});
 
@@ -132,8 +132,8 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"password": ['password must contain at least one uppercase, one lowercase, one number and one special char'],
-				"passwordConfirmation": ['password confirmation does not match with the password'],
+				"password": ['must contain uppercase, lowercase, number and special char'],
+				"passwordConfirmation": ['should match with the password'],
 			});
 		});
 
@@ -248,8 +248,8 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"email": ['email must not be empty or falsy value'],
-				"password": ['password must not be empty or falsy value'],
+				"email": ['must not be empty'],
+				"password": ['must not be empty'],
 			});
 		});
 
@@ -276,8 +276,8 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"email": ['email must not be empty or falsy value'],
-				"password": ['password must not be empty or falsy value'],
+				"email": ['must not be empty'],
+				"password": ['must not be empty'],
 			});
 		});
 
@@ -304,7 +304,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"email": ['email must be in valid form'],
+				"email": ['must be valid email address'],
 			});
 		});
 
@@ -451,7 +451,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"email": ['email must not be empty or falsy value'],
+				"email": ['must not be empty'],
 			});
 		});
 
@@ -477,7 +477,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"email": ['email must not be empty or falsy value'],
+				"email": ['must not be empty'],
 			});
 		});
 
@@ -503,7 +503,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"email": ['email must be in valid form'],
+				"email": ['must be valid email address'],
 			});
 		});
 
@@ -549,9 +549,9 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"password": ['password must not be empty or falsy value'],
-				"passwordConfirmation": ['password confirmation must not be empty or falsy value'],
-				"token": ['token must not be empty'],
+				"password": ['must not be empty'],
+				"passwordConfirmation": ['must not be empty'],
+				"token": ['token is missing'],
 			});
 		});
 
@@ -579,9 +579,9 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"password": ['password must not be empty or falsy value'],
-				"passwordConfirmation": ['password confirmation must not be empty or falsy value'],
-				"token": ['token must not be empty'],
+				"password": ['must not be empty'],
+				"passwordConfirmation": ['must not be empty'],
+				"token": ['token is missing'],
 			});
 		});
 
@@ -609,8 +609,8 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"password": ['password must be minimum 8 characters'],
-				"passwordConfirmation": ['password confirmation must not be empty or falsy value'],
+				"password": ['must be minimum 8 characters'],
+				"passwordConfirmation": ['must not be empty'],
 			});
 		});
 
@@ -638,8 +638,8 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"password": ['password must contain at least one uppercase, one lowercase, one number and one special char'],
-				"passwordConfirmation": ['password confirmation does not match with the password'],
+				"password": ['must contain uppercase, lowercase, number and special char'],
+				"passwordConfirmation": ['should match with the password'],
 			});
 		});
 
@@ -687,7 +687,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"token": ['token must not be empty'],
+				"token": ['token is missing'],
 			});
 		});
 
@@ -713,7 +713,7 @@ describe('Validate Middleware : Auth validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"token": ['token must not be empty'],
+				"token": ['token is missing'],
 			});
 		});
 

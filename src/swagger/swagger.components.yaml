@@ -44,7 +44,7 @@ components:
         password:
           type: string
           format: password
-          description: must not be empty or falsy value
+          description: must not be empty
       example:
         email: talatkuyuk@gmail.com
         password: Pass1word!      
@@ -365,16 +365,16 @@ components:
         ###### General
         * _Any extra parameter is not allowed other than ['email', 'password', 'passwordConfirmation']_
         ###### Email related
-        * _email must not be empty or falsy value_
-        * _email must be in valid form_
+        * _must not be empty_
+        * _must be valid email address_
         * _email is already taken_
         ###### Password related
-        * _password must not be empty or falsy value_
-        * _password must be minimum 8 characters_
-        * _password must contain at least one uppercase, one lowercase, one number and one special char_
+        * _must not be empty_
+        * _must be minimum 8 characters_
+        * _must contain uppercase, lowercase, number and special char_
         ###### Password confirmation related
-        * _password confirmation must not be empty or falsy value_
-        * _password confirmation does not match with the password_
+        * _must not be empty_
+        * _should match with the password_
       content:
         application/json:
           schema:
@@ -386,7 +386,7 @@ components:
             errors: {
               email: ["email validation errors appear in a string array"],
               password: ["password validation errors appear in a string array"],
-              passwordConfirmation: ["password confirmation does not match with the password"]
+              passwordConfirmation: ["should match with the password"]
             }
 
     LoginValidationErrors:
@@ -395,10 +395,10 @@ components:
 
         #### ValidationErrors
         ###### Email related
-        * _email must not be empty or falsy value_
-        * _email must be in valid form_
+        * _must not be empty_
+        * _must be valid email address_
         ###### Password related
-        * _password must not be empty or falsy value_
+        * _must not be empty_
       content:
         application/json:
           schema:
@@ -409,7 +409,7 @@ components:
             message: The request could not be validated
             errors: {
               email: ["one of the email validation errors appear here"],
-              password: ["password must not be empty or falsy value"],
+              password: ["must not be empty"],
             }
 
     LoginUnauthorizedFailures:
@@ -443,7 +443,7 @@ components:
         
         #### ApiErrors
         * _Access token does not refer any user_
-        * _Your browser/agent seems changed or updated, you have to re-login to get authentication_
+        * _Your browser/agent seems changed or updated, you have to re-login._
       content:
         application/json:
           schema:
@@ -611,7 +611,7 @@ components:
         #### Refresh Tokens Unauthorized Errors
         * _refresh token is not valid_
         * _Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication._
-        * _Your browser/agent seems changed or updated, you have to re-login to get authentication._
+        * _Your browser/agent seems changed or updated, you have to re-login.._
         * _The refresh token is expired. You have to re-login to get authentication._
       content:
         application/json:
@@ -661,8 +661,8 @@ components:
         UNPROCESSABLE ENTITY
 
         #### ValidationErrors
-        * _email must not be empty or falsy value_
-        * _email must be in valid form_
+        * _must not be empty_
+        * _must be valid email address_
       content:
         application/json:
           schema:
@@ -681,12 +681,12 @@ components:
         UNPROCESSABLE ENTITY
 
         #### ValidationErrors
-        * _password must not be empty or falsy value_
-        * _password must be minimum 8 characters_
-        * _password must contain at least one uppercase, one lowercase, one number and one special char_
-        * _password confirmation must not be empty or falsy value_
-        * _password confirmation does not match with the password_
-        * _token must not be empty_
+        * _must not be empty_
+        * _must be minimum 8 characters_
+        * _must contain uppercase, lowercase, number and special char_
+        * _must not be empty_
+        * _should match with the password_
+        * _token is missing_
       content:
         application/json:
           schema:
@@ -697,7 +697,7 @@ components:
             message: The request could not be validated
             errors: {
               password: ["password validation errors appear in a string array"],
-              passwordConfirmation: ["password confirmation does not match with the password"],
+              passwordConfirmation: ["should match with the password"],
               token: ["The query parameter 'token' must not be empty"]
             }
 
@@ -782,12 +782,12 @@ components:
 
         #### ValidationErrors
         * _incorrect current password_
-        * _current password must not be empty or falsy value_
-        * _password must not be empty or falsy value_
-        * _password must be minimum 8 characters_
-        * _password must contain at least one uppercase, one lowercase, one number and one special char_
-        * _password confirmation must not be empty or falsy value_
-        * _password confirmation does not match with the password_
+        * _must not be empty_
+        * _must not be empty_
+        * _must be minimum 8 characters_
+        * _must contain uppercase, lowercase, number and special char_
+        * _must not be empty_
+        * _should match with the password_
       content:
         application/json:
           schema:
@@ -797,9 +797,9 @@ components:
             name: ValidationError
             message: The request could not be validated
             errors: {
-              currentPassword: ["current password must not be empty or falsy value", "incorrect current password"],
+              currentPassword: ["must not be empty", "incorrect current password"],
               password: ["password validation errors appear in a string array"],
-              passwordConfirmation: ["password confirmation does not match with the password"]
+              passwordConfirmation: ["should match with the password"]
             }
 
 
@@ -848,14 +848,14 @@ components:
         * _There is no correspondent authenticated user with the same id and email_
         * _Any extra parameter is not allowed other than ['email', 'role', 'name', 'gender', 'country']_
         ###### Email related
-        * _email must not be empty or falsy value_
-        * _email must be in valid form_
+        * _must not be empty_
+        * _must be valid email address_
         ###### Others
         * _The role must be setted as 'user' while creating_
-        * _name must be minimum 2 characters_
-        * _gender could be male, female or none_
-        * _country code must be 3-letter standart iso code_
-        * _gender could be male, female or none_
+        * _requires minimum 2 characters_
+        * _could be male, female or none_
+        * _must be 3-letter standart country code_
+        * _could be male, female or none_
       content:
         application/json:
           schema:
@@ -867,7 +867,7 @@ components:
             errors: {
               email: ["email validation errors appear in a string array"],
               body: ["There is no correspondent authenticated user with the same id and email"],
-              name: ["name must be minimum 2 characters"]
+              name: ["requires minimum 2 characters"]
             }
 
 
@@ -882,10 +882,10 @@ components:
         * _The request body should contain at least one of the name, gender, country_
         * _Any extra parameter is not allowed other than ['name', 'gender', 'country']_
         ###### Others
-        * _name must be minimum 2 characters_
-        * _gender could be male, female or none_
-        * _country code must be 3-letter standart iso code_
-        * _gender could be male, female or none_
+        * _requires minimum 2 characters_
+        * _could be male, female or none_
+        * _must be 3-letter standart country code_
+        * _could be male, female or none_
       content:
         application/json:
           schema:
@@ -896,8 +896,8 @@ components:
             message: The request could not be validated
             errors: {
               body: ["The request body should contain at least one of the name, gender, country"],
-              gender: ["gender could be male, female or none"],
-              country: ["country code must be 3-letter standart iso code"],
+              gender: ["could be male, female or none"],
+              country: ["must be 3-letter standart country code"],
             }
 
 

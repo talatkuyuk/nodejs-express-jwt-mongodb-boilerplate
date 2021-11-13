@@ -23,7 +23,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 	
 		// control if the request is coming from the same useragent - for preventing mitm
 		if (req.useragent.source !== payload.ua) {
-			throw new ApiError(httpStatus.UNAUTHORIZED, `Your browser/agent seems changed or updated, you have to re-login to get authentication`);
+			throw new ApiError(httpStatus.UNAUTHORIZED, `Your browser/agent seems changed or updated, you have to re-login.`);
 		}
 	
 		// control if the token is in the blacklist

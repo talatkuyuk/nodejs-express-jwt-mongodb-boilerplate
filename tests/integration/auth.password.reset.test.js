@@ -22,7 +22,7 @@ describe('POST /auth/reset-password', () => {
 
 	describe('Request Validation (password, passwordConfirmation, token) Errors', () => {
 
-		test('should return 422 Validation Error if password is empty or falsy value', async () => {
+		test('should return 422 Validation Error if password is empty', async () => {
 			const resetPasswordForm = {
 				password: '',
 				passwordConfirmation: '',
@@ -33,8 +33,8 @@ describe('POST /auth/reset-password', () => {
 
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors.password.length).toBe(1);
-			expect(response.body.errors.password).toEqual(["password must not be empty or falsy value"]); 
-			expect(response.body.errors.passwordConfirmation).toEqual(["password confirmation must not be empty or falsy value"]); 
+			expect(response.body.errors.password).toEqual(["must not be empty"]); 
+			expect(response.body.errors.passwordConfirmation).toEqual(["must not be empty"]); 
 		});
 
 
@@ -49,7 +49,7 @@ describe('POST /auth/reset-password', () => {
 
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors.password.length).toBe(1);
-			expect(response.body.errors.password).toEqual(["password must be minimum 8 characters"]); 
+			expect(response.body.errors.password).toEqual(["must be minimum 8 characters"]); 
 			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 	  	});
 
@@ -65,7 +65,7 @@ describe('POST /auth/reset-password', () => {
 
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors.password.length).toBe(1);
-			expect(response.body.errors.password).toEqual(["password must contain at least one uppercase, one lowercase, one number and one special char"]); 
+			expect(response.body.errors.password).toEqual(["must contain uppercase, lowercase, number and special char"]); 
 			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 	  	});
 
@@ -82,7 +82,7 @@ describe('POST /auth/reset-password', () => {
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("password");
 			expect(response.body.errors.passwordConfirmation.length).toBe(1);
-			expect(response.body.errors.passwordConfirmation).toEqual(["password confirmation does not match with the password"]); 
+			expect(response.body.errors.passwordConfirmation).toEqual(["should match with the password"]); 
 		});
 
 
@@ -98,7 +98,7 @@ describe('POST /auth/reset-password', () => {
 			expect(response.body.errors).not.toHaveProperty("password");
 			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 			expect(response.body.errors.token.length).toBe(1);
-			expect(response.body.errors.token).toEqual(["token must not be empty"]); 
+			expect(response.body.errors.token).toEqual(["token is missing"]); 
 		});
 
 
@@ -113,9 +113,9 @@ describe('POST /auth/reset-password', () => {
 
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({
-				"password": ["password must be minimum 8 characters"],
-				"passwordConfirmation": ["password confirmation does not match with the password"],
-				"token": ["token must not be empty"]
+				"password": ["must be minimum 8 characters"],
+				"passwordConfirmation": ["should match with the password"],
+				"token": ["token is missing"]
 			});
 		});
 	});
@@ -195,7 +195,7 @@ describe('POST /auth/reset-password', () => {
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("reset-password token is not valid");
+			expect(response.body.message).toEqual("the token is not valid");
 		});
 
 
@@ -218,7 +218,7 @@ describe('POST /auth/reset-password', () => {
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("reset-password token is in the blacklist");
+			expect(response.body.message).toEqual("the token is in the blacklist");
 		});
 	});
 
