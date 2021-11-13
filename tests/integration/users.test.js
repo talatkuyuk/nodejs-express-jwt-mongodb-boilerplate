@@ -441,9 +441,9 @@ describe('PATH /users', () => {
 
 				TestUtil.validationErrorExpectations(response);
 				expect(response.body.errors).toEqual({ 
-					name: ["name must be minimum 2 characters"],
-					gender: ["gender could be male, female or none"],
-					country: ["country code must be 3-letter standart iso code"],
+					name: ["requires minimum 2 characters"],
+					gender: ["could be male, female or none"],
+					country: ["must be 3-letter standart country code"],
 					body: ["Any extra parameter is not allowed other than name,gender,country"],
 				});
 

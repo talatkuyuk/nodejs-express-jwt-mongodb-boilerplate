@@ -66,15 +66,15 @@ const verifyToken = async (token, type) => {
 		const tokenDoc = await tokenDbService.getToken({ token, user: payload.sub, type });
 
 		if (!tokenDoc)
-			throw new ApiError(httpStatus.UNAUTHORIZED, `${type} token is not valid`);
+			throw new ApiError(httpStatus.UNAUTHORIZED, `the token is not valid`);
 
 		if (tokenDoc.blacklisted)
-			throw new ApiError(httpStatus.UNAUTHORIZED, `${type} token is in the blacklist`);
+			throw new ApiError(httpStatus.UNAUTHORIZED, `the token is in the blacklist`);
 
 		return tokenDoc;
 
 	} catch (error) {
-		if (error.name.includes("Token")) {
+		if (error.name === "TokenExpiredError" || error.name === "JsonWebTokenError") {
 			const err = new ApiError(httpStatus.UNAUTHORIZED, error);
 			throw locateError(err, "TokenService : verifyToken");
 		} else
@@ -130,7 +130,7 @@ const verifyToken = async (token, type) => {
 		if (payload.ua !== userAgent) {
 			console.log(`refreshTokenRotation: userAgent is checked and failed`);
 
-			throw new ApiError(httpStatus.UNAUTHORIZED, `Your browser/agent seems changed or updated, you have to re-login to get authentication.`);
+			throw new ApiError(httpStatus.UNAUTHORIZED, `Your browser/agent seems changed or updated, you have to re-login.`);
 		}
 
 		// okey then, success refresh token rotation happened; update the refresh token with the { blacklisted: true }

@@ -18,21 +18,24 @@ const check_body_name = () =>
 		.trim()
 		.escape()
 		.isLength({ min: 2 })
-		.withMessage('name must be minimum 2 characters');
+		.withMessage('requires minimum 2 characters');
 
 const check_body_gender = () =>
 	body('gender')
 		.trim()
 		.toLowerCase()
 		.isIn(["male", "female", "none"])
-		.withMessage('gender could be male, female or none');
+		.withMessage('could be male, female or none');
 
 const check_body_country = () =>
 	body('country')
 		.trim()
 		.toUpperCase()
+		.isLength({ min: 3, max: 3 })
+		.withMessage('must be 3-letter standart country code')
+		.bail()
 		.matches(iso_3166_alpha_3)
-		.withMessage("country code must be 3-letter standart iso code");
+		.withMessage("must be 3-letter standart country code");
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -71,6 +74,9 @@ const getUsers = [
 		.custom(once)
 		.trim()
 		.toUpperCase()
+		.isLength({ min: 3, max: 3 })
+		.withMessage("The query param 'country' code must be in the form of 3-letter standart country code")
+		.bail()
 		.matches(iso_3166_alpha_3)
 		.withMessage("The query param 'country' code must be in the form of 3-letter standart country code")
 		.optional(),

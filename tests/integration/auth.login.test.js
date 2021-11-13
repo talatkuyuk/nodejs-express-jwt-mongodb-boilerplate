@@ -21,7 +21,7 @@ describe('POST /auth/login', () => {
 
 	describe('Request Validation Errors', () => {
 
-	  	test('should return 422 Validation Error if email is empty or falsy value', async () => {
+	  	test('should return 422 Validation Error if email is empty', async () => {
 			const loginForm = {
 				password: 'Pass1word.',
 			};
@@ -29,7 +29,7 @@ describe('POST /auth/login', () => {
 			const response = await request(app).post('/auth/login').send(loginForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.email).toEqual(["email must not be empty or falsy value"]); 
+			expect(response.body.errors.email).toEqual(["must not be empty"]); 
 			expect(response.body.errors).not.toHaveProperty("password");
 	  	});
 
@@ -43,12 +43,12 @@ describe('POST /auth/login', () => {
 			const response = await request(app).post('/auth/login').send(loginForm);
 			
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.email).toEqual(["email must be in valid form"]); 
+			expect(response.body.errors.email).toEqual(["must be valid email address"]); 
 			expect(response.body.errors).not.toHaveProperty("password");
 		});
 
 		
-		test('should return 422 Validation Error if password is empty or falsy value', async () => {
+		test('should return 422 Validation Error if password is empty', async () => {
 			const loginForm = {
 				email: 'talat@gmail.com',
 			};
@@ -57,7 +57,7 @@ describe('POST /auth/login', () => {
 
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("email");
-			expect(response.body.errors.password).toEqual(["password must not be empty or falsy value"]); 
+			expect(response.body.errors.password).toEqual(["must not be empty"]); 
 		});
 
 
@@ -71,8 +71,8 @@ describe('POST /auth/login', () => {
 
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({
-				"email": ["email must be in valid form"],
-				"password": ["password must not be empty or falsy value"],
+				"email": ["must be valid email address"],
+				"password": ["must not be empty"],
 			});
 		});
 	});

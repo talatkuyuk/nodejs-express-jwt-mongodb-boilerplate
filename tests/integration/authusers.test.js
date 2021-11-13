@@ -431,8 +431,8 @@ describe('PATH /authusers', () => {
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({ 
 				currentPassword: ["incorrect current password"],
-				password: ["password must be minimum 8 characters"],
-				passwordConfirmation: ["password confirmation does not match with the password"]
+				password: ["must be minimum 8 characters"],
+				passwordConfirmation: ["should match with the password"]
 			});
 		});
 

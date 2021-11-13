@@ -22,13 +22,13 @@ describe('POST /auth/forgot-password', () => {
 
 	describe('Request Validation (email) Errors', () => {
 
-		test('should return 422 Validation Error if email is empty or falsy value', async () => {
+		test('should return 422 Validation Error if email is empty', async () => {
 			const forgotPasswordForm = {};
 
 			const response = await request(app).post('/auth/forgot-password').send(forgotPasswordForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.email).toEqual(["email must not be empty or falsy value"]); 
+			expect(response.body.errors.email).toEqual(["must not be empty"]); 
 		});
 
 
@@ -38,7 +38,7 @@ describe('POST /auth/forgot-password', () => {
 			const response = await request(app).post('/auth/forgot-password').send(forgotPasswordForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.email).toEqual(["email must be in valid form"]); 
+			expect(response.body.errors.email).toEqual(["must be valid email address"]); 
 		});
 	});
 

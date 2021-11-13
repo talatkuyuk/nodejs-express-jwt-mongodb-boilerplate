@@ -14,10 +14,10 @@ const check_body_email = [
 	  .trim()
 	  //.normalizeEmail()
       .exists({checkFalsy: true})
-	  .withMessage('email must not be empty or falsy value')
+	  .withMessage('must not be empty')
 	  .bail()
       .isEmail()
-	  .withMessage('email must be in valid form')
+	  .withMessage('must be valid email address')
 	  .toLowerCase()
 ];
 
@@ -35,22 +35,22 @@ const check_body_email_isTaken = [
 
 const check_body_password = [
 	body('password')
-		.exists({checkFalsy: true}).withMessage('password must not be empty or falsy value')
+		.exists({checkFalsy: true}).withMessage('must not be empty')
 		.bail()
-		.isLength({ min: 8 }).withMessage('password must be minimum 8 characters')
+		.isLength({ min: 8 }).withMessage('must be minimum 8 characters')
 		.bail()
 		.matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W\_])[A-Za-z\d\W\_]{8,}$/)
-		.withMessage('password must contain at least one uppercase, one lowercase, one number and one special char'),
+		.withMessage('must contain uppercase, lowercase, number and special char'),
 ];
 
 
 const check_body_passwordConfirmation = [
 	body('passwordConfirmation')
-		.exists({checkFalsy: true}).withMessage('password confirmation must not be empty or falsy value')
+		.exists({checkFalsy: true}).withMessage('must not be empty')
 		.bail()
 		.custom((value, { req }) => {
 			if (!Object.is(value, req.body.password)) {
-				throw new Error('password confirmation does not match with the password');
+				throw new Error('should match with the password');
 			}
 			return true; // Indicates the success
 		}),

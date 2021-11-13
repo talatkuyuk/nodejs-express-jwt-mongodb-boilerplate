@@ -8,6 +8,7 @@ module.exports.roleRights = {
 		"update-user@self",
 		"delete-user@self",
 		//authuser related
+		"get-authuser@self",
 		"change-password@self"
 	],
 	"admin": [

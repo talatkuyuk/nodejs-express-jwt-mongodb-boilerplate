@@ -171,6 +171,8 @@
     responses:
       204:
         description: NO CONTENT
+      403:
+        $ref: '#/components/responses/DisabledForbiddenError'
       404:
         $ref: '#/components/responses/NoUserFound'
       422:
@@ -198,6 +200,8 @@
         description: NO CONTENT
       401:
         $ref: '#/components/responses/VerifyTokenUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/DisabledForbiddenError'
       404:
         $ref: '#/components/responses/NoUserFound'
       422:
@@ -255,6 +259,8 @@
         description: NO CONTENT
       401:
         $ref: '#/components/responses/VerifyTokenUnauthorizedErrors'
+      403:
+        $ref: '#/components/responses/DisabledForbiddenError'
       404:
         $ref: '#/components/responses/NoUserFound'
       422:

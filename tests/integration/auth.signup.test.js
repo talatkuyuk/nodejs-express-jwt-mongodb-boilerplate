@@ -20,7 +20,7 @@ describe('POST /auth/signup', () => {
 
 	describe('Request Validation Errors', () => {
 
-	  	test('should return 422 Validation Error if email is empty or falsy value', async () => {
+	  	test('should return 422 Validation Error if email is empty', async () => {
 			const registerform = {
 				password: 'Pass1word.',
 				passwordConfirmation: 'Pass1word.'
@@ -28,7 +28,7 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.email).toEqual(["email must not be empty or falsy value"]); 
+			expect(response.body.errors.email).toEqual(["must not be empty"]); 
 			expect(response.body.errors).not.toHaveProperty("password");
 			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 	  	});
@@ -43,7 +43,7 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.email).toEqual(["email must be in valid form"]); 
+			expect(response.body.errors.email).toEqual(["must be valid email address"]); 
 			expect(response.body.errors).not.toHaveProperty("password");
 			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
 		});
@@ -73,7 +73,7 @@ describe('POST /auth/signup', () => {
 		});
 
 		
-		test('should return 422 Validation Error if password is empty or falsy value', async () => {
+		test('should return 422 Validation Error if password is empty', async () => {
 			const registerform = {
 				email: 'talat@gmail.com',
 				password: '',
@@ -83,8 +83,8 @@ describe('POST /auth/signup', () => {
 
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("email");
-			expect(response.body.errors.password).toEqual(["password must not be empty or falsy value"]);
-			expect(response.body.errors.passwordConfirmation).toEqual(["password confirmation must not be empty or falsy value"]); 
+			expect(response.body.errors.password).toEqual(["must not be empty"]);
+			expect(response.body.errors.passwordConfirmation).toEqual(["must not be empty"]); 
 		});
 
 
@@ -99,7 +99,7 @@ describe('POST /auth/signup', () => {
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("email");
 			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
-			expect(response.body.errors.password).toEqual(["password must be minimum 8 characters"]); 
+			expect(response.body.errors.password).toEqual(["must be minimum 8 characters"]); 
 	  	});
 
 
@@ -114,7 +114,7 @@ describe('POST /auth/signup', () => {
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("email");
 			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
-			expect(response.body.errors.password).toEqual(["password must contain at least one uppercase, one lowercase, one number and one special char"]); 
+			expect(response.body.errors.password).toEqual(["must contain uppercase, lowercase, number and special char"]); 
 	  	});
 
 
@@ -129,7 +129,7 @@ describe('POST /auth/signup', () => {
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).not.toHaveProperty("email");
 			expect(response.body.errors).not.toHaveProperty("password");
-			expect(response.body.errors.passwordConfirmation).toEqual(["password confirmation does not match with the password"]); 
+			expect(response.body.errors.passwordConfirmation).toEqual(["should match with the password"]); 
 		});
 
 
@@ -143,9 +143,9 @@ describe('POST /auth/signup', () => {
 
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({
-				"email": ["email must be in valid form"],
-				"password": ["password must be minimum 8 characters"],
-				"passwordConfirmation": ["password confirmation does not match with the password"]
+				"email": ["must be valid email address"],
+				"password": ["must be minimum 8 characters"],
+				"passwordConfirmation": ["should match with the password"]
 			});
 		});
 	});

@@ -106,7 +106,11 @@ app.use(mongoSanitize({
 
 // sanitize the requests against XSS attacks
 app.use(xss());
-  
+
+// app.use(async function (req, res, next) {
+// 	await new Promise(resolve => setTimeout(resolve, 0)).then(()=>{console.log(req.useragent.source); next()});
+// });
+
 // routes
 app.use('/', routes);
 

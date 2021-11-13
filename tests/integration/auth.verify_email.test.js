@@ -26,7 +26,7 @@ describe('POST /auth/verify-email', () => {
 			const response = await request(app).post('/auth/verify-email').send({});
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.token).toEqual(["token must not be empty"]); 
+			expect(response.body.errors.token).toEqual(["token is missing"]); 
 		});
 
 
@@ -37,7 +37,7 @@ describe('POST /auth/verify-email', () => {
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.token).toEqual(["token must not be empty"]); 
+			expect(response.body.errors.token).toEqual(["token is missing"]); 
 		});
 	});
 
@@ -103,7 +103,7 @@ describe('POST /auth/verify-email', () => {
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("verify-email token is not valid");
+			expect(response.body.message).toEqual("the token is not valid");
 		});
 
 
@@ -122,7 +122,7 @@ describe('POST /auth/verify-email', () => {
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
 			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("verify-email token is in the blacklist");
+			expect(response.body.message).toEqual("the token is in the blacklist");
 		});
 	});
 
