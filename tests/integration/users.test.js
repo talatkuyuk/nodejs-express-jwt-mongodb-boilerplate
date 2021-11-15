@@ -353,35 +353,61 @@ describe('PATH /users', () => {
 
 			const testAuthuser = response.body;
 
-			const addForm = {
+			const addForm1 = {
+				email: "",
+				role: "",
+				name: "",
+				gender: "",
+				country: "",
+			};
+
+			// try to add an user correspondent with the authuser but having the validation errors
+			response = await request(app)
+				.post(`/users/${testAuthuser.id}`)
+				.set('User-Agent', userAgent) 
+				.set('Authorization', `Bearer ${adminAccessToken}`)
+				.send(addForm1);
+
+			TestUtil.validationErrorExpectations(response);
+			expect(response.body.errors).toEqual({
+				email: ["must not be empty"],
+				role: ["must be user"],
+				name: ["requires minimum 2 characters"],
+				gender: ["must not be empty"],
+				country: ["must not be empty"],
+			});
+
+			const addForm2 = {
 				email: testAuthuser.email,
 				role: "user",
 				name: "Mr.Test"
 			};
 
-			// add an user correspondent
+			// add a valid user correspondent
 			await request(app)
 				.post(`/users/${testAuthuser.id}`)
 				.set('User-Agent', userAgent) 
 				.set('Authorization', `Bearer ${adminAccessToken}`)
-				.send(addForm);
+				.send(addForm2);
 			
 			// try to add another user with the same id, get the error
 			response = await request(app)
 				.post(`/users/${testAuthuser.id}`)
 				.set('User-Agent', userAgent) 
 				.set('Authorization', `Bearer ${adminAccessToken}`)
-				.send(addForm);
+				.send(addForm2);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({ id: ["There is another user with the same id"]});
+			expect(response.body.errors).toEqual({ 
+				id: ["There is another user with the same id"]
+			});
 
 			// try to add an user which has not correspondent authuser, get the error
 			response = await request(app)
 				.post(`/users/123456789012345678901234`)
 				.set('User-Agent', userAgent) 
 				.set('Authorization', `Bearer ${adminAccessToken}`)
-				.send(addForm);
+				.send(addForm2);
 
 			TestUtil.validationErrorExpectations(response);
 			expect(response.body.errors).toEqual({ body: ["There is no correspondent authenticated user with the same id and email"]});
@@ -432,17 +458,32 @@ describe('PATH /users', () => {
 			expect(response.body.name).toBe("ApiError");
 			expect(response.body.message).toBe("No user found");
 
+			// try to update an user with validation errors (empty values)
+			response = await request(app)
+				.put('/users/123456789012345678901234')
+				.set('User-Agent', userAgent) 
+				.set('Authorization', `Bearer ${adminAccessToken}`)
+				.send({ role: "admin", name: "", gender: "", country: "" });
+
+				TestUtil.validationErrorExpectations(response);
+				expect(response.body.errors).toEqual({
+					name: ["requires minimum 2 characters"],
+					gender: ["must not be empty"],
+					country: ["must not be empty"],
+					body: ["Any extra parameter is not allowed other than name,gender,country"],
+				});
+
 			// try to update an user with validation errors
 			response = await request(app)
 				.put('/users/123456789012345678901234')
 				.set('User-Agent', userAgent) 
 				.set('Authorization', `Bearer ${adminAccessToken}`)
-				.send({ role: "admin", name: "", gender: "fmale", country: "tr" });
+				.send({ role: "", name: "a", gender: "fmale", country: "tr" });
 
 				TestUtil.validationErrorExpectations(response);
 				expect(response.body.errors).toEqual({ 
 					name: ["requires minimum 2 characters"],
-					gender: ["could be male, female or none"],
+					gender: ["should be male, female or none"],
 					country: ["must be 3-letter standart country code"],
 					body: ["Any extra parameter is not allowed other than name,gender,country"],
 				});
@@ -485,87 +526,3 @@ describe('PATH /users', () => {
 
 	});
 });
-
-[
-	{
-	  email: 'user10@gmail.com',
-	  role: 'user',
-	  name: 'User-10',
-	  gender: 'female',
-	  country: 'ITA',
-	  createdAt: 1635436890060,
-	  id: '617ac959935fce78fa8d63b3'
-	},
-	{
-	  email: 'user8@gmail.com',
-	  role: 'user',
-	  name: 'User-8',
-	  gender: 'female',
-	  country: 'TUR',
-	  createdAt: 1635436890004,
-	  id: '617ac959935fce78fa8d63b1'
-	},
-	{
-	  email: 'user7@gmail.com',
-	  role: 'user',
-	  name: 'User-7',
-	  gender: 'male',
-	  country: 'USA',
-	  createdAt: 1635436889975,
-	  id: '617ac959935fce78fa8d63b0'
-	},
-	{
-	  email: 'user5@gmail.com',
-	  role: 'user',
-	  name: 'User-5',
-	  gender: 'male',
-	  country: 'ITA',
-	  createdAt: 1635436889917,
-	  id: '617ac959935fce78fa8d63ae'
-	},
-	{
-	  email: 'user4@gmail.com',
-	  role: 'user',
-	  name: 'User-4',
-	  gender: 'female',
-	  country: 'USA',
-	  createdAt: 1635436889889,
-	  id: '617ac959935fce78fa8d63ad'
-	},
-	{
-	  email: 'user2@gmail.com',
-	  role: 'user',
-	  name: 'User-2',
-	  gender: 'female',
-	  country: 'TUR',
-	  createdAt: 1635436889835,
-	  id: '617ac959935fce78fa8d63ab'
-	},
-	{
-	  email: 'user1@gmail.com',
-	  role: 'user',
-	  name: 'User-1',
-	  gender: 'male',
-	  country: 'USA',
-	  createdAt: 1635436889806,
-	  id: '617ac959935fce78fa8d63aa'
-	},
-	{
-	  email: 'test@gmail.com',
-	  role: 'user',
-	  name: 'Mr.Test',
-	  gender: null,
-	  country: null,
-	  createdAt: 1635436889310,
-	  id: '617ac959935fce78fa8d63a9'
-	},
-	{
-	  email: 'admin@gmail.com',
-	  role: 'admin',
-	  name: 'Mr.Admin',
-	  gender: null,
-	  country: null,
-	  createdAt: 1635436889182,
-	  id: '617ac959935fce78fa8d63a7'
-	}
-  ]
