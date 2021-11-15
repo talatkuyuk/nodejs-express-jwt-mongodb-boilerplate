@@ -333,7 +333,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['must not be empty'],
-				"role": ['The role must be setted as \'user\' while creating'],
+				"role": ['must be user'],
 			});
 		});
 
@@ -364,7 +364,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['must not be empty'],
-				"role": ['The role must be setted as \'user\' while creating'],
+				"role": ['must be user'],
 			});
 		});
 
@@ -396,7 +396,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
 				"email": ['must be valid email address'],
-				"role": ['The role must be setted as \'user\' while creating'],
+				"role": ['must be user'],
 			});
 		});
 
@@ -435,6 +435,41 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			});
 		});
 
+
+		test('addUser: should throw error 422, if the gender is empty value', async () => {
+			const request = {
+				params: { id: "123456789012345678901234" },
+				body: {
+					email: "user@gmail.com",
+					role: "user",
+					gender: ""  // empty
+				}
+			};
+
+			const req = httpMocks.createRequest(request);
+			const res = httpMocks.createResponse();
+			const next = jest.fn();
+
+			const spyOnValid = jest.spyOn(userService, 'isExist');
+			spyOnValid.mockResolvedValue(false);
+
+			const spyOnExist = jest.spyOn(authuserService, 'isExist');
+			spyOnExist.mockResolvedValue(true);
+			
+			await validate(userValidation.addUser)(req, res, next);
+
+			expect(next).toHaveBeenCalledTimes(1);
+			expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+			
+			// obtain the error from the next function
+			const err = next.mock.calls[0][0];
+
+			TestUtil.validationErrorInMiddleware(err);
+			expect(err.errors).toEqual({
+				"gender": ['must not be empty'],
+			});
+		});
+
 		
 		test('addUser: should throw error 422, if the gender is not one of male, female, none', async () => {
 			const request = {
@@ -466,11 +501,46 @@ describe('Validate Middleware : Athuser validation rules', () => {
 
 			TestUtil.validationErrorInMiddleware(err);
 			expect(err.errors).toEqual({
-				"gender": ['could be male, female or none'],
+				"gender": ['should be male, female or none'],
 			});
 		});
 		
 		
+		test('addUser: should throw error 422, if the country is empty value', async () => {
+			const request = {
+				params: { id: "123456789012345678901234" },
+				body: {
+					email: "user@gmail.com",
+					role: "user",
+					country: ""  // empty
+				}
+			};
+
+			const req = httpMocks.createRequest(request);
+			const res = httpMocks.createResponse();
+			const next = jest.fn();
+
+			const spyOnValid = jest.spyOn(userService, 'isExist');
+			spyOnValid.mockResolvedValue(false);
+
+			const spyOnExist = jest.spyOn(authuserService, 'isExist');
+			spyOnExist.mockResolvedValue(true);
+			
+			await validate(userValidation.addUser)(req, res, next);
+
+			expect(next).toHaveBeenCalledTimes(1);
+			expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+			
+			// obtain the error from the next function
+			const err = next.mock.calls[0][0];
+
+			TestUtil.validationErrorInMiddleware(err);
+			expect(err.errors).toEqual({
+				"country": ['must not be empty'],
+			});
+		});
+
+
 		test('addUser: should throw error 422, if the country code is not valid 3-letter iso code', async () => {
 			const request = {
 				params: { id: "123456789012345678901234" },
@@ -736,7 +806,7 @@ describe('Validate Middleware : Athuser validation rules', () => {
 			expect(err.errors).toEqual({
 				"id": ['The param id must be a 24-character number'],
 				"name": ['requires minimum 2 characters'],
-				"gender": ['could be male, female or none'],
+				"gender": ['should be male, female or none'],
 				"country": ['must be 3-letter standart country code'],
 			});
 		});

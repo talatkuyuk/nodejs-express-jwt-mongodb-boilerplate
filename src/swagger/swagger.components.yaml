@@ -851,7 +851,7 @@ components:
         * _must not be empty_
         * _must be valid email address_
         ###### Others
-        * _The role must be setted as 'user' while creating_
+        * _must be user_
         * _requires minimum 2 characters_
         * _could be male, female or none_
         * _must be 3-letter standart country code_
