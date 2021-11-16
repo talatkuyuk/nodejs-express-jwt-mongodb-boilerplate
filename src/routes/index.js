@@ -83,19 +83,21 @@ router.get('/status', asyncHandler( async (req, res) => {
 	var database = mongodb.getDatabase();
 	var cache = redis.getRedisClient();
 
-	let mongoStatus, redisStatus;
+	let mongoStatus, redisStatus, environment, port;
 
 	try {
+		environment = process.env.NODE_ENV || config.env;
+		port = process.env.PORT || req.headers.host.split(':')[1];
 
 		redisStatus = cache?.connected ? "OK" : "DOWN";
 
 		const result = await database.admin().ping();
 		mongoStatus = result.ok === 1 ? "OK" : "DOWN";
 
-		res.json({ mongoStatus, redisStatus });
+		res.json({ environment, port, mongoStatus, redisStatus });
 		
 	} catch (error) {
-		res.json({ mongoStatus: "DOWN", redisStatus });
+		res.json({ environment, port, mongoStatus: "DOWN", redisStatus });
 
 		//throw locateError(error, "RouteIndex : getStatus");
 		console.log(locateError(error, "RouteIndex : getStatus"));

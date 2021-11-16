@@ -20,20 +20,22 @@ async function start() {
 		await mongodb.connect();
 
 		if (config.server === "https" || config.server === "both") {
+			const port = process.env.PORT || config.porthttps;
 			const key  = fs.readFileSync(SSLdirectory + 'server.decrypted.key', 'utf8');
 			const cert = fs.readFileSync(SSLdirectory + 'server.crt', 'utf8');
 			const credentials = { key, cert };
 
 			httpsServer = https.createServer(credentials, app);
-			httpsServer.listen(config.porthttps, function () {
-				logger.info('Https Server started on port ' + config.porthttps);
+			httpsServer.listen(port, function () {
+				logger.info('Https Server started on port ' + port);
 			});
 		}
 		
 		if (config.server === "http" || config.server === "both") {
+			const port = process.env.PORT || config.porthttp;
 			httpServer = http.createServer(app);
-			httpServer.listen(config.porthttp, function () {
-				logger.info('Http Server started on port ' + config.porthttp);
+			httpServer.listen(port, function () {
+				logger.info('Http Server started on port ' + port);
 			});
 
 			// app.listen actually also creates an http server instance
