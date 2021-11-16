@@ -1,9 +1,10 @@
 {
-  "name": "node-express-mongo-boilerplate-tk",
+  "name": "nodejs-express-jwt-mongodb-boilerplate",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node src/server.js",
     "dev": "cross-env NODE_ENV=development nodemon src/server.js",
     "prod": "cross-env NODE_ENV=production nodemon src/server.js",
     "test": "cross-env NODE_ENV=test jest --runInBand --detectOpenHandles --config ./jest.config.json",
@@ -20,9 +21,9 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/talatkuyuk/node-express-mongo-boilerplate-tk/issues"
+    "url": "https://github.com/talatkuyuk/nodejs-express-jwt-mongodb-boilerplate/issues"
   },
-  "homepage": "https://github.com/talatkuyuk/node-express-mongo-boilerplate-tk#readme",
+  "homepage": "https://github.com/talatkuyuk/nodejs-express-jwt-mongodb-boilerplate#readme",
   "dependencies": {
     "axios": "^0.21.4",
     "bcryptjs": "^2.4.3",
