@@ -59,9 +59,9 @@ const locateError = (error, description) => {
           error.description += `  --->  ${main} [${module}]`
       else
           error.description = `failed in ${main} [${module}]`
-      
-      return error;
   }
+  
+  return error;
 }
 
 
