@@ -17,6 +17,10 @@ const options = {
 		},
 		servers: [
 			{
+				url: "/",
+				description: 'The server on Heroku',
+			},
+			{
 				url: "https://localhost:8443",
 				description: 'Secure development server',
 			},
