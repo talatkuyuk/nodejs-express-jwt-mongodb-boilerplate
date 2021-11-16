@@ -71,7 +71,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // enable cors
 var corsOptions = {
-	origin: ['http://localhost:5500', 'https://localhost:5500'],
+	origin: ['http://localhost:5500', 'https://localhost:5500', 'https://safemeals.netlify.app'],
 	optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true // allow session cookie from browser to pass through
