@@ -156,6 +156,9 @@
                     "403": {
                         "$ref": "#/components/responses/DisabledForbiddenError"
                     },
+                    "404": {
+                        "$ref": "#/components/responses/NoUserFound"
+                    },
                     "422": {
                         "$ref": "#/components/responses/LoginValidationErrors"
                     },
@@ -1798,7 +1801,7 @@
                 }
             },
             "LoginUnauthorizedFailures": {
-                "description": "UNAUTHORIZED\n\n#### Login Unauthorized Failures\n* _You are not registered user_\n* _Incorrect email or password_\n",
+                "description": "UNAUTHORIZED\n\n#### Login Unauthorized Failures\n* _Incorrect email or password_\n",
                 "content": {
                     "application/json": {
                         "schema": {
