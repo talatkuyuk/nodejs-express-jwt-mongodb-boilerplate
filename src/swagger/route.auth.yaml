@@ -70,6 +70,8 @@
         $ref: '#/components/responses/LoginUnauthorizedFailures'
       403:
         $ref: '#/components/responses/DisabledForbiddenError'
+      404:
+        $ref: '#/components/responses/NoUserFound'
       422:
         $ref: '#/components/responses/LoginValidationErrors'
       500:

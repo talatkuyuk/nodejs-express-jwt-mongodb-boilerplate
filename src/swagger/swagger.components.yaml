@@ -417,7 +417,6 @@ components:
         UNAUTHORIZED
 
         #### Login Unauthorized Failures
-        * _You are not registered user_
         * _Incorrect email or password_
       content:
         application/json:
