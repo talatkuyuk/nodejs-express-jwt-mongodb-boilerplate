@@ -1,0 +1,2632 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Safemeals API Documentation",
+        "description": "for github.com/talatkuyuk/nodejs-express-jwt-mongodb-boilerplate",
+        "contact": {
+            "name": "Talat Kuyuk",
+            "url": "https://github.com/talatkuyuk/nodejs-express-jwt-mongodb-boilerplate",
+            "email": "talatkuyuk@gmail.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://github.com/talatkuyuk/nodejs-express-jwt-mongodb-boilerplate/blob/master/LICENSE"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "https://authouse.herokuapp.com",
+            "description": "The server on Heroku"
+        },
+        {
+            "url": "https://localhost:8443",
+            "description": "Secure server for development"
+        },
+        {
+            "url": "http://localhost:3000",
+            "description": "Non-Secure server for development"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Authentication"
+        },
+        {
+            "name": "AuthUsers",
+            "description": "Manuplates the AuthUsers"
+        },
+        {
+            "name": "Users",
+            "description": "Manuplates the Users"
+        },
+        {
+            "name": "Joined",
+            "description": "Queries on join AuthUsers & Users"
+        }
+    ],
+    "paths": {
+        "/auth/signup": {
+            "post": {
+                "summary": "Signup",
+                "description": "receives the registration form and returns the authuser info and tokens",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-signup"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-signup"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/authuser",
+                                            "example": {
+                                                "$ref": "#components/examples/response-authuser"
+                                            }
+                                        },
+                                        "tokens": {
+                                            "$ref": "#/components/schemas/tokens",
+                                            "example": {
+                                                "$ref": "#components/examples/response-tokens"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/SignUpValidationErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "summary": "Login",
+                "description": "receives the login form and returns the authuser info and tokens",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-login"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-login"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/authuser",
+                                            "example": {
+                                                "$ref": "#components/examples/response-authuser"
+                                            }
+                                        },
+                                        "tokens": {
+                                            "$ref": "#/components/schemas/tokens",
+                                            "example": {
+                                                "$ref": "#components/examples/response-tokens"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/LoginUnauthorizedFailures"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/DisabledForbiddenError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/LoginValidationErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "summary": "Logout",
+                "description": "gets logged the authuser out, deletes the refresh token family and revokes the access tokens",
+                "tags": [
+                    "Auth"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/LogoutSignoutUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareForbiddenErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/auth/signout": {
+            "post": {
+                "summary": "Signout",
+                "description": "gets signed the authuser out, deletes all the user data and tokens and revokes the access tokens",
+                "tags": [
+                    "Auth"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareForbiddenErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/auth/refresh-tokens": {
+            "post": {
+                "summary": "Refresh auth tokens",
+                "description": "receives the refresh token, implements refresh token rotation and sends the new tokens",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-refresh-token"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-refresh-token"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/tokens"
+                                },
+                                "examples": {
+                                    "_": {
+                                        "$ref": "#components/examples/response-tokens-for-refresh"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/RefreshTokensUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/DisabledForbiddenError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NoUserFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/RefreshTokenValidationError"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/auth/forgot-password": {
+            "post": {
+                "summary": "Forgot password",
+                "description": "sends an email with a link and token in order to reset password",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-forgot-password"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-forgot-password"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/DisabledForbiddenError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NoUserFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ForgotPasswordValidationErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/auth/reset-password": {
+            "post": {
+                "summary": "Reset password",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-reset-password"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-reset-password"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/VerifyTokenUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/DisabledForbiddenError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NoUserFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ResetPasswordValidationErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/auth/send-verification-email": {
+            "post": {
+                "summary": "Send verification email",
+                "description": "An email will be sent to verify email.",
+                "tags": [
+                    "Auth"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    },
+                    "400": {
+                        "description": "BAD REQUEST",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "code": 400,
+                                    "name": "ApiError",
+                                    "message": "Email is already verified",
+                                    "description": "the service name where the error occured"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareForbiddenErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/auth/verify-email": {
+            "post": {
+                "summary": "Verify email",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-verify-email"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-verify-email"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/VerifyTokenUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/DisabledForbiddenError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NoUserFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/VerifyEmailTokenValidationError"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/auth/google": {
+            "post": {
+                "summary": "Login with Google",
+                "description": "receives the google id token in header; and returns the authuser info and tokens",
+                "tags": [
+                    "Auth"
+                ],
+                "security": [
+                    {
+                        "BearerAuth_WithGoogleIdToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/authuser",
+                                            "example": {
+                                                "$ref": "#components/examples/response-authuser"
+                                            }
+                                        },
+                                        "tokens": {
+                                            "$ref": "#/components/schemas/tokens",
+                                            "example": {
+                                                "$ref": "#components/examples/response-tokens"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/oAuthLoginBadRequests"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/oAuthLoginUnauthorizedFailures"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/oAuthLoginForbiddenErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/auth/facebook": {
+            "post": {
+                "summary": "Login with Facebook",
+                "description": "receives the facebook access token in header; and returns the authuser info and tokens",
+                "tags": [
+                    "Auth"
+                ],
+                "security": [
+                    {
+                        "BearerAuth_WithFacebookAccessToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/authuser",
+                                            "example": {
+                                                "$ref": "#components/examples/response-authuser"
+                                            }
+                                        },
+                                        "tokens": {
+                                            "$ref": "#/components/schemas/tokens",
+                                            "example": {
+                                                "$ref": "#components/examples/response-tokens"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/oAuthLoginBadRequests"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/oAuthLoginUnauthorizedFailures"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/oAuthLoginForbiddenErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/authusers": {
+            "get": {
+                "summary": "Get the list of authusers within a paginary",
+                "tags": [
+                    "AuthUsers"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/query-param-page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-size"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-sort"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-email"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-isEmailVerified"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-isDisabled"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The list of the authusers with paginary info",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "users": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/authuser"
+                                            }
+                                        },
+                                        "totalCount": {
+                                            "type": "number"
+                                        },
+                                        "pagination": {
+                                            "type": "object",
+                                            "properties": {
+                                                "currentPage": {
+                                                    "type": "number"
+                                                },
+                                                "totalPages": {
+                                                    "type": "number"
+                                                },
+                                                "perPage": {
+                                                    "type": "number"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "_": {
+                                        "$ref": "#/components/examples/response-query-authusers"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/AuthUserQueryParamsValidationErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Add an authuser",
+                "tags": [
+                    "AuthUsers"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-add-authuser"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-add-authuser"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/authuser",
+                                            "example": {
+                                                "$ref": "#components/examples/response-authuser"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/SignUpValidationErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/authusers/{id}": {
+            "parameters": [
+                {
+                    "$ref": "#/components/parameters/param-authuser-id"
+                }
+            ],
+            "get": {
+                "summary": "Get an authuser",
+                "tags": [
+                    "AuthUsers"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The authuser info",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/authuser"
+                                },
+                                "examples": {
+                                    "_": {
+                                        "$ref": "#components/examples/response-authuser"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NoUserFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ParamIdValidationError"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Disable or able an authuser",
+                "tags": [
+                    "AuthUsers"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NoUserFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ParamIdValidationError"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete an authuser",
+                "tags": [
+                    "AuthUsers"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NoUserFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ParamIdValidationError"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/authusers/password": {
+            "patch": {
+                "summary": "Change own password",
+                "tags": [
+                    "AuthUsers"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-change-password"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-change-password"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NoUserFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ChangePasswordValidationErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/joined/authusers": {
+            "get": {
+                "summary": "Get the list of the authusers with left outer join on users within a paginary",
+                "tags": [
+                    "Joined"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/query-param-page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-size"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-sort"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-email"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-isEmailVerified"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-isDisabled"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-role"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-name"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-gender"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-country"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The list of the authusers with the user info if exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "users": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/authuser"
+                                            }
+                                        },
+                                        "totalCount": {
+                                            "type": "number"
+                                        },
+                                        "pagination": {
+                                            "type": "object",
+                                            "properties": {
+                                                "currentPage": {
+                                                    "type": "number"
+                                                },
+                                                "totalPages": {
+                                                    "type": "number"
+                                                },
+                                                "perPage": {
+                                                    "type": "number"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "_": {
+                                        "$ref": "#/components/examples/response-query-authusers"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/AuthUserQueryParamsValidationErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/joined/users": {
+            "get": {
+                "summary": "Get the list of the users with left outer join on authusers within a paginary",
+                "tags": [
+                    "Joined"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/query-param-page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-size"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-sort"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-email"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-isEmailVerified"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-isDisabled"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-role"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-name"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-gender"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-country"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The list of the users with the authuser info if exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "users": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/user"
+                                            }
+                                        },
+                                        "totalCount": {
+                                            "type": "number"
+                                        },
+                                        "pagination": {
+                                            "type": "object",
+                                            "properties": {
+                                                "currentPage": {
+                                                    "type": "number"
+                                                },
+                                                "totalPages": {
+                                                    "type": "number"
+                                                },
+                                                "perPage": {
+                                                    "type": "number"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "_": {
+                                        "$ref": "#/components/examples/response-query-users"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/UserQueryParamsValidationErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "summary": "Get the list of users within a paginary",
+                "tags": [
+                    "Users"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/query-param-page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-size"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-sort"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-email"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-role"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-name"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-gender"
+                    },
+                    {
+                        "$ref": "#/components/parameters/query-param-country"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The list of the users with paginary info",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "users": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/user"
+                                            }
+                                        },
+                                        "totalCount": {
+                                            "type": "number"
+                                        },
+                                        "pagination": {
+                                            "type": "object",
+                                            "properties": {
+                                                "currentPage": {
+                                                    "type": "number"
+                                                },
+                                                "totalPages": {
+                                                    "type": "number"
+                                                },
+                                                "perPage": {
+                                                    "type": "number"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "_": {
+                                        "$ref": "#/components/examples/response-query-users"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/UserQueryParamsValidationErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "parameters": [
+                {
+                    "$ref": "#/components/parameters/param-user-id"
+                }
+            ],
+            "get": {
+                "summary": "Get an user",
+                "tags": [
+                    "Users"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The user info",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/user"
+                                },
+                                "examples": {
+                                    "_": {
+                                        "$ref": "#components/examples/response-user"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NoUserFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ParamIdValidationError"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Add an user",
+                "tags": [
+                    "Users"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-add-user"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-add-user"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/user",
+                                            "example": {
+                                                "$ref": "#components/examples/response-user"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/AddUserValidationErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update an user",
+                "tags": [
+                    "Users"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-update-user"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-update-user"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NoUserFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/UpdateUserValidationErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Change the user role",
+                "tags": [
+                    "Users"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-change-role"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/form-change-role"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NoUserFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ChangeRoleValidationErrors"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete an user",
+                "tags": [
+                    "Users"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "NO CONTENT"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NoUserFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ParamIdValidationError"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "form-signup": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "must be in valid form"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "description": "minimum length is 8; and at least one number, uppercase, lowercase, and special char"
+                    },
+                    "passwordConfirmation": {
+                        "type": "string",
+                        "format": "password",
+                        "description": "same value with the password"
+                    }
+                },
+                "example": {
+                    "email": "talatkuyuk@gmail.com",
+                    "password": "Pass1word!",
+                    "passwordConfirmation": "Pass1word!"
+                }
+            },
+            "form-login": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "must be in valid form"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "description": "must not be empty"
+                    }
+                },
+                "example": {
+                    "email": "talatkuyuk@gmail.com",
+                    "password": "Pass1word!"
+                }
+            },
+            "form-refresh-token": {
+                "type": "object",
+                "required": [
+                    "refreshToken"
+                ],
+                "properties": {
+                    "refreshToken": {
+                        "type": "string",
+                        "example": "eyJhb.INPUT_YOUR_REFRESH_TOKEN_HERE.m1U63"
+                    }
+                }
+            },
+            "form-forgot-password": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "the email that the reset password link is going to be sent",
+                        "example": "talatkuyuk@gmail.com"
+                    }
+                }
+            },
+            "form-reset-password": {
+                "type": "object",
+                "properties": {
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "description": "minimum length is 8; and at least one number, uppercase, lowercase, and special char"
+                    },
+                    "passwordConfirmation": {
+                        "type": "string",
+                        "format": "password",
+                        "description": "same value with the password"
+                    },
+                    "token": {
+                        "type": "string",
+                        "description": "reset password token"
+                    }
+                },
+                "example": {
+                    "password": "Pass1word!",
+                    "passwordConfirmation": "Pass1word!",
+                    "token": "lkfkldE-reset-password-token-oflkmFDDkf"
+                }
+            },
+            "form-verify-email": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "description": "reset password token",
+                        "example": "lkfkldE-verify-email-token-oflkmFDDkf"
+                    }
+                }
+            },
+            "authuser": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "MongoDb.ObjectId"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "isEmailVerified": {
+                        "type": "boolean"
+                    },
+                    "isDisabled": {
+                        "type": "boolean"
+                    },
+                    "createdAt": {
+                        "type": "date-time",
+                        "description": "unix time like 7635472654762"
+                    },
+                    "services": {
+                        "type": "object",
+                        "properties": {
+                            "emailpassword": {
+                                "type": "string",
+                                "enum": [
+                                    "registered",
+                                    "unregistered"
+                                ]
+                            },
+                            "google": {
+                                "type": "string",
+                                "description": "google-oauth-id"
+                            },
+                            "facebook": {
+                                "type": "string",
+                                "description": "facebook-oauth-id"
+                            }
+                        }
+                    }
+                }
+            },
+            "form-add-authuser": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "must be in valid form"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "description": "minimum length is 8; and at least one number, uppercase, lowercase, and special char"
+                    },
+                    "passwordConfirmation": {
+                        "type": "string",
+                        "format": "password",
+                        "description": "same value with the password"
+                    }
+                },
+                "example": {
+                    "email": "talatkuyuk@gmail.com",
+                    "password": "Pass1word!",
+                    "passwordConfirmation": "Pass1word!"
+                }
+            },
+            "form-change-password": {
+                "type": "object",
+                "properties": {
+                    "currentPassword": {
+                        "type": "string",
+                        "format": "password",
+                        "description": "Current password"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "description": "minimum length is 8; and at least one number, uppercase, lowercase, and special char"
+                    },
+                    "passwordConfirmation": {
+                        "type": "string",
+                        "format": "password",
+                        "description": "same value with the password"
+                    }
+                },
+                "example": {
+                    "currentPassword": "Curr9pasS+",
+                    "password": "Pass1word!",
+                    "passwordConfirmation": "Pass1word!"
+                }
+            },
+            "user": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "MongoDb.ObjectId"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "gender": {
+                        "type": "string"
+                    },
+                    "country": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "date-time",
+                        "description": "unix time like 7635472654762"
+                    }
+                }
+            },
+            "form-add-user": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "must be in valid form"
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "user role, should be \"user\""
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "user name, minimum 2-length"
+                    },
+                    "gender": {
+                        "type": "string",
+                        "description": "user gender, male/female/none"
+                    },
+                    "country": {
+                        "type": "string",
+                        "description": "3-letter standart country code"
+                    }
+                },
+                "example": {
+                    "email": "talatkuyuk@gmail.com",
+                    "role": "user",
+                    "name": "Talat",
+                    "gender": "male",
+                    "country": "TUR"
+                }
+            },
+            "form-update-user": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "user name, minimum 2-length"
+                    },
+                    "gender": {
+                        "type": "string",
+                        "description": "user gender, male/female/none"
+                    },
+                    "country": {
+                        "type": "string",
+                        "description": "3-letter standart country code"
+                    }
+                },
+                "example": {
+                    "name": "Talat",
+                    "gender": "male",
+                    "country": "TUR"
+                }
+            },
+            "form-change-role": {
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "type": "string",
+                        "description": "user role, admin/user"
+                    }
+                },
+                "example": {
+                    "role": "admin"
+                }
+            },
+            "tokens": {
+                "type": "object",
+                "properties": {
+                    "access": {
+                        "type": "object",
+                        "properties": {
+                            "token": {
+                                "type": "string"
+                            },
+                            "expires": {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        }
+                    },
+                    "refresh": {
+                        "type": "object",
+                        "properties": {
+                            "token": {
+                                "type": "string"
+                            },
+                            "expires": {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        }
+                    }
+                }
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "number",
+                        "description": "The status code of the response"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The error name"
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "The error message"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "The service name that the error occured, only in development environment"
+                    }
+                }
+            },
+            "ValidationError": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "number",
+                        "value": 422
+                    },
+                    "name": {
+                        "type": "string",
+                        "value": "ValidationError"
+                    },
+                    "message": {
+                        "type": "string",
+                        "value": "The request could not be validated"
+                    },
+                    "errors": {
+                        "type": "object",
+                        "description": "{ key1: string[], key2: string[], ... } The keys refer to a property name validation failed in the requestbody (email, password etc.), having value which is an array of string that refers to specific error message for that property"
+                    }
+                }
+            }
+        },
+        "responses": {
+            "SignUpValidationErrors": {
+                "description": "UNPROCESSABLE ENTITY\n\n#### ValidationErrors\n###### General\n* _Any extra parameter is not allowed other than ['email', 'password', 'passwordConfirmation']_\n###### Email related\n* _must not be empty_\n* _must be valid email address_\n* _email is already taken_\n###### Password related\n* _must not be empty_\n* _must be minimum 8 characters_\n* _must contain uppercase, lowercase, number and special char_\n###### Password confirmation related\n* _must not be empty_\n* _should match with the password_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "example": {
+                            "code": 422,
+                            "name": "ValidationError",
+                            "message": "The request could not be validated",
+                            "errors": {
+                                "email": [
+                                    "email validation errors appear in a string array"
+                                ],
+                                "password": [
+                                    "password validation errors appear in a string array"
+                                ],
+                                "passwordConfirmation": [
+                                    "should match with the password"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "LoginValidationErrors": {
+                "description": "UNPROCESSABLE ENTITY\n\n#### ValidationErrors\n###### Email related\n* _must not be empty_\n* _must be valid email address_\n###### Password related\n* _must not be empty_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "example": {
+                            "code": 422,
+                            "name": "ValidationError",
+                            "message": "The request could not be validated",
+                            "errors": {
+                                "email": [
+                                    "one of the email validation errors appear here"
+                                ],
+                                "password": [
+                                    "must not be empty"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "LoginUnauthorizedFailures": {
+                "description": "UNAUTHORIZED\n\n#### Login Unauthorized Failures\n* _You are not registered user_\n* _Incorrect email or password_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 401,
+                            "name": "ApiError",
+                            "message": "one of the error messages appears here",
+                            "description": "the service name where the error occured"
+                        }
+                    }
+                }
+            },
+            "AuthenticateMiddlewareUnauthorizedErrors": {
+                "description": "UNAUTHORIZED\n\n#### TokenErrors\n* _No auth token_\n* _invalid signature_\n* _jwt malformed_\n* _jwt expired_\n* _jwt not active_\n* _Invalid token type_\n\n#### ApiErrors\n* _Access token does not refer any user_\n* _Your browser/agent seems changed or updated, you have to re-login._\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "examples": {
+                            "TokenError": {
+                                "value": {
+                                    "code": 401,
+                                    "name": "TokenError",
+                                    "message": "One of the token errors appears here",
+                                    "description": "the service name where the error occured"
+                                }
+                            },
+                            "ApiError": {
+                                "value": {
+                                    "code": 401,
+                                    "name": "ApiError",
+                                    "message": "One of the api errors appears here",
+                                    "description": "the service name where the error occured"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "AuthenticateAndAuthorizeMiddlewaresForbiddenErrors": {
+                "description": "FORBIDDEN\n\n#### ApiErrors\n* _You are disabled, call the system administrator_\n* _The token is in the blacklist_\n* _Forbidden, (only self-data)_\n* _Forbidden, (you don't have appropriate right)_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 403,
+                            "name": "ApiError",
+                            "message": "One of the api errors appears here",
+                            "description": "the service name where the error occured"
+                        }
+                    }
+                }
+            },
+            "AuthenticateMiddlewareForbiddenErrors": {
+                "description": "FORBIDDEN\n\n#### ApiErrors\n* _You are disabled, call the system administrator_\n* _The token is in the blacklist_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 403,
+                            "name": "ApiError",
+                            "message": "One of the api errors appears here",
+                            "description": "the service name where the error occured"
+                        }
+                    }
+                }
+            },
+            "AuthorizeMiddlewareForbiddenErrors": {
+                "description": "FORBIDDEN\n\n#### ApiErrors\n* _Forbidden, (only self-data)_\n* _Forbidden, (you don't have appropriate right)_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 403,
+                            "name": "ApiError",
+                            "message": "One of the api errors appears here",
+                            "description": "the service name where the error occured"
+                        }
+                    }
+                }
+            },
+            "oAuthLoginForbiddenErrors": {
+                "description": "FORBIDDEN\n\n#### ApiErrors\n* _You are disabled, call the system administrator_\n* _The token of the auth provider is allowed to be used only once_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 403,
+                            "name": "ApiError",
+                            "message": "One of the api errors appears here",
+                            "description": "the service name where the error occured"
+                        }
+                    }
+                }
+            },
+            "oAuthLoginUnauthorizedFailures": {
+                "description": "UNAUTHORIZED\n\n#### Login Unauthorized Failures\n* _Passport Bearer Strategy related errors._\n* _provider oAuth token could not be associated with any identification._\n* _provider oAuth token does not contain necessary email information._\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 401,
+                            "name": "ApiError",
+                            "message": "one of the error messages appears here",
+                            "description": "the service name where the error occured"
+                        }
+                    }
+                }
+            },
+            "oAuthLoginBadRequests": {
+                "description": "BAD_REQUEST",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 400,
+                            "name": "ApiError",
+                            "message": "Badly formed Authorization Header with Bearer.",
+                            "description": "oAuthMiddleware : oAuth(callback) --> AuthenticateMiddleware : oAuth"
+                        }
+                    }
+                }
+            },
+            "LogoutSignoutUnauthorizedErrors": {
+                "description": "UNAUTHORIZED\n\n(Here is continuation of 401 UNAUTHORIZED response above, not 402)\n\n#### ApiErrors\n* _refresh token is not valid_\n* _refresh token is in the blacklist_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 401,
+                            "name": "ApiError",
+                            "message": "One of the api errors appears here",
+                            "description": "the service name where the error occured"
+                        }
+                    }
+                }
+            },
+            "RefreshTokenValidationError": {
+                "description": "UNPROCESSABLE ENTITY",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "example": {
+                            "code": 422,
+                            "name": "ValidationError",
+                            "message": "The request could not be validated",
+                            "errors": {
+                                "refreshToken": [
+                                    "refresh token must not be empty"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "RefreshTokensUnauthorizedErrors": {
+                "description": "UNAUTHORIZED\n\n#### Refresh Tokens Unauthorized Errors\n* _refresh token is not valid_\n* _Unauthorized use of the refresh token has been detected. All credentials have been cancelled, you have to re-login to get authentication._\n* _Your browser/agent seems changed or updated, you have to re-login.._\n* _The refresh token is expired. You have to re-login to get authentication._\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 401,
+                            "name": "ApiError",
+                            "message": "one of the error messages appears here",
+                            "description": "the service name where the error occured"
+                        }
+                    }
+                }
+            },
+            "VerifyTokenUnauthorizedErrors": {
+                "description": "UNAUTHORIZED\n\n#### TokenErrors\n* _No auth token_\n* _invalid signature_\n* _jwt malformed_\n* _jwt expired_  n/a for refresh token\n* _jwt not active_  n/a for refresh token\n\n#### ApiErrors\n* _refresh|resetPassword|verifyEmail token is not valid_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "examples": {
+                            "TokenError": {
+                                "value": {
+                                    "code": 401,
+                                    "name": "TokenError",
+                                    "message": "One of the token errors appears here",
+                                    "description": "the service name where the error occured"
+                                }
+                            },
+                            "ApiError": {
+                                "value": {
+                                    "code": 401,
+                                    "name": "ApiError",
+                                    "message": "refresh|resetPassword|verifyEmail token is not valid",
+                                    "description": "the service name where the error occured"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ForgotPasswordValidationErrors": {
+                "description": "UNPROCESSABLE ENTITY\n\n#### ValidationErrors\n* _must not be empty_\n* _must be valid email address_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 422,
+                            "name": "ValidationError",
+                            "message": "The request could not be validated",
+                            "errors": {
+                                "email": [
+                                    "email validation errors appear in a string array"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "ResetPasswordValidationErrors": {
+                "description": "UNPROCESSABLE ENTITY\n\n#### ValidationErrors\n* _must not be empty_\n* _must be minimum 8 characters_\n* _must contain uppercase, lowercase, number and special char_\n* _must not be empty_\n* _should match with the password_\n* _token is missing_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 422,
+                            "name": "ValidationError",
+                            "message": "The request could not be validated",
+                            "errors": {
+                                "password": [
+                                    "password validation errors appear in a string array"
+                                ],
+                                "passwordConfirmation": [
+                                    "should match with the password"
+                                ],
+                                "token": [
+                                    "The query parameter 'token' must not be empty"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "VerifyEmailTokenValidationError": {
+                "description": "UNPROCESSABLE ENTITY",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 422,
+                            "name": "ValidationError",
+                            "message": "The request could not be validated",
+                            "errors": {
+                                "token": [
+                                    "The query parameter 'token' must not be empty"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "DisabledForbiddenError": {
+                "description": "FORBIDDEN",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 403,
+                            "name": "ApiError",
+                            "message": "You are disabled, call the system administrator",
+                            "description": "the service name where the error occured"
+                        }
+                    }
+                }
+            },
+            "ParamIdValidationError": {
+                "description": "UNPROCESSABLE ENTITY",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "example": {
+                            "code": 422,
+                            "name": "ValidationError",
+                            "message": "The request could not be validated",
+                            "errors": {
+                                "id": [
+                                    "The param id must be a 24-character number"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "AuthUserQueryParamsValidationErrors": {
+                "description": "UNPROCESSABLE ENTITY\n\n#### ValidationErrors\n* _The parameter can only appear once in the query string_       \n* _The query param 'email' must be in valid form_        \n* _The query param 'isDisabled' must be boolean value_\n* _The query param 'isEmailVerified' must be boolean value_\n* _The query param 'page' must be numeric value_\n* _The query param 'size' must be numeric value_\n* _The query param 'size' can be between 1-50_\n* _The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "example": {
+                            "code": 422,
+                            "name": "ValidationError",
+                            "message": "The request could not be validated",
+                            "errors": {
+                                "email": [
+                                    "The query param 'email' must be in valid form"
+                                ],
+                                "isDisabled": [
+                                    "The query param 'isDisabled' must be boolean value"
+                                ],
+                                "isEmailVerified": [
+                                    "The query param 'isEmailVerified' must be boolean value"
+                                ],
+                                "page": [
+                                    "The query param 'page' must be numeric value"
+                                ],
+                                "size": [
+                                    "The query param 'size' can be at most 50"
+                                ],
+                                "sort": [
+                                    "The parameter can only appear once in the query string"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "ChangePasswordValidationErrors": {
+                "description": "UNPROCESSABLE ENTITY\n\n#### ValidationErrors\n* _incorrect current password_\n* _must not be empty_\n* _must not be empty_\n* _must be minimum 8 characters_\n* _must contain uppercase, lowercase, number and special char_\n* _must not be empty_\n* _should match with the password_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "example": {
+                            "code": 422,
+                            "name": "ValidationError",
+                            "message": "The request could not be validated",
+                            "errors": {
+                                "currentPassword": [
+                                    "must not be empty",
+                                    "incorrect current password"
+                                ],
+                                "password": [
+                                    "password validation errors appear in a string array"
+                                ],
+                                "passwordConfirmation": [
+                                    "should match with the password"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "UserQueryParamsValidationErrors": {
+                "description": "UNPROCESSABLE ENTITY\n\n#### ValidationErrors\n* _The parameter can only appear once in the query string_\n* _The query param 'email' must be in valid form_\n* _The query param 'role' could be one of admin, user_\n* _The query param 'name' must be minumum 2-length charachter_\n* _The query param 'gender' could be only male, female or none_\n* _The query param 'country' code must be in the form of 3-letter standart country code_\n* _The query param 'page' must be numeric value_\n* _The query param 'size' must be numeric value_\n* _The query param 'size' can be between 1-50_\n* _The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "example": {
+                            "code": 422,
+                            "name": "ValidationError",
+                            "message": "The request could not be validated",
+                            "errors": {
+                                "email": [
+                                    "The query param 'email' must be in valid form"
+                                ],
+                                "role": [
+                                    "The query param 'role' could be one of admin, user"
+                                ],
+                                "name": [
+                                    "The query param 'name' must be minumum 2-length charachter"
+                                ],
+                                "page": [
+                                    "The query param 'page' must be numeric value"
+                                ],
+                                "size": [
+                                    "The query param 'size' can be at most 50"
+                                ],
+                                "sort": [
+                                    "The parameter can only appear once in the query string"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "AddUserValidationErrors": {
+                "description": "UNPROCESSABLE ENTITY\n\n#### ValidationErrors\n###### Parameter Id related\n* _The param id must be a 24-character number_\n* _There is another user with the same id_\n###### General\n* _There is no correspondent authenticated user with the same id and email_\n* _Any extra parameter is not allowed other than ['email', 'role', 'name', 'gender', 'country']_\n###### Email related\n* _must not be empty_\n* _must be valid email address_\n###### Others\n* _must be user_\n* _requires minimum 2 characters_\n* _could be male, female or none_\n* _must be 3-letter standart country code_\n* _could be male, female or none_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "example": {
+                            "code": 422,
+                            "name": "ValidationError",
+                            "message": "The request could not be validated",
+                            "errors": {
+                                "email": [
+                                    "email validation errors appear in a string array"
+                                ],
+                                "body": [
+                                    "There is no correspondent authenticated user with the same id and email"
+                                ],
+                                "name": [
+                                    "requires minimum 2 characters"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "UpdateUserValidationErrors": {
+                "description": "UNPROCESSABLE ENTITY\n\n#### ValidationErrors\n###### Parameter Id related\n* _The param id must be a 24-character number_\n###### General\n* _The request body should contain at least one of the name, gender, country_\n* _Any extra parameter is not allowed other than ['name', 'gender', 'country']_\n###### Others\n* _requires minimum 2 characters_\n* _could be male, female or none_\n* _must be 3-letter standart country code_\n* _could be male, female or none_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "example": {
+                            "code": 422,
+                            "name": "ValidationError",
+                            "message": "The request could not be validated",
+                            "errors": {
+                                "body": [
+                                    "The request body should contain at least one of the name, gender, country"
+                                ],
+                                "gender": [
+                                    "could be male, female or none"
+                                ],
+                                "country": [
+                                    "must be 3-letter standart country code"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "ChangeRoleValidationErrors": {
+                "description": "UNPROCESSABLE ENTITY\n\n#### ValidationErrors\n###### Parameter Id related\n* _The param id must be a 24-character number_\n###### General\n* _Any extra parameter is not allowed other than 'role'_\n###### Role related\n* _role could be one of admin,user_\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "example": {
+                            "code": 422,
+                            "name": "ValidationError",
+                            "message": "The request could not be validated",
+                            "errors": {
+                                "body": [
+                                    "Any extra parameter is not allowed other than 'role'"
+                                ],
+                                "id": [
+                                    "The param id must be a 24-character number"
+                                ],
+                                "role": [
+                                    "role could be one of admin,user"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "NoUserFound": {
+                "description": "NOT FOUND",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 404,
+                            "name": "ApiError",
+                            "message": "No user found",
+                            "description": "the service name where the error occured"
+                        }
+                    }
+                }
+            },
+            "InternalServerError": {
+                "description": "INTERNAL SERVER ERROR",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 500,
+                            "name": "ApiError",
+                            "message": "Internal Server Error",
+                            "description": "the service name where the error occured"
+                        }
+                    }
+                }
+            },
+            "Unauthorized": {
+                "description": "UNAUTHORIZED",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 401,
+                            "name": "ApiError",
+                            "message": "Unauthorized",
+                            "description": "the service name where the error occured"
+                        }
+                    }
+                }
+            },
+            "Forbidden": {
+                "description": "FORBIDDEN",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 403,
+                            "name": "ApiError",
+                            "message": "Forbidden",
+                            "description": "the service name where the error occured"
+                        }
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "param-authuser-id": {
+                "in": "path",
+                "name": "id",
+                "schema": {
+                    "type": "string"
+                },
+                "required": false,
+                "description": "the authuser id",
+                "allowEmptyValue": true
+            },
+            "query-param-page": {
+                "in": "query",
+                "name": "page",
+                "required": false,
+                "schema": {
+                    "type": "integer"
+                },
+                "description": "optional, which page according to the total page of the result records, default is 1 (first page)"
+            },
+            "query-param-size": {
+                "in": "query",
+                "name": "size",
+                "required": false,
+                "schema": {
+                    "type": "integer"
+                },
+                "description": "optional, how many records will be on a page, default is 20, max 50."
+            },
+            "query-param-sort": {
+                "in": "query",
+                "name": "sort",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                },
+                "description": "optional, could be more than one, the field that the records be sorted (fieldname.asc|desc), default is createdAt.desc"
+            },
+            "query-param-email": {
+                "in": "query",
+                "name": "email",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                },
+                "description": "optional, string in an email form"
+            },
+            "query-param-isEmailVerified": {
+                "in": "query",
+                "name": "isEmailVerified",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                },
+                "description": "optional, boolean"
+            },
+            "query-param-isDisabled": {
+                "in": "query",
+                "name": "isDisabled",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                },
+                "description": "optional, boolean"
+            },
+            "param-user-id": {
+                "in": "path",
+                "name": "id",
+                "schema": {
+                    "type": "string"
+                },
+                "required": false,
+                "description": "the user id",
+                "allowEmptyValue": true
+            },
+            "query-param-role": {
+                "in": "query",
+                "name": "role",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                },
+                "description": "optional, admin or user"
+            },
+            "query-param-name": {
+                "in": "query",
+                "name": "name",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                },
+                "description": "optional, at least 2-length name"
+            },
+            "query-param-gender": {
+                "in": "query",
+                "name": "gender",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                },
+                "description": "optional, male, female or none"
+            },
+            "query-param-country": {
+                "in": "query",
+                "name": "country",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                },
+                "description": "optional, 3-letter standard country code"
+            }
+        },
+        "examples": {
+            "response-authuser": {
+                "id": "6152fde5c127504eab292d24",
+                "email": "talatkuyuk@gmail.com",
+                "isEmailVerified": false,
+                "isDisabled": false,
+                "createdAt": 1632828901965,
+                "services": {
+                    "emailpassword": "registered"
+                }
+            },
+            "response-tokens": {
+                "access": {
+                    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MTUyZmRlNWMxMjc1MDRlYWIyOTJkMjQiLCJpYXQiOjE2MzI4Mjg5MDIsImV4cCI6MTYzMjg1MDUwMiwianRpIjoiMGZmNmZkNzMzYjQ3NWQxY2EzZjMyZTYyN2RmMTQwNjEiLCJ1YSI6InZzY29kZS1yZXN0Y2xpZW50IiwidHlwZSI6ImFjY2VzcyIsIm5iZiI6MTYzMjgyODkwMn0.xw88sTQSvXr84-5nefKJXfKw4VicZS2UNSnvQu9iuuk",
+                    "expires": "2021-09-28T17:35:02.040Z"
+                },
+                "refresh": {
+                    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MTUyZmRlNWMxMjc1MDRlYWIyOTJkMjQiLCJpYXQiOjE2MzI4Mjg5MDIsImV4cCI6MTYzNTQyMDkwMiwianRpIjoiMGZmNmZkNzMzYjQ3NWQxY2EzZjMyZTYyN2RmMTQwNjEiLCJ1YSI6InZzY29kZS1yZXN0Y2xpZW50IiwidHlwZSI6InJlZnJlc2giLCJuYmYiOjE2MzI4NTA1MDJ9.mlBB7txKnFW6XPVO1eeQ9W9UkaOzaSIgIWGiDUGqAxg",
+                    "expires": "2021-10-28T11:35:02.042Z"
+                }
+            },
+            "response-tokens-for-refresh": {
+                "summary": "it consists access and refresh tokens",
+                "value": {
+                    "access": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MTUyZmRlNWMxMjc1MDRlYWIyOTJkMjQiLCJpYXQiOjE2MzI4Mjg5MDIsImV4cCI6MTYzMjg1MDUwMiwianRpIjoiMGZmNmZkNzMzYjQ3NWQxY2EzZjMyZTYyN2RmMTQwNjEiLCJ1YSI6InZzY29kZS1yZXN0Y2xpZW50IiwidHlwZSI6ImFjY2VzcyIsIm5iZiI6MTYzMjgyODkwMn0.xw88sTQSvXr84-5nefKJXfKw4VicZS2UNSnvQu9iuuk",
+                        "expires": "2021-09-28T17:35:02.040Z"
+                    },
+                    "refresh": {
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MTUyZmRlNWMxMjc1MDRlYWIyOTJkMjQiLCJpYXQiOjE2MzI4Mjg5MDIsImV4cCI6MTYzNTQyMDkwMiwianRpIjoiMGZmNmZkNzMzYjQ3NWQxY2EzZjMyZTYyN2RmMTQwNjEiLCJ1YSI6InZzY29kZS1yZXN0Y2xpZW50IiwidHlwZSI6InJlZnJlc2giLCJuYmYiOjE2MzI4NTA1MDJ9.mlBB7txKnFW6XPVO1eeQ9W9UkaOzaSIgIWGiDUGqAxg",
+                        "expires": "2021-10-28T11:35:02.042Z"
+                    }
+                }
+            },
+            "response-query-authusers": {
+                "summary": "it returns the authusers queried",
+                "value": {
+                    "users": [
+                        {
+                            "id": "6152fde5c127504eab292d24",
+                            "email": "user1@gmail.com",
+                            "isEmailVerified": false,
+                            "isDisabled": false,
+                            "createdAt": 1632828901111,
+                            "services": {
+                                "emailpassword": "registered"
+                            }
+                        },
+                        {
+                            "id": "6152fde5c127504eab292d25",
+                            "email": "user2@gmail.com",
+                            "isEmailVerified": false,
+                            "isDisabled": false,
+                            "createdAt": 1632828902222,
+                            "services": {
+                                "emailpassword": "unregistered",
+                                "google": "63876327467767364"
+                            }
+                        }
+                    ],
+                    "totalCount": 2,
+                    "pagination": {
+                        "currentPage": 1,
+                        "totalPages": 1,
+                        "perPage": 20
+                    }
+                }
+            },
+            "response-query-users": {
+                "summary": "it returns the authusers queried",
+                "value": {
+                    "users": [
+                        {
+                            "id": "6152fde5c127504eab292d24",
+                            "email": "user1@gmail.com",
+                            "role": "admin",
+                            "name": "User1 Brown",
+                            "gender": "male",
+                            "country": "TUR",
+                            "createdAt": 1632828901111
+                        },
+                        {
+                            "id": "6152fde5c127504eab292d25",
+                            "email": "user2@gmail.com",
+                            "role": "admin",
+                            "name": "User2 Brown",
+                            "gender": "female",
+                            "country": "USA",
+                            "createdAt": 1632828902222
+                        }
+                    ],
+                    "totalCount": 2,
+                    "pagination": {
+                        "currentPage": 1,
+                        "totalPages": 1,
+                        "perPage": 20
+                    }
+                }
+            },
+            "response-user": {
+                "id": "6152fde5c127504eab292d24",
+                "email": "talatkuyuk@gmail.com",
+                "role": "user",
+                "name": "Talat Kuyuk",
+                "gender": "male",
+                "country": "TUR",
+                "createdAt": 1632828901965
+            }
+        },
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            },
+            "BearerAuth_WithGoogleIdToken": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "google idToken or facebook accessToken"
+            },
+            "BearerAuth_WithFacebookAccessToken": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "google idToken or facebook accessToken"
+            },
+            "google_id_token": {
+                "type": "oauth2",
+                "description": "This API uses OAuth 2 with the implicit grand flow.",
+                "flows": {
+                    "implicit": {
+                        "authorizationUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+                        "tokenUrl": "https://www.googleapis.com/oauth2/v4/token",
+                        "x-google-issuer": "https://accounts.google.com",
+                        "x-google-jwks_uri": "https://www.googleapis.com/oauth2/v3/certs",
+                        "x-google-audiences": "831846632-gsn4gqhumc1dmgv1tjupkivqo16g3330.apps.googleusercontent.com",
+                        "scopes": {
+                            "email": "https://www.googleapis.com/auth/userinfo.email",
+                            "profile": "https://www.googleapis.com/auth/userinfo.profile"
+                        }
+                    }
+                }
+            },
+            "google_oAuth_2": {
+                "type": "oauth2",
+                "description": "This API uses OAuth 2 with the authorizationCode flow.",
+                "flows": {
+                    "authorizationCode": {
+                        "authorizationUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+                        "tokenUrl": "https://www.googleapis.com/oauth2/v4/token",
+                        "scopes": {
+                            "email": "https://www.googleapis.com/auth/userinfo.email",
+                            "profile": "https://www.googleapis.com/auth/userinfo.profile"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
