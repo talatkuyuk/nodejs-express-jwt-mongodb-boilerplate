@@ -25,13 +25,20 @@ class TestUtil {
 			const { name: rName, message: rMessage, statusCode: rCode } = sReceived;
 			const { name: eName, message: eMessage, statusCode: eCode } = sExpected;
 
-			const check = (r, e) => r === e || console.log(`Expected: ${e}\nReceived: ${r}`);
+			// const check = (r, e) => r === e;
+			const check = (r, e) => {
+				r !== e && console.log(`Expected: ${e}\nReceived: ${r}`);
+				return r === e;
+			}
 
 			const passName = check(rName, eName);
 			const passMessage = check(rMessage, eMessage);
 			const passCode = check(rCode, eCode);
+
+			const pass =  passName && passMessage && passCode;
+			// const message = pass ? () => 'Error matched' : () => 'Error is not matched'
 			
-			return { pass: passName && passMessage && passCode };
+			return { pass };
 		},
 	});
 
