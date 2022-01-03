@@ -1,5 +1,5 @@
 const mongodb = require('../core/mongodb');
-const ObjectId = require('mongodb').ObjectId;
+const { ObjectId, ReturnDocument } = require('mongodb');
 
 const { AuthUser } = require('../models');
 const { locateError } = require('../utils/ApiError');
@@ -15,11 +15,14 @@ const addAuthUser = async (authuser) => {
 		const db = mongodb.getDatabase();
 		const result = await db.collection("authusers").insertOne(authuser);
 
-		if (result.result.ok !== 1) return null;
+		if (!result.acknowledged) return null;
 
-		console.log(`${result.insertedCount} record is created in authusers. (${result.insertedId})`);
+		console.log(`1 record is created in authusers. (${result.insertedId})`);
 
-		return AuthUser.fromDoc(result.ops[0]); // inserted document
+		// get the inserted document back
+		const authuserInserted = await db.collection("authusers").findOne({ _id: result.insertedId });
+
+		return AuthUser.fromDoc(authuserInserted);
 
 	} catch (error) {
 		throw locateError(error, "AuthUserDbService : addAuthUser");
@@ -124,7 +127,7 @@ const updateAuthUser = async (id, updateBody) => {
 		const result = await db.collection("authusers").findOneAndUpdate(
 		  { _id: ObjectId(id) },
 		  { $set: {...updateBody, updatedAt: Date.now()} },
-		  { returnDocument: "after" }
+		  { returnDocument: ReturnDocument.AFTER }
 		);
 	  
 		const count = result.value === null ? 0 : 1;
@@ -191,11 +194,14 @@ const deleteAuthUser = async (id) => {
 		const db = mongodb.getDatabase();
 		const result = await db.collection("deletedauthusers").insertOne(deletedAuthUser);
 
-		if (result.result.ok !== 1) return null;
+		if (!result.acknowledged) return null;
 		
-		console.log(`${result.insertedCount} record is created in deletedauthusers. ${result.insertedId}`);
+		console.log(`1 record is created in deletedauthusers. ${result.insertedId}`);
 
-		return result.ops[0]; // deleted AuthUser
+		// get the inserted document back
+		const deletedAuthuserInserted = await db.collection("deletedauthusers").findOne({ _id: result.insertedId });
+
+		return deletedAuthuserInserted;
 		
 	} catch (error) {
 		throw locateError(error, "AuthUserDbService : toDeletedAuthUsers");
