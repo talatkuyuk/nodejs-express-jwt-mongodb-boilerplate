@@ -1,5 +1,5 @@
 const mongodb = require('../core/mongodb');
-const ObjectId = require('mongodb').ObjectId;
+const { ObjectId, ReturnDocument } = require('mongodb');
 
 const { User } = require('../models');
 const { locateError } = require('../utils/ApiError');
@@ -19,11 +19,14 @@ const { locateError } = require('../utils/ApiError');
 			...user
 		});
 
-		if (result.result.ok !== 1) return null;
+		if (!result.acknowledged) return null;
 
-		console.log(`${result.insertedCount} record is created in users. (${result.insertedId})`);
+		console.log(`1 record is created in users. (${result.insertedId})`);
 
-		return User.fromDoc(result.ops[0]); // inserted document
+		// get the inserted document back
+		const userInserted = await db.collection("users").findOne({ _id: result.insertedId });
+
+		return User.fromDoc(userInserted);
 		
 	} catch (error) {
 		throw locateError(error, "UserDbService : addUser");
@@ -131,7 +134,7 @@ const { locateError } = require('../utils/ApiError');
 		 const result = await db.collection("users").findOneAndUpdate(
 			{ _id: ObjectId(id) },
 			{ $set: {...updateBody, updatedAt: Date.now()} },
-			{ returnDocument: "after" }
+			{ returnDocument: ReturnDocument.AFTER }
 		 );
 
 		 const count = result.value == null ? 0 : 1;
@@ -198,11 +201,14 @@ const { locateError } = require('../utils/ApiError');
 		const db = mongodb.getDatabase();
 		const result = await db.collection("deletedusers").insertOne(deletedUser);
 
-		if (result.result.ok !== 1) return null;
+		if (!result.acknowledged) return null;
 		
-		console.log(`${result.insertedCount} record is created in deletedusers. ${result.insertedId}`);
+		console.log(`1 record is created in deletedusers. ${result.insertedId}`);
 
-		return result.ops[0]; // deleted User
+		// get the inserted document back
+		const deletedUserInserted = await db.collection("deletedusers").findOne({ _id: result.insertedId });
+
+		return deletedUserInserted;
 		
 	} catch (error) {
 		throw locateError(error, "UserDbService : toDeletedUsers");

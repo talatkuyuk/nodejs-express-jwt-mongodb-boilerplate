@@ -1,8 +1,12 @@
 const mongodb = require('../core/mongodb');
-const ObjectId = require('mongodb').ObjectId;
+const { ObjectId, ReturnDocument } = require('mongodb');
 
 const { Token } = require('../models');
 const { locateError } = require('../utils/ApiError');
+
+// https://github.com/mongodb/specifications/blob/master/source/crud/crud.rst#write-results
+// https://mongodb.github.io/node-mongodb-native/4.2/
+// https://mongodb.github.io/node-mongodb-native/3.6/reference/unified-topology/
 
 /**
  * Save the token to db
@@ -16,11 +20,14 @@ const addToken = async (tokenDoc) => {
 		const db = mongodb.getDatabase();
 		const result = await db.collection("tokens").insertOne(tokenDoc);
 
-		if (result.result.ok !== 1) return null;
+		if (!result.acknowledged) return null;
 
-		console.log(`${result.insertedCount} record is created in tokens. (${result.insertedId})`);
+		console.log(`1 record is created in tokens. (${result.insertedId})`);
 
-		return Token.fromDoc(result.ops[0]); // inserted document
+		// get the inserted document back
+		const tokenInserted = await db.collection("tokens").findOne({ _id: result.insertedId });
+
+		return Token.fromDoc(tokenInserted);
 		
 	} catch (error) {
 		throw locateError(error, "TokenDbService : addToken");
@@ -31,8 +38,8 @@ const addToken = async (tokenDoc) => {
 
 /**
  * Get the token from db
- * @param {Object} query 
- * @returns {Promise<Token>}
+ * @param {Object} query
+ * @returns {Promise<Token?>}
  */
 const getToken = async (query) => {
 	try {
@@ -74,8 +81,6 @@ const getTokens = async (query) => {
 			.project({ _id: 0, id: "$_id", token: 1, user: 1, expires: 1, type: 1, jti: 1, family: 1, blacklisted: 1,  createdAt: 1 })
 			.toArray();
 
-		console.log(tokens)
-
 		return tokens;
 
 	} catch (error) {
@@ -100,7 +105,7 @@ const updateToken = async (id, updateBody) => {
 		const result = await db.collection("tokens").findOneAndUpdate(
 		   { _id: ObjectId(id) }, 
 		   { $set: {...updateBody} },
-		   { returnOriginal: false }
+		   { returnDocument: ReturnDocument.AFTER }
 		);
 
 		console.log(`${result.ok} record is updated in tokens`);
@@ -126,7 +131,7 @@ const deleteToken = async (id) => {
 		const db = mongodb.getDatabase();
 		const result = await db.collection("tokens").deleteOne({ _id: ObjectId(id) });
 
-		return {isDeleted: result.result.ok === 1, deletedCount: result.deletedCount };
+		return {isDeleted: result.acknowledged, deletedCount: result.deletedCount };
 		
 	} catch (error) {
 		throw locateError(error, "TokenDbService : deleteToken");
@@ -149,7 +154,7 @@ const deleteTokens = async (query) => {
 		const db = mongodb.getDatabase();
 		const result = await db.collection("tokens").deleteMany(query);
 
-		return {isDeleted: result.result.ok === 1, deletedCount: result.deletedCount };
+		return {isDeleted: result.acknowledged, deletedCount: result.deletedCount };
 		
 	} catch (error) {
 		throw locateError(error, "TokenDbService : deleteTokens");

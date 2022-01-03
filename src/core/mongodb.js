@@ -1,4 +1,4 @@
-const MongoClient = require('mongodb').MongoClient;
+const { MongoClient, Db } = require('mongodb');
 const config = require('../config');
 const logger = require('../core/logger');
 
@@ -6,20 +6,19 @@ const { userSchema } = require('../schemas/user.schema');
 const { authuserSchema } = require('../schemas/authuser.schema');
 const { tokenSchema } = require('../schemas/token.schema');
 
-let client, db;
-
 const uri = config.mongodb_url;
 const options = {
-	poolSize: 10,
-	useNewUrlParser: true,
-	useUnifiedTopology: true,
+	maxPoolSize: 10,
 	serverSelectionTimeoutMS: 5000,
 	connectTimeoutMS: 5000,
 	socketTimeoutMS: 5000,
 }
 
+const dbName = config.mongodb_database + (config.env === 'test' ? '-test' : '');
+
 // Create a new MongoClient
-client = new MongoClient(uri, options);
+let client = new MongoClient(uri, options);
+let db = new Db(client, dbName);
 
 const connect = async function() {
 
@@ -27,8 +26,6 @@ const connect = async function() {
 
 		// Establish connection
 		await client.connect();
-
-		const dbName = config.mongodb_database + (config.env === 'test' ? '-test' : '');
 
 		// get the database
 		db = client.db(dbName);
@@ -60,10 +57,8 @@ const getDatabase = function() {
 
 const disconnect = async function(callback) {
 	try {
-		if (client.isConnected()) {
-			await client.close();
-			callback("OK");
-		}
+		await client.close();
+		callback("OK");
 
 	} catch (error) {
 		logger.error("MongoClient connection error while disconnecting.tk.");
@@ -72,12 +67,8 @@ const disconnect = async function(callback) {
 }
 
 
-const isConnected = () => client.isConnected();
-
-
 module.exports = {
 	connect,
 	getDatabase,
-	disconnect,
-	isConnected,
+	disconnect
 }
