@@ -14,7 +14,7 @@ const docsRoute = require('./docs.route');
 const mongodb = require('../core/mongodb');
 const redis = require('../core/redis');
 const config = require('../config');
-const { locateError } = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
 
 
 

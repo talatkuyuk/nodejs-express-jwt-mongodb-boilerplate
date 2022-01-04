@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const httpMocks = require('node-mocks-http');
 
 const { authorize } = require('../../src/middlewares');
-const { ApiError } = require('../../src/utils/ApiError');
+const ApiError = require('../../src/utils/ApiError');
 
 const userDbService = require('../../src/services/user.db.service');
 

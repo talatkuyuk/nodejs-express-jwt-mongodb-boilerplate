@@ -1,7 +1,8 @@
 const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
 
-const { ApiError, locateError } = require('../utils/ApiError');
+const ApiError = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
 const composeFilter = require('../utils/composeFilter');
 const composeSort = require('../utils/composeSort');
 const { AuthUser } = require('../models');

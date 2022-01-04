@@ -9,7 +9,7 @@ const app = require('../../src/core/express');
 
 const config = require('../../src/config');
 const { authenticate } = require('../../src/middlewares');
-const { ApiError } = require('../../src/utils/ApiError');
+const ApiError = require('../../src/utils/ApiError');
 
 const { authuserDbService, authuserService, tokenService, redisService } = require('../../src/services');
 const { tokenTypes } = require('../../src/config/tokens');

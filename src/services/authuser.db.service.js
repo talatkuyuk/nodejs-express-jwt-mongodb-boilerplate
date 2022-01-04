@@ -2,7 +2,7 @@ const mongodb = require('../core/mongodb');
 const { ObjectId, ReturnDocument } = require('mongodb');
 
 const { AuthUser } = require('../models');
-const { locateError } = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
 
 
 /**

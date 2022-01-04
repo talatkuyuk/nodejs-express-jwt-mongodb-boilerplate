@@ -3,7 +3,7 @@ const moment = require('moment');
 const {OAuth2Client} = require('google-auth-library');
 
 const config = require('../config');
-const { locateError } = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
 
 
 const google = async (idToken) => {

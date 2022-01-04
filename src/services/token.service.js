@@ -5,7 +5,8 @@ const httpStatus = require('http-status');
 
 const config = require('../config');
 
-const { ApiError, locateError } = require('../utils/ApiError');
+const ApiError = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
 const { Token } = require('../models');
 const { tokenTypes } = require('../config/tokens');
 
