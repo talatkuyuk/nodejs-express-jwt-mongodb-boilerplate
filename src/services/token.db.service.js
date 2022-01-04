@@ -2,7 +2,7 @@ const mongodb = require('../core/mongodb');
 const { ObjectId, ReturnDocument } = require('mongodb');
 
 const { Token } = require('../models');
-const { locateError } = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
 
 // https://github.com/mongodb/specifications/blob/master/source/crud/crud.rst#write-results
 // https://mongodb.github.io/node-mongodb-native/4.2/

@@ -1,4 +1,4 @@
-const { locateError } = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
 const composeFilter = require('../utils/composeFilter');
 const composeSort = require('../utils/composeSort');
 

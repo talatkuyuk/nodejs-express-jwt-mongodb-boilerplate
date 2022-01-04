@@ -2,7 +2,7 @@ const httpMocks = require('node-mocks-http');
 
 const { validate } = require('../../src/middlewares');
 const authValidation = require('../../src/validations/auth.ValidationRules');
-const { ApiError } = require('../../src/utils/ApiError');
+const ApiError = require('../../src/utils/ApiError');
 const { authuserService } = require('../../src/services');
 
 const TestUtil = require('../testutils/TestUtil');

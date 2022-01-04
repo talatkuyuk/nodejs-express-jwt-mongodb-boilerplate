@@ -1,7 +1,8 @@
 const passport = require('passport');
 const httpStatus = require('http-status');
 
-const { ApiError, locateError } = require('../utils/ApiError');
+const ApiError = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
 const { redisService } = require('../services');
 
 

@@ -1,4 +1,4 @@
-const { locateError } = require('./ApiError');
+const { locateError } = require('./errorUtils');
 const Utils = require('./Utils');
 
 

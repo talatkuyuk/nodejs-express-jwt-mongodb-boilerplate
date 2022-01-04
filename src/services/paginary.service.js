@@ -1,5 +1,5 @@
 const Utils = require('../utils/Utils');
-const { locateError } = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
 
 const paginary = async (query, filter, sort, dbQueryCallback) => {
 

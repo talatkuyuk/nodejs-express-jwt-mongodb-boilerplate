@@ -3,7 +3,7 @@ const BearerStrategy = require('passport-http-bearer').Strategy;
 
 const config = require('../config');
 const { tokenTypes } = require('../config/tokens');
-const { locateError } = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
 const { authProviders, joinedDbService } = require('../services');
 
 

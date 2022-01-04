@@ -1,7 +1,7 @@
 const mongodb = require('../core/mongodb');
 const ObjectId = require('mongodb').ObjectId;
 
-const { locateError } = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
 const { AuthUser, User } = require('../models');
 
 const getAuthUserJoined = async (id) => {

@@ -2,7 +2,7 @@ const MongoError = require('mongodb').MongoError;
 const httpStatus = require('http-status');
 const config = require('../config');
 const logger = require('../core/logger');
-const { ApiError } = require('../utils/ApiError');
+const ApiError = require('../utils/ApiError');
 
 
 

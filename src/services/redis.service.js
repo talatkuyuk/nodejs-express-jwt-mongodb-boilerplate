@@ -3,7 +3,8 @@ const httpStatus = require('http-status');
 const config = require('../config');
 const logger = require('../core/logger');
 const { getRedisClient } = require('../core/redis');
-const { ApiError, locateError } = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
+const ApiError = require('../utils/ApiError');
 
 
 /**

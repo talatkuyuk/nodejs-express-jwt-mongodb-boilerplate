@@ -5,7 +5,7 @@ const app = require('../../src/core/express');
 
 const { oAuth } = require('../../src/middlewares');
 const { authProviders, redisService } = require('../../src/services');
-const { ApiError } = require('../../src/utils/ApiError');
+const ApiError = require('../../src/utils/ApiError');
 
 const { setupRedis } = require('../setup/setupRedis');
 

@@ -1,7 +1,8 @@
 const httpStatus = require('http-status');
 
-const { validationResult, matchedData } = require('express-validator')
-const { ApiError, locateError } = require('../utils/ApiError');
+const { validationResult, matchedData } = require('express-validator');
+const { locateError } = require('../utils/errorUtils');
+const ApiError = require('../utils/ApiError');
 
 
 const validate = (rules) => async (req, res, next) => {

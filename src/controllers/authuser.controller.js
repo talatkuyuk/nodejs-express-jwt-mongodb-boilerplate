@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler');
 
-const { locateError } = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
 
 // SERVICE DEPENDENCIES
 const { authuserService, tokenService } = require('../services');

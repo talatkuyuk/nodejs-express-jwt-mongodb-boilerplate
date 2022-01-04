@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 
 const config = require('../config');
 const logger = require('../core/logger');
-const { locateError } = require('../utils/ApiError');
+const { locateError } = require('../utils/errorUtils');
 
 
 const transporter = nodemailer.createTransport(config.email.smtp);

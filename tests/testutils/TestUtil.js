@@ -6,7 +6,7 @@ const {serializeError} = require('serialize-error');
 const { tokenService, tokenDbService, authuserDbService } = require('../../src/services');
 const { tokenTypes } = require('../../src/config/tokens');
 const { AuthUser } = require('../../src/models');
-const { ApiError } = require('../../src/utils/ApiError');
+const ApiError = require('../../src/utils/ApiError');
 const config = require('../../src/config');
 
 
