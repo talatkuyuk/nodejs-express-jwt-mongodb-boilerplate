@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 
 const ApiError  = require('../utils/ApiError');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 const { userDbService } = require('../services');
 const { roleRights } = require('../config/roles');
 
@@ -41,7 +41,7 @@ const authorize = (...requiredRights) => async (req, res, next) => {
 		next();
 		
 	} catch (error) {
-		next( locateError(error, "AuthorizeMiddleware : authorize") );
+		next( traceError(error, "AuthorizeMiddleware : authorize") );
 	}
 };
 

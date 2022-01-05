@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 
 const ApiError = require('../utils/ApiError');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 const composeFilter = require('../utils/composeFilter');
 const composeSort = require('../utils/composeSort');
 const { User } = require('../models');
@@ -24,7 +24,7 @@ const userDbService = require('./user.db.service');
 	   	return !!user;
 
 	} catch (error) {
-	   throw locateError(error, "UserService : isExist");
+	   throw traceError(error, "UserService : isExist");
 	}
 };
 
@@ -51,7 +51,7 @@ const userDbService = require('./user.db.service');
 		return user;
 
 	} catch (error) {
-		throw locateError(error, "UserService : addUser");
+		throw traceError(error, "UserService : addUser");
 	}
 }
 
@@ -68,7 +68,7 @@ const userDbService = require('./user.db.service');
 		return user;
   
 	} catch (error) {
-		throw locateError(error, "UserService : getUserById");
+		throw traceError(error, "UserService : getUserById");
 	}
 };
 
@@ -87,7 +87,7 @@ const userDbService = require('./user.db.service');
 		return user;
   
 	} catch (error) {
-		throw locateError(error, "UserService : getUserByEmail");
+		throw traceError(error, "UserService : getUserByEmail");
 	}
 };
 
@@ -112,7 +112,7 @@ const userDbService = require('./user.db.service');
 		return await paginaryService.paginary(query, filter, sort, userDbService.getUsers);
   
 	} catch (error) {
-		throw locateError(error, "UserService : getUsers");
+		throw traceError(error, "UserService : getUsers");
 	}
 };
 
@@ -134,7 +134,7 @@ const userDbService = require('./user.db.service');
 		return user;
 		
 	} catch (error) {
-	   throw locateError(error, "UserService : updateUser");
+	   throw traceError(error, "UserService : updateUser");
 	}
 };
 
@@ -153,7 +153,7 @@ const userDbService = require('./user.db.service');
 			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
   
 	} catch (error) {
-		throw locateError(error, "UserService : deleteUser");
+		throw traceError(error, "UserService : deleteUser");
 	}
 };
 
@@ -172,7 +172,7 @@ const userDbService = require('./user.db.service');
 		return user;
   
 	} catch (error) {
-		throw locateError(error, "UserService : getDeletedUserById");
+		throw traceError(error, "UserService : getDeletedUserById");
 	}
 };
 

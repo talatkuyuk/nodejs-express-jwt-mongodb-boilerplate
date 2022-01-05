@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 
 const config = require('../config');
 const logger = require('../core/logger');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 
 
 const transporter = nodemailer.createTransport(config.email.smtp);
@@ -31,7 +31,7 @@ const sendEmail = async (to, subject, text) => {
 	} catch (error) {
 		const {code, response, responseCode, command} = error;
 		console.log({code, response, responseCode, command});
-		throw locateError(error, "EmailService : sendEmail");
+		throw traceError(error, "EmailService : sendEmail");
 	}
 };
 
@@ -51,7 +51,7 @@ const sendResetPasswordEmail = async (to, token) => {
 		await sendEmail(to, subject, text);
 
 	} catch (error) {
-		throw locateError(error, "EmailService : sendResetPasswordEmail");
+		throw traceError(error, "EmailService : sendResetPasswordEmail");
 	}
 };
 
@@ -70,7 +70,7 @@ const sendVerificationEmail = async (to, token) => {
 		await sendEmail(to, subject, text);
 
 	} catch (error) {
-		throw locateError(error, "EmailService : sendVerificationEmail");
+		throw traceError(error, "EmailService : sendVerificationEmail");
 	}
 };
 

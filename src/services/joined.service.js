@@ -1,4 +1,4 @@
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 const composeFilter = require('../utils/composeFilter');
 const composeSort = require('../utils/composeSort');
 
@@ -34,7 +34,7 @@ const paginaryService = require('./paginary.service');
 		return await paginaryService.paginaryForJoinQuery(query, filterLeft, filterRight, sort, joinedDbService.getAuthUsersJoined);
   
 	} catch (error) {
-		throw locateError(error, "JoinedService : getAuthUsersJoined");
+		throw traceError(error, "JoinedService : getAuthUsersJoined");
 	}
 };
 
@@ -65,7 +65,7 @@ const paginaryService = require('./paginary.service');
 		return await paginaryService.paginaryForJoinQuery(query, filterLeft, filterRight, sort, joinedDbService.getUsersJoined);
   
 	} catch (error) {
-		throw locateError(error, "JoinedService : getUsersJoined");
+		throw traceError(error, "JoinedService : getUsersJoined");
 	}
 };
 

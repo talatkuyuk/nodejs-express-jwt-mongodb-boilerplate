@@ -2,7 +2,7 @@ const mongodb = require('../core/mongodb');
 const { ObjectId, ReturnDocument } = require('mongodb');
 
 const { User } = require('../models');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 
 
 /**
@@ -29,7 +29,7 @@ const { locateError } = require('../utils/errorUtils');
 		return User.fromDoc(userInserted);
 		
 	} catch (error) {
-		throw locateError(error, "UserDbService : addUser");
+		throw traceError(error, "UserDbService : addUser");
 	}
 };
 
@@ -54,7 +54,7 @@ const { locateError } = require('../utils/errorUtils');
 		return User.fromDoc(doc);
 		
 	} catch (error) {
-		throw locateError(error, "UserDbService : getUser");
+		throw traceError(error, "UserDbService : getUser");
 	}
 };
 
@@ -113,7 +113,7 @@ const { locateError } = require('../utils/errorUtils');
 	   	return await db.collection("users").aggregate(pipeline).toArray();
 		
 	} catch (error) {
-		throw locateError(error, "UserDbService : getUsers");
+		throw traceError(error, "UserDbService : getUsers");
 	}
 };
 
@@ -143,7 +143,7 @@ const { locateError } = require('../utils/errorUtils');
 		 return User.fromDoc(result.value);
 		 
 	 } catch (error) {
-		throw locateError(error, "UserDbService : updateUser");
+		throw traceError(error, "UserDbService : updateUser");
 	 }
 };
 
@@ -178,7 +178,7 @@ const { locateError } = require('../utils/errorUtils');
 		return true;
 
 	} catch (error) {
-		throw locateError(error, "UserDbService : deleteUser");
+		throw traceError(error, "UserDbService : deleteUser");
 	}
 };
 
@@ -211,7 +211,7 @@ const { locateError } = require('../utils/errorUtils');
 		return deletedUserInserted;
 		
 	} catch (error) {
-		throw locateError(error, "UserDbService : toDeletedUsers");
+		throw traceError(error, "UserDbService : toDeletedUsers");
 	}
 };
 
@@ -237,7 +237,7 @@ const { locateError } = require('../utils/errorUtils');
 		return User.fromDoc(doc);
 		
 	} catch (error) {
-		throw locateError(error, "UserDbService : getDeletedUser");
+		throw traceError(error, "UserDbService : getDeletedUser");
 	}
 };
 

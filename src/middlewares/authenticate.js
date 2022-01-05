@@ -2,7 +2,7 @@ const passport = require('passport');
 const httpStatus = require('http-status');
 
 const ApiError = require('../utils/ApiError');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 const { redisService } = require('../services');
 
 
@@ -40,7 +40,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, pas
 		resolve();
 		
 	} catch (error) {
-		reject( locateError(error, "AuthenticateMiddleware : verifyCallback") );
+		reject( traceError(error, "AuthenticateMiddleware : verifyCallback") );
 	}
 };
 
@@ -53,7 +53,7 @@ const authenticate = async (req, res, next) => {
 		next();
 		
 	} catch (error) {
-		next( locateError(error, "AuthenticateMiddleware : authenticate") );
+		next( traceError(error, "AuthenticateMiddleware : authenticate") );
 	}
 };
 

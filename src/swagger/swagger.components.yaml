@@ -426,7 +426,7 @@ components:
             code: 401
             name: "ApiError"
             message: "one of the error messages appears here"
-            description: "the service name where the error occured"
+            errorPath: "the service-module name where the error occured"
 
     AuthenticateMiddlewareUnauthorizedErrors:
       description: | 
@@ -453,13 +453,13 @@ components:
                 code: 401
                 name: "TokenError"
                 message: "One of the token errors appears here"
-                description: "the service name where the error occured"
+                errorPath: "the service-module name where the error occured"
             ApiError:
               value:
                 code: 401
                 name: "ApiError"
                 message: "One of the api errors appears here"
-                description: "the service name where the error occured"
+                errorPath: "the service-module name where the error occured"
 
 
     AuthenticateAndAuthorizeMiddlewaresForbiddenErrors:
@@ -479,7 +479,7 @@ components:
             code: 403
             name: "ApiError"
             message: "One of the api errors appears here"
-            description: "the service name where the error occured"
+            errorPath: "the service-module name where the error occured"
 
 
     AuthenticateMiddlewareForbiddenErrors:
@@ -497,7 +497,7 @@ components:
             code: 403
             name: "ApiError"
             message: "One of the api errors appears here"
-            description: "the service name where the error occured"
+            errorPath: "the service-module name where the error occured"
 
 
     AuthorizeMiddlewareForbiddenErrors:
@@ -515,7 +515,7 @@ components:
             code: 403
             name: "ApiError"
             message: "One of the api errors appears here"
-            description: "the service name where the error occured"
+            errorPath: "the service-module name where the error occured"
 
 
     oAuthLoginForbiddenErrors:
@@ -533,7 +533,7 @@ components:
             code: 403
             name: "ApiError"
             message: "One of the api errors appears here"
-            description: "the service name where the error occured"
+            errorPath: "the service-module name where the error occured"
 
         
     oAuthLoginUnauthorizedFailures:
@@ -552,8 +552,8 @@ components:
           example:
             code: 401
             name: "ApiError"
-            message: "one of the error messages appears here"
-            description: "the service name where the error occured"
+            message: "One of the error messages appears here"
+            errorPath: "the service-module name where the error occured"
 
 
     oAuthLoginBadRequests:
@@ -586,7 +586,7 @@ components:
             code: 401
             name: "ApiError"
             message: "One of the api errors appears here"
-            description: "the service name where the error occured"
+            errorPath: "the service-module name where the error occured"
 
 
     RefreshTokenValidationError:
@@ -621,7 +621,7 @@ components:
             code: 401
             name: "ApiError"
             message: "one of the error messages appears here"
-            description: "the service name where the error occured"
+            errorPath: "the service-module name where the error occured"
 
     
     VerifyTokenUnauthorizedErrors:
@@ -647,13 +647,13 @@ components:
                 code: 401
                 name: "TokenError"
                 message: "One of the token errors appears here"
-                description: "the service name where the error occured"
+                errorPath: "the service-module name where the error occured"
             ApiError:
               value:
                 code: 401
                 name: "ApiError"
                 message: "refresh|resetPassword|verifyEmail token is not valid"
-                description: "the service name where the error occured"
+                errorPath: "the service-module name where the error occured"
 
 
     ForgotPasswordValidationErrors:
@@ -727,7 +727,7 @@ components:
             code: 403
             name: "ApiError"
             message: "You are disabled, call the system administrator"
-            description: "the service name where the error occured"
+            errorPath: "the service-module name where the error occured"
 
 
     ParamIdValidationError:
@@ -937,7 +937,7 @@ components:
             code: 404
             name: ApiError
             message: No user found
-            description: "the service name where the error occured"
+            errorPath: "the service-module name where the error occured"
 
 
     InternalServerError:
@@ -950,7 +950,7 @@ components:
             code: 500
             name: ApiError
             message: Internal Server Error
-            description: "the service name where the error occured"
+            errorPath: "the service-module name where the error occured"
 
 
     Unauthorized:
@@ -963,7 +963,7 @@ components:
             code: 401
             name: ApiError
             message: Unauthorized
-            description: "the service name where the error occured"
+            errorPath: "the service-module name where the error occured"
           
     Forbidden:
       description: FORBIDDEN
@@ -975,7 +975,7 @@ components:
             code: 403
             name: ApiError
             message: Forbidden
-            description: "the service name where the error occured"
+            errorPath: "the service-module name where the error occured"
 
 
 

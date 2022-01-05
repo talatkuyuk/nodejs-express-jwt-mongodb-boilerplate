@@ -1,5 +1,5 @@
 const Utils = require('../utils/Utils');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 
 const paginary = async (query, filter, sort, dbQueryCallback) => {
 
@@ -17,7 +17,7 @@ const paginary = async (query, filter, sort, dbQueryCallback) => {
 		return prepareResponse(content, page, limit);
 		
 	} catch (error) {
-		throw locateError(error, "PaginaryService : paginary");
+		throw traceError(error, "PaginaryService : paginary");
 	}
 }
 
@@ -38,7 +38,7 @@ const paginaryForJoinQuery = async (query, filterLeft, filterRight, sort, dbQuer
 		return prepareResponse(content, page, limit);
 		
 	} catch (error) {
-		throw locateError(error, "PaginaryService : paginaryForJoinQuery");
+		throw traceError(error, "PaginaryService : paginaryForJoinQuery");
 	}
 }
 

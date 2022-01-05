@@ -3,7 +3,7 @@ const BearerStrategy = require('passport-http-bearer').Strategy;
 
 const config = require('../config');
 const { tokenTypes } = require('../config/tokens');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 const { authProviders, joinedDbService } = require('../services');
 
 
@@ -24,7 +24,7 @@ const jwtVerify = async (req, payload, done) => {
 		done(null, { authuser, user, payload });
 
 	} catch (error) {
-		done( locateError(error, "Passport : jwtVerify") );
+		done( traceError(error, "Passport : jwtVerify") );
 	}
 };
 
@@ -40,7 +40,7 @@ const oAuthVerify = (service) => async (req, token, done) => {
 		return done(null, oAuth);
 
 	} catch (error) {
-		done( locateError(error, "Passport : oAuthVerify") );
+		done( traceError(error, "Passport : oAuthVerify") );
 	}
 };
 

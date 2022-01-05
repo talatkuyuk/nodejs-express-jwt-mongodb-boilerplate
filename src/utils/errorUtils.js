@@ -1,25 +1,32 @@
 const config = require('../config');
 
 // Add desription to Error to locate the module in which occurs
-const locateError = (error, description) => {
+const traceError = (error, mainmodule) => {
   if (config.env !== "production") {
 
-      const [main, module] = description.split(" : ");
+      const [main, module] = mainmodule.split(" : ");
 
       // OPTION-1 (error point)
-      // error.description || (error.description = description);
+      // error.errorPath || (error.errorPath = `${main} [${module}]`);
 
       // OPTION-2 (error path)
-      if (error.description)
-          error.description += `  --->  ${main} [${module}]`
+      if (error.errorPath)
+          error.errorPath += `  --->  ${main} [${module}]`
       else
-          error.description = `failed in ${main} [${module}]`
+          error.errorPath = `failed in ${main} [${module}]`
   }
-  
   return error;
+}
+
+function isOperationalError(error) {
+  if (error instanceof ApiError) {
+    return error.isOperational
+  }
+  return false
 }
 
 
 module.exports = {
-  locateError
+  traceError,
+  isOperationalError,
 };

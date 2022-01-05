@@ -2,7 +2,7 @@ const passport = require('passport');
 const httpStatus = require('http-status');
 
 const ApiError = require('../utils/ApiError');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 const { redisService } = require('../services');
 
 
@@ -52,13 +52,13 @@ const oAuth = (service) => async (req, res, next) => {
 				resolve();
 
 			} catch (error) {
-				reject( locateError(error, "oAuthMiddleware : oAuth(callback)") );
+				reject( traceError(error, "oAuthMiddleware : oAuth(callback)") );
 			}
 		})(req, res, next)
 	})
 	.then(() => next())
 	.catch((error) => { 
-		next( locateError(error, "AuthMiddleware : oAuth") );
+		next( traceError(error, "AuthMiddleware : oAuth") );
 	});
 }
 

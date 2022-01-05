@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler');
 
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 
 // SERVICE DEPENDENCIES
 const { authuserService, tokenService } = require('../services');
@@ -19,7 +19,7 @@ const addAuthUser = asyncHandler(async (req, res) => {
 		res.status(httpStatus.CREATED).send(authuser.filter());
 		
 	} catch (error) {
-		throw locateError(error, "AuthUserController : addAuthUser");
+		throw traceError(error, "AuthUserController : addAuthUser");
 	}
 });
 
@@ -34,7 +34,7 @@ const getAuthUser = asyncHandler(async (req, res) => {
 		res.status(httpStatus.OK).send(authuser.filter());
 		
 	} catch (error) {
-		throw locateError(error, "AuthUserController : getAuthUser");
+		throw traceError(error, "AuthUserController : getAuthUser");
 	}
 });
 
@@ -49,7 +49,7 @@ const getAuthUsers = asyncHandler(async (req, res) => {
 		res.status(httpStatus.OK).send(result);
 		
 	} catch (error) {
-		throw locateError(error, "AuthUserController : getAuthUsers");
+		throw traceError(error, "AuthUserController : getAuthUsers");
 	}
 });
 
@@ -65,7 +65,7 @@ const changePassword = asyncHandler(async (req, res) => {
 		res.status(httpStatus.NO_CONTENT).send();
 		
 	} catch (error) {
-		throw locateError(error, "AuthUserController : changePassword");
+		throw traceError(error, "AuthUserController : changePassword");
 	}
 });
 
@@ -82,7 +82,7 @@ const toggleAbility = asyncHandler(async (req, res) => {
 		res.status(httpStatus.NO_CONTENT).send();
 		
 	} catch (error) {
-		throw locateError(error, "AuthUserController : toggleAbility");
+		throw traceError(error, "AuthUserController : toggleAbility");
 	}
 });
 
@@ -99,7 +99,7 @@ const deleteAuthUser = asyncHandler(async (req, res) => {
 		res.status(httpStatus.NO_CONTENT).send();
 		
 	} catch (error) {
-		throw locateError(error, "AuthUserController : deleteAuthUser");
+		throw traceError(error, "AuthUserController : deleteAuthUser");
 	}
 });
 

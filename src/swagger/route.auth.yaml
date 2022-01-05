@@ -233,7 +233,7 @@
               code: 400
               name: ApiError
               message: Email is already verified
-              description: "the service name where the error occured"
+              errorPath: "the service-module name where the error occured"
       401:
         $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:

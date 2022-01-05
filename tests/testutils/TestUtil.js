@@ -114,7 +114,7 @@ class TestUtil {
 		expect(response.status).toBe(status);
 		expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 		expect(response.body.code).toEqual(status);
-		expect(response.body).toHaveProperty("description");
+		expect(response.body).toHaveProperty("errorPath");
 		expect(response.body).not.toHaveProperty("errors");
 	}
 
@@ -124,14 +124,14 @@ class TestUtil {
 		expect(response.body.code).toEqual(422);
 		expect(response.body.name).toEqual("ValidationError");
 		expect(response.body.message).toEqual("The request could not be validated");
-		expect(response.body).not.toHaveProperty("description");
+		expect(response.body).not.toHaveProperty("errorPath");
 	}
 
 	static validationErrorInMiddleware = (err) => {
 		expect(err.statusCode).toBe(422);
 		expect(err.name).toBe("ValidationError");
 		expect(err.message).toEqual("The request could not be validated");
-		expect(err.description).toBeNull();
+		expect(err.errorPath).toBeNull();
 	}
 
 	static createAuthUser = async (email, password, userAgent) => {

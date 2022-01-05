@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
 
 const ApiError = require('../utils/ApiError');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 const composeFilter = require('../utils/composeFilter');
 const composeSort = require('../utils/composeSort');
 const { AuthUser } = require('../models');
@@ -25,7 +25,7 @@ const isEmailTaken = async function (email) {
 		return !!authuser;
 
 	} catch (error) {
-		throw locateError(error, "AuthUserService : isEmailTaken");
+		throw traceError(error, "AuthUserService : isEmailTaken");
 	}
 };
 
@@ -42,7 +42,7 @@ const isExist = async function (id, email) {
 		return !!authuser;
 
 	} catch (error) {
-		throw locateError(error, "AuthUserService : isExist");
+		throw traceError(error, "AuthUserService : isExist");
 	}
 };
 
@@ -70,7 +70,7 @@ const isExist = async function (id, email) {
 		return authuser;
 
 	} catch (error) {
-		throw locateError(error, "AuthUserService : addAuthUser");
+		throw traceError(error, "AuthUserService : addAuthUser");
 	}
 }
 
@@ -90,7 +90,7 @@ const isExist = async function (id, email) {
 		return authuser;
   
 	} catch (error) {
-		throw locateError(error, "AuthUserService : getAuthUserById");
+		throw traceError(error, "AuthUserService : getAuthUserById");
 	}
 };
 
@@ -111,7 +111,7 @@ const isExist = async function (id, email) {
 		return authuser;
   
 	} catch (error) {
-		throw locateError(error, "AuthUserService : getAuthUserByEmail");
+		throw traceError(error, "AuthUserService : getAuthUserByEmail");
 	}
 };
 
@@ -137,7 +137,7 @@ const isExist = async function (id, email) {
 		return await paginaryService.paginary(query, filter, sort, authuserDbService.getAuthUsers);
   
 	} catch (error) {
-		throw locateError(error, "AuthUserService : getAuthUsers");
+		throw traceError(error, "AuthUserService : getAuthUsers");
 	}
 };
 
@@ -159,7 +159,7 @@ const isExist = async function (id, email) {
 		await authuserDbService.updateAuthUser(id, {isDisabled: !authuser.isDisabled});
   
 	} catch (error) {
-		throw locateError(error, "AuthUserService : toggleAbility");
+		throw traceError(error, "AuthUserService : toggleAbility");
 	}
 };
 
@@ -181,7 +181,7 @@ const isExist = async function (id, email) {
 			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
 
 	} catch (error) {
-		throw locateError(error, "AuthUserService : changePassword");
+		throw traceError(error, "AuthUserService : changePassword");
 	}
 };
 
@@ -202,7 +202,7 @@ const isExist = async function (id, email) {
 		// delete user data through another request
   
 	} catch (error) {
-		throw locateError(error, "AuthUserService : deleteAuthUser");
+		throw traceError(error, "AuthUserService : deleteAuthUser");
 	}
 };
 
@@ -223,7 +223,7 @@ const isExist = async function (id, email) {
 		return authuser;
   
 	} catch (error) {
-		throw locateError(error, "AuthUserService : getDeletedAuthUserById");
+		throw traceError(error, "AuthUserService : getDeletedAuthUserById");
 	}
 };
 
