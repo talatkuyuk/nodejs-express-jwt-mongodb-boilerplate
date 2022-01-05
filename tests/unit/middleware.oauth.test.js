@@ -140,7 +140,7 @@ describe('oAuth Middleware', () => {
 			// the error comes from the facebook
 			expect(err.statusCode).toBe(401);
 			expect(err.name).toBe("ApiError");
-			expect(err.message).toContain(`${provider} oAuth token could not be associated with any identification.`);
+			expect(err.message).toContain(`${provider} oAuth token could not be associated with any identification`);
 			
 			expect(req.oAuth).toBeFalsy();
 		});
@@ -171,7 +171,7 @@ describe('oAuth Middleware', () => {
 			// the error comes from the facebook
 			expect(err.statusCode).toBe(401);
 			expect(err.name).toBe("ApiError");
-			expect(err.message).toContain(`${provider} oAuth token does not contain necessary email information.`);
+			expect(err.message).toContain(`${provider} oAuth token does not contain necessary email information`);
 			
 			expect(req.oAuth).toBeFalsy();
 		});

@@ -22,6 +22,8 @@ describe('POST /auth/google & auth/facebook', () => {
 
 	describe('Failed logins with AuthProvider', () => {
 
+		TestUtil.CheckOneOf();
+
 		test('should return status 401, if the oAuth provider (google) token is invalid', async () => {
 			const google_id_token = "the-id-token-coming-from-google";
 
@@ -30,8 +32,12 @@ describe('POST /auth/google & auth/facebook', () => {
 												.send();
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toEqual(`Wrong number of segments in token: ${google_id_token}`);
+			expect(response.body.name).toBeOneOf(["ApiError", "FetchError"]);
+
+			if (response.body.name === "ApiError")
+				expect(response.body.message).toEqual(`Wrong number of segments in token: ${google_id_token}`);
+			else if (response.body.name === "FetchError") // if there is no internet connection
+				expect(response.body.message).toContain(`Auth provider connection error occured, try later`);
 		});
 
 
@@ -43,8 +49,12 @@ describe('POST /auth/google & auth/facebook', () => {
 												.send();
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toEqual("Request failed with status code 400");
+			expect(response.body.name).toBeOneOf(["ApiError", "AxiosError"]);
+
+			if (response.body.name === "ApiError")
+				expect(response.body.message).toEqual("Request failed with status code 400");
+			else if (response.body.name === "AxiosError") // if there is no internet connection
+				expect(response.body.message).toContain(`Auth provider connection error occured, try later`);
 		});
 
 

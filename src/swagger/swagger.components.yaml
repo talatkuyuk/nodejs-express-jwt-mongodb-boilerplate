@@ -542,8 +542,9 @@ components:
 
         #### Login Unauthorized Failures
         * _Passport Bearer Strategy related errors._
-        * _provider oAuth token could not be associated with any identification._
-        * _provider oAuth token does not contain necessary email information._
+        * _provider oAuth token could not be associated with any identification_
+        * _provider oAuth token does not contain necessary email information_
+        * _Auth provider connection error occured, try later_
       content:
         application/json:
           schema:

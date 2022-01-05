@@ -13,6 +13,8 @@ const oAuth = (service) => async (req, res, next) => {
 		passport.authenticate( service,	 { session: false }, async function(err, oAuth, info) {
 			try {
 				if (err) {
+					if (err.message?.includes("ENOTFOUND"))
+						err.message = "Auth provider connection error occured, try later"
 					throw new ApiError(httpStatus.UNAUTHORIZED, err);
 				}
 
@@ -25,11 +27,11 @@ const oAuth = (service) => async (req, res, next) => {
 				}
 		
 				if (!oAuth) {
-					throw new ApiError(httpStatus.BAD_REQUEST, 'Badly formed Authorization Header with Bearer.');
+					throw new ApiError(httpStatus.BAD_REQUEST, 'Badly formed Authorization Header with Bearer');
 				}
 
 				if (!oAuth.user.id) {
-					throw new ApiError(httpStatus.UNAUTHORIZED, `${service} oAuth token could not be associated with any identification.`);
+					throw new ApiError(httpStatus.UNAUTHORIZED, `${service} oAuth token could not be associated with any identification`);
 				}
 
 				if (!oAuth.user.email) {

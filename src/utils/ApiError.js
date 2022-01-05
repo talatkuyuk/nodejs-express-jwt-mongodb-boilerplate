@@ -23,10 +23,17 @@ class ApiError extends Error {
         this.description = description;
       }
 
+      // if ApiError receives an object (error like)
+      else if (typeof error === 'object') {
+        super(error.message ?? "general error");
+        this.name = error.isAxiosError ? "AxiosError" : error.name ?? Error.prototype.name;
+        this.description = error.description ?? description;
+      }
+
       // if ApiError receives wrong argument type for the paramater error
       else {
-        super("bad reference for error message");
-        this.name = this.constructor.name;
+        super("bad ApiError argument");
+        this.name = Error.prototype.name;
         this.description = description;
       }
       
