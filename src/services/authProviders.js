@@ -3,7 +3,7 @@ const moment = require('moment');
 const {OAuth2Client} = require('google-auth-library');
 
 const config = require('../config');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 
 
 const google = async (idToken) => {
@@ -31,7 +31,7 @@ const google = async (idToken) => {
 		return google_response;
 
 	} catch (error) {
-		throw locateError(error, "AuthProviders : google");
+		throw traceError(error, "AuthProviders : google");
 	}
 };
 
@@ -56,7 +56,7 @@ const facebook = async (access_token) => {
 		return facebook_response;
 
 	} catch (error) {
-		throw locateError(error, "AuthProviders : facebook");
+		throw traceError(error, "AuthProviders : facebook");
 	}
 };
 

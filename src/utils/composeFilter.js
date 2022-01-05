@@ -1,4 +1,4 @@
-const { locateError } = require('./errorUtils');
+const { traceError } = require('./errorUtils');
 const Utils = require('./Utils');
 
 
@@ -21,7 +21,7 @@ const composeFilter = (query, fields) => {
 		return {...stringFilters, ...booleanFilters, ...numberFilters};
 
 	} catch (error) {
-		throw locateError(error, "Utils : composeFilter");
+		throw traceError(error, "Utils : composeFilter");
 	}
 }
 

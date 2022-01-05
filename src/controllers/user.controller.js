@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler');
 
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 
 // SERVICE DEPENDENCIES
 const { userService } = require('../services');
@@ -18,7 +18,7 @@ const addUser = asyncHandler(async (req, res) => {
 		res.status(httpStatus.CREATED).send(user.filter());
 		
 	} catch (error) {
-		throw locateError(error, "UserController : addUser");
+		throw traceError(error, "UserController : addUser");
 	}
 });
 
@@ -34,7 +34,7 @@ const getUser = asyncHandler(async (req, res) => {
 		res.status(httpStatus.OK).send(user.filter());
 		
 	} catch (error) {
-		throw locateError(error, "UserController : getUser");
+		throw traceError(error, "UserController : getUser");
 	}
 });
 
@@ -49,7 +49,7 @@ const getUsers = asyncHandler(async (req, res) => {
 		res.status(httpStatus.OK).send(result);
 		
 	} catch (error) {
-		throw locateError(error, "UserController : getUsers");
+		throw traceError(error, "UserController : getUsers");
 	}
 });
 
@@ -65,7 +65,7 @@ const updateUser = asyncHandler(async (req, res) => {
 		res.status(httpStatus.OK).send(user.filter());
 		
 	} catch (error) {
-		throw locateError(error, "UserController : updateUser");
+		throw traceError(error, "UserController : updateUser");
 	}
 });
 
@@ -81,7 +81,7 @@ const changeRole = asyncHandler(async (req, res) => {
 		res.status(httpStatus.NO_CONTENT).send();
 		
 	} catch (error) {
-		throw locateError(error, "UserController : changeRole");
+		throw traceError(error, "UserController : changeRole");
 	}
 });
 
@@ -96,7 +96,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 		res.status(httpStatus.NO_CONTENT).send();
 		
 	} catch (error) {
-		throw locateError(error, "UserController : deleteUser");
+		throw traceError(error, "UserController : deleteUser");
 	}
 });
 

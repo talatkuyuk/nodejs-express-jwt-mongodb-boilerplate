@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler');
 
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 
 // SERVICE DEPENDENCIES
 const { joinedService } = require('../services');
@@ -17,7 +17,7 @@ const getAuthUsersJoined = asyncHandler(async (req, res) => {
 		res.status(httpStatus.OK).send(result);
 		
 	} catch (error) {
-		throw locateError(error, "JoinedController : getAuthUsersJoined");
+		throw traceError(error, "JoinedController : getAuthUsersJoined");
 	}
 });
 
@@ -32,7 +32,7 @@ const getUsersJoined = asyncHandler(async (req, res) => {
 		res.status(httpStatus.OK).send(result);
 		
 	} catch (error) {
-		throw locateError(error, "UserController : getUsersJoined");
+		throw traceError(error, "UserController : getUsersJoined");
 	}
 });
 

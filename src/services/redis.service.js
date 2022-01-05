@@ -3,7 +3,7 @@ const httpStatus = require('http-status');
 const config = require('../config');
 const logger = require('../core/logger');
 const { getRedisClient } = require('../core/redis');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 const ApiError = require('../utils/ApiError');
 
 
@@ -44,7 +44,7 @@ const put_into_blacklist = async (box, put)  => {
 		}
 
 	} catch (error) {
-		throw locateError(error, "RedisService : put_into_blacklist");
+		throw traceError(error, "RedisService : put_into_blacklist");
 	}
 }
 
@@ -77,7 +77,7 @@ const check_in_blacklist = async (check)  => {
 		}
 
 	} catch (error) {
-		throw locateError(error, "RedisService : check_in_blacklist");
+		throw traceError(error, "RedisService : check_in_blacklist");
 	}
 }
 

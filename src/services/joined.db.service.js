@@ -1,7 +1,7 @@
 const mongodb = require('../core/mongodb');
 const ObjectId = require('mongodb').ObjectId;
 
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 const { AuthUser, User } = require('../models');
 
 const getAuthUserJoined = async (id) => {
@@ -43,7 +43,7 @@ const getAuthUserJoined = async (id) => {
 		return { authuser, user };
 		
 	} catch (error) {
-		throw locateError(error, "JoinedDbService : getAuthUserJoined");
+		throw traceError(error, "JoinedDbService : getAuthUserJoined");
 	}
 };
 /**
@@ -116,7 +116,7 @@ const getAuthUserJoined = async (id) => {
 	   	return await db.collection("authusers").aggregate(pipeline).toArray();
 		
 	} catch (error) {
-		throw locateError(error, "JoinedDbService : getAuthUsersJoined");
+		throw traceError(error, "JoinedDbService : getAuthUsersJoined");
 	}
 };
 
@@ -192,7 +192,7 @@ const getAuthUserJoined = async (id) => {
 	   	return await db.collection("users").aggregate(pipeline).toArray();
 		
 	} catch (error) {
-	   throw locateError(error, "JoinedDbService : getUsersJoined");
+	   throw traceError(error, "JoinedDbService : getUsersJoined");
 	}
 };
 

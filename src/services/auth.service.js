@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
 
 const ApiError = require('../utils/ApiError');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 const { AuthUser } = require('../models');
 
 // SERVICE DEPENDENCIES
@@ -55,7 +55,7 @@ const signupWithEmailAndPassword = async (email, password) => {
 		return authuser;
 
 	} catch (error) {
-		throw locateError(error, "AuthService : signupWithEmailAndPassword");
+		throw traceError(error, "AuthService : signupWithEmailAndPassword");
 	}
 }
  			
@@ -80,7 +80,7 @@ const loginWithEmailAndPassword = async (email, password) => {
 		return authuser;
 
 	} catch (error) {
-		throw locateError(error, "AuthService : loginWithEmailAndPassword");
+		throw traceError(error, "AuthService : loginWithEmailAndPassword");
 	}
 };
 
@@ -119,7 +119,7 @@ const loginWithAuthProvider = async (provider, id, email) => {
 		return await authuserDbService.addAuthUser(authuserx);
 		
 	} catch (error) {
-		throw locateError(error, "AuthService : loginWithAuthProvider");
+		throw traceError(error, "AuthService : loginWithAuthProvider");
 	}
 };
 
@@ -138,7 +138,7 @@ const logout = async (id, jti) => {
 		await redisService.put_into_blacklist("jti", jti);
 		
 	} catch (error) {
-		throw locateError(error, "AuthService : logout");
+		throw traceError(error, "AuthService : logout");
 	}
 };
 
@@ -161,7 +161,7 @@ const logout = async (id, jti) => {
 		// delete user data through another request
 		
 	} catch (error) {
-		throw locateError(error, "AuthService : signout");
+		throw traceError(error, "AuthService : signout");
 	}
 };
 
@@ -181,7 +181,7 @@ const refreshAuth = async (id) => {
 	return authuser;
 
   } catch (error) {
-	throw locateError(error, "AuthService : refreshAuth");
+	throw traceError(error, "AuthService : refreshAuth");
   }
 };
 
@@ -201,7 +201,7 @@ const refreshAuth = async (id) => {
 	  return authuser;
   
 	} catch (error) {
-	  throw locateError(error, "AuthService : forgotPassword");
+	  throw traceError(error, "AuthService : forgotPassword");
 	}
   };
 
@@ -229,7 +229,7 @@ const resetPassword = async (id, newPassword) => {
 	return updatedAuthuser;
 
   } catch (error) {
-	throw locateError(error, "AuthService : resetPassword");
+	throw traceError(error, "AuthService : resetPassword");
   }
 };
 
@@ -243,7 +243,7 @@ const resetPassword = async (id, newPassword) => {
  const handleEmailIsVerified = function (isEmailVerified) {
 	if (isEmailVerified) {
 		const error = new ApiError(httpStatus.BAD_REQUEST, "Email is already verified");
-		throw locateError(error, "AuthService : handleEmailIsAlreadyVerified");
+		throw traceError(error, "AuthService : handleEmailIsAlreadyVerified");
 	}
 };
 
@@ -265,7 +265,7 @@ const verifyEmail = async (id) => {
 	return updatedAuthuser;
 
   } catch (error) {
-	throw locateError(error, "AuthService : verifyEmail");
+	throw traceError(error, "AuthService : verifyEmail");
   }
 };
 

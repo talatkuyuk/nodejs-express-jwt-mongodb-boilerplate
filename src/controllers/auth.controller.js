@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const asyncHandler = require('express-async-handler');
 
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 const { tokenTypes } = require('../config/tokens');
 
 // SERVICE DEPENDENCIES
@@ -32,7 +32,7 @@ const signup = asyncHandler(async (req, res) => {
 		});
 		
 	} catch (error) {
-		throw locateError(error, "AuthController : signup");
+		throw traceError(error, "AuthController : signup");
 	}
 });
 
@@ -57,7 +57,7 @@ const login = asyncHandler(async (req, res) => {
 		});
 		
 	} catch (error) {
-		throw locateError(error, "AuthController : login");
+		throw traceError(error, "AuthController : login");
 	}
 });
 
@@ -81,7 +81,7 @@ const loginWithAuthProvider = asyncHandler(async (req, res) => {
 		});
 		
 	} catch (error) {
-		throw locateError(error, "AuthController : oAuth");
+		throw traceError(error, "AuthController : oAuth");
 	}
 });
 
@@ -100,7 +100,7 @@ const logout = asyncHandler(async (req, res) => {
 		res.status(httpStatus.NO_CONTENT).send();
 		
 	} catch (error) {
-		throw locateError(error, "AuthController : logout");
+		throw traceError(error, "AuthController : logout");
 	}
 });
 
@@ -119,7 +119,7 @@ const signout = asyncHandler(async (req, res) => {
 		res.status(httpStatus.NO_CONTENT).send();
 		
 	} catch (error) {
-		throw locateError(error, "AuthController : signout");
+		throw traceError(error, "AuthController : signout");
 	}
 });
 
@@ -145,7 +145,7 @@ const refreshTokens = asyncHandler(async (req, res) => {
 		});
 		
 	} catch (error) {
-		throw locateError(error, "AuthController : refreshTokens");
+		throw traceError(error, "AuthController : refreshTokens");
 	}
 });
 
@@ -166,7 +166,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 		res.status(httpStatus.NO_CONTENT).send();
 		
 	} catch (error) {
-		throw locateError(error, "AuthController : forgotPassword");
+		throw traceError(error, "AuthController : forgotPassword");
 	}
 });
 
@@ -187,7 +187,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 		res.status(httpStatus.NO_CONTENT).send();
 		
 	} catch (error) {
-		throw locateError(error, "AuthController : resetPassword");
+		throw traceError(error, "AuthController : resetPassword");
 	}
 });
 
@@ -206,7 +206,7 @@ const sendVerificationEmail = asyncHandler(async (req, res, next) => {
 		res.status(httpStatus.NO_CONTENT).send();
 		
 	} catch (error) {
-		throw locateError(error, "AuthController : sendVerificationEmail");
+		throw traceError(error, "AuthController : sendVerificationEmail");
 	}
 });
 
@@ -227,7 +227,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
 		res.status(httpStatus.NO_CONTENT).send();
 		
 	} catch (error) {
-		throw locateError(error, "AuthController : verifyEmail");
+		throw traceError(error, "AuthController : verifyEmail");
 	}
 });
 

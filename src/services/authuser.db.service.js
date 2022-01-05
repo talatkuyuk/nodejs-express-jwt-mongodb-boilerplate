@@ -2,7 +2,7 @@ const mongodb = require('../core/mongodb');
 const { ObjectId, ReturnDocument } = require('mongodb');
 
 const { AuthUser } = require('../models');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 
 
 /**
@@ -25,7 +25,7 @@ const addAuthUser = async (authuser) => {
 		return AuthUser.fromDoc(authuserInserted);
 
 	} catch (error) {
-		throw locateError(error, "AuthUserDbService : addAuthUser");
+		throw traceError(error, "AuthUserDbService : addAuthUser");
 	}
 };
 
@@ -49,7 +49,7 @@ const getAuthUser = async (query) => {
 		return AuthUser.fromDoc(doc);
 		
 	} catch (error) {
-		throw locateError(error, "AuthUserDbService : getAuthUser");
+		throw traceError(error, "AuthUserDbService : getAuthUser");
 	}
 };
 
@@ -107,7 +107,7 @@ const getAuthUser = async (query) => {
 	   	return await db.collection("authusers").aggregate(pipeline).toArray();
 		
 	} catch (error) {
-		throw locateError(error, "AuthUserDbService : getAuthUsers");
+		throw traceError(error, "AuthUserDbService : getAuthUsers");
 	}
 };
 
@@ -136,7 +136,7 @@ const updateAuthUser = async (id, updateBody) => {
 		return AuthUser.fromDoc(result.value);
 		
 	} catch (error) {
-		throw locateError(error, "AuthUserDbService : updateAuthUser");
+		throw traceError(error, "AuthUserDbService : updateAuthUser");
 	}
 };
 
@@ -171,7 +171,7 @@ const deleteAuthUser = async (id) => {
 		return true;
 
 	} catch (error) {
-		throw locateError(error, "AuthUserDbService : deleteAuthUser");
+		throw traceError(error, "AuthUserDbService : deleteAuthUser");
 	}
 };
 
@@ -204,7 +204,7 @@ const deleteAuthUser = async (id) => {
 		return deletedAuthuserInserted;
 		
 	} catch (error) {
-		throw locateError(error, "AuthUserDbService : toDeletedAuthUsers");
+		throw traceError(error, "AuthUserDbService : toDeletedAuthUsers");
 	}
 };
 
@@ -230,7 +230,7 @@ const deleteAuthUser = async (id) => {
 		return AuthUser.fromDoc(doc);
 		
 	} catch (error) {
-		throw locateError(error, "AuthUserDbService : getDeletedAuthUser");
+		throw traceError(error, "AuthUserDbService : getDeletedAuthUser");
 	}
 };
 

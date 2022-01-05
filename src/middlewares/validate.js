@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 
 const { validationResult, matchedData } = require('express-validator');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 const ApiError = require('../utils/ApiError');
 
 
@@ -31,15 +31,14 @@ const validate = (rules) => async (req, res, next) => {
 		const validationError = new ApiError(
 			httpStatus.UNPROCESSABLE_ENTITY, // error.statusCode (422)
 			"ValidationError: The request could not be validated", // error.name: error.message
-			null, // error.description
-			myerrors, // converted validation errors
 			true, // error.isOperational
+			myerrors, // converted validation errors
 		);
 
 		next(validationError);
 
 	} catch (error) {
-		throw locateError(error, "ValidationMiddleware : validate");
+		throw traceError(error, "ValidationMiddleware : validate");
 	}
 }
 

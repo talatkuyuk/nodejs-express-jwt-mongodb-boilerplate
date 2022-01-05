@@ -2,7 +2,7 @@ const mongodb = require('../core/mongodb');
 const { ObjectId, ReturnDocument } = require('mongodb');
 
 const { Token } = require('../models');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 
 // https://github.com/mongodb/specifications/blob/master/source/crud/crud.rst#write-results
 // https://mongodb.github.io/node-mongodb-native/4.2/
@@ -30,7 +30,7 @@ const addToken = async (tokenDoc) => {
 		return Token.fromDoc(tokenInserted);
 		
 	} catch (error) {
-		throw locateError(error, "TokenDbService : addToken");
+		throw traceError(error, "TokenDbService : addToken");
 	}
 };
 
@@ -58,7 +58,7 @@ const getToken = async (query) => {
 		return Token.fromDoc(result);
 
 	} catch (error) {
-		throw locateError(error, "TokenDbService : getToken");
+		throw traceError(error, "TokenDbService : getToken");
 	}	
 }
 
@@ -84,7 +84,7 @@ const getTokens = async (query) => {
 		return tokens;
 
 	} catch (error) {
-		throw locateError(error, "TokenDbService : getTokens");
+		throw traceError(error, "TokenDbService : getTokens");
 	}	
 }
 
@@ -113,7 +113,7 @@ const updateToken = async (id, updateBody) => {
 		return Token.fromDoc(result.value);
 		
 	} catch (error) {
-		throw locateError(error, "TokenDbService : updateToken");
+		throw traceError(error, "TokenDbService : updateToken");
 	}
 };
 
@@ -134,7 +134,7 @@ const deleteToken = async (id) => {
 		return {isDeleted: result.acknowledged, deletedCount: result.deletedCount };
 		
 	} catch (error) {
-		throw locateError(error, "TokenDbService : deleteToken");
+		throw traceError(error, "TokenDbService : deleteToken");
 	}
 }
 
@@ -157,7 +157,7 @@ const deleteTokens = async (query) => {
 		return {isDeleted: result.acknowledged, deletedCount: result.deletedCount };
 		
 	} catch (error) {
-		throw locateError(error, "TokenDbService : deleteTokens");
+		throw traceError(error, "TokenDbService : deleteTokens");
 	}
 }
 

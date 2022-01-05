@@ -1,4 +1,4 @@
-const { locateError } = require('./errorUtils');
+const { traceError } = require('./errorUtils');
 const Utils = require('./Utils');
 
 
@@ -7,7 +7,7 @@ const composeSort = (query, sortingFields) => {
 		return Utils.pickSort(query.sort, sortingFields);
 
 	} catch (error) {
-		throw locateError(error, "Utils : composeSort");
+		throw traceError(error, "Utils : composeSort");
 	}
 }
 

@@ -1,4 +1,4 @@
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 
 class Utils {
 
@@ -20,7 +20,7 @@ class Utils {
 			}, {});
 
 		} catch (error) {
-			throw locateError(error, "Util : pick");
+			throw traceError(error, "Util : pick");
 		}
 	};
 
@@ -49,7 +49,7 @@ class Utils {
 			}, {});
 
 		} catch (error) {
-			throw locateError(error, "Util : pickBooleans");
+			throw traceError(error, "Util : pickBooleans");
 		}
 	};
 
@@ -77,7 +77,7 @@ class Utils {
 			}, {});
 
 		} catch (error) {
-			throw locateError(error, "Util : pickNumbers");
+			throw traceError(error, "Util : pickNumbers");
 		}
 	};
 
@@ -108,7 +108,7 @@ class Utils {
 			return obj;
 
 		} catch (error) {
-			throw locateError(error, "Util : pickSort");
+			throw traceError(error, "Util : pickSort");
 		}
 	};
 
@@ -127,7 +127,7 @@ class Utils {
 			return [first.trim(), second.trim()];
 
 		} catch (error) {
-			throw locateError(error, "Util : splitTwo");
+			throw traceError(error, "Util : splitTwo");
 		}
 	}
 

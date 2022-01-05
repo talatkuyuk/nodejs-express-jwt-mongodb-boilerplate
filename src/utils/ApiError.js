@@ -1,12 +1,12 @@
 
 class ApiError extends Error {
-    constructor(statusCode, error, description = null, errors = null, isOperational = true, stack) {
+    constructor(statusCode, error, isOperational = true, errors = null,  errorPath = null, stack) {
       
       // ApiError accepts any Error instance as the paramater error.
       if (error instanceof Error) {
         super(error.message);
         this.name = error.name === Error.prototype.name ? this.constructor.name : error.name;
-        this.description = error.description ?? description;
+        this.errorPath = error.errorPath ?? errorPath;
         this.stack = error.stack;
       }
 
@@ -20,21 +20,21 @@ class ApiError extends Error {
             super(error);
             this.name = this.constructor.name;
         }
-        this.description = description;
+        this.errorPath = errorPath;
       }
 
-      // if ApiError receives an object (error like)
+      // if ApiError receives an object (error like object)
       else if (typeof error === 'object') {
         super(error.message ?? "general error");
         this.name = error.isAxiosError ? "AxiosError" : error.name ?? Error.prototype.name;
-        this.description = error.description ?? description;
+        this.errorPath = error.errorPath ?? errorPath;
       }
 
       // if ApiError receives wrong argument type for the paramater error
       else {
         super("bad ApiError argument");
         this.name = Error.prototype.name;
-        this.description = description;
+        this.errorPath = errorPath;
       }
       
       this.statusCode = statusCode;
@@ -108,6 +108,8 @@ examples: [Error, TypeError, ReferenceError]
 
 
 Operational errors are part of the runtime and application while programmer errors are bugs you introduce in your codebase.
+
+Operational errors are (unavoidable) run-time problems experienced by correctly-written programs, such as disk full, network connection loss, database is not available for temporary etc.
 
 Do you want to restart your app if there’s a user not found error? Absolutely not. Other users are still enjoying your app. This is an example of an operational error.
 
