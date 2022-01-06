@@ -15,7 +15,9 @@
     "redis:count": "netstat -an | grep 6379 | grep ESTABLISHED | wc -l",
     "redis:kill": "redis-cli CLIENT KILL TYPE normal",
     "redis:stop": "brew services stop redis",
-    "redis:restart": "brew services restart redis"
+    "redis:restart": "brew services restart redis",
+    "prettier": "prettier --check src/**/*.js",
+    "prettier:fix": "prettier --write src/**/*.js"
   },
   "keywords": [],
   "author": "",
@@ -63,6 +65,7 @@
     "cross-env": "^7.0.3",
     "jest": "^27.4.5",
     "node-mocks-http": "^1.11.0",
+    "prettier": "^2.5.1",
     "shelljs": "^0.8.4",
     "supertest": "^6.1.6"
   }
