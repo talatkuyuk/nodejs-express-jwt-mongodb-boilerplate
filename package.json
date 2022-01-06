@@ -17,7 +17,8 @@
     "redis:stop": "brew services stop redis",
     "redis:restart": "brew services restart redis",
     "prettier": "prettier --check src/**/*.js",
-    "prettier:fix": "prettier --write src/**/*.js"
+    "prettier:fix": "prettier --write src/**/*.js",
+    "prettier:fixfile": "prettier --write src/utils/Utils.js"
   },
   "keywords": [],
   "author": "",
