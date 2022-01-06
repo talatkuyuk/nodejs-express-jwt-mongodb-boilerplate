@@ -14,7 +14,7 @@ const docsRoute = require('./docs.route');
 const mongodb = require('../core/mongodb');
 const redis = require('../core/redis');
 const config = require('../config');
-const { locateError } = require('../utils/errorUtils');
+const { traceError } = require('../utils/errorUtils');
 
 
 
@@ -37,7 +37,7 @@ router.get('/list', asyncHandler( async (req, res) => {
 			res.status(httpStatus.OK).json("OK");
 		
 	} catch (error) {
-		throw locateError(error, "RouteIndex : getList");
+		throw traceError(error, "RouteIndex : getList");
 	}
 }));
 
@@ -71,7 +71,7 @@ router.get('/console', (req, res) => {
 		res.status(httpStatus.OK).json("OK");
 
 	} catch (error) {
-		throw locateError(error, "RouteIndex : getConsole");
+		throw traceError(error, "RouteIndex : getConsole");
 	}
 });
 
@@ -99,9 +99,31 @@ router.get('/status', asyncHandler( async (req, res) => {
 	} catch (error) {
 		res.json({ environment, port, mongoStatus: "DOWN", redisStatus });
 
-		//throw locateError(error, "RouteIndex : getStatus");
-		console.log(locateError(error, "RouteIndex : getStatus"));
+		//throw traceError(error, "RouteIndex : getStatus");
+		console.log(traceError(error, "RouteIndex : getStatus"));
 	}
+}));
+
+// see the mongodb and redis client status
+router.get('/test', asyncHandler( async (req, res) => {
+
+	function main () {
+		doesnotexist; // will throw
+	}
+
+	const errorType = req.query.error;
+	console.log(errorType)
+
+	if (errorType === "e") { // uncaughtException
+		const result = main();
+		res.json("uncaughtException");
+
+	} else if (errorType === "r") { // unhandledRejection
+		Promise.reject('Invalid password');
+		res.json("unhandledRejection");
+
+	} else
+		res.json("OK");
 }));
 
 
