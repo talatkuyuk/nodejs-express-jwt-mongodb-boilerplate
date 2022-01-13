@@ -105,21 +105,31 @@ router.get('/status', asyncHandler( async (req, res) => {
 }));
 
 // see the mongodb and redis client status
-router.get('/test', asyncHandler( async (req, res) => {
-
-	function main () {
-		doesnotexist; // will throw
-	}
+router.get('/test', asyncHandler( async (req, res, next) => {
 
 	const errorType = req.query.error;
-	console.log(errorType)
 
-	if (errorType === "e") { // uncaughtException
-		const result = main();
-		res.json("uncaughtException");
+	// uncaughtException
+	if (errorType === "e") { 
+		throw new Error('BROKEN'); // express catches syncronous errors
 
-	} else if (errorType === "r") { // unhandledRejection
-		Promise.reject('Invalid password');
+	} else if (errorType === "x") {
+		setTimeout(function () {
+			try {
+			  throw new Error('BROKEN');
+			} catch (err) {
+			  next(err);  // express catches errors passed with next function
+			}
+		}, 100);
+
+	} else if (errorType === "z") {
+		setTimeout(function () {
+			throw new Error('BROKEN'); // express does not catch asyncronous errors, the process craches
+		}, 100);
+
+	// unhandledRejection
+	} else if (errorType === "r") { 
+		Promise.reject('Invalid password'); // unhandledRejection event is emitted, the process craches
 		res.json("unhandledRejection");
 
 	} else
