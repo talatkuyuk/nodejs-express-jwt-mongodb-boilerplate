@@ -1,7 +1,9 @@
+const httpStatus = require('http-status');
 const nodemailer = require('nodemailer');
 
 const config = require('../config');
 const logger = require('../core/logger');
+const ApiError = require('../utils/ApiError');
 const { traceError } = require('../utils/errorUtils');
 
 
@@ -29,9 +31,15 @@ const sendEmail = async (to, subject, text) => {
 		await transporter.sendMail(message).then(console.log);
 
 	} catch (error) {
-		const {code, response, responseCode, command} = error;
-		console.log({code, response, responseCode, command});
-		throw traceError(error, "EmailService : sendEmail");
+		const {code,  command, name, message, response, responseCode} = error;
+		console.log({code,  command, name, message, response, responseCode});
+
+		if (code && command && message.includes("Data command failed"))
+			throw traceError(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "SmtpError : SMTP server is out of service"), "EmailService : sendEmail");
+		else if (code && command)
+			throw traceError(new ApiError(httpStatus.BAD_REQUEST, `ApiError : ${message}`), "EmailService : sendEmail");
+		else
+			throw traceError(error, "EmailService : sendEmail");
 	}
 };
 
