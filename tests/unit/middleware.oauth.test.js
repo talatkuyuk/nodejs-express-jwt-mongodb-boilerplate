@@ -1,4 +1,5 @@
 const httpMocks = require('node-mocks-http');
+const httpStatus = require('http-status');
 
 // without the express app which is actually not necessary, the tests stucks, I don't know the reason
 const app = require('../../src/core/express');
@@ -6,6 +7,8 @@ const app = require('../../src/core/express');
 const { oAuth } = require('../../src/middlewares');
 const { authProviders, redisService } = require('../../src/services');
 const ApiError = require('../../src/utils/ApiError');
+
+const TestUtil = require('../testutils/TestUtil');
 
 const { setupRedis } = require('../setup/setupRedis');
 
@@ -32,7 +35,7 @@ describe('oAuth Middleware', () => {
 			const err = next.mock.calls[0][0];
 
 			// the error comes from the passport bearer strategy
-			expect(err.statusCode).toBe(400);
+			expect(err.statusCode).toBe(httpStatus.BAD_REQUEST);
 			expect(err.name).toBe("ApiError");
 			expect(err.message).toContain("Badly formed Authorization Header with Bearer.");
 		});
@@ -55,7 +58,7 @@ describe('oAuth Middleware', () => {
 			const err = next.mock.calls[0][0];
 
 			// the error comes from the passport bearer strategy
-			expect(err.statusCode).toBe(400);
+			expect(err.statusCode).toBe(httpStatus.BAD_REQUEST);
 			expect(err.name).toBe("ApiError");
 			expect(err.message).toContain("Badly formed Authorization Header with Bearer.");
 		});
@@ -64,6 +67,8 @@ describe('oAuth Middleware', () => {
 
 
 	describe('Failed Authentications with oAuth handled by providers', () => {
+
+		TestUtil.CheckOneOf();
 
 		test('should throw error, if attached id-token is invalid (google)', async () => {
 
@@ -84,9 +89,12 @@ describe('oAuth Middleware', () => {
 			const err = next.mock.calls[0][0];
 
 			// the error comes from the package 'google-auth-library' in authProvider.google
-			expect(err.statusCode).toBe(401);
-			expect(err.name).toBe("ApiError");
-			expect(err.message).toEqual(`Wrong number of segments in token: ${google_id_token}`);
+			expect(err.statusCode).toBe(httpStatus.UNAUTHORIZED);
+			expect(err.name).toBeOneOf(["ApiError", "FetchError"]);
+			if (err.name === "ApiError")
+				expect(err.message).toEqual(`Wrong number of segments in token: ${google_id_token}`);
+			else if (err.name === "FetchError") // if there is no internet connection
+				expect(err.message).toEqual(`Auth provider connection error occured, try later`);
 		});
 
 
@@ -109,9 +117,12 @@ describe('oAuth Middleware', () => {
 			const err = next.mock.calls[0][0];
 
 			// the error comes from the facebook
-			expect(err.statusCode).toBe(401);
-			expect(err.name).toBe("ApiError");
-			expect(err.message).toEqual(`Request failed with status code 400`);
+			expect(err.statusCode).toBe(httpStatus.UNAUTHORIZED);
+			expect(err.name).toBeOneOf(["ApiError", "AxiosError"]);
+			if (err.name === "ApiError")
+				expect(err.message).toEqual(`Request failed with status code 400`);
+			else if (err.name === "AxiosError") // if there is no internet connection
+				expect(err.message).toEqual(`Auth provider connection error occured, try later`);
 		});
 
 
@@ -138,7 +149,7 @@ describe('oAuth Middleware', () => {
 			const err = next.mock.calls[0][0];
 
 			// the error comes from the facebook
-			expect(err.statusCode).toBe(401);
+			expect(err.statusCode).toBe(httpStatus.UNAUTHORIZED);
 			expect(err.name).toBe("ApiError");
 			expect(err.message).toContain(`${provider} oAuth token could not be associated with any identification`);
 			
@@ -169,7 +180,7 @@ describe('oAuth Middleware', () => {
 			const err = next.mock.calls[0][0];
 
 			// the error comes from the facebook
-			expect(err.statusCode).toBe(401);
+			expect(err.statusCode).toBe(httpStatus.UNAUTHORIZED);
 			expect(err.name).toBe("ApiError");
 			expect(err.message).toContain(`${provider} oAuth token does not contain necessary email information`);
 			

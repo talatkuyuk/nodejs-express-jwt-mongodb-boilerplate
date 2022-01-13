@@ -13,7 +13,7 @@ const oAuth = (service) => async (req, res, next) => {
 		passport.authenticate( service,	 { session: false }, async function(err, oAuth, info) {
 			try {
 				if (err) {
-					if (err.message?.includes("ENOTFOUND"))
+					if (["ENOTFOUND", "socket", "connection"].some(el => err.message?.includes(el)))
 						err.message = "Auth provider connection error occured, try later"
 					throw new ApiError(httpStatus.UNAUTHORIZED, err);
 				}
