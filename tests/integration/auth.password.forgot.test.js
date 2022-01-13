@@ -67,15 +67,52 @@ describe('POST /auth/forgot-password', () => {
 			// ad the authuserx into db
 			const authuser = await authuserDbService.addAuthUser(authuserx);
 
+			const smtpResponse = {
+				code: 'EENVELOPE',
+				response: '421 Domain xx.mailgun.org is not allowed to send: Sandbox subdomains are for test purposes only. Please add your own domain or add the address to authorized recipients in Account Settings.',
+				responseCode: 421,
+				command: 'DATA',
+				name: 'Error',
+				message: 'Data command failed: 421 Domain xx.mailgun.org is not allowed to send: Sandbox subdomains are for test purposes only. Please add your own domain or add the address to authorized recipients in Account Settings.',
+			}
+
 			// spy on transporter to produce error
-			jest.spyOn(emailService.transporter, 'sendMail').mockImplementation(() => Promise.reject(new Error("email service does not respond")));
+			jest.spyOn(emailService.transporter, 'sendMail').mockImplementation(() => Promise.reject(smtpResponse));
 
 			const forgotPasswordForm = { email: authuser.email };
 			const response = await request(app).post('/auth/forgot-password').send(forgotPasswordForm);
 
 			TestUtil.errorExpectations(response, httpStatus.INTERNAL_SERVER_ERROR)
+			expect(response.body.name).toBe("SmtpError");
+			expect(response.body.message).toEqual("SMTP server is out of service");
+		});
+
+
+		test('should return status 400, if the email recipient is empty', async () => {
+			const authuserx = AuthUser.fromDoc({
+				email: 'talat@gmail.com',
+				password: await bcrypt.hash('Pass1word.', 8),
+			});
+
+			// ad the authuserx into db
+			const authuser = await authuserDbService.addAuthUser(authuserx);
+
+			const smtpResponse = {
+				code: 'EENVELOPE',
+				command: 'API',
+				name: 'Error',
+				message: 'No recipients defined'
+			}
+
+			// spy on transporter to produce error
+			jest.spyOn(emailService.transporter, 'sendMail').mockImplementation(() => Promise.reject(smtpResponse));
+
+			const forgotPasswordForm = { email: authuser.email };
+			const response = await request(app).post('/auth/forgot-password').send(forgotPasswordForm);
+
+			TestUtil.errorExpectations(response, httpStatus.BAD_REQUEST)
 			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toEqual("email service does not respond");
+			expect(response.body.message).toEqual("No recipients defined");
 		});
 	});
 
