@@ -432,7 +432,7 @@ components:
       description: | 
         UNAUTHORIZED
 
-        #### TokenErrors
+        #### TokenError
         * _No auth token_
         * _invalid signature_
         * _jwt malformed_
@@ -440,7 +440,7 @@ components:
         * _jwt not active_
         * _Invalid token type_
         
-        #### ApiErrors
+        #### ApiError
         * _Access token does not refer any user_
         * _Your browser/agent seems changed or updated, you have to re-login._
       content:
@@ -466,7 +466,7 @@ components:
       description: | 
         FORBIDDEN
 
-        #### ApiErrors
+        #### ApiError
         * _You are disabled, call the system administrator_
         * _The token is in the blacklist_
         * _Forbidden, (only self-data)_
@@ -486,7 +486,7 @@ components:
       description: | 
         FORBIDDEN
 
-        #### ApiErrors
+        #### ApiError
         * _You are disabled, call the system administrator_
         * _The token is in the blacklist_
       content:
@@ -504,7 +504,7 @@ components:
       description: | 
         FORBIDDEN
 
-        #### ApiErrors
+        #### ApiError
         * _Forbidden, (only self-data)_
         * _Forbidden, (you don't have appropriate right)_
       content:
@@ -522,7 +522,7 @@ components:
       description: | 
         FORBIDDEN
 
-        #### ApiErrors
+        #### ApiError
         * _You are disabled, call the system administrator_
         * _The token of the auth provider is allowed to be used only once_
       content:
@@ -540,10 +540,15 @@ components:
       description: | 
         UNAUTHORIZED
 
-        #### Login Unauthorized Failures
+        #### ApiError
         * _Passport Bearer Strategy related errors._
         * _provider oAuth token could not be associated with any identification_
         * _provider oAuth token does not contain necessary email information_
+
+        #### FetchError
+        * _Auth provider connection error occured, try later_
+
+        #### AxiosError
         * _Auth provider connection error occured, try later_
       content:
         application/json:
@@ -575,7 +580,7 @@ components:
 
         (Here is continuation of 401 UNAUTHORIZED response above, not 402)
 
-        #### ApiErrors
+        #### ApiError
         * _refresh token is not valid_
         * _refresh token is in the blacklist_
       content:
@@ -628,14 +633,14 @@ components:
       description: | 
         UNAUTHORIZED
 
-        #### TokenErrors
+        #### TokenError
         * _No auth token_
         * _invalid signature_
         * _jwt malformed_
         * _jwt expired_  n/a for refresh token
         * _jwt not active_  n/a for refresh token
 
-        #### ApiErrors
+        #### ApiError
         * _refresh|resetPassword|verifyEmail token is not valid_
       content:
         application/json:
@@ -654,6 +659,23 @@ components:
                 name: "ApiError"
                 message: "refresh|resetPassword|verifyEmail token is not valid"
                 errorPath: "the service-module name where the error occured"
+
+
+    ForgotPasswordEmailErrors:
+      description: | 
+        BAD REQUEST
+
+        #### ApiError
+        * _No recipients defined_
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            name: "ApiError"
+            message: "No recipients defined"
+            errorPath: "the service-module name where the error occured"
 
 
     ForgotPasswordValidationErrors:
@@ -701,6 +723,38 @@ components:
               token: ["The query parameter 'token' must not be empty"]
             }
 
+    SendVerificationEmailErrors:
+      description: | 
+        BAD REQUEST
+
+        #### ApiError
+        * _Email is already verified_
+        * _No recipients defined_
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            name: "ApiError"
+            message: "One of the api errors appears here"
+            errorPath: "the service-module name where the error occured"
+
+    SendEmailInternalServerError:
+      description: | 
+        INTERNAL SERVER ERROR
+
+        #### SmtpError: SMTP server is out of service
+        #### ApiError: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            name: "SmtpError"
+            message: "SMTP server is out of service"
+            errorPath: "the service-module name where the error occured"
 
     VerifyEmailTokenValidationError:
       description: UNPROCESSABLE ENTITY

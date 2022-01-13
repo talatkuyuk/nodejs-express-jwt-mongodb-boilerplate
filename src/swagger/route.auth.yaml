@@ -173,6 +173,8 @@
     responses:
       204:
         description: NO CONTENT
+      400:
+        $ref: '#/components/responses/ForgotPasswordEmailErrors'
       403:
         $ref: '#/components/responses/DisabledForbiddenError'
       404:
@@ -180,7 +182,7 @@
       422:
         $ref: '#/components/responses/ForgotPasswordValidationErrors'
       500:
-        $ref: '#/components/responses/InternalServerError'
+        $ref: '#/components/responses/SendEmailInternalServerError'
 
 
 ### RESET-PASSWORD ###
@@ -224,22 +226,13 @@
       204:
         description: NO CONTENT
       400:
-        description: BAD REQUEST
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-            example:
-              code: 400
-              name: ApiError
-              message: Email is already verified
-              errorPath: "the service-module name where the error occured"
+        $ref: '#/components/responses/SendVerificationEmailErrors'
       401:
         $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
         $ref: '#/components/responses/AuthenticateMiddlewareForbiddenErrors'
       500:
-        $ref: '#/components/responses/InternalServerError'
+        $ref: '#/components/responses/SendEmailInternalServerError'
 
 
 ### VERIFY-EMAIL ###
