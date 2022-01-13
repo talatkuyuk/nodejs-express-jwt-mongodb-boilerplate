@@ -46,16 +46,14 @@ async function start() {
 
 	} catch (error) {
 		logger.error(`${error}`);
-		exitHandler();
+		exitHandler(1);
 	}
 }
 
 start();
 
-const exitHandler = async () => {
+const exitHandler = async (code) => {
 	try {
-		process.exitCode = 1;
-
 		await httpServer?.close(() => {
 			logger.info('exithandler: Http Server closed.tk');
 		});
@@ -71,6 +69,9 @@ const exitHandler = async () => {
 		await redis.disconnect((result) => {
 			logger.info(`exithandler: Redis client quit with ${result}.tk`);
 		});
+
+		process.exit(code);
+
 	} catch (error) {
 		logger.error(error);
 	}
@@ -78,29 +79,44 @@ const exitHandler = async () => {
   
   
 process.on('uncaughtException', (err, origin) => {
+	console.log("Exeption error message:", err.message);
+	console.log("Exeption error origin:", origin);
+
 	logger.error(`uncaughtException: ${err}`);
-	exitHandler();
+	exitHandler(1);
 });
 
 
 process.on('unhandledRejection', (reason, promise) => {
-	console.log(`Unhandled Rejection Promise: ${promise}\nRejection Reason: ${reason.stack || reason}`);
+	console.log("Rejection Reason:", reason);
+	console.log("Rejection Promise:", promise);
 	
-	logger.error(`unexpectedError : ${reason}`);
-	exitHandler();
+	logger.error(`unhandledRejection : ${reason}`);
+	exitHandler(1);
 });
 
 
-process.on('SIGINT', cleanup);
-process.on('SIGTERM', cleanup);
+// these two events are considered a successful termination
+process.on('SIGINT', cleanup); // SIGINT is emitted when a Node.js process is interrupted, usually with (^-C) keyboard event. 
+process.on('SIGTERM', cleanup); // SIGTERM is normally sent by a process monitor to tell Node.js to expect a successful termination.
 
 function cleanup(signal) {
-	logger.error(`${signal} received.tk`);
-	exitHandler()
+	logger.error(`${signal} received for the process ${process.pid}`);
+	exitHandler(0);
 };
 
 
-process.on("exit", function(code){
+process.on('beforeExit', code => {
+	// Can make asynchronous calls
+	setTimeout(() => {
+	  console.log(`beforeExit: Process will exit with code: ${code}`);
+	  process.exit(code);
+	}, 100);
+});
+
+
+process.on("exit", code => {
+	// Only make synchronous calls
 	logger.warn(`ON_EXIT code: ${code}`);
 });
 
