@@ -1817,7 +1817,7 @@
                 }
             },
             "AuthenticateMiddlewareUnauthorizedErrors": {
-                "description": "UNAUTHORIZED\n\n#### TokenErrors\n* _No auth token_\n* _invalid signature_\n* _jwt malformed_\n* _jwt expired_\n* _jwt not active_\n* _Invalid token type_\n\n#### ApiErrors\n* _Access token does not refer any user_\n* _Your browser/agent seems changed or updated, you have to re-login._\n",
+                "description": "UNAUTHORIZED\n\n#### TokenError\n* _No auth token_\n* _invalid signature_\n* _jwt malformed_\n* _jwt expired_\n* _jwt not active_\n* _Invalid token type_\n\n#### ApiError\n* _Access token does not refer any user_\n* _Your browser/agent seems changed or updated, you have to re-login._\n",
                 "content": {
                     "application/json": {
                         "schema": {
@@ -1845,7 +1845,7 @@
                 }
             },
             "AuthenticateAndAuthorizeMiddlewaresForbiddenErrors": {
-                "description": "FORBIDDEN\n\n#### ApiErrors\n* _You are disabled, call the system administrator_\n* _The token is in the blacklist_\n* _Forbidden, (only self-data)_\n* _Forbidden, (you don't have appropriate right)_\n",
+                "description": "FORBIDDEN\n\n#### ApiError\n* _You are disabled, call the system administrator_\n* _The token is in the blacklist_\n* _Forbidden, (only self-data)_\n* _Forbidden, (you don't have appropriate right)_\n",
                 "content": {
                     "application/json": {
                         "schema": {
@@ -1861,7 +1861,7 @@
                 }
             },
             "AuthenticateMiddlewareForbiddenErrors": {
-                "description": "FORBIDDEN\n\n#### ApiErrors\n* _You are disabled, call the system administrator_\n* _The token is in the blacklist_\n",
+                "description": "FORBIDDEN\n\n#### ApiError\n* _You are disabled, call the system administrator_\n* _The token is in the blacklist_\n",
                 "content": {
                     "application/json": {
                         "schema": {
@@ -1877,7 +1877,7 @@
                 }
             },
             "AuthorizeMiddlewareForbiddenErrors": {
-                "description": "FORBIDDEN\n\n#### ApiErrors\n* _Forbidden, (only self-data)_\n* _Forbidden, (you don't have appropriate right)_\n",
+                "description": "FORBIDDEN\n\n#### ApiError\n* _Forbidden, (only self-data)_\n* _Forbidden, (you don't have appropriate right)_\n",
                 "content": {
                     "application/json": {
                         "schema": {
@@ -1893,7 +1893,7 @@
                 }
             },
             "oAuthLoginForbiddenErrors": {
-                "description": "FORBIDDEN\n\n#### ApiErrors\n* _You are disabled, call the system administrator_\n* _The token of the auth provider is allowed to be used only once_\n",
+                "description": "FORBIDDEN\n\n#### ApiError\n* _You are disabled, call the system administrator_\n* _The token of the auth provider is allowed to be used only once_\n",
                 "content": {
                     "application/json": {
                         "schema": {
@@ -1941,7 +1941,7 @@
                 }
             },
             "LogoutSignoutUnauthorizedErrors": {
-                "description": "UNAUTHORIZED\n\n(Here is continuation of 401 UNAUTHORIZED response above, not 402)\n\n#### ApiErrors\n* _refresh token is not valid_\n* _refresh token is in the blacklist_\n",
+                "description": "UNAUTHORIZED\n\n(Here is continuation of 401 UNAUTHORIZED response above, not 402)\n\n#### ApiError\n* _refresh token is not valid_\n* _refresh token is in the blacklist_\n",
                 "content": {
                     "application/json": {
                         "schema": {
@@ -1993,7 +1993,7 @@
                 }
             },
             "VerifyTokenUnauthorizedErrors": {
-                "description": "UNAUTHORIZED\n\n#### TokenErrors\n* _No auth token_\n* _invalid signature_\n* _jwt malformed_\n* _jwt expired_  n/a for refresh token\n* _jwt not active_  n/a for refresh token\n\n#### ApiErrors\n* _refresh|resetPassword|verifyEmail token is not valid_\n",
+                "description": "UNAUTHORIZED\n\n#### TokenError\n* _No auth token_\n* _invalid signature_\n* _jwt malformed_\n* _jwt expired_  n/a for refresh token\n* _jwt not active_  n/a for refresh token\n\n#### ApiError\n* _refresh|resetPassword|verifyEmail token is not valid_\n",
                 "content": {
                     "application/json": {
                         "schema": {
