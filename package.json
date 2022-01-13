@@ -36,7 +36,7 @@
     "express": "^4.17.2",
     "express-async-handler": "^1.2.0",
     "express-mongo-sanitize": "^2.1.0",
-    "express-rate-limit": "^6.0.4",
+    "express-rate-limit": "^6.1.0",
     "express-useragent": "^1.0.15",
     "express-validator": "^6.14.0",
     "google-auth-library": "^7.11.0",
@@ -59,15 +59,15 @@
     "swagger-jsdoc": "^6.1.0",
     "swagger-ui-express": "^4.3.0",
     "validator": "^13.7.0",
-    "winston": "^3.3.3",
+    "winston": "^3.4.0",
     "xss-clean": "^0.1.1"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "jest": "^27.4.5",
+    "jest": "^27.4.7",
     "node-mocks-http": "^1.11.0",
     "prettier": "^2.5.1",
-    "shelljs": "^0.8.4",
-    "supertest": "^6.1.6"
+    "shelljs": "^0.8.5",
+    "supertest": "^6.2.1"
   }
 }
