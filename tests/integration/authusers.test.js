@@ -88,6 +88,7 @@ describe('PATH /authusers', () => {
 			// check the testAuthuser created above
 			expect(response.status).toBe(httpStatus.CREATED);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
+			expect(response.headers['location']).toEqual(expect.stringContaining("/authusers/"));
 			expect(response.body).not.toHaveProperty("tokens");
 			expect(testAuthuser).not.toHaveProperty("password");
 			expect(testAuthuser).toEqual({

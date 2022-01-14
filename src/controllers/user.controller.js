@@ -15,6 +15,7 @@ const addUser = asyncHandler(async (req, res) => {
 	
 		const user = await userService.addUser(id, addBody);
 	
+		res.location(`${req.protocol}://${req.get('host')}/users/${user.id}`);
 		res.status(httpStatus.CREATED).send(user.filter());
 		
 	} catch (error) {
