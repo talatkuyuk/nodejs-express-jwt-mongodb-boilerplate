@@ -22,8 +22,9 @@ const signup = asyncHandler(async (req, res) => {
 		const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 	
 		req.authuser = authuser; // for morgan logger to tokenize it as user
-	
-		res.status(httpStatus.CREATED).send({ 
+
+		res.location(`${req.protocol}://${req.get('host')}/authusers/${authuser.id}`);
+		res.status(httpStatus.CREATED).send({
 			user: authuser.filter(),
 			tokens: { 
 				access: tokens.access,

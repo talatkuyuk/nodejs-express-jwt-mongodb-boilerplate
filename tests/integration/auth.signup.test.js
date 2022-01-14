@@ -151,6 +151,7 @@ describe('POST /auth/signup', () => {
 	});
 
 	describe('Success registration', () => {
+
 		test('should return status 201, user and valid tokens in json form; successfully register user if the request is valid', async () => {
 			const registerform = {
 				email: 'talat@gmail.com',
@@ -162,6 +163,7 @@ describe('POST /auth/signup', () => {
 
 			expect(response.status).toBe(httpStatus.CREATED);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
+			expect(response.headers['location']).toEqual(expect.stringContaining("/authusers/"));
 
 			TestUtil.CheckTokenConsistency(response.body.tokens, response.body.user.id);
 

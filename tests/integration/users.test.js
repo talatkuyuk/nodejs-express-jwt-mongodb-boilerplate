@@ -99,6 +99,7 @@ describe('PATH /users', () => {
 			// check the testUser created above
 			expect(response.status).toBe(httpStatus.CREATED);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
+			expect(response.headers['location']).toEqual(expect.stringContaining("/users/"));
 			expect(testUser).toEqual({
 				id: testAuthuser.id,
 				email: testAuthuser.email,
