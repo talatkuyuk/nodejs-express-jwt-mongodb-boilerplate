@@ -1,13 +1,13 @@
 
 class ApiError extends Error {
-    constructor(statusCode, error, isOperational = true, errors = null,  errorPath = null, stack) {
+    constructor(statusCode, error, isOperational = true, errors = null) {
+
+      if (!statusCode || !error) throw Error("bad ApiError argument");
       
       // ApiError accepts any Error instance as the paramater error.
       if (error instanceof Error) {
         super(error.message);
         this.name = error.name === Error.prototype.name ? this.constructor.name : error.name;
-        this.errorPath = error.errorPath ?? errorPath;
-        this.stack = error.stack;
       }
 
       // ApiError accepts string "error message" or "XxxError: error message" as the paramater error.
@@ -17,34 +17,28 @@ class ApiError extends Error {
             super(message.trim());
             this.name = name.trim();
         } else {
-            super(error);
+            super(error.trim());
             this.name = this.constructor.name;
         }
-        this.errorPath = errorPath;
       }
 
-      // if ApiError receives an object (error like object)
+      // if ApiError may receive an error like object
       else if (typeof error === 'object') {
-        super(error.message ?? "general error");
-        this.name = error.isAxiosError ? "AxiosError" : error.name ?? Error.prototype.name;
-        this.errorPath = error.errorPath ?? errorPath;
+        super(error.message ?? "no specific error message");
+        this.name = error.isAxiosError ? "AxiosError" : error.name ?? this.constructor.name;
       }
 
-      // if ApiError receives wrong argument type for the paramater error
+      // if received wrong argument type, throw an error
       else {
-        super("bad ApiError argument");
-        this.name = Error.prototype.name;
-        this.errorPath = errorPath;
+        throw Error("bad ApiError argument");
       }
       
       this.statusCode = statusCode;
-	    this.errors = errors;
       this.isOperational = isOperational;
+	    this.errors = errors;
+      this.errorPath = null;
 
-      stack && (this.stack = stack);
-
-      if (!this.stack)
-          Error.captureStackTrace(this, this.constructor);
+      Error.captureStackTrace(this, this.constructor);
     }
 }
 
@@ -69,12 +63,12 @@ There is only one constructor: new Error(message);
 I've implemented an ApiError on top of the Error object:
 -------------------------------------------------------
 interface ApiError {
+    statusCode: Number,
     name: string,
     message: string,
-    statusCode: Number,
-    errors: Object,
     isOperational: string,
-    description: string,
+    errors: Object,
+    errorPath: string,
     stack?: string,
 }
 

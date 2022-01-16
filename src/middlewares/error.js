@@ -19,14 +19,14 @@ const converter = (err, req, res, next) => {
   let convertedError;
 
   if (err instanceof MongoError) {
-      err.message = err.message ?? "Database error in MongoDB";
-      err.errorPath = err.errorPath ?? "Catched in error middleware";
-      convertedError = new ApiError(httpStatus.BAD_REQUEST, err, true, null, err.errorPath, err.stack);
+      !err.message && (err.message = "Database error in MongoDB");
+      !err.errorPath && (err.errorPath = "Catched in error middleware");
+      convertedError = new ApiError(httpStatus.BAD_REQUEST, err, true);
 
   } else {
-      err.message = err.message ?? "Internal server error";
-      err.errorPath = err.errorPath ?? "Catched in error middleware";
-      convertedError = new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err, false, null, err.errorPath, err.stack);
+      !err.message && (err.message = "Internal server error");
+      !err.errorPath && (err.errorPath = "Catched in error middleware");
+      convertedError = new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err, false);
   }
 
   next(convertedError);
@@ -36,7 +36,7 @@ const converter = (err, req, res, next) => {
 
 // Prepare the response having the error
 const handler = (err, req, res, next) => {
-  let { statusCode, name, message, errors, errorPath, stack } = err;
+  let { statusCode, name, message, isOperational, errors, errorPath, stack } = err;
 
   // morgan handler uses the res.locals.error to tokenize
   res.locals.error = `${name}: ${message}`;
@@ -44,7 +44,7 @@ const handler = (err, req, res, next) => {
   // log the error object
   config.env === 'development' && (logger.error(err));
     
-  if (config.env === 'production' && !err.isOperational) {
+  if (config.env === 'production' && !isOperational) {
     statusCode = httpStatus.INTERNAL_SERVER_ERROR;
     message = httpStatus[httpStatus.INTERNAL_SERVER_ERROR];
   }
@@ -58,7 +58,7 @@ const handler = (err, req, res, next) => {
     ...(config.env === 'development' && stack && { stack }) // { stack: stack }
   };
 
-  !err.isOperational && (process.exit(1));
+  !isOperational && (process.exit(1));
 
   res.status(statusCode).send(response);
 };
