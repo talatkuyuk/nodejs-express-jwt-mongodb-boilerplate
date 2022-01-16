@@ -13,26 +13,26 @@ const validate = (rules) => async (req, res, next) => {
 		const bodyData = matchedData(req, { includeOptionals: false, onlyValidData: false });
 		console.log(bodyData);
 
-		const errors = validationResult(req);
+		const validationErrors = validationResult(req);
 
-		if (errors.isEmpty()) return next();
+		if (validationErrors.isEmpty()) return next();
 
-		const myerrors = {};
+		const errors = {};
 
-		// convert errors object to myerrors object as structured below at the end of the file.
-		errors.array().map(err => {
+		// convert errors object to errors object as structured below at the end of the file.
+		validationErrors.array().map(err => {
 			// oneOf([check(...).exists(), ...]) --> param: "_error" (see at users validation)
 			if (err.param === "_error") err.param = "body";
 			
 			const key = err.param || err.location;
-			myerrors[key] = myerrors[key] ? [...myerrors[key], err.msg] : [err.msg];
+			errors[key] = errors[key] ? [...errors[key], err.msg] : [err.msg];
 		});
 
 		const validationError = new ApiError(
 			httpStatus.UNPROCESSABLE_ENTITY, // error.statusCode (422)
 			"ValidationError: The request could not be validated", // error.name: error.message
 			true, // error.isOperational
-			myerrors, // converted validation errors
+			errors, // converted validation errors
 		);
 
 		next(validationError);
@@ -45,7 +45,7 @@ const validate = (rules) => async (req, res, next) => {
 module.exports = validate;
 
 // { 
-// 		"errors": [ 
+// 		"validationErrors": [ 
 // 			{ 
 // 				value, 
 // 				msg, 
@@ -58,7 +58,7 @@ module.exports = validate;
 
 
 // {
-//     "myerrors": {
+//     "errors": {
 //         "param1": [
 //             "message"
 //         ],
