@@ -109,38 +109,7 @@ components:
         token:
           type: string
           description: reset password token
-          example: lkfkldE-verify-email-token-oflkmFDDkf
-
-
-    # AUTHUSER IN RESPONSE
-    authuser:
-      type: object
-      properties:
-        id:
-          type: string
-          description: MongoDb.ObjectId
-        email:
-          type: string
-          format: email
-        isEmailVerified:
-          type: boolean
-        isDisabled:
-          type: boolean
-        createdAt:
-          type: date-time
-          description: unix time like 7635472654762
-        services: 
-          type: object
-          properties:
-            emailpassword:
-              type: string
-              enum: [registered, unregistered]
-            google:
-              type: string
-              description: google-oauth-id
-            facebook:
-              type: string
-              description: facebook-oauth-id   
+          example: lkfkldE-verify-email-token-oflkmFDDkf 
       
 
     # ADD AUTHUSER FORM IN REQUEST.BODY
@@ -196,29 +165,6 @@ components:
         password: Pass1word!
         passwordConfirmation: Pass1word!
   
-
-    # USER IN RESPONSE
-    user:
-      type: object
-      properties:
-        id:
-          type: string
-          description: MongoDb.ObjectId
-        email:
-          type: string
-          format: email
-        role:
-          type: string
-        name:
-          type: string
-        gender:
-          type: string
-        country:
-          type: string
-        createdAt:
-          type: date-time
-          description: unix time like 7635472654762
-
 
     # ADD USER FORM IN REQUEST.BODY
     form-add-user:
@@ -295,6 +241,60 @@ components:
         role: admin
 
 
+    # AUTHUSER IN RESPONSE
+    authuser:
+      type: object
+      properties:
+        id:
+          type: string
+          description: MongoDb.ObjectId
+        email:
+          type: string
+          format: email
+        isEmailVerified:
+          type: boolean
+        isDisabled:
+          type: boolean
+        createdAt:
+          type: date-time
+          description: unix time like 7635472654762
+        services: 
+          type: object
+          properties:
+            emailpassword:
+              type: string
+              enum: [registered, unregistered]
+            google:
+              type: string
+              description: google-oauth-id
+            facebook:
+              type: string
+              description: facebook-oauth-id
+
+              
+    # USER IN RESPONSE
+    user:
+      type: object
+      properties:
+        id:
+          type: string
+          description: MongoDb.ObjectId
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+        name:
+          type: string
+        gender:
+          type: string
+        country:
+          type: string
+        createdAt:
+          type: date-time
+          description: unix time like 7635472654762
+
+
     # ACCESS-REFRESH TOKENS IN RESPONSE
     tokens:
       type: object
@@ -318,44 +318,65 @@ components:
 
 
     # ERROR
-    Error:
+    ErrorResponse:
       type: object
       properties:
-        code:
-          type: number
-          description: The status code of the response
-        name:
-          type: string
-          description: The error name
-        message:
-          type: string
-          description: The error message
-        errorPath:
-          type: string
-          description: The service name that the error occured, only in development environment
+        success:
+          type: boolean
+          value: false
+        error:
+          type: object
+          properties:
+            code:
+              type: number
+              description: The status code of the response
+            name:
+              type: string
+              description: The error name
+            message:
+              type: string
+              description: The error message
 
 
     # VALIDATION ERROR
-    ValidationError:
+    ValidationErrorResponse:
       type: object
       properties:
-        code:
-          type: number
-          value: 422
-        name:
-          type: string
-          value: "ValidationError"
-        message:
-          type: string
-          value: "The request could not be validated"
-        errors:
+        success:
+          type: boolean
+          value: false
+        error:
           type: object
-          description: "{ key1: string[], key2: string[], ... } The keys refer to a property name validation failed in the requestbody (email, password etc.), having value which is an array of string that refers to specific error message for that property"
+          properties:
+            code:
+              type: number
+              value: 422
+            name:
+              type: string
+              value: "ValidationError"
+            message:
+              type: string
+              value: "The request could not be validated"
+            errors:
+              type: object
+              description: "{ key1: string[], key2: string[], ... } The keys refer to a property name validation failed in the requestbody (email, password etc.), having value which is an array of string that refers to specific error message for that property"
 
 
 
   ##################### RESPONSES ***************************
   responses:
+
+    SuccessResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                value: true
+
 
     SignUpValidationErrors:
       description: |
@@ -378,16 +399,18 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationError'
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            code: 422
-            name: ValidationError
-            message: The request could not be validated
-            errors: {
-              email: ["email validation errors appear in a string array"],
-              password: ["password validation errors appear in a string array"],
-              passwordConfirmation: ["should match with the password"]
-            }
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                email: ["email validation errors appear in a string array"]
+                password: ["password validation errors appear in a string array"]
+                passwordConfirmation: ["should match with the password"]
+
 
     LoginValidationErrors:
       description: |
@@ -402,15 +425,17 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationError'
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            code: 422
-            name: ValidationError
-            message: The request could not be validated
-            errors: {
-              email: ["one of the email validation errors appear here"],
-              password: ["must not be empty"],
-            }
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                email: ["one of the email validation errors appear here"]
+                password: ["must not be empty"]
+
 
     LoginUnauthorizedFailures:
       description: | 
@@ -421,12 +446,14 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 401
-            name: "ApiError"
-            message: "one of the error messages appears here"
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 401
+              name: "ApiError"
+              message: "one of the error messages appears here"
+
 
     AuthenticateMiddlewareUnauthorizedErrors:
       description: | 
@@ -446,20 +473,22 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           examples:
             TokenError:
               value:
-                code: 401
-                name: "TokenError"
-                message: "One of the token errors appears here"
-                errorPath: "the service-module name where the error occured"
+                success: false
+                error:
+                  code: 401
+                  name: "TokenError"
+                  message: "One of the token errors appears here"
             ApiError:
               value:
-                code: 401
-                name: "ApiError"
-                message: "One of the api errors appears here"
-                errorPath: "the service-module name where the error occured"
+                success: false
+                error:
+                  code: 401
+                  name: "ApiError"
+                  message: "One of the api errors appears here"
 
 
     AuthenticateAndAuthorizeMiddlewaresForbiddenErrors:
@@ -474,12 +503,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 403
-            name: "ApiError"
-            message: "One of the api errors appears here"
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 403
+              name: "ApiError"
+              message: "One of the api errors appears here"
 
 
     AuthenticateMiddlewareForbiddenErrors:
@@ -492,12 +522,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 403
-            name: "ApiError"
-            message: "One of the api errors appears here"
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 403
+              name: "ApiError"
+              message: "One of the api errors appears here"
 
 
     AuthorizeMiddlewareForbiddenErrors:
@@ -510,12 +541,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 403
-            name: "ApiError"
-            message: "One of the api errors appears here"
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 403
+              name: "ApiError"
+              message: "One of the api errors appears here"
 
 
     oAuthLoginForbiddenErrors:
@@ -528,12 +560,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 403
-            name: "ApiError"
-            message: "One of the api errors appears here"
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 403
+              name: "ApiError"
+              message: "One of the api errors appears here"
 
         
     oAuthLoginUnauthorizedFailures:
@@ -553,12 +586,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 401
-            name: "ApiError"
-            message: "One of the error messages appears here"
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 401
+              name: "ApiError"
+              message: "One of the error messages appears here"
 
 
     oAuthLoginBadRequests:
@@ -566,12 +600,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 400
-            name: "ApiError"
-            message: "Badly formed Authorization Header with Bearer."
-            description: "oAuthMiddleware : oAuth(callback) --> AuthenticateMiddleware : oAuth"
+            success: false
+            error:
+              code: 400
+              name: "ApiError"
+              message: "Badly formed Authorization Header with Bearer."
 
 
     LogoutSignoutUnauthorizedErrors:
@@ -586,12 +621,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 401
-            name: "ApiError"
-            message: "One of the api errors appears here"
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 401
+              name: "ApiError"
+              message: "One of the api errors appears here"
 
 
     RefreshTokenValidationError:
@@ -599,14 +635,15 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationError'
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            code: 422
-            name: ValidationError
-            message: The request could not be validated
-            errors: {
-              refreshToken: ["refresh token must not be empty"]
-            }
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                refreshToken: ["refresh token must not be empty"]
 
 
     RefreshTokensUnauthorizedErrors:
@@ -621,12 +658,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 401
-            name: "ApiError"
-            message: "one of the error messages appears here"
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 401
+              name: "ApiError"
+              message: "one of the error messages appears here"
 
     
     VerifyTokenUnauthorizedErrors:
@@ -645,20 +683,22 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           examples:
             TokenError:
               value:
-                code: 401
-                name: "TokenError"
-                message: "One of the token errors appears here"
-                errorPath: "the service-module name where the error occured"
+                success: false
+                error:
+                  code: 401
+                  name: "TokenError"
+                  message: "One of the token errors appears here"
             ApiError:
               value:
-                code: 401
-                name: "ApiError"
-                message: "refresh|resetPassword|verifyEmail token is not valid"
-                errorPath: "the service-module name where the error occured"
+                success: false
+                error:
+                  code: 401
+                  name: "ApiError"
+                  message: "refresh|resetPassword|verifyEmail token is not valid"
 
 
     ForgotPasswordEmailErrors:
@@ -670,12 +710,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 400
-            name: "ApiError"
-            message: "No recipients defined"
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 400
+              name: "ApiError"
+              message: "No recipients defined"
 
 
     ForgotPasswordValidationErrors:
@@ -688,14 +729,15 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            code: 422
-            name: ValidationError
-            message: The request could not be validated
-            errors: {
-              email: ["email validation errors appear in a string array"],
-            }
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                email: ["email validation errors appear in a string array"]
 
 
     ResetPasswordValidationErrors:
@@ -712,16 +754,18 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            code: 422
-            name: ValidationError
-            message: The request could not be validated
-            errors: {
-              password: ["password validation errors appear in a string array"],
-              passwordConfirmation: ["should match with the password"],
-              token: ["The query parameter 'token' must not be empty"]
-            }
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                password: ["password validation errors appear in a string array"]
+                passwordConfirmation: ["should match with the password"]
+                token: ["The query parameter 'token' must not be empty"]
+
 
     SendVerificationEmailErrors:
       description: | 
@@ -733,12 +777,14 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 400
-            name: "ApiError"
-            message: "One of the api errors appears here"
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 400
+              name: "ApiError"
+              message: "One of the api errors appears here"
+
 
     SendEmailInternalServerError:
       description: | 
@@ -749,26 +795,29 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 400
-            name: "SmtpError"
-            message: "SMTP server is out of service"
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 400
+              name: "SmtpError"
+              message: "SMTP server is out of service"
+
 
     VerifyEmailTokenValidationError:
       description: UNPROCESSABLE ENTITY
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            code: 422
-            name: ValidationError
-            message: The request could not be validated
-            errors: {
-              token: ["The query parameter 'token' must not be empty"]
-            }
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                token: ["The query parameter 'token' must not be empty"]
 
 
     DisabledForbiddenError:
@@ -776,12 +825,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 403
-            name: "ApiError"
-            message: "You are disabled, call the system administrator"
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 403
+              name: "ApiError"
+              message: "You are disabled, call the system administrator"
 
 
     ParamIdValidationError:
@@ -789,14 +839,15 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationError'
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            code: 422
-            name: ValidationError
-            message: The request could not be validated
-            errors: {
-              id: ["The param id must be a 24-character number"]
-            }
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                id: ["The param id must be a 24-character number"]
 
 
     AuthUserQueryParamsValidationErrors:
@@ -815,19 +866,20 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationError'
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            code: 422
-            name: ValidationError
-            message: The request could not be validated
-            errors: {
-              email: ["The query param 'email' must be in valid form"],
-              isDisabled: ["The query param 'isDisabled' must be boolean value"],
-              isEmailVerified: ["The query param 'isEmailVerified' must be boolean value"],
-              page: ["The query param 'page' must be numeric value"],
-              size: ["The query param 'size' can be at most 50"],
-              sort: ["The parameter can only appear once in the query string"],
-            }
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                email: ["The query param 'email' must be in valid form"]
+                isDisabled: ["The query param 'isDisabled' must be boolean value"]
+                isEmailVerified: ["The query param 'isEmailVerified' must be boolean value"]
+                page: ["The query param 'page' must be numeric value"]
+                size: ["The query param 'size' can be at most 50"]
+                sort: ["The parameter can only appear once in the query string"]
 
 
     ChangePasswordValidationErrors:
@@ -845,16 +897,17 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationError'
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            code: 422
-            name: ValidationError
-            message: The request could not be validated
-            errors: {
-              currentPassword: ["must not be empty", "incorrect current password"],
-              password: ["password validation errors appear in a string array"],
-              passwordConfirmation: ["should match with the password"]
-            }
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                currentPassword: ["must not be empty", "incorrect current password"]
+                password: ["password validation errors appear in a string array"]
+                passwordConfirmation: ["should match with the password"]
 
 
     UserQueryParamsValidationErrors:
@@ -875,19 +928,20 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationError'
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            code: 422
-            name: ValidationError
-            message: The request could not be validated
-            errors: {
-              email: ["The query param 'email' must be in valid form"],
-              role: ["The query param 'role' could be one of admin, user"],
-              name: ["The query param 'name' must be minumum 2-length charachter"],
-              page: ["The query param 'page' must be numeric value"],
-              size: ["The query param 'size' can be at most 50"],
-              sort: ["The parameter can only appear once in the query string"],
-            }
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                email: ["The query param 'email' must be in valid form"]
+                role: ["The query param 'role' could be one of admin, user"]
+                name: ["The query param 'name' must be minumum 2-length charachter"]
+                page: ["The query param 'page' must be numeric value"]
+                size: ["The query param 'size' can be at most 50"]
+                sort: ["The parameter can only appear once in the query string"]
 
 
     AddUserValidationErrors:
@@ -913,16 +967,17 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationError'
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            code: 422
-            name: ValidationError
-            message: The request could not be validated
-            errors: {
-              email: ["email validation errors appear in a string array"],
-              body: ["There is no correspondent authenticated user with the same id and email"],
-              name: ["requires minimum 2 characters"]
-            }
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                email: ["email validation errors appear in a string array"]
+                body: ["There is no correspondent authenticated user with the same id and email"]
+                name: ["requires minimum 2 characters"]
 
 
     UpdateUserValidationErrors:
@@ -943,16 +998,17 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationError'
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            code: 422
-            name: ValidationError
-            message: The request could not be validated
-            errors: {
-              body: ["The request body should contain at least one of the name, gender, country"],
-              gender: ["could be male, female or none"],
-              country: ["must be 3-letter standart country code"],
-            }
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                body: ["The request body should contain at least one of the name, gender, country"]
+                gender: ["could be male, female or none"]
+                country: ["must be 3-letter standart country code"]
 
 
     ChangeRoleValidationErrors:
@@ -969,16 +1025,17 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationError'
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            code: 422
-            name: ValidationError
-            message: The request could not be validated
-            errors: {
-              body: ["Any extra parameter is not allowed other than 'role'"],
-              id: ["The param id must be a 24-character number"],
-              role: ["role could be one of admin,user"],
-            }
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                body: ["Any extra parameter is not allowed other than 'role'"]
+                id: ["The param id must be a 24-character number"]
+                role: ["role could be one of admin,user"]
 
 
     NoUserFound:
@@ -986,12 +1043,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 404
-            name: ApiError
-            message: No user found
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 404
+              name: "ApiError"
+              message: "No user found"
 
 
     InternalServerError:
@@ -999,12 +1057,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 500
-            name: ApiError
-            message: Internal Server Error
-            errorPath: "the service-module name where the error occured"
+            success: false
+            error:
+              code: 500
+              name: "ApiError"
+              message: "Internal Server Error"
 
 
     Unauthorized:
@@ -1012,25 +1071,27 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 401
-            name: ApiError
-            message: Unauthorized
-            errorPath: "the service-module name where the error occured"
-          
+            success: false
+            error:
+              code: 401
+              name: "ApiError"
+              message: "Unauthorized"
+
+
     Forbidden:
       description: FORBIDDEN
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
           example:
-            code: 403
-            name: ApiError
-            message: Forbidden
-            errorPath: "the service-module name where the error occured"
-
+            success: false
+            error:
+              code: 403
+              name: "ApiError"
+              message: "Forbidden"
 
 
   ##################### PARAMETERS *********************
@@ -1152,76 +1213,71 @@ components:
       refresh:
         token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MTUyZmRlNWMxMjc1MDRlYWIyOTJkMjQiLCJpYXQiOjE2MzI4Mjg5MDIsImV4cCI6MTYzNTQyMDkwMiwianRpIjoiMGZmNmZkNzMzYjQ3NWQxY2EzZjMyZTYyN2RmMTQwNjEiLCJ1YSI6InZzY29kZS1yZXN0Y2xpZW50IiwidHlwZSI6InJlZnJlc2giLCJuYmYiOjE2MzI4NTA1MDJ9.mlBB7txKnFW6XPVO1eeQ9W9UkaOzaSIgIWGiDUGqAxg
         expires: 2021-10-28T11:35:02.042Z
-      
-
-    response-tokens-for-refresh:
-      summary: it consists access and refresh tokens
-      value:
-        access:
-          token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MTUyZmRlNWMxMjc1MDRlYWIyOTJkMjQiLCJpYXQiOjE2MzI4Mjg5MDIsImV4cCI6MTYzMjg1MDUwMiwianRpIjoiMGZmNmZkNzMzYjQ3NWQxY2EzZjMyZTYyN2RmMTQwNjEiLCJ1YSI6InZzY29kZS1yZXN0Y2xpZW50IiwidHlwZSI6ImFjY2VzcyIsIm5iZiI6MTYzMjgyODkwMn0.xw88sTQSvXr84-5nefKJXfKw4VicZS2UNSnvQu9iuuk
-          expires: 2021-09-28T17:35:02.040Z
-        refresh:
-          token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MTUyZmRlNWMxMjc1MDRlYWIyOTJkMjQiLCJpYXQiOjE2MzI4Mjg5MDIsImV4cCI6MTYzNTQyMDkwMiwianRpIjoiMGZmNmZkNzMzYjQ3NWQxY2EzZjMyZTYyN2RmMTQwNjEiLCJ1YSI6InZzY29kZS1yZXN0Y2xpZW50IiwidHlwZSI6InJlZnJlc2giLCJuYmYiOjE2MzI4NTA1MDJ9.mlBB7txKnFW6XPVO1eeQ9W9UkaOzaSIgIWGiDUGqAxg
-          expires: 2021-10-28T11:35:02.042Z
 
 
     response-query-authusers:
       summary: it returns the authusers queried
       value:
-        users: [
-          {
-            id: 6152fde5c127504eab292d24,
-            email: user1@gmail.com,
-            isEmailVerified: false,
-            isDisabled: false,
-            createdAt: 1632828901111,
-            services: { emailpassword: registered }
-          },
-          {
-            id: 6152fde5c127504eab292d25,
-            email: user2@gmail.com,
-            isEmailVerified: false,
-            isDisabled: false,
-            createdAt: 1632828902222,
-            services: { emailpassword: unregistered, google: "63876327467767364" }
-          },
-        ]
-        totalCount: 2
-        pagination: {
-          currentPage: 1,
-          totalPages: 1,
-          perPage: 20,
+        success: true,
+        data: {
+          authusers: [
+            {
+              id: 6152fde5c127504eab292d24,
+              email: user1@gmail.com,
+              isEmailVerified: false,
+              isDisabled: false,
+              createdAt: 1632828901111,
+              services: { emailpassword: registered }
+            },
+            {
+              id: 6152fde5c127504eab292d25,
+              email: user2@gmail.com,
+              isEmailVerified: false,
+              isDisabled: false,
+              createdAt: 1632828902222,
+              services: { emailpassword: unregistered, google: "63876327467767364" }
+            },
+          ],
+          totalCount: 2,
+          pagination: {
+            currentPage: 1,
+            totalPages: 1,
+            perPage: 20,
+          }
         }
 
                     
     response-query-users:
       summary: it returns the authusers queried
       value:
-        users: [
-          {
-            id: 6152fde5c127504eab292d24,
-            email: user1@gmail.com,
-            role: "admin",
-            name: "User1 Brown",
-            gender: "male",
-            country: "TUR",
-            createdAt: 1632828901111,
-          },
-          {
-            id: 6152fde5c127504eab292d25,
-            email: user2@gmail.com,
-            role: "admin",
-            name: "User2 Brown",
-            gender: "female",
-            country: "USA",
-            createdAt: 1632828902222,
-          },
-        ]
-        totalCount: 2
-        pagination: {
-          currentPage: 1,
-          totalPages: 1,
-          perPage: 20,
+        success: true,
+        data: {
+          users: [
+            {
+              id: 6152fde5c127504eab292d24,
+              email: user1@gmail.com,
+              role: "admin",
+              name: "User1 Brown",
+              gender: "male",
+              country: "TUR",
+              createdAt: 1632828901111,
+            },
+            {
+              id: 6152fde5c127504eab292d25,
+              email: user2@gmail.com,
+              role: "admin",
+              name: "User2 Brown",
+              gender: "female",
+              country: "USA",
+              createdAt: 1632828902222,
+            },
+          ],
+          totalCount: 2,
+          pagination: {
+            currentPage: 1,
+            totalPages: 1,
+            perPage: 20,
+          }
         }
 
     response-user:

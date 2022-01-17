@@ -21,21 +21,27 @@
             schema:
               type: object
               properties:
-                users:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/user'
-                totalCount:
-                  type: number
-                pagination:
+                success:
+                  type: boolean
+                  value: true
+                data:
                   type: object
                   properties:
-                    currentPage:
+                    users:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/user'
+                    totalCount:
                       type: number
-                    totalPages:
-                      type: number
-                    perPage:
-                      type: number
+                    pagination:
+                      type: object
+                      properties:
+                        currentPage:
+                          type: number
+                        totalPages:
+                          type: number
+                        perPage:
+                          type: number
             examples:
               _:
                 $ref: '#/components/examples/response-query-users'
@@ -64,10 +70,18 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/user'
-            examples:
-              _:
-                $ref: '#components/examples/response-user'
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  value: true
+                data:
+                  type: object
+                  properties:
+                    user:
+                      $ref: '#/components/schemas/user'
+                      example:
+                        $ref: '#components/examples/response-user'
       401:
         $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
@@ -101,10 +115,16 @@
             schema:
               type: object
               properties:
-                user:
-                  $ref: '#/components/schemas/user'
-                  example:
-                    $ref: '#components/examples/response-user'
+                success:
+                  type: boolean
+                  value: true
+                data:
+                  type: object
+                  properties:
+                    user:
+                      $ref: '#/components/schemas/user'
+                      example:
+                        $ref: '#components/examples/response-user'
       401:
         $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
@@ -129,8 +149,8 @@
           schema:
             $ref: '#/components/schemas/form-update-user'
     responses:
-      204:
-        description: NO CONTENT
+      200:
+        $ref: '#/components/responses/SuccessResponse'
       401:
         $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
@@ -157,8 +177,8 @@
           schema:
             $ref: '#/components/schemas/form-change-role'
     responses:
-      204:
-        description: NO CONTENT
+      200:
+        $ref: '#/components/responses/SuccessResponse'
       401:
         $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
@@ -176,8 +196,8 @@
     security:
       - BearerAuth: []
     responses:
-      204:
-        description: NO CONTENT
+      200:
+        $ref: '#/components/responses/SuccessResponse'
       401:
         $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
