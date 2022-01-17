@@ -52,8 +52,8 @@ describe('POST /auth/logout', () => {
 												.send();
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("refresh token is in the blacklist");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("refresh token is in the blacklist");
 		});
 
 
@@ -70,8 +70,8 @@ describe('POST /auth/logout', () => {
 												.send();
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("refresh token is not valid");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("refresh token is not valid");
 		});
 
 
@@ -88,8 +88,8 @@ describe('POST /auth/logout', () => {
 												.send();
 										
 			TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("Access token is in the blacklist");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("Access token is in the blacklist");
 		});
 
 	});
@@ -112,11 +112,12 @@ describe('POST /auth/logout', () => {
 
 			if (config.raiseErrorWhenRedisDown) {
 				TestUtil.errorExpectations(response, httpStatus.INTERNAL_SERVER_ERROR);
-				expect(response.body.name).toEqual("ApiError");
-				expect(response.body.message).toEqual(`We've encountered a server internal problem (Redis)`);
+				expect(response.body.error.name).toEqual("ApiError");
+				expect(response.body.error.message).toEqual(`We've encountered a server internal problem (Redis)`);
 
 			} else {
-				expect(response.status).toBe(httpStatus.NO_CONTENT);
+				expect(response.status).toBe(httpStatus.OK);
+				expect(response.body.success).toBe(true);
 			}
 
 			console.log("Redis is getting re-started intentionally for the test...");
@@ -132,7 +133,8 @@ describe('POST /auth/logout', () => {
 												.set('User-Agent', userAgent) 
 												.send();
 
-			expect(response.status).toBe(httpStatus.NO_CONTENT);
+			expect(response.status).toBe(httpStatus.OK);
+			expect(response.body.success).toBe(true);
 
 			// check the access token of the authuser is in the blacklist
 			const result = await redisService.check_in_blacklist(refreshTokenJti);

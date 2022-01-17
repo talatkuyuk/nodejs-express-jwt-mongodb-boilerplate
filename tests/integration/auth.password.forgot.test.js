@@ -28,7 +28,7 @@ describe('POST /auth/forgot-password', () => {
 			const response = await request(app).post('/auth/forgot-password').send(forgotPasswordForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.email).toEqual(["must not be empty"]); 
+			expect(response.body.error.errors.email).toEqual(["must not be empty"]); 
 		});
 
 
@@ -38,7 +38,7 @@ describe('POST /auth/forgot-password', () => {
 			const response = await request(app).post('/auth/forgot-password').send(forgotPasswordForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.email).toEqual(["must be valid email address"]); 
+			expect(response.body.error.errors.email).toEqual(["must be valid email address"]); 
 		});
 	});
 
@@ -52,8 +52,8 @@ describe('POST /auth/forgot-password', () => {
 			const response = await request(app).post('/auth/forgot-password').send(forgotPasswordForm);
 
 			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND)
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toEqual("No user found");
+			expect(response.body.error.name).toBe("ApiError");
+			expect(response.body.error.message).toEqual("No user found");
 
 		});
 
@@ -83,8 +83,8 @@ describe('POST /auth/forgot-password', () => {
 			const response = await request(app).post('/auth/forgot-password').send(forgotPasswordForm);
 
 			TestUtil.errorExpectations(response, httpStatus.INTERNAL_SERVER_ERROR)
-			expect(response.body.name).toBe("SmtpError");
-			expect(response.body.message).toEqual("SMTP server is out of service");
+			expect(response.body.error.name).toBe("SmtpError");
+			expect(response.body.error.message).toEqual("SMTP server is out of service");
 		});
 
 
@@ -111,8 +111,8 @@ describe('POST /auth/forgot-password', () => {
 			const response = await request(app).post('/auth/forgot-password').send(forgotPasswordForm);
 
 			TestUtil.errorExpectations(response, httpStatus.BAD_REQUEST)
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toEqual("No recipients defined");
+			expect(response.body.error.name).toBe("ApiError");
+			expect(response.body.error.message).toEqual("No recipients defined");
 		});
 	});
 
@@ -137,7 +137,8 @@ describe('POST /auth/forgot-password', () => {
 			const forgotPasswordForm = { email: authuser.email };
 			const response = await request(app).post('/auth/forgot-password').send(forgotPasswordForm);
 
-			expect(response.status).toBe(httpStatus.NO_CONTENT);
+			expect(response.status).toBe(httpStatus.OK);
+			expect(response.body.success).toBe(true);
 
 			expect(spyOnSendResetPasswordEmail).toHaveBeenCalledWith(authuser.email, expect.any(String));
 			

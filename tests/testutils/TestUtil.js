@@ -101,9 +101,9 @@ class TestUtil {
 	static CheckRefreshTokenStoredInDB = async (response) => {
 		// check the refresh token is stored into database
 		const tokenDoc = await tokenDbService.getToken({
-			user: response.body.user.id,
-			token: response.body.tokens.refresh.token,
-			expires: moment(response.body.tokens.refresh.expires).toDate(),
+			user: response.body.data.authuser.id,
+			token: response.body.data.tokens.refresh.token,
+			expires: moment(response.body.data.tokens.refresh.expires).toDate(),
 			type: tokenTypes.REFRESH,
 		});
 		expect(tokenDoc?.id).toBeDefined();
@@ -113,18 +113,22 @@ class TestUtil {
 	static errorExpectations = (response, status) => {
 		expect(response.status).toBe(status);
 		expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-		expect(response.body.code).toEqual(status);
-		expect(response.body).toHaveProperty("errorPath");
-		expect(response.body).not.toHaveProperty("errors");
+		expect(response.body.success).toBe(false);
+		expect(response.body).not.toHaveProperty("data");
+		expect(response.body.error.code).toEqual(status);
+		expect(response.body.error).toHaveProperty("errorPath");
+		expect(response.body.error).not.toHaveProperty("errors");
 	}
 
 	static validationErrorExpectations = (response) => {
 		expect(response.status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
 		expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-		expect(response.body.code).toEqual(422);
-		expect(response.body.name).toEqual("ValidationError");
-		expect(response.body.message).toEqual("The request could not be validated");
-		expect(response.body).not.toHaveProperty("errorPath");
+		expect(response.body.success).toBe(false);
+		expect(response.body).not.toHaveProperty("data");
+		expect(response.body.error.code).toEqual(422);
+		expect(response.body.error.name).toEqual("ValidationError");
+		expect(response.body.error.message).toEqual("The request could not be validated");
+		expect(response.body.error).not.toHaveProperty("errorPath");
 	}
 
 	static validationErrorInMiddleware = (err) => {

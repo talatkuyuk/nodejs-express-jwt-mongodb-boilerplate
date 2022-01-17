@@ -29,8 +29,8 @@ describe('POST /auth/login', () => {
 			const response = await request(app).post('/auth/login').send(loginForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.email).toEqual(["must not be empty"]); 
-			expect(response.body.errors).not.toHaveProperty("password");
+			expect(response.body.error.errors.email).toEqual(["must not be empty"]); 
+			expect(response.body.error.errors).not.toHaveProperty("password");
 	  	});
 
 
@@ -43,8 +43,8 @@ describe('POST /auth/login', () => {
 			const response = await request(app).post('/auth/login').send(loginForm);
 			
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.email).toEqual(["must be valid email address"]); 
-			expect(response.body.errors).not.toHaveProperty("password");
+			expect(response.body.error.errors.email).toEqual(["must be valid email address"]); 
+			expect(response.body.error.errors).not.toHaveProperty("password");
 		});
 
 		
@@ -56,8 +56,8 @@ describe('POST /auth/login', () => {
 			const response = await request(app).post('/auth/login').send(loginForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).not.toHaveProperty("email");
-			expect(response.body.errors.password).toEqual(["must not be empty"]); 
+			expect(response.body.error.errors).not.toHaveProperty("email");
+			expect(response.body.error.errors.password).toEqual(["must not be empty"]); 
 		});
 
 
@@ -70,7 +70,7 @@ describe('POST /auth/login', () => {
 			const response = await request(app).post('/auth/login').send(loginForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({
+			expect(response.body.error.errors).toEqual({
 				"email": ["must be valid email address"],
 				"password": ["must not be empty"],
 			});
@@ -89,7 +89,7 @@ describe('POST /auth/login', () => {
 			const response = await request(app).post('/auth/login').send(loginForm);
 
 			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
-			expect(response.body.message).toEqual("No user found");
+			expect(response.body.error.message).toEqual("No user found");
 		});
 
 
@@ -110,7 +110,7 @@ describe('POST /auth/login', () => {
 			const response = await request(app).post('/auth/login').send(loginForm);
 
 			TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
-			expect(response.body.message).toEqual("You are disabled, call the system administrator");
+			expect(response.body.error.message).toEqual("You are disabled, call the system administrator");
 
 		});
 
@@ -132,7 +132,7 @@ describe('POST /auth/login', () => {
 			const response = await request(app).post('/auth/login').send(loginForm);
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.message).toEqual("Incorrect email or password");
+			expect(response.body.error.message).toEqual("Incorrect email or password");
 		});
 	});
 
@@ -161,21 +161,24 @@ describe('POST /auth/login', () => {
 			expect(response.status).toBe(httpStatus.OK);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 
-			TestUtil.CheckTokenConsistency(response.body.tokens, response.body.user.id);
+			TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
 			// check the whole response body expected
 			expect(response.body).toEqual({
-				"user": {
-					"createdAt": expect.any(Number), // 1631868212022
-					"email": authuser.email,
-					"id": authuser.id,
-					"isEmailVerified": false,
-					"isDisabled": false,
-					"services": {
-					  "emailpassword": "registered",
+				"success": true,
+				"data": {
+					"authuser": {
+						"createdAt": expect.any(Number), // 1631868212022
+						"email": authuser.email,
+						"id": authuser.id,
+						"isEmailVerified": false,
+						"isDisabled": false,
+						"services": {
+						  "emailpassword": "registered",
+						},
 					},
-				},
-				"tokens": TestUtil.ExpectedTokens,
+					"tokens": TestUtil.ExpectedTokens,
+				}
 			});
 
 			// check the refresh token is stored into database

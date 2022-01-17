@@ -6,7 +6,7 @@ const { traceError } = require('../utils/errorUtils');
 // SERVICE DEPENDENCIES
 const { userService } = require('../services');
 
-
+const success = { success: true };
 
 const addUser = asyncHandler(async (req, res) => {
 	try {
@@ -16,7 +16,12 @@ const addUser = asyncHandler(async (req, res) => {
 		const user = await userService.addUser(id, addBody);
 	
 		res.location(`${req.protocol}://${req.get('host')}/users/${user.id}`);
-		res.status(httpStatus.CREATED).send(user.filter());
+		res.status(httpStatus.CREATED).send({ 
+			success: true,
+			data: {
+				user: user.filter()
+			}
+		});
 		
 	} catch (error) {
 		throw traceError(error, "UserController : addUser");
@@ -32,7 +37,12 @@ const getUser = asyncHandler(async (req, res) => {
 		// the service checks the param id refers any valid user
 		const user = await userService.getUserById(id);
 		
-		res.status(httpStatus.OK).send(user.filter());
+		res.status(httpStatus.OK).send({ 
+			success: true,
+			data: {
+				user: user.filter()
+			}
+		});
 		
 	} catch (error) {
 		throw traceError(error, "UserController : getUser");
@@ -47,7 +57,10 @@ const getUsers = asyncHandler(async (req, res) => {
 	
 		const result = await userService.getUsers(query);
 		
-		res.status(httpStatus.OK).send(result);
+		res.status(httpStatus.OK).send({ 
+			success: true,
+			data: result
+		});
 		
 	} catch (error) {
 		throw traceError(error, "UserController : getUsers");
@@ -63,7 +76,12 @@ const updateUser = asyncHandler(async (req, res) => {
 
 		const user = await userService.updateUser(id, updateBody);
 
-		res.status(httpStatus.OK).send(user.filter());
+		res.status(httpStatus.OK).send({ 
+			success: true,
+			data: {
+				user: user.filter()
+			}
+		});
 		
 	} catch (error) {
 		throw traceError(error, "UserController : updateUser");
@@ -79,7 +97,7 @@ const changeRole = asyncHandler(async (req, res) => {
 	
 		await userService.updateUser(id, { role });
 	
-		res.status(httpStatus.NO_CONTENT).send();
+		res.status(httpStatus.OK).send(success);
 		
 	} catch (error) {
 		throw traceError(error, "UserController : changeRole");
@@ -94,7 +112,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 	
 		await userService.deleteUser(id);
 	
-		res.status(httpStatus.NO_CONTENT).send();
+		res.status(httpStatus.OK).send(success);
 		
 	} catch (error) {
 		throw traceError(error, "UserController : deleteUser");

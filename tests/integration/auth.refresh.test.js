@@ -29,8 +29,8 @@ describe('POST /auth/refresh-tokens', () => {
 			const response = await request(app).post('/auth/refresh-tokens').send({});
 
 			TestUtil.validationErrorExpectations(response);
-			expect(Object.keys(response.body.errors).length).toBe(1);
-			expect(response.body.errors.refreshToken).toEqual(["refresh token must not be empty"]); 
+			expect(Object.keys(response.body.error.errors).length).toBe(1);
+			expect(response.body.error.errors.refreshToken).toEqual(["refresh token must not be empty"]); 
 		});
 	});
 
@@ -58,8 +58,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken: testData.REFRESH_TOKEN_VALID });
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("refresh token is not valid");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("refresh token is not valid");
 		});
 
 		
@@ -94,8 +94,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("Unauthorized usage of refresh token has been detected");
 
 			// check the whole refresh token's family are in db // up to now, 3 refresh tokens would be added above
 			const data = await tokenDbService.getTokens({ family: refreshTokenFamily });
@@ -146,8 +146,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("Unauthorized usage of refresh token has been detected");
 
 			// check the whole refresh token's family are removed from db // up to now, 3 refresh tokens would be added above
 			const data = await tokenDbService.getTokens({ family: refreshTokenFamily });
@@ -181,8 +181,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("The refresh token is expired. You have to re-login to get authentication.");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("The refresh token is expired. You have to re-login to get authentication.");
 
 			// check the whole refresh token's family are removed from db
 			const data = await tokenDbService.getTokens({ family: "i-am-supposed-to-be-deleted" });
@@ -197,8 +197,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("Unauthorized usage of refresh token has been detected");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("Unauthorized usage of refresh token has been detected");
 
 			// no need to check family of the refresh token is removed or blacklisted here since this control is handled in the above tests
 			// (means that disableFamilyRefreshToken in Token Service is tested, it is fine.)
@@ -246,8 +246,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("Your browser/agent seems changed or updated, you have to re-login.");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("Your browser/agent seems changed or updated, you have to re-login.");
 		});
 
 
@@ -260,8 +260,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("No user found");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("No user found");
 		});
 
 
@@ -274,8 +274,8 @@ describe('POST /auth/refresh-tokens', () => {
 												.send({ refreshToken });
 
 			TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("You are disabled, call the system administrator");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("You are disabled, call the system administrator");
 		});
 	});
 
@@ -311,7 +311,12 @@ describe('POST /auth/refresh-tokens', () => {
 			expect(response.status).toBe(httpStatus.OK);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 
-			expect(response.body).toEqual(TestUtil.ExpectedTokens);
+			expect(response.body).toEqual({
+				success: true,
+				data: {
+					tokens: TestUtil.ExpectedTokens
+				}
+			});
 		});
 	});
 

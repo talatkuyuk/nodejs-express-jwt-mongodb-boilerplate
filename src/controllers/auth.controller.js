@@ -11,7 +11,7 @@ const {
 	emailService 
 } = require('../services');
 
-
+const success = { success: true };
 
 const signup = asyncHandler(async (req, res) => {
 	try {
@@ -25,10 +25,13 @@ const signup = asyncHandler(async (req, res) => {
 
 		res.location(`${req.protocol}://${req.get('host')}/authusers/${authuser.id}`);
 		res.status(httpStatus.CREATED).send({
-			user: authuser.filter(),
-			tokens: { 
-				access: tokens.access,
-				refresh: tokens.refresh.filter(),
+			success: true,
+			data: {
+				authuser: authuser.filter(),
+				tokens: { 
+					access: tokens.access,
+					refresh: tokens.refresh.filter(),
+				}
 			}
 		});
 		
@@ -49,11 +52,14 @@ const login = asyncHandler(async (req, res) => {
 	
 		req.authuser = authuser; // for morgan logger to tokenize it as user
 	
-		res.status(httpStatus.OK).send({ 
-			user: authuser.filter(),
-			tokens: { 
-				access: tokens.access,
-				refresh: tokens.refresh.filter(),
+		res.status(httpStatus.OK).send({
+			success: true,
+			data: {
+				authuser: authuser.filter(),
+				tokens: { 
+					access: tokens.access,
+					refresh: tokens.refresh.filter(),
+				}
 			}
 		});
 		
@@ -73,11 +79,14 @@ const loginWithAuthProvider = asyncHandler(async (req, res) => {
 		const authuser = await authService.loginWithAuthProvider(authProvider, id, email);
 		const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 	
-		res.status(httpStatus.OK).send({ 
-			user: authuser.filter(),
-			tokens: { 
-				access: tokens.access,
-				refresh: tokens.refresh.filter(),
+		res.status(httpStatus.OK).send({
+			success: true,
+			data: {
+				authuser: authuser.filter(),
+				tokens: { 
+					access: tokens.access,
+					refresh: tokens.refresh.filter(),
+				}
 			}
 		});
 		
@@ -98,7 +107,7 @@ const logout = asyncHandler(async (req, res) => {
 
 		await authService.logout(id, jti);
 	
-		res.status(httpStatus.NO_CONTENT).send();
+		res.status(httpStatus.OK).send(success);
 		
 	} catch (error) {
 		throw traceError(error, "AuthController : logout");
@@ -117,7 +126,7 @@ const signout = asyncHandler(async (req, res) => {
 
 		await authService.signout(id, jti);
 	
-		res.status(httpStatus.NO_CONTENT).send();
+		res.status(httpStatus.OK).send(success);
 		
 	} catch (error) {
 		throw traceError(error, "AuthController : signout");
@@ -141,8 +150,13 @@ const refreshTokens = asyncHandler(async (req, res) => {
 		req.authuser = authuser; // for morgan logger to tokenize it as user
 		
 		res.status(httpStatus.OK).send({ 
-			access: tokens.access,
-			refresh: tokens.refresh.filter(),
+			success: true,
+			data: {
+				tokens: {
+					access: tokens.access,
+					refresh: tokens.refresh.filter(),
+				}
+			}
 		});
 		
 	} catch (error) {
@@ -164,7 +178,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 	
 		req.authuser = authuser; // for morgan logger to tokenize it as user
 	
-		res.status(httpStatus.NO_CONTENT).send();
+		res.status(httpStatus.OK).send(success);
 		
 	} catch (error) {
 		throw traceError(error, "AuthController : forgotPassword");
@@ -185,7 +199,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 
 		req.authuser = authuser; // for morgan logger to tokenize it as user
 	
-		res.status(httpStatus.NO_CONTENT).send();
+		res.status(httpStatus.OK).send(success);
 		
 	} catch (error) {
 		throw traceError(error, "AuthController : resetPassword");
@@ -204,7 +218,7 @@ const sendVerificationEmail = asyncHandler(async (req, res, next) => {
 
 		await emailService.sendVerificationEmail(email, verifyEmailToken.token);
 	
-		res.status(httpStatus.NO_CONTENT).send();
+		res.status(httpStatus.OK).send(success);
 		
 	} catch (error) {
 		throw traceError(error, "AuthController : sendVerificationEmail");
@@ -225,7 +239,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
 	
 		req.authuser = authuser; // for morgan logger to tokenize it as user
 	
-		res.status(httpStatus.NO_CONTENT).send();
+		res.status(httpStatus.OK).send(success);
 		
 	} catch (error) {
 		throw traceError(error, "AuthController : verifyEmail");

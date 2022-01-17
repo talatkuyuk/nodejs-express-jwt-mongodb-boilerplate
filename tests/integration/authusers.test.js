@@ -32,16 +32,20 @@ describe('PATH /authusers', () => {
 				passwordConfirmation: 'Pass1word!'
 			});
 
-		adminAccessToken = response.body.tokens.access.token;
-		adminAuthuserId = response.body.user.id; // used in below test
+		adminAccessToken = response.body.data.tokens.access.token;
+		adminAuthuserId = response.body.data.authuser.id; // used in below test
 
-		const adminAuthuser = response.body.user;
+		const adminAuthuser = response.body.data.authuser;
 
 		// add admin authusers to localDb
 		localDb[adminAuthuser.email] = adminAuthuser;
 
 		// create an admin user correspondent with the authuser
-		await userService.addUser(adminAuthuser.id, { email: adminAuthuser.email, role: "admin",  name: "Mr.Admin"});
+		await userService.addUser(adminAuthuser.id, { 
+			email: adminAuthuser.email,
+			role: "admin",
+			name: "Mr.Admin"
+		});
 	});
 
 
@@ -83,13 +87,14 @@ describe('PATH /authusers', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send(addForm);
 
-			const testAuthuser = response.body;
+			const testAuthuser = response.body.data.authuser;
 
 			// check the testAuthuser created above
 			expect(response.status).toBe(httpStatus.CREATED);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.headers['location']).toEqual(expect.stringContaining("/authusers/"));
-			expect(response.body).not.toHaveProperty("tokens");
+			expect(response.body.success).toBe(true);
+			expect(response.body.data).not.toHaveProperty("tokens");
 			expect(testAuthuser).not.toHaveProperty("password");
 			expect(testAuthuser).toEqual({
 				id: expect.any(String),
@@ -119,9 +124,10 @@ describe('PATH /authusers', () => {
 						password: "Pass1word!",
 						passwordConfirmation: "Pass1word!"
 					});
-
-				authusers.push(response.body);
-				localDb[response.body.email] = response.body;
+				
+				const authuser = response.body.data.authuser;
+				authusers.push(authuser);
+				localDb[authuser.email] = authuser;
 			}
 			
 			// check random 8th authuser exists in db
@@ -137,7 +143,8 @@ describe('PATH /authusers', () => {
 
 			expect(response.status).toBe(httpStatus.OK);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.users.length).toBe(12); // including admin and test authusers
+			expect(response.body.success).toBe(true);
+			expect(response.body.data.authusers.length).toBe(12); // including admin and test authusers
 			expect(authusers.length).toBe(10);
 
 			// update even ones as disabled, toggleAbility
@@ -145,10 +152,10 @@ describe('PATH /authusers', () => {
 			  if (i%2===0) {
 				await request(app)
 					.put(`/authusers/${authusers[i-1]["id"]}`)
-					.set('User-Agent', userAgent) 
+					.set('User-Agent', userAgent)
 					.set('Authorization', `Bearer ${adminAccessToken}`)
 					.send()
-					.expect(httpStatus.NO_CONTENT);
+					.expect(httpStatus.OK);
 
 				localDb[authusers[i-1]["email"]].isDisabled = true;
 			  }
@@ -170,7 +177,7 @@ describe('PATH /authusers', () => {
 					.set('User-Agent', userAgent) 
 					.set('Authorization', `Bearer ${adminAccessToken}`)
 					.send()
-					.expect(httpStatus.NO_CONTENT);
+					.expect(httpStatus.OK);
 
 				delete localDb[authusers[i-1]["email"]];
 			  }
@@ -193,16 +200,17 @@ describe('PATH /authusers', () => {
 				.expect(httpStatus.OK);
 
 			// check the last added one is the first authuser, the default sort is descending createdAt
-			expect(response.body.users.length).toBe(9);
-			expect(response.body.users[0]["email"]).toBe("user10@gmail.com");
+			expect(response.body.success).toBe(true);
+			expect(response.body.data.authusers.length).toBe(9);
+			expect(response.body.data.authusers[0]["email"]).toBe("user10@gmail.com");
 
 			// check localDb is equal to db result
 			const arraysort = (a,b)=>a.createdAt-b.createdAt;
-			expect(response.body.users.sort(arraysort)).toEqual(Object.values(localDb).sort(arraysort));
+			expect(response.body.data.authusers.sort(arraysort)).toEqual(Object.values(localDb).sort(arraysort));
 
 			// check the pagination
-			expect(response.body.totalCount).toBe(9); // 3 of the authusers are deleted
-			expect(response.body.pagination).toEqual({
+			expect(response.body.data.totalCount).toBe(9); // 3 of the authusers are deleted
+			expect(response.body.data.pagination).toEqual({
 				currentPage: 1,
 				totalPages: 1,
 				perPage: 20,
@@ -218,8 +226,9 @@ describe('PATH /authusers', () => {
 			// check the authuser data
 			expect(response.status).toBe(httpStatus.OK);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body).not.toHaveProperty("password");
-			expect(response.body).toEqual({
+			expect(response.body.success).toBe(true);
+			expect(response.body.data.authuser).not.toHaveProperty("password");
+			expect(response.body.data.authuser).toEqual({
 				id: authusers[9]["id"],
 				email: authusers[9]["email"],
 				isEmailVerified: true,
@@ -237,15 +246,16 @@ describe('PATH /authusers', () => {
 				.send()
 				.expect(httpStatus.OK);
 			
-			expect(response.body.users.length).toBe(4);
-			expect(response.body.users[0]["email"]).toBe("user2@gmail.com");
-			expect(response.body.users[1]["email"]).toBe("user4@gmail.com");
-			expect(response.body.users[2]["email"]).toBe("user8@gmail.com");
-			expect(response.body.users[3]["email"]).toBe("user10@gmail.com");
+			expect(response.body.success).toBe(true);
+			expect(response.body.data.authusers.length).toBe(4);
+			expect(response.body.data.authusers[0]["email"]).toBe("user2@gmail.com");
+			expect(response.body.data.authusers[1]["email"]).toBe("user4@gmail.com");
+			expect(response.body.data.authusers[2]["email"]).toBe("user8@gmail.com");
+			expect(response.body.data.authusers[3]["email"]).toBe("user10@gmail.com");
 
 			// check the pagination
-			expect(response.body.totalCount).toBe(4); // 5 were disabled but one deleted
-			expect(response.body.pagination).toEqual({
+			expect(response.body.data.totalCount).toBe(4); // 5 were disabled but one deleted
+			expect(response.body.data.pagination).toEqual({
 				currentPage: 1,
 				totalPages: 1,
 				perPage: 20,
@@ -261,13 +271,14 @@ describe('PATH /authusers', () => {
 				.send()
 				.expect(httpStatus.OK);
 
-			expect(response.body.users.length).toBe(2);
-			expect(response.body.users[0]["email"]).toBe("admin@gmail.com");
-			expect(response.body.users[1]["email"]).toBe("test@gmail.com");
+			expect(response.body.success).toBe(true);
+			expect(response.body.data.authusers.length).toBe(2);
+			expect(response.body.data.authusers[0]["email"]).toBe("admin@gmail.com");
+			expect(response.body.data.authusers[1]["email"]).toBe("test@gmail.com");
 
 			// check the pagination
-			expect(response.body.totalCount).toBe(4); // 5 were disabled but one deleted
-			expect(response.body.pagination).toEqual({
+			expect(response.body.data.totalCount).toBe(4); // 5 were disabled but one deleted
+			expect(response.body.data.pagination).toEqual({
 				currentPage: 1,
 				totalPages: 2,
 				perPage: 2,
@@ -282,13 +293,14 @@ describe('PATH /authusers', () => {
 				.send()
 				.expect(httpStatus.OK);
 
-			expect(response.body.users.length).toBe(2);
-			expect(response.body.users[0]["email"]).toBe("user1@gmail.com");
-			expect(response.body.users[1]["email"]).toBe("user7@gmail.com");
+			expect(response.body.success).toBe(true);
+			expect(response.body.data.authusers.length).toBe(2);
+			expect(response.body.data.authusers[0]["email"]).toBe("user1@gmail.com");
+			expect(response.body.data.authusers[1]["email"]).toBe("user7@gmail.com");
 
 			// check the pagination
-			expect(response.body.totalCount).toBe(4); // 5 were disabled but one deleted
-			expect(response.body.pagination).toEqual({
+			expect(response.body.data.totalCount).toBe(4); // 5 were disabled but one deleted
+			expect(response.body.data.pagination).toEqual({
 				currentPage: 2,
 				totalPages: 2,
 				perPage: 2,
@@ -304,8 +316,10 @@ describe('PATH /authusers', () => {
 					currentPassword: "Pass1word!",
 					password: newPassword,
 					passwordConfirmation: newPassword
-				})
-				.expect(httpStatus.NO_CONTENT);
+				});
+			
+			expect(response.status).toBe(httpStatus.OK);
+			expect(response.body.success).toBe(true);
 
 			// check the admin authuser's new password is hashed
 			const { password: hashedPassword } = await authuserDbService.getAuthUser({ id: adminAuthuserId });
@@ -356,7 +370,7 @@ describe('PATH /authusers', () => {
 				.send(addForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({ email: ["email is already taken"]});
+			expect(response.body.error.errors).toEqual({ email: ["email is already taken"]});
 
 			// try to get an authuser with invalid id
 			response = await request(app)
@@ -366,7 +380,7 @@ describe('PATH /authusers', () => {
 				.send();
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({ id: ["The param id must be a 24-character number"]});
+			expect(response.body.error.errors).toEqual({ id: ["The param id must be a 24-character number"]});
 
 			// try to get an authuser that not exists
 			response = await request(app)
@@ -376,8 +390,8 @@ describe('PATH /authusers', () => {
 				.send();
 
 			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toBe("No user found");
+			expect(response.body.error.name).toBe("ApiError");
+			expect(response.body.error.message).toBe("No user found");
 
 			// try to get authusers with wrong parameters
 			response = await request(app)
@@ -388,7 +402,7 @@ describe('PATH /authusers', () => {
 				.send();
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({ 
+			expect(response.body.error.errors).toEqual({ 
 				page: ["The query param 'page' must be numeric value"],
 				size: ["The query param 'size' must be numeric value"],
 			});
@@ -401,8 +415,8 @@ describe('PATH /authusers', () => {
 				.send();
 
 			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toBe("No user found");
+			expect(response.body.error.name).toBe("ApiError");
+			expect(response.body.error.message).toBe("No user found");
 
 			// try to delete an authuser that not exists
 			response = await request(app)
@@ -412,8 +426,8 @@ describe('PATH /authusers', () => {
 				.send();
 
 			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toBe("No user found");
+			expect(response.body.error.name).toBe("ApiError");
+			expect(response.body.error.message).toBe("No user found");
 
 			// try to change another authuser's password
 			// there is no route for that action, so only own password
@@ -430,7 +444,7 @@ describe('PATH /authusers', () => {
 				})
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({ 
+			expect(response.body.error.errors).toEqual({ 
 				currentPassword: ["incorrect current password"],
 				password: ["must be minimum 8 characters"],
 				passwordConfirmation: ["should match with the password"]

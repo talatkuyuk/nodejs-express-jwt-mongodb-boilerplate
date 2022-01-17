@@ -14,7 +14,10 @@ const getAuthUsersJoined = asyncHandler(async (req, res) => {
 	
 		const result = await joinedService.getAuthUsersJoined(query);
 		
-		res.status(httpStatus.OK).send(result);
+		res.status(httpStatus.OK).send({ 
+			success: true,
+			data: result
+		});
 		
 	} catch (error) {
 		throw traceError(error, "JoinedController : getAuthUsersJoined");
@@ -29,7 +32,10 @@ const getUsersJoined = asyncHandler(async (req, res) => {
 	
 		const result = await joinedService.getUsersJoined(query);
 		
-		res.status(httpStatus.OK).send(result);
+		res.status(httpStatus.OK).send({ 
+			success: true,
+			data: result
+		});
 		
 	} catch (error) {
 		throw traceError(error, "UserController : getUsersJoined");

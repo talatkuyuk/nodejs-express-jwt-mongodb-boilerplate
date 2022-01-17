@@ -32,12 +32,12 @@ describe('POST /auth/google & auth/facebook', () => {
 												.send();
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toBeOneOf(["ApiError", "FetchError"]);
+			expect(response.body.error.name).toBeOneOf(["ApiError", "FetchError"]);
 
-			if (response.body.name === "ApiError")
-				expect(response.body.message).toEqual(`Wrong number of segments in token: ${google_id_token}`);
-			else if (response.body.name === "FetchError") // if there is no internet connection
-				expect(response.body.message).toContain(`Auth provider connection error occured, try later`);
+			if (response.body.error.name === "ApiError")
+				expect(response.body.error.message).toEqual(`Wrong number of segments in token: ${google_id_token}`);
+			else if (response.body.error.name === "FetchError") // if there is no internet connection
+				expect(response.body.error.message).toContain(`Auth provider connection error occured, try later`);
 		});
 
 
@@ -49,12 +49,12 @@ describe('POST /auth/google & auth/facebook', () => {
 												.send();
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toBeOneOf(["ApiError", "AxiosError"]);
+			expect(response.body.error.name).toBeOneOf(["ApiError", "AxiosError"]);
 
-			if (response.body.name === "ApiError")
-				expect(response.body.message).toEqual("Request failed with status code 400");
-			else if (response.body.name === "AxiosError") // if there is no internet connection
-				expect(response.body.message).toContain(`Auth provider connection error occured, try later`);
+			if (response.body.error.name === "ApiError")
+				expect(response.body.error.message).toEqual("Request failed with status code 400");
+			else if (response.body.error.name === "AxiosError") // if there is no internet connection
+				expect(response.body.error.message).toContain(`Auth provider connection error occured, try later`);
 		});
 
 
@@ -88,8 +88,8 @@ describe('POST /auth/google & auth/facebook', () => {
 												.send();
 
 			TestUtil.errorExpectations(response2, httpStatus.FORBIDDEN);
-			expect(response2.body.name).toBe("ApiError");
-			expect(response2.body.message).toEqual(`The token of the auth provider (${provider}) is allowed to be used only once`);
+			expect(response2.body.error.name).toBe("ApiError");
+			expect(response2.body.error.message).toEqual(`The token of the auth provider (${provider}) is allowed to be used only once`);
 		});
 
 
@@ -120,8 +120,8 @@ describe('POST /auth/google & auth/facebook', () => {
 												.send();
 
 			TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toEqual("You are disabled, call the system administrator");
+			expect(response.body.error.name).toBe("ApiError");
+			expect(response.body.error.message).toEqual("You are disabled, call the system administrator");
 
 			const authuser_in_db = await authuserDbService.getAuthUser({ id: authuser.id });
 			expect(authuser_in_db.services[provider]).toBeUndefined();
@@ -156,26 +156,29 @@ describe('POST /auth/google & auth/facebook', () => {
 			expect(response.status).toBe(httpStatus.OK);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 
-			const authuser = await authuserDbService.getAuthUser({ id: response.body.user.id });
+			const authuser = await authuserDbService.getAuthUser({ id: response.body.data.authuser.id });
 			expect(authuser.services[provider]).toBeDefined();
 			expect(authuser.password).toBeNull();
 
-			TestUtil.CheckTokenConsistency(response.body.tokens, response.body.user.id);
+			TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
 			// check the whole response body expected
 			expect(response.body).toEqual({
-				"user": {
-					"createdAt": expect.any(Number), // 1631868212022
-					"email": google_email,
-					"id": authuser.id,
-					"isEmailVerified": true,
-					"isDisabled": false,
-					"services": {
-					  "emailpassword": "not registered",
-					  [provider]: google_id,
+				"success": true,
+				"data": {
+					"authuser": {
+						"createdAt": expect.any(Number), // 1631868212022
+						"email": google_email,
+						"id": authuser.id,
+						"isEmailVerified": true,
+						"isDisabled": false,
+						"services": {
+						  "emailpassword": "not registered",
+						  [provider]: google_id,
+						},
 					},
-				},
-				"tokens": TestUtil.ExpectedTokens,
+					"tokens": TestUtil.ExpectedTokens,
+				}
 			});
 
 			// check the refresh token is stored into database
@@ -220,22 +223,25 @@ describe('POST /auth/google & auth/facebook', () => {
 			expect(authuser_in_db.services["emailpassword"]).toBe("registered");
 			expect(authuser_in_db.services[provider]).toBeDefined();
 
-			TestUtil.CheckTokenConsistency(response.body.tokens, response.body.user.id);
+			TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
 			// check the whole response body expected
 			expect(response.body).toEqual({
-				"user": {
-					"createdAt": expect.any(Number), // 1631868212022
-					"email": authuser.email,
-					"id": authuser.id,
-					"isEmailVerified": true,
-					"isDisabled": false,
-					"services": {
-					  "emailpassword": "registered",
-					  [provider]: facebook_id,
+				"success": true,
+				"data": {
+					"authuser": {
+						"createdAt": expect.any(Number), // 1631868212022
+						"email": authuser.email,
+						"id": authuser.id,
+						"isEmailVerified": true,
+						"isDisabled": false,
+						"services": {
+						  "emailpassword": "registered",
+						  [provider]: facebook_id,
+						},
 					},
-				},
-				"tokens": TestUtil.ExpectedTokens,
+					"tokens": TestUtil.ExpectedTokens,
+				}
 			});
 
 			// check the refresh token is stored into database

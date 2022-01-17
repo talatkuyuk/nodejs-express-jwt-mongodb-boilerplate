@@ -21,7 +21,7 @@
             schema:
               type: object
               properties:
-                user:
+                authuser:
                   $ref: '#/components/schemas/authuser'
                   example:
                     $ref: '#components/examples/response-authuser'
@@ -58,7 +58,7 @@
             schema:
               type: object
               properties:
-                user:
+                authuser:
                   $ref: '#/components/schemas/authuser'
                   example:
                     $ref: '#components/examples/response-authuser'

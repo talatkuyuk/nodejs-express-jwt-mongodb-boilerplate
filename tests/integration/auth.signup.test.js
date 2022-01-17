@@ -28,9 +28,9 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.email).toEqual(["must not be empty"]); 
-			expect(response.body.errors).not.toHaveProperty("password");
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
+			expect(response.body.error.errors.email).toEqual(["must not be empty"]); 
+			expect(response.body.error.errors).not.toHaveProperty("password");
+			expect(response.body.error.errors).not.toHaveProperty("passwordConfirmation");
 	  	});
 
 
@@ -43,9 +43,9 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.email).toEqual(["must be valid email address"]); 
-			expect(response.body.errors).not.toHaveProperty("password");
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
+			expect(response.body.error.errors.email).toEqual(["must be valid email address"]); 
+			expect(response.body.error.errors).not.toHaveProperty("password");
+			expect(response.body.error.errors).not.toHaveProperty("passwordConfirmation");
 		});
 
 
@@ -67,9 +67,9 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 			
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.email).toEqual(["email is already taken"]); 
-			expect(response.body.errors).not.toHaveProperty("password");
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
+			expect(response.body.error.errors.email).toEqual(["email is already taken"]); 
+			expect(response.body.error.errors).not.toHaveProperty("password");
+			expect(response.body.error.errors).not.toHaveProperty("passwordConfirmation");
 		});
 
 		
@@ -82,9 +82,9 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).not.toHaveProperty("email");
-			expect(response.body.errors.password).toEqual(["must not be empty"]);
-			expect(response.body.errors.passwordConfirmation).toEqual(["must not be empty"]); 
+			expect(response.body.error.errors).not.toHaveProperty("email");
+			expect(response.body.error.errors.password).toEqual(["must not be empty"]);
+			expect(response.body.error.errors.passwordConfirmation).toEqual(["must not be empty"]); 
 		});
 
 
@@ -97,9 +97,9 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).not.toHaveProperty("email");
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
-			expect(response.body.errors.password).toEqual(["must be minimum 8 characters"]); 
+			expect(response.body.error.errors).not.toHaveProperty("email");
+			expect(response.body.error.errors).not.toHaveProperty("passwordConfirmation");
+			expect(response.body.error.errors.password).toEqual(["must be minimum 8 characters"]); 
 	  	});
 
 
@@ -112,9 +112,9 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).not.toHaveProperty("email");
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
-			expect(response.body.errors.password).toEqual(["must contain uppercase, lowercase, number and special char"]); 
+			expect(response.body.error.errors).not.toHaveProperty("email");
+			expect(response.body.error.errors).not.toHaveProperty("passwordConfirmation");
+			expect(response.body.error.errors.password).toEqual(["must contain uppercase, lowercase, number and special char"]); 
 	  	});
 
 
@@ -127,9 +127,9 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).not.toHaveProperty("email");
-			expect(response.body.errors).not.toHaveProperty("password");
-			expect(response.body.errors.passwordConfirmation).toEqual(["should match with the password"]); 
+			expect(response.body.error.errors).not.toHaveProperty("email");
+			expect(response.body.error.errors).not.toHaveProperty("password");
+			expect(response.body.error.errors.passwordConfirmation).toEqual(["should match with the password"]); 
 		});
 
 
@@ -142,7 +142,7 @@ describe('POST /auth/signup', () => {
 			const response = await request(app).post('/auth/signup').send(registerform);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({
+			expect(response.body.error.errors).toEqual({
 				"email": ["must be valid email address"],
 				"password": ["must be minimum 8 characters"],
 				"passwordConfirmation": ["should match with the password"]
@@ -165,28 +165,31 @@ describe('POST /auth/signup', () => {
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.headers['location']).toEqual(expect.stringContaining("/authusers/"));
 
-			TestUtil.CheckTokenConsistency(response.body.tokens, response.body.user.id);
+			TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
 			// check the whole response body expected
 			expect(response.body).toEqual({
-				"user": {
-					"createdAt": expect.any(Number), // 1631868212022
-					"email": registerform.email,
-					"id": expect.stringMatching(/^[0-9a-fA-F]{24}$/), // valid mongodb ObjectID: 24-size hex value
-					"isEmailVerified": false,
-					"isDisabled": false,
-					"services": {
-					  "emailpassword": "registered",
+				"success": true,
+				"data": {
+					"authuser": {
+						"createdAt": expect.any(Number), // 1631868212022
+						"email": registerform.email,
+						"id": expect.stringMatching(/^[0-9a-fA-F]{24}$/), // valid mongodb ObjectID: 24-size hex value
+						"isEmailVerified": false,
+						"isDisabled": false,
+						"services": {
+						  "emailpassword": "registered",
+						},
 					},
-				},
-				"tokens": TestUtil.ExpectedTokens,
+					"tokens": TestUtil.ExpectedTokens,
+				}
 			});
 
 			// check the refresh token is stored into database
 			TestUtil.CheckRefreshTokenStoredInDB(response);
 
-			// TODO: check the new auth user is stored into database
-			// TODO: check the new auth user password is hashed in the database
+			// TODO: check the new authuser is stored into database
+			// TODO: check the new authuser password is hashed in the database
 		});
 	});
 })
