@@ -50,12 +50,15 @@ const handler = (err, req, res, next) => {
   }
 
   const response = {
-    code: statusCode,
-    name,
-    message,
-    ...(errors && { errors }),
-    ...(config.env !== 'production' && errorPath && { errorPath }),
-    ...(config.env === 'development' && stack && { stack }) // { stack: stack }
+    success: false,
+    error: {
+      code: statusCode,
+      name,
+      message,
+      ...(errors && { errors }),
+      ...(config.env !== 'production' && errorPath && { errorPath }),
+      ...(config.env === 'development' && stack && { stack }) // { stack: stack }
+    }
   };
 
   !isOperational && (process.exit(1));

@@ -26,18 +26,19 @@ describe('POST /auth/verify-email', () => {
 			const response = await request(app).post('/auth/verify-email').send({});
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.token).toEqual(["token is missing"]); 
+			expect(response.body.error.errors.token).toEqual(["token is missing"]); 
 		});
 
 
 		test('should return 422 Validation Error if the token is undefined', async () => {
 			const verifyEmailForm = {
-				token: testData.VERIFY_EMAIL_TOKEN_UNDEFINED // there is no such token in the testData in order to simulate "undefined"
+				token: testData.VERIFY_EMAIL_TOKEN_UNDEFINED 
+				// there is no such token in the testData in order to simulate "undefined"
 			};
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.token).toEqual(["token is missing"]); 
+			expect(response.body.error.errors.token).toEqual(["token is missing"]); 
 		});
 	});
 
@@ -53,8 +54,8 @@ describe('POST /auth/verify-email', () => {
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("TokenExpiredError");
-			expect(response.body.message).toEqual("jwt expired");
+			expect(response.body.error.name).toEqual("TokenExpiredError");
+			expect(response.body.error.message).toEqual("jwt expired");
 		});
 
 		
@@ -67,8 +68,8 @@ describe('POST /auth/verify-email', () => {
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("JsonWebTokenError");
-			expect(response.body.message).toEqual("invalid signature");
+			expect(response.body.error.name).toEqual("JsonWebTokenError");
+			expect(response.body.error.message).toEqual("invalid signature");
 		});
 
 
@@ -79,8 +80,8 @@ describe('POST /auth/verify-email', () => {
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("JsonWebTokenError");
-			expect(response.body.message).toEqual("jwt malformed");
+			expect(response.body.error.name).toEqual("JsonWebTokenError");
+			expect(response.body.error.message).toEqual("jwt malformed");
 		});
 	});
 
@@ -102,8 +103,8 @@ describe('POST /auth/verify-email', () => {
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("the token is not valid");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("the token is not valid");
 		});
 
 
@@ -121,8 +122,8 @@ describe('POST /auth/verify-email', () => {
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("the token is in the blacklist");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("the token is in the blacklist");
 		});
 	});
 
@@ -141,8 +142,8 @@ describe('POST /auth/verify-email', () => {
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
 			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("No user found");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("No user found");
 		});
 
 
@@ -167,8 +168,8 @@ describe('POST /auth/verify-email', () => {
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
 			TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("You are disabled, call the system administrator");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("You are disabled, call the system administrator");
 		});
 	});
 
@@ -193,12 +194,12 @@ describe('POST /auth/verify-email', () => {
 
 			const response = await request(app).post('/auth/verify-email').send(verifyEmailForm);
 
-			expect(response.status).toBe(httpStatus.NO_CONTENT);
+			expect(response.status).toBe(httpStatus.OK);
+			expect(response.body.success).toBe(true);
 
 			// check the database if the authuser's verify-email tokens are deleted
 			const data = await tokenDbService.getTokens({ user: authuser.id, type: tokenTypes.VERIFY_EMAIL });
 			expect(data.length).toBe(0);
-
  		})
 	});
 });

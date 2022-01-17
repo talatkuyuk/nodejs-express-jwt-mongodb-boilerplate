@@ -53,7 +53,8 @@ describe('POST /auth/signout', () => {
 												.set('User-Agent', userAgent) 
 												.send();
 
-			expect(response.status).toBe(httpStatus.NO_CONTENT);
+			expect(response.status).toBe(httpStatus.OK);
+			expect(response.body.success).toBe(true);
 
 			// check the access token of the authuser is in the blacklist
 			const { jti } = jwt.decode(accessToken, config.jwt.secret);

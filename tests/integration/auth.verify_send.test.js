@@ -45,8 +45,8 @@ describe('POST /auth/send-verification-email', () => {
 												.send();
 			
 			TestUtil.errorExpectations(response, httpStatus.BAD_REQUEST)
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toEqual("Email is already verified");
+			expect(response.body.error.name).toBe("ApiError");
+			expect(response.body.error.message).toEqual("Email is already verified");
 		});
 
 
@@ -69,8 +69,8 @@ describe('POST /auth/send-verification-email', () => {
 												.send();
 
 			TestUtil.errorExpectations(response, httpStatus.INTERNAL_SERVER_ERROR);
-			expect(response.body.name).toBe("SmtpError");
-			expect(response.body.message).toEqual("SMTP server is out of service");
+			expect(response.body.error.name).toBe("SmtpError");
+			expect(response.body.error.message).toEqual("SMTP server is out of service");
 		});
 	
 		test('should return status 400, if the email recipient is empty', async () => {
@@ -90,8 +90,8 @@ describe('POST /auth/send-verification-email', () => {
 												.send();
 
 			TestUtil.errorExpectations(response, httpStatus.BAD_REQUEST);
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toEqual("No recipients defined");
+			expect(response.body.error.name).toBe("ApiError");
+			expect(response.body.error.message).toEqual("No recipients defined");
 		});
 	});
 
@@ -110,7 +110,8 @@ describe('POST /auth/send-verification-email', () => {
 												.set('User-Agent', userAgent) 
 												.send();
 
-			expect(response.status).toBe(httpStatus.NO_CONTENT);
+			expect(response.status).toBe(httpStatus.OK);
+			expect(response.body.success).toBe(true);
 
 			expect(spyOnSendVerificationEmail).toHaveBeenCalledWith(authuseEmail, expect.any(String));
 			

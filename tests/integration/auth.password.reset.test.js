@@ -32,9 +32,9 @@ describe('POST /auth/reset-password', () => {
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.password.length).toBe(1);
-			expect(response.body.errors.password).toEqual(["must not be empty"]); 
-			expect(response.body.errors.passwordConfirmation).toEqual(["must not be empty"]); 
+			expect(response.body.error.errors.password.length).toBe(1);
+			expect(response.body.error.errors.password).toEqual(["must not be empty"]); 
+			expect(response.body.error.errors.passwordConfirmation).toEqual(["must not be empty"]); 
 		});
 
 
@@ -48,9 +48,9 @@ describe('POST /auth/reset-password', () => {
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.password.length).toBe(1);
-			expect(response.body.errors.password).toEqual(["must be minimum 8 characters"]); 
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
+			expect(response.body.error.errors.password.length).toBe(1);
+			expect(response.body.error.errors.password).toEqual(["must be minimum 8 characters"]); 
+			expect(response.body.error.errors).not.toHaveProperty("passwordConfirmation");
 	  	});
 
 
@@ -64,9 +64,9 @@ describe('POST /auth/reset-password', () => {
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors.password.length).toBe(1);
-			expect(response.body.errors.password).toEqual(["must contain uppercase, lowercase, number and special char"]); 
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
+			expect(response.body.error.errors.password.length).toBe(1);
+			expect(response.body.error.errors.password).toEqual(["must contain uppercase, lowercase, number and special char"]); 
+			expect(response.body.error.errors).not.toHaveProperty("passwordConfirmation");
 	  	});
 
 
@@ -80,9 +80,9 @@ describe('POST /auth/reset-password', () => {
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).not.toHaveProperty("password");
-			expect(response.body.errors.passwordConfirmation.length).toBe(1);
-			expect(response.body.errors.passwordConfirmation).toEqual(["should match with the password"]); 
+			expect(response.body.error.errors).not.toHaveProperty("password");
+			expect(response.body.error.errors.passwordConfirmation.length).toBe(1);
+			expect(response.body.error.errors.passwordConfirmation).toEqual(["should match with the password"]); 
 		});
 
 
@@ -95,10 +95,10 @@ describe('POST /auth/reset-password', () => {
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).not.toHaveProperty("password");
-			expect(response.body.errors).not.toHaveProperty("passwordConfirmation");
-			expect(response.body.errors.token.length).toBe(1);
-			expect(response.body.errors.token).toEqual(["token is missing"]); 
+			expect(response.body.error.errors).not.toHaveProperty("password");
+			expect(response.body.error.errors).not.toHaveProperty("passwordConfirmation");
+			expect(response.body.error.errors.token.length).toBe(1);
+			expect(response.body.error.errors.token).toEqual(["token is missing"]); 
 		});
 
 
@@ -112,7 +112,7 @@ describe('POST /auth/reset-password', () => {
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({
+			expect(response.body.error.errors).toEqual({
 				"password": ["must be minimum 8 characters"],
 				"passwordConfirmation": ["should match with the password"],
 				"token": ["token is missing"]
@@ -135,8 +135,8 @@ describe('POST /auth/reset-password', () => {
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("TokenExpiredError");
-			expect(response.body.message).toEqual("jwt expired");
+			expect(response.body.error.name).toEqual("TokenExpiredError");
+			expect(response.body.error.message).toEqual("jwt expired");
 		});
 
 		
@@ -151,8 +151,8 @@ describe('POST /auth/reset-password', () => {
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("JsonWebTokenError");
-			expect(response.body.message).toEqual("invalid signature");
+			expect(response.body.error.name).toEqual("JsonWebTokenError");
+			expect(response.body.error.message).toEqual("invalid signature");
 		});
 
 
@@ -167,8 +167,8 @@ describe('POST /auth/reset-password', () => {
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("JsonWebTokenError");
-			expect(response.body.message).toEqual("jwt malformed");
+			expect(response.body.error.name).toEqual("JsonWebTokenError");
+			expect(response.body.error.message).toEqual("jwt malformed");
 		});
 	});
 
@@ -194,8 +194,8 @@ describe('POST /auth/reset-password', () => {
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("the token is not valid");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("the token is not valid");
 		});
 
 
@@ -217,8 +217,8 @@ describe('POST /auth/reset-password', () => {
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
 			TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("the token is in the blacklist");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("the token is in the blacklist");
 		});
 	});
 
@@ -241,8 +241,8 @@ describe('POST /auth/reset-password', () => {
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
 			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("No user found");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("No user found");
 		});
 
 
@@ -271,8 +271,8 @@ describe('POST /auth/reset-password', () => {
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
 			TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
-			expect(response.body.name).toEqual("ApiError");
-			expect(response.body.message).toEqual("You are disabled, call the system administrator");
+			expect(response.body.error.name).toEqual("ApiError");
+			expect(response.body.error.message).toEqual("You are disabled, call the system administrator");
 		});
 	});
 
@@ -301,7 +301,8 @@ describe('POST /auth/reset-password', () => {
 
 			const response = await request(app).post('/auth/reset-password').send(resetPasswordForm);
 
-			expect(response.status).toBe(httpStatus.NO_CONTENT);
+			expect(response.status).toBe(httpStatus.OK);
+			expect(response.body.success).toBe(true);
 
 			// check the database if the authuser's reset-password tokens are deleted
 			const data = await tokenDbService.getTokens({ user: authuser.id, type: tokenTypes.RESET_PASSWORD });

@@ -330,7 +330,7 @@ components:
         message:
           type: string
           description: The error message
-        description:
+        errorPath:
           type: string
           description: The service name that the error occured, only in development environment
 

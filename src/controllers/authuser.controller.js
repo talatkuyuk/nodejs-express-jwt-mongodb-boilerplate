@@ -6,7 +6,7 @@ const { traceError } = require('../utils/errorUtils');
 // SERVICE DEPENDENCIES
 const { authuserService, tokenService } = require('../services');
 
-
+const success = { success: true };
 
 const addAuthUser = asyncHandler(async (req, res) => {
 	try {
@@ -17,7 +17,12 @@ const addAuthUser = asyncHandler(async (req, res) => {
 		// no need to generate tokens since the user is going to login self
 	
 		res.location(`${req.protocol}://${req.get('host')}/authusers/${authuser.id}`);
-		res.status(httpStatus.CREATED).send(authuser.filter());
+		res.status(httpStatus.CREATED).send({ 
+			success: true,
+			data: {
+				authuser: authuser.filter()
+			}
+		});
 		
 	} catch (error) {
 		throw traceError(error, "AuthUserController : addAuthUser");
@@ -32,7 +37,12 @@ const getAuthUser = asyncHandler(async (req, res) => {
 	
 		const authuser = await authuserService.getAuthUserById(id);
 	
-		res.status(httpStatus.OK).send(authuser.filter());
+		res.status(httpStatus.OK).send({ 
+			success: true,
+			data: {
+				authuser: authuser.filter()
+			}
+		});
 		
 	} catch (error) {
 		throw traceError(error, "AuthUserController : getAuthUser");
@@ -47,7 +57,10 @@ const getAuthUsers = asyncHandler(async (req, res) => {
 	
 		const result = await authuserService.getAuthUsers(query);
 		
-		res.status(httpStatus.OK).send(result);
+		res.status(httpStatus.OK).send({ 
+			success: true,
+			data: result
+		});
 		
 	} catch (error) {
 		throw traceError(error, "AuthUserController : getAuthUsers");
@@ -63,7 +76,7 @@ const changePassword = asyncHandler(async (req, res) => {
 	
 		await authuserService.changePassword(authuser.id, newPassword);
 	
-		res.status(httpStatus.NO_CONTENT).send();
+		res.status(httpStatus.OK).send(success);
 		
 	} catch (error) {
 		throw traceError(error, "AuthUserController : changePassword");
@@ -80,7 +93,7 @@ const toggleAbility = asyncHandler(async (req, res) => {
 
 		// TODO: consider deleting the all tokens of the authuser after disabling
 	  
-		res.status(httpStatus.NO_CONTENT).send();
+		res.status(httpStatus.OK).send(success);
 		
 	} catch (error) {
 		throw traceError(error, "AuthUserController : toggleAbility");
@@ -97,7 +110,7 @@ const deleteAuthUser = asyncHandler(async (req, res) => {
 		
 		await tokenService.removeTokens({ user: id });
 	
-		res.status(httpStatus.NO_CONTENT).send();
+		res.status(httpStatus.OK).send(success);
 		
 	} catch (error) {
 		throw traceError(error, "AuthUserController : deleteAuthUser");

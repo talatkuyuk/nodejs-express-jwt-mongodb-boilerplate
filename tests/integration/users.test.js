@@ -31,8 +31,8 @@ describe('PATH /users', () => {
 				passwordConfirmation: 'Pass1word!'
 			});
 
-		adminAccessToken = response.body.tokens.access.token;
-		const adminAuthuser = response.body.user;
+		adminAccessToken = response.body.data.tokens.access.token;
+		const adminAuthuser = response.body.data.authuser;
 
 		// create an admin user correspondent with the authuser
 		const adminUser = await userService.addUser(adminAuthuser.id, { email: adminAuthuser.email, role: "admin",  name: "Mr.Admin"});
@@ -76,7 +76,7 @@ describe('PATH /users', () => {
 				})
 				.expect(httpStatus.CREATED);
 
-			const testAuthuser = response.body;
+			const testAuthuser = response.body.data.authuser;
 
 			const addForm = {
 				email: testAuthuser.email,
@@ -91,7 +91,7 @@ describe('PATH /users', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send(addForm);
 			
-			const testUser = response.body;
+			const testUser = response.body.data.user;
 
 			// add test authuser to localDb
 			localDb[testUser.email] = testUser;
@@ -100,6 +100,7 @@ describe('PATH /users', () => {
 			expect(response.status).toBe(httpStatus.CREATED);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
 			expect(response.headers['location']).toEqual(expect.stringContaining("/users/"));
+			expect(response.body.success).toBe(true);
 			expect(testUser).toEqual({
 				id: testAuthuser.id,
 				email: testAuthuser.email,
@@ -118,7 +119,7 @@ describe('PATH /users', () => {
 					.set('Authorization', `Bearer ${adminAccessToken}`)
 					.send({email: `user${i}@gmail.com`, password: "Pass1word!", passwordConfirmation: "Pass1word!"});
 
-				authusers.push(response.body);
+				authusers.push(response.body.data.authuser);
 			}
 
 			// add ten users correspondent
@@ -135,7 +136,8 @@ describe('PATH /users', () => {
 						country: i%3==1?"USA":"TUR",
 					});
 
-				localDb[response.body.email] = response.body;
+				const user = response.body.data.user;
+				localDb[user.email] = user;
 			}
 
 			// check random 8th user exists in db
@@ -151,7 +153,8 @@ describe('PATH /users', () => {
 
 			expect(response.status).toBe(httpStatus.OK);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body.users.length).toBe(12); // including admin and test users
+			expect(response.body.success).toBe(true);
+			expect(response.body.data.users.length).toBe(12); // including admin and test users
 
 			// update some as country ITA
 			for (let i=1; i<=10; i++) {
@@ -175,7 +178,7 @@ describe('PATH /users', () => {
 					.set('User-Agent', userAgent) 
 					.set('Authorization', `Bearer ${adminAccessToken}`)
 					.send()
-					.expect(httpStatus.NO_CONTENT);
+					.expect(httpStatus.OK);
 
 				delete localDb[authusers[i-1]["email"]];
 			  }
@@ -189,7 +192,7 @@ describe('PATH /users', () => {
 			user = await userService.getDeletedUserById(authusers[2]["id"]);
 			expect(user.deletedAt).toEqual(expect.any(Number));
 
-			// get all authusers
+			// get all users
 			response = await request(app)
 				.get('/users')
 				.set('User-Agent', userAgent)
@@ -198,16 +201,17 @@ describe('PATH /users', () => {
 				.expect(httpStatus.OK);
 
 			// check the last added one is the first user, the default sort is descending createdAt
-			expect(response.body.users.length).toBe(9);
-			expect(response.body.users[0]["email"]).toBe("user10@gmail.com");
+			expect(response.body.success).toBe(true);
+			expect(response.body.data.users.length).toBe(9);
+			expect(response.body.data.users[0]["email"]).toBe("user10@gmail.com");
 
 			// check localDb is equal to db result
 			const arraysort = (a,b)=>a.createdAt-b.createdAt;
-			expect(response.body.users.sort(arraysort)).toEqual(Object.values(localDb).sort(arraysort));
+			expect(response.body.data.users.sort(arraysort)).toEqual(Object.values(localDb).sort(arraysort));
 
 			// check the pagination
-			expect(response.body.totalCount).toBe(9); // 3 of the users are deleted
-			expect(response.body.pagination).toEqual({
+			expect(response.body.data.totalCount).toBe(9); // 3 of the users are deleted
+			expect(response.body.data.pagination).toEqual({
 				currentPage: 1,
 				totalPages: 1,
 				perPage: 20,
@@ -220,10 +224,11 @@ describe('PATH /users', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send();
 
-			// check the authuser data
+			// check the user data
 			expect(response.status).toBe(httpStatus.OK);
 			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"));
-			expect(response.body).toEqual({
+			expect(response.body.success).toBe(true);
+			expect(response.body.data.user).toEqual({
 				id: authusers[9]["id"],
 				email: authusers[9]["email"],
 				role: "user",
@@ -242,14 +247,15 @@ describe('PATH /users', () => {
 				.send()
 				.expect(httpStatus.OK);
 			
-			expect(response.body.users.length).toBe(3);
-			expect(response.body.users[0]["email"]).toBe("user1@gmail.com");
-			expect(response.body.users[1]["email"]).toBe("user4@gmail.com");
-			expect(response.body.users[2]["email"]).toBe("user7@gmail.com");
+			expect(response.body.success).toBe(true);
+			expect(response.body.data.users.length).toBe(3);
+			expect(response.body.data.users[0]["email"]).toBe("user1@gmail.com");
+			expect(response.body.data.users[1]["email"]).toBe("user4@gmail.com");
+			expect(response.body.data.users[2]["email"]).toBe("user7@gmail.com");
 
 			// check the pagination
-			expect(response.body.totalCount).toBe(3); // 5 were disabled but one deleted
-			expect(response.body.pagination).toEqual({
+			expect(response.body.data.totalCount).toBe(3); // 5 were disabled but one deleted
+			expect(response.body.data.pagination).toEqual({
 				currentPage: 1,
 				totalPages: 1,
 				perPage: 20,
@@ -265,13 +271,14 @@ describe('PATH /users', () => {
 				.send()
 				.expect(httpStatus.OK);
 
-			expect(response.body.users.length).toBe(2);
-			expect(response.body.users[0]["email"]).toBe("user10@gmail.com");
-			expect(response.body.users[1]["email"]).toBe("user2@gmail.com");
+			expect(response.body.success).toBe(true);
+			expect(response.body.data.users.length).toBe(2);
+			expect(response.body.data.users[0]["email"]).toBe("user10@gmail.com");
+			expect(response.body.data.users[1]["email"]).toBe("user2@gmail.com");
 
 			// check the pagination
-			expect(response.body.totalCount).toBe(4); // 5 were female but one deleted
-			expect(response.body.pagination).toEqual({
+			expect(response.body.data.totalCount).toBe(4); // 5 were female but one deleted
+			expect(response.body.data.pagination).toEqual({
 				currentPage: 1,
 				totalPages: 2,
 				perPage: 2,
@@ -286,13 +293,14 @@ describe('PATH /users', () => {
 				.send()
 				.expect(httpStatus.OK);
 
-			expect(response.body.users.length).toBe(2);
-			expect(response.body.users[0]["email"]).toBe("user4@gmail.com");
-			expect(response.body.users[1]["email"]).toBe("user8@gmail.com");
+			expect(response.body.success).toBe(true);
+			expect(response.body.data.users.length).toBe(2);
+			expect(response.body.data.users[0]["email"]).toBe("user4@gmail.com");
+			expect(response.body.data.users[1]["email"]).toBe("user8@gmail.com");
 
 			// check the pagination
-			expect(response.body.totalCount).toBe(4); // 5 were female but one deleted
-			expect(response.body.pagination).toEqual({
+			expect(response.body.data.totalCount).toBe(4); // 5 were female but one deleted
+			expect(response.body.data.pagination).toEqual({
 				currentPage: 2,
 				totalPages: 2,
 				perPage: 2,
@@ -304,7 +312,7 @@ describe('PATH /users', () => {
 				.set('User-Agent', userAgent) 
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send({ role: "admin" })
-				.expect(httpStatus.NO_CONTENT);
+				.expect(httpStatus.OK);
 
 			response = await request(app)
 				.get('/users')
@@ -314,8 +322,8 @@ describe('PATH /users', () => {
 				.send()
 				.expect(httpStatus.OK);
 
-			expect(response.body.users.length).toBe(2); // 2 admin users
-			
+			expect(response.body.success).toBe(true);
+			expect(response.body.data.users.length).toBe(2); // 2 admin users
 	  	});
 	});
 
@@ -352,7 +360,7 @@ describe('PATH /users', () => {
 				})
 				.expect(httpStatus.CREATED);
 
-			const testAuthuser = response.body;
+			const testAuthuser = response.body.data.authuser;
 
 			const addForm1 = {
 				email: "",
@@ -370,7 +378,7 @@ describe('PATH /users', () => {
 				.send(addForm1);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({
+			expect(response.body.error.errors).toEqual({
 				email: ["must not be empty"],
 				role: ["must be user"],
 				name: ["requires minimum 2 characters"],
@@ -399,7 +407,7 @@ describe('PATH /users', () => {
 				.send(addForm2);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({ 
+			expect(response.body.error.errors).toEqual({ 
 				id: ["There is another user with the same id"]
 			});
 
@@ -411,7 +419,7 @@ describe('PATH /users', () => {
 				.send(addForm2);
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({ body: ["There is no correspondent authenticated user with the same id and email"]});
+			expect(response.body.error.errors).toEqual({ body: ["There is no correspondent authenticated user with the same id and email"]});
 
 			// try to get an user with invalid id
 			response = await request(app)
@@ -421,7 +429,7 @@ describe('PATH /users', () => {
 				.send();
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({ id: ["The param id must be a 24-character number"]});
+			expect(response.body.error.errors).toEqual({ id: ["The param id must be a 24-character number"]});
 
 			// try to get an user that not exists
 			response = await request(app)
@@ -431,8 +439,8 @@ describe('PATH /users', () => {
 				.send();
 
 			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toBe("No user found");
+			expect(response.body.error.name).toBe("ApiError");
+			expect(response.body.error.message).toBe("No user found");
 
 			// try to get users with wrong parameters
 			response = await request(app)
@@ -443,7 +451,7 @@ describe('PATH /users', () => {
 				.send();
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({ 
+			expect(response.body.error.errors).toEqual({ 
 				page: ["The query param 'page' must be numeric value"],
 				size: ["The query param 'size' must be numeric value"],
 			});
@@ -456,8 +464,8 @@ describe('PATH /users', () => {
 				.send({ gender: "female" });
 
 			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toBe("No user found");
+			expect(response.body.error.name).toBe("ApiError");
+			expect(response.body.error.message).toBe("No user found");
 
 			// try to update an user with validation errors (empty values)
 			response = await request(app)
@@ -466,13 +474,13 @@ describe('PATH /users', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send({ role: "admin", name: "", gender: "", country: "" });
 
-				TestUtil.validationErrorExpectations(response);
-				expect(response.body.errors).toEqual({
-					name: ["requires minimum 2 characters"],
-					gender: ["must not be empty"],
-					country: ["must not be empty"],
-					body: ["Any extra parameter is not allowed other than name,gender,country"],
-				});
+			TestUtil.validationErrorExpectations(response);
+			expect(response.body.error.errors).toEqual({
+				name: ["requires minimum 2 characters"],
+				gender: ["must not be empty"],
+				country: ["must not be empty"],
+				body: ["Any extra parameter is not allowed other than name,gender,country"],
+			});
 
 			// try to update an user with validation errors
 			response = await request(app)
@@ -481,13 +489,13 @@ describe('PATH /users', () => {
 				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send({ role: "", name: "a", gender: "fmale", country: "tr" });
 
-				TestUtil.validationErrorExpectations(response);
-				expect(response.body.errors).toEqual({ 
-					name: ["requires minimum 2 characters"],
-					gender: ["should be male, female or none"],
-					country: ["must be 3-letter standart country code"],
-					body: ["Any extra parameter is not allowed other than name,gender,country"],
-				});
+			TestUtil.validationErrorExpectations(response);
+			expect(response.body.error.errors).toEqual({ 
+				name: ["requires minimum 2 characters"],
+				gender: ["should be male, female or none"],
+				country: ["must be 3-letter standart country code"],
+				body: ["Any extra parameter is not allowed other than name,gender,country"],
+			});
 
 			// try to delete an user that not exists
 			response = await request(app)
@@ -497,8 +505,8 @@ describe('PATH /users', () => {
 				.send();
 
 			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toBe("No user found");
+			expect(response.body.error.name).toBe("ApiError");
+			expect(response.body.error.message).toBe("No user found");
 
 			// try to change user's role that not exists
 			response = await request(app)
@@ -508,8 +516,8 @@ describe('PATH /users', () => {
 				.send({ role: "admin" });
 
 			TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
-			expect(response.body.name).toBe("ApiError");
-			expect(response.body.message).toBe("No user found");
+			expect(response.body.error.name).toBe("ApiError");
+			expect(response.body.error.message).toBe("No user found");
 
 			// try to change user's role validation errors
 			response = await request(app)
@@ -519,11 +527,10 @@ describe('PATH /users', () => {
 				.send({ role: "client", additional: "" })
 
 			TestUtil.validationErrorExpectations(response);
-			expect(response.body.errors).toEqual({ 
+			expect(response.body.error.errors).toEqual({ 
 				role: ["role could be one of user,admin"],
 				body: ["Any extra parameter is not allowed other than 'role'"],
 			});
 		});
-
 	});
 });
