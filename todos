@@ -2,11 +2,6 @@
 //TODO: implement authuserDAO
 //TODO: implement userDAO
 
-//TODO: update unhandledRejection and uncaughtException mechanism
-//TODO: update ErrorHandler strategy and isOperational logic
-//TODO: update mongodb native driver to 4.x.x
-//TODO: Refine the response json objects
-
 //TODO: add todo part
 //TODO: add socket io
 //TODO: add loggers for mongo operations
