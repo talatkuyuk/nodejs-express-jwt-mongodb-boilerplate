@@ -21,14 +21,20 @@
             schema:
               type: object
               properties:
-                authuser:
-                  $ref: '#/components/schemas/authuser'
-                  example:
-                    $ref: '#components/examples/response-authuser'
-                tokens:
-                  $ref: '#/components/schemas/tokens'
-                  example:
-                    $ref: '#components/examples/response-tokens'
+                success:
+                  type: boolean
+                  value: true
+                data:
+                  type: object
+                  properties:
+                    authuser:
+                      $ref: '#/components/schemas/authuser'
+                      example:
+                        $ref: '#components/examples/response-authuser'
+                    tokens:
+                      $ref: '#/components/schemas/tokens'
+                      example:
+                        $ref: '#components/examples/response-tokens'
       422:
         $ref: '#/components/responses/SignUpValidationErrors'
       500:
@@ -58,14 +64,20 @@
             schema:
               type: object
               properties:
-                authuser:
-                  $ref: '#/components/schemas/authuser'
-                  example:
-                    $ref: '#components/examples/response-authuser'
-                tokens:
-                  $ref: '#/components/schemas/tokens'
-                  example:
-                    $ref: '#components/examples/response-tokens'
+                success:
+                  type: boolean
+                  value: true
+                data:
+                  type: object
+                  properties:
+                    authuser:
+                      $ref: '#/components/schemas/authuser'
+                      example:
+                        $ref: '#components/examples/response-authuser'
+                    tokens:
+                      $ref: '#/components/schemas/tokens'
+                      example:
+                        $ref: '#components/examples/response-tokens'
       401:
         $ref: '#/components/responses/LoginUnauthorizedFailures'
       403:
@@ -87,8 +99,8 @@
     security:
       - BearerAuth: []
     responses:
-      204:
-        description: NO CONTENT
+      200:
+        $ref: '#/components/responses/SuccessResponse'
       401:
         $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       402:
@@ -108,8 +120,8 @@
     security:
       - BearerAuth: []
     responses:
-      204:
-        description: NO CONTENT
+      200:
+        $ref: '#/components/responses/SuccessResponse'
       401:
         $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
       403:
@@ -139,10 +151,18 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/tokens'
-            examples:
-              _:
-                $ref: '#components/examples/response-tokens-for-refresh'
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  value: true
+                data:
+                  type: object
+                  properties:
+                    tokens:
+                      $ref: '#/components/schemas/tokens'
+                      example:
+                        $ref: '#components/examples/response-tokens'
       401:
         $ref: '#/components/responses/RefreshTokensUnauthorizedErrors'
       403:
@@ -171,8 +191,8 @@
           schema:
             $ref: '#/components/schemas/form-forgot-password'
     responses:
-      204:
-        description: NO CONTENT
+      200:
+        $ref: '#/components/responses/SuccessResponse'
       400:
         $ref: '#/components/responses/ForgotPasswordEmailErrors'
       403:
@@ -200,8 +220,8 @@
           schema:
             $ref: '#/components/schemas/form-reset-password'
     responses:
-      204:
-        description: NO CONTENT
+      200:
+        $ref: '#/components/responses/SuccessResponse'
       401:
         $ref: '#/components/responses/VerifyTokenUnauthorizedErrors'
       403:
@@ -223,8 +243,8 @@
     security:
       - BearerAuth: []
     responses:
-      204:
-        description: NO CONTENT
+      200:
+        $ref: '#/components/responses/SuccessResponse'
       400:
         $ref: '#/components/responses/SendVerificationEmailErrors'
       401:
@@ -250,8 +270,8 @@
           schema:
             $ref: '#/components/schemas/form-verify-email'
     responses:
-      204:
-        description: NO CONTENT
+      200:
+        $ref: '#/components/responses/SuccessResponse'
       401:
         $ref: '#/components/responses/VerifyTokenUnauthorizedErrors'
       403:
@@ -282,14 +302,20 @@
             schema:
               type: object
               properties:
-                user:
-                  $ref: '#/components/schemas/authuser'
-                  example:
-                    $ref: '#components/examples/response-authuser'
-                tokens:
-                  $ref: '#/components/schemas/tokens'
-                  example:
-                    $ref: '#components/examples/response-tokens'
+                success:
+                  type: boolean
+                  value: true
+                data:
+                  type: object
+                  properties:
+                    authuser:
+                      $ref: '#/components/schemas/authuser'
+                      example:
+                        $ref: '#components/examples/response-authuser'
+                    tokens:
+                      $ref: '#/components/schemas/tokens'
+                      example:
+                        $ref: '#components/examples/response-tokens'
       400:
         $ref: '#/components/responses/oAuthLoginBadRequests'
       401:
@@ -317,14 +343,20 @@
             schema:
               type: object
               properties:
-                user:
-                  $ref: '#/components/schemas/authuser'
-                  example:
-                    $ref: '#components/examples/response-authuser'
-                tokens:
-                  $ref: '#/components/schemas/tokens'
-                  example:
-                    $ref: '#components/examples/response-tokens'
+                success:
+                  type: boolean
+                  value: true
+                data:
+                  type: object
+                  properties:
+                    authuser:
+                      $ref: '#/components/schemas/authuser'
+                      example:
+                        $ref: '#components/examples/response-authuser'
+                    tokens:
+                      $ref: '#/components/schemas/tokens'
+                      example:
+                        $ref: '#components/examples/response-tokens'
       400:
         $ref: '#/components/responses/oAuthLoginBadRequests'
       401:
