@@ -1,5 +1,6 @@
 const request = require('supertest');
 const httpStatus = require('http-status');
+const bcrypt = require('bcryptjs');
 
 const app = require('../../src/core/express');
 
@@ -10,6 +11,7 @@ const TestUtil = require('../testutils/TestUtil');
 
 const { setupTestDatabase } = require('../setup/setupTestDatabase');
 const { setupRedis } = require('../setup/setupRedis');
+const { string } = require('joi');
 
 
 setupTestDatabase();
@@ -188,8 +190,21 @@ describe('POST /auth/signup', () => {
 			// check the refresh token is stored into database
 			TestUtil.CheckRefreshTokenStoredInDB(response);
 
-			// TODO: check the new authuser is stored into database
-			// TODO: check the new authuser password is hashed in the database
+			// check the new authuser is stored into database
+			const authuser = await authuserDbService.getAuthUser({
+				id: response.body.data.authuser.id,
+				email: response.body.data.authuser.email
+			});
+			expect(authuser).toEqual(
+				expect.objectContaining({
+					id: expect.any(String)
+				})
+			);
+
+			// check the new authuser password is hashed in the database
+			expect(authuser.password).not.toEqual(registerform.password);
+			const data = await bcrypt.compare(registerform.password, authuser.password);
+			expect(data).toBeTruthy();
 		});
 	});
 })
