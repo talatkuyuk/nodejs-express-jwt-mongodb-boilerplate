@@ -209,10 +209,9 @@ const changeRole = [
 		.isIn(roles)
 		.withMessage(`role could be one of ${roles}`),
 
-	// TODO: extract req, you can use only body, test it
-	body().custom((body, { req }) => {
+	body().custom(body => {
 		const validKey = "role";
-		return Object.keys(req.body).every(key => validKey === key);
+		return Object.keys(body).every(key => validKey === key);
 	}).withMessage(`Any extra parameter is not allowed other than 'role'`),
 ];
 
