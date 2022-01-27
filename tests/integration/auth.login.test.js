@@ -168,11 +168,12 @@ describe('POST /auth/login', () => {
 				"success": true,
 				"data": {
 					"authuser": {
-						"createdAt": expect.any(Number), // 1631868212022
-						"email": authuser.email,
 						"id": authuser.id,
+						"email": authuser.email,
 						"isEmailVerified": false,
 						"isDisabled": false,
+						"createdAt": expect.any(Number), // 1631868212022
+						"updatedAt": null,
 						"services": {
 						  "emailpassword": "registered",
 						},

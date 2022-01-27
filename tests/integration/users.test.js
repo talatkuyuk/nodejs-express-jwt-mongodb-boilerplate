@@ -3,7 +3,7 @@ const httpStatus = require('http-status');
 
 const app = require('../../src/core/express');
 
-const { userService } = require('../../src/services');
+const { userService, userDbService } = require('../../src/services');
 
 const TestUtil = require('../testutils/TestUtil');
 
@@ -109,6 +109,7 @@ describe('PATH /users', () => {
 				gender: null,
 				country: null,
 				createdAt: expect.any(Number),
+				updatedAt: null,
 			});
 
 			// add ten authusers
@@ -128,7 +129,7 @@ describe('PATH /users', () => {
 					.post(`/users/${authusers[i-1]["id"]}`)
 					.set('User-Agent', userAgent) 
 					.set('Authorization', `Bearer ${adminAccessToken}`)
-					.send({ 
+					.send({
 						email: authusers[i-1]["email"],
 						role: "user",
 						name: `User-${i}`,
@@ -159,7 +160,7 @@ describe('PATH /users', () => {
 			// update some as country ITA
 			for (let i=1; i<=10; i++) {
 			  if (i%5===0) {
-				response = await request(app)
+				await request(app)
 					.put(`/users/${authusers[i-1]["id"]}`)
 					.set('User-Agent', userAgent) 
 					.set('Authorization', `Bearer ${adminAccessToken}`)
@@ -167,13 +168,16 @@ describe('PATH /users', () => {
 					.expect(httpStatus.OK);
 
 				localDb[authusers[i-1]["email"]].country = "ITA";
+
+				const updatedUser = await userDbService.getUser({ id: authusers[i-1]["id"] });
+				localDb[authusers[i-1]["email"]].updatedAt = updatedUser.updatedAt;
 			  }
 			}
 
 			// delete 3th, 6th and 9th
 			for (let i=1; i<=10; i++) {
 			  if (i%3===0) {
-				response = await request(app)
+				await request(app)
 					.delete(`/users/${authusers[i-1]["id"]}`)
 					.set('User-Agent', userAgent) 
 					.set('Authorization', `Bearer ${adminAccessToken}`)
@@ -206,7 +210,7 @@ describe('PATH /users', () => {
 			expect(response.body.data.users[0]["email"]).toBe("user10@gmail.com");
 
 			// check localDb is equal to db result
-			const arraysort = (a,b)=>a.createdAt-b.createdAt;
+			const arraysort = (a,b) => a.createdAt - b.createdAt;
 			expect(response.body.data.users.sort(arraysort)).toEqual(Object.values(localDb).sort(arraysort));
 
 			// check the pagination
@@ -235,7 +239,8 @@ describe('PATH /users', () => {
 				name: "User-10",
 				gender: "female",
 				country: "ITA",
-				createdAt: expect.any(Number)
+				createdAt: expect.any(Number),
+				updatedAt: expect.any(Number)
 			});
 
 			// query filter country USA, check the count; and control the list

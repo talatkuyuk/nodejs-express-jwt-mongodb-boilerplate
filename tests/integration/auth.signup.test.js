@@ -174,11 +174,12 @@ describe('POST /auth/signup', () => {
 				"success": true,
 				"data": {
 					"authuser": {
-						"createdAt": expect.any(Number), // 1631868212022
-						"email": registerform.email,
 						"id": expect.stringMatching(/^[0-9a-fA-F]{24}$/), // valid mongodb ObjectID: 24-size hex value
+						"email": registerform.email,
 						"isEmailVerified": false,
 						"isDisabled": false,
+						"createdAt": expect.any(Number), // 1631868212022
+						"updatedAt": null,
 						"services": {
 						  "emailpassword": "registered",
 						},

@@ -167,11 +167,12 @@ describe('POST /auth/google & auth/facebook', () => {
 				"success": true,
 				"data": {
 					"authuser": {
-						"createdAt": expect.any(Number), // 1631868212022
-						"email": google_email,
 						"id": authuser.id,
+						"email": google_email,
 						"isEmailVerified": true,
 						"isDisabled": false,
+						"createdAt": expect.any(Number), // 1631868212022
+						"updatedAt": null,
 						"services": {
 						  "emailpassword": "not registered",
 						  [provider]: google_id,
@@ -230,11 +231,12 @@ describe('POST /auth/google & auth/facebook', () => {
 				"success": true,
 				"data": {
 					"authuser": {
-						"createdAt": expect.any(Number), // 1631868212022
-						"email": authuser.email,
 						"id": authuser.id,
+						"email": authuser.email,
 						"isEmailVerified": true,
 						"isDisabled": false,
+						"createdAt": expect.any(Number), // 1631868212022
+						"updatedAt": expect.any(Number),
 						"services": {
 						  "emailpassword": "registered",
 						  [provider]: facebook_id,
