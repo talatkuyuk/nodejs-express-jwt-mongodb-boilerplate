@@ -78,6 +78,7 @@ const getAuthUser = async (query) => {
 					isEmailVerified: 1,
 					isDisabled: 1,
 					createdAt: 1,
+					updatedAt: 1,
 					services: 1,
 				}
 			},

@@ -102,11 +102,12 @@ describe('PATH /authusers', () => {
 				isEmailVerified: false,
 				isDisabled: false,
 				createdAt: expect.any(Number),
+				updatedAt: null,
 				services: { emailpassword: "registered"}
 			});
 
 			// check the test authuser's password is hashed
-			const { password } = await authuserDbService.getAuthUser({ id: testAuthuser.id});
+			const { password } = await authuserDbService.getAuthUser({ id: testAuthuser.id });
 			data = await bcrypt.compare(addForm.password, password);
 			expect(data).toBeTruthy();
 
@@ -158,14 +159,18 @@ describe('PATH /authusers', () => {
 					.expect(httpStatus.OK);
 
 				localDb[authusers[i-1]["email"]].isDisabled = true;
+
+				const updatedAuthuser = await authuserDbService.getAuthUser({ id: authusers[i-1]["id"] });
+				localDb[authusers[i-1]["email"]].updatedAt = updatedAuthuser.updatedAt;
 			  }
 			}
 
 			// update 5th and 10th as email verified
 			for (let i=1; i<=10; i++) {
 			  if (i%5===0) {
-				await authuserDbService.updateAuthUser(authusers[i-1]["id"], { isEmailVerified: true })
+				const updatedAuthuser = await authuserDbService.updateAuthUser(authusers[i-1]["id"], { isEmailVerified: true });
 				localDb[authusers[i-1]["email"]].isEmailVerified = true;
+				localDb[authusers[i-1]["email"]].updatedAt = updatedAuthuser.updatedAt;
 			  }
 			}
 
@@ -205,7 +210,7 @@ describe('PATH /authusers', () => {
 			expect(response.body.data.authusers[0]["email"]).toBe("user10@gmail.com");
 
 			// check localDb is equal to db result
-			const arraysort = (a,b)=>a.createdAt-b.createdAt;
+			const arraysort = (a,b) => a.createdAt - b.createdAt;
 			expect(response.body.data.authusers.sort(arraysort)).toEqual(Object.values(localDb).sort(arraysort));
 
 			// check the pagination
@@ -234,6 +239,7 @@ describe('PATH /authusers', () => {
 				isEmailVerified: true,
 				isDisabled: true,
 				createdAt: expect.any(Number),
+				updatedAt: expect.any(Number),
 				services: { emailpassword: "registered"}
 			});
 

@@ -7,7 +7,8 @@ class AuthUser {
 		password, 
 		isEmailVerified = false, 
 		isDisabled = false, 
-		createdAt = Date.now(), 
+		createdAt = Date.now(),
+		updatedAt = null,
 		services
 		) {
 		this.email = email;
@@ -15,6 +16,7 @@ class AuthUser {
 		this.isEmailVerified = isEmailVerified;
 		this.isDisabled = isDisabled;
 		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
 		this.services = services;
 	}
 
@@ -33,6 +35,7 @@ class AuthUser {
 			doc.isEmailVerified,
 			doc.isDisabled,
 			doc.createdAt,
+			doc.updatedAt,
 			doc.services
 		)
 		doc._id && authuser.transformId(doc._id);

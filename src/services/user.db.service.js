@@ -85,6 +85,7 @@ const { traceError } = require('../utils/errorUtils');
 					gender: 1,
 					country: 1,
 					createdAt: 1,
+					updatedAt: 1
 				}
 			},
 			{
