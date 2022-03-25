@@ -314,6 +314,33 @@ describe("Validate Middleware : Athuser validation rules", () => {
       });
     });
 
+    test("addUser: should throw error 422, if the param id is self", async () => {
+      const request = {
+        params: { id: "self" }, // self is valid for only getUser
+        body: {
+          email: "user@gmail.com",
+          role: "user",
+        },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(userValidation.addUser)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        id: ["The param id must be a 24-character number"],
+      });
+    });
+
     test("addUser: should throw error 422, if the body is empty", async () => {
       const request = {
         params: { id: "123456789012345678901234" },
@@ -767,6 +794,21 @@ describe("Validate Middleware : Athuser validation rules", () => {
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();
     });
+
+    test("getUser: should continue next middleware if the param id is self", async () => {
+      const request = {
+        params: { id: "self" }, // to get user himself
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(userValidation.getUser)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith();
+    });
   });
 
   describe("updateUser validation", () => {
@@ -801,11 +843,11 @@ describe("Validate Middleware : Athuser validation rules", () => {
       });
     });
 
-    test("updateUser: should throw error 422, for only those appear in the body", async () => {
+    test("updateUser: should throw error 422, for invalid field appears in the body", async () => {
       const request = {
         params: { id: "123456789012345678901234" }, // 24-length string, valid id
         body: {
-          country: "tr",
+          country: "tr", // invalid, it is not 3-letter
         },
       };
 
@@ -824,6 +866,32 @@ describe("Validate Middleware : Athuser validation rules", () => {
       TestUtil.validationErrorInMiddleware(err);
       expect(err.errors).toEqual({
         country: ["must be 3-letter standart country code"],
+      });
+    });
+
+    test("updateUser: should throw error 422, the param id is self", async () => {
+      const request = {
+        params: { id: "self" }, // self is valid for only getUser
+        body: {
+          country: "tur", // valid
+        },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(userValidation.updateUser)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        id: ["The param id must be a 24-character number"],
       });
     });
 
@@ -880,7 +948,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
       });
     });
 
-    test("updateUser: should continue next middleware if the param is valid and the body contains at least one element valid", async () => {
+    test("updateUser: should continue next middleware if the param is valid and the body contains one element valid", async () => {
       const request = {
         params: { id: "123456789012345678901234" }, // 24-length string, valid id
         body: {
@@ -923,6 +991,32 @@ describe("Validate Middleware : Athuser validation rules", () => {
     test("changeRole: should throw error 422, if the param id is not 24-length character", async () => {
       const request = {
         params: { id: "1234567890" }, // 10-length string, invalid id
+        body: {
+          role: "admin",
+        },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(userValidation.changeRole)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        id: ["The param id must be a 24-character number"],
+      });
+    });
+
+    test("changeRole: should throw error 422, if the param id is self", async () => {
+      const request = {
+        params: { id: "self" }, // self is valid for only getUser
         body: {
           role: "admin",
         },
@@ -997,6 +1091,29 @@ describe("Validate Middleware : Athuser validation rules", () => {
     test("deleteUser: should throw error 422, if the param id is not 24-length character", async () => {
       const request = {
         params: { id: "1234567890" }, // 10-length string, invalid id
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(userValidation.deleteUser)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        id: ["The param id must be a 24-character number"],
+      });
+    });
+
+    test("deleteUser: should throw error 422, if the param id is self", async () => {
+      const request = {
+        params: { id: "self" }, // invalid id, which is valid for only getUser
       };
 
       const req = httpMocks.createRequest(request);
