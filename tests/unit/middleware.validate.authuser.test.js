@@ -398,7 +398,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
           email: "user@gmail.com",
           password: "Pass1word!",
           passwordConfirmation: "Pass1word!",
-          otherParameter: "", // this is not allowed
+          id: "self", // this is not allowed
         },
       };
 
@@ -484,12 +484,50 @@ describe("Validate Middleware : Athuser validation rules", () => {
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();
     });
+
+    test("getAuthUser: should continue next middleware if the param id is self", async () => {
+      const request = {
+        params: { id: "self" }, // self is valid for here
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authuserValidation.getAuthUser)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith();
+    });
   });
 
   describe("toggleAuthUser validation", () => {
     test("toggleAuthUser: should throw error 422, if the param id is not 24-length character", async () => {
       const request = {
         params: { id: "1234567890" }, // 10-length string, invalid id
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authuserValidation.toggleAuthUser)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        id: ["The param id must be a 24-character number"],
+      });
+    });
+
+    test("toggleAuthUser: should throw error 422, if the param id is self", async () => {
+      const request = {
+        params: { id: "self" }, // self is not valid here
       };
 
       const req = httpMocks.createRequest(request);
@@ -530,6 +568,29 @@ describe("Validate Middleware : Athuser validation rules", () => {
     test("deleteAuthUser: should throw error 422, if the param id is not 24-length character", async () => {
       const request = {
         params: { id: "1234567890" }, // 10-length string, invalid id
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authuserValidation.deleteAuthUser)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        id: ["The param id must be a 24-character number"],
+      });
+    });
+
+    test("deleteAuthUser: should throw error 422, if the param id is self", async () => {
+      const request = {
+        params: { id: "self" }, // self is invalid here
       };
 
       const req = httpMocks.createRequest(request);

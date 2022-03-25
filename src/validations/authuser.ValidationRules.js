@@ -1,6 +1,7 @@
 const { body, query } = require("express-validator");
 const {
   check_param_id,
+  check_param_id_custom,
   check_body_email,
   check_body_email_isTaken,
   check_body_password,
@@ -67,7 +68,7 @@ const getAuthUsers = [
     .optional(),
 ];
 
-const getAuthUser = [...check_param_id];
+const getAuthUser = [...check_param_id_custom];
 
 const addAuthUser = [
   ...check_body_email,

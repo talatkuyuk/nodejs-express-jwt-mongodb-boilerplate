@@ -6,6 +6,7 @@ const { roles } = require("../config/roles");
 
 const {
   check_param_id,
+  check_param_id_custom,
   check_body_email,
 } = require("./common.ValidationRules");
 
@@ -122,7 +123,7 @@ const getUsers = [
     .optional(),
 ];
 
-const getUser = [...check_param_id];
+const getUser = [...check_param_id_custom];
 
 const addUser = [
   // check the id is valid and check if there is another user with the same id.
