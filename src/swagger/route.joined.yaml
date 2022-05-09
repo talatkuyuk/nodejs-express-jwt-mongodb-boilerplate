@@ -5,16 +5,16 @@
     security:
       - BearerAuth: []
     parameters:
-      - $ref: '#/components/parameters/query-param-page'
-      - $ref: '#/components/parameters/query-param-size'
-      - $ref: '#/components/parameters/query-param-sort'
-      - $ref: '#/components/parameters/query-param-email'
-      - $ref: '#/components/parameters/query-param-isEmailVerified'
-      - $ref: '#/components/parameters/query-param-isDisabled'
-      - $ref: '#/components/parameters/query-param-role'
-      - $ref: '#/components/parameters/query-param-name'
-      - $ref: '#/components/parameters/query-param-gender'
-      - $ref: '#/components/parameters/query-param-country'
+      - $ref: "#/components/parameters/query-param-page"
+      - $ref: "#/components/parameters/query-param-size"
+      - $ref: "#/components/parameters/query-param-sort"
+      - $ref: "#/components/parameters/query-param-email"
+      - $ref: "#/components/parameters/query-param-isEmailVerified"
+      - $ref: "#/components/parameters/query-param-isDisabled"
+      - $ref: "#/components/parameters/query-param-role"
+      - $ref: "#/components/parameters/query-param-name"
+      - $ref: "#/components/parameters/query-param-gender"
+      - $ref: "#/components/parameters/query-param-country"
     responses:
       200:
         description: The list of the authusers with the user info if exists
@@ -26,30 +26,31 @@
                 users:
                   type: array
                   items:
-                    $ref: '#/components/schemas/authuser'
+                    $ref: "#/components/schemas/authuser"
                 totalCount:
                   type: number
                 pagination:
                   type: object
                   properties:
-                    currentPage:
+                    pageIndex:
                       type: number
-                    totalPages:
+                    pageNumber:
                       type: number
-                    perPage:
+                    pageCount:
+                      type: number
+                    pageSize:
                       type: number
             examples:
               _:
-                $ref: '#/components/examples/response-query-authusers'
+                $ref: "#/components/examples/response-query-authusers"
       401:
-        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
+        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
       422:
-        $ref: '#/components/responses/AuthUserQueryParamsValidationErrors'
+        $ref: "#/components/responses/AuthUserQueryParamsValidationErrors"
       500:
-        $ref: '#/components/responses/InternalServerError'
-        
+        $ref: "#/components/responses/InternalServerError"
 
 /joined/users:
   get:
@@ -58,16 +59,16 @@
     security:
       - BearerAuth: []
     parameters:
-      - $ref: '#/components/parameters/query-param-page'
-      - $ref: '#/components/parameters/query-param-size'
-      - $ref: '#/components/parameters/query-param-sort'
-      - $ref: '#/components/parameters/query-param-email'
-      - $ref: '#/components/parameters/query-param-isEmailVerified'
-      - $ref: '#/components/parameters/query-param-isDisabled'
-      - $ref: '#/components/parameters/query-param-role'
-      - $ref: '#/components/parameters/query-param-name'
-      - $ref: '#/components/parameters/query-param-gender'
-      - $ref: '#/components/parameters/query-param-country'
+      - $ref: "#/components/parameters/query-param-page"
+      - $ref: "#/components/parameters/query-param-size"
+      - $ref: "#/components/parameters/query-param-sort"
+      - $ref: "#/components/parameters/query-param-email"
+      - $ref: "#/components/parameters/query-param-isEmailVerified"
+      - $ref: "#/components/parameters/query-param-isDisabled"
+      - $ref: "#/components/parameters/query-param-role"
+      - $ref: "#/components/parameters/query-param-name"
+      - $ref: "#/components/parameters/query-param-gender"
+      - $ref: "#/components/parameters/query-param-country"
     responses:
       200:
         description: The list of the users with the authuser info if exists
@@ -79,26 +80,28 @@
                 users:
                   type: array
                   items:
-                    $ref: '#/components/schemas/user'
+                    $ref: "#/components/schemas/user"
                 totalCount:
                   type: number
                 pagination:
                   type: object
                   properties:
-                    currentPage:
+                    pageIndex:
                       type: number
-                    totalPages:
+                    pageNumber:
                       type: number
-                    perPage:
+                    pageCount:
+                      type: number
+                    pageSize:
                       type: number
             examples:
               _:
-                $ref: '#/components/examples/response-query-users'
+                $ref: "#/components/examples/response-query-users"
       401:
-        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
+        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
       422:
-        $ref: '#/components/responses/UserQueryParamsValidationErrors'
+        $ref: "#/components/responses/UserQueryParamsValidationErrors"
       500:
-        $ref: '#/components/responses/InternalServerError'
+        $ref: "#/components/responses/InternalServerError"

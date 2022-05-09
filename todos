@@ -7,6 +7,8 @@
 //TODO: add loggers for mongo operations
 //TODO: add "logs" collection to mongodb
 
+//TODO: country validation regex ex BELA does not catch
+
 //TODO: revoke the access token when the user session is closed
 //TODO: implement the Schema Versioning pattern, add a schema_version
 //TODO: set schemas for createcollection and create indexes and further arrange schemas
