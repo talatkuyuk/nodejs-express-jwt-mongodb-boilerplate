@@ -1,8 +1,6 @@
 components:
-
   ##################### SCHEMES ***************************
   schemas:
-
     # SIGNUP FORM IN REQUEST.BODY
     form-signup:
       type: object
@@ -29,7 +27,6 @@ components:
         password: Pass1word!
         passwordConfirmation: Pass1word!
 
-
     # LOGIN FORM IN REQUEST.BODY
     form-login:
       type: object
@@ -47,9 +44,8 @@ components:
           description: must not be empty
       example:
         email: talatkuyuk@gmail.com
-        password: Pass1word!      
+        password: Pass1word!
 
-        
     # REFRESH-TOKEN FORM IN REQUEST.BODY
     form-refresh-token:
       type: object
@@ -59,7 +55,6 @@ components:
         refreshToken:
           type: string
           example: eyJhb.INPUT_YOUR_REFRESH_TOKEN_HERE.m1U63
-
 
     # FORGOT PASSWORD FORM IN REQUEST.BODY
     form-forgot-password:
@@ -72,7 +67,6 @@ components:
           format: email
           description: the email that the reset password link is going to be sent
           example: talatkuyuk@gmail.com
-
 
     # RESET PASSWORD FORM IN REQUEST.BODY
     form-reset-password:
@@ -99,7 +93,6 @@ components:
         passwordConfirmation: Pass1word!
         token: lkfkldE-reset-password-token-oflkmFDDkf
 
-
     # VERIFY EMAIL FORM IN REQUEST.BODY
     form-verify-email:
       type: object
@@ -109,8 +102,7 @@ components:
         token:
           type: string
           description: reset password token
-          example: lkfkldE-verify-email-token-oflkmFDDkf 
-      
+          example: lkfkldE-verify-email-token-oflkmFDDkf
 
     # ADD AUTHUSER FORM IN REQUEST.BODY
     form-add-authuser:
@@ -138,7 +130,6 @@ components:
         password: Pass1word!
         passwordConfirmation: Pass1word!
 
-
     # CHANGE PASSWORD FORM IN REQUEST.BODY
     form-change-password:
       type: object
@@ -164,7 +155,6 @@ components:
         currentPassword: Curr9pasS+
         password: Pass1word!
         passwordConfirmation: Pass1word!
-  
 
     # ADD USER FORM IN REQUEST.BODY
     form-add-user:
@@ -201,7 +191,6 @@ components:
         gender: male
         country: TUR
 
-
     # UPDATE USER FORM IN REQUEST.BODY
     form-update-user:
       type: object
@@ -226,7 +215,6 @@ components:
         gender: male
         country: TUR
 
-
     # CHANGE USER ROLE IN REQUEST.BODY
     form-change-role:
       type: object
@@ -239,7 +227,6 @@ components:
           description: user role, admin/user
       example:
         role: admin
-
 
     # AUTHUSER IN RESPONSE
     authuser:
@@ -258,7 +245,7 @@ components:
         createdAt:
           type: date-time
           description: unix time like 7635472654762
-        services: 
+        services:
           type: object
           properties:
             emailpassword:
@@ -271,7 +258,6 @@ components:
               type: string
               description: facebook-oauth-id
 
-              
     # USER IN RESPONSE
     user:
       type: object
@@ -294,7 +280,6 @@ components:
           type: date-time
           description: unix time like 7635472654762
 
-
     # ACCESS-REFRESH TOKENS IN RESPONSE
     tokens:
       type: object
@@ -316,7 +301,6 @@ components:
               type: string
               format: date-time
 
-
     # ERROR
     ErrorResponse:
       type: object
@@ -336,7 +320,6 @@ components:
             message:
               type: string
               description: The error message
-
 
     # VALIDATION ERROR
     ValidationErrorResponse:
@@ -361,11 +344,8 @@ components:
               type: object
               description: "{ key1: string[], key2: string[], ... } The keys refer to a property name validation failed in the requestbody (email, password etc.), having value which is an array of string that refers to specific error message for that property"
 
-
-
   ##################### RESPONSES ***************************
   responses:
-
     SuccessResponse:
       description: OK
       content:
@@ -376,7 +356,6 @@ components:
               success:
                 type: boolean
                 value: true
-
 
     SignUpValidationErrors:
       description: |
@@ -399,7 +378,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationErrorResponse'
+            $ref: "#/components/schemas/ValidationErrorResponse"
           example:
             success: false
             error:
@@ -408,9 +387,9 @@ components:
               message: The request could not be validated
               errors:
                 email: ["email validation errors appear in a string array"]
-                password: ["password validation errors appear in a string array"]
+                password:
+                  ["password validation errors appear in a string array"]
                 passwordConfirmation: ["should match with the password"]
-
 
     LoginValidationErrors:
       description: |
@@ -425,7 +404,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationErrorResponse'
+            $ref: "#/components/schemas/ValidationErrorResponse"
           example:
             success: false
             error:
@@ -436,9 +415,8 @@ components:
                 email: ["one of the email validation errors appear here"]
                 password: ["must not be empty"]
 
-
     LoginUnauthorizedFailures:
-      description: | 
+      description: |
         UNAUTHORIZED
 
         #### Login Unauthorized Failures
@@ -446,7 +424,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -454,9 +432,8 @@ components:
               name: "ApiError"
               message: "one of the error messages appears here"
 
-
     AuthenticateMiddlewareUnauthorizedErrors:
-      description: | 
+      description: |
         UNAUTHORIZED
 
         #### TokenError
@@ -466,14 +443,14 @@ components:
         * _jwt expired_
         * _jwt not active_
         * _Invalid token type_
-        
+
         #### ApiError
         * _Access token does not refer any user_
         * _Your browser/agent seems changed or updated, you have to re-login._
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           examples:
             TokenError:
               value:
@@ -490,9 +467,8 @@ components:
                   name: "ApiError"
                   message: "One of the api errors appears here"
 
-
     AuthenticateAndAuthorizeMiddlewaresForbiddenErrors:
-      description: | 
+      description: |
         FORBIDDEN
 
         #### ApiError
@@ -503,17 +479,16 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
               code: 403
               name: "ApiError"
               message: "One of the api errors appears here"
-
 
     AuthenticateMiddlewareForbiddenErrors:
-      description: | 
+      description: |
         FORBIDDEN
 
         #### ApiError
@@ -522,7 +497,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -530,9 +505,8 @@ components:
               name: "ApiError"
               message: "One of the api errors appears here"
 
-
     AuthorizeMiddlewareForbiddenErrors:
-      description: | 
+      description: |
         FORBIDDEN
 
         #### ApiError
@@ -541,7 +515,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -549,9 +523,8 @@ components:
               name: "ApiError"
               message: "One of the api errors appears here"
 
-
     oAuthLoginForbiddenErrors:
-      description: | 
+      description: |
         FORBIDDEN
 
         #### ApiError
@@ -560,7 +533,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -568,9 +541,8 @@ components:
               name: "ApiError"
               message: "One of the api errors appears here"
 
-        
     oAuthLoginUnauthorizedFailures:
-      description: | 
+      description: |
         UNAUTHORIZED
 
         #### ApiError
@@ -586,7 +558,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -594,13 +566,12 @@ components:
               name: "ApiError"
               message: "One of the error messages appears here"
 
-
     oAuthLoginBadRequests:
       description: BAD_REQUEST
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -608,9 +579,8 @@ components:
               name: "ApiError"
               message: "Badly formed Authorization Header with Bearer."
 
-
     LogoutSignoutUnauthorizedErrors:
-      description: | 
+      description: |
         UNAUTHORIZED
 
         (Here is continuation of 401 UNAUTHORIZED response above, not 402)
@@ -621,7 +591,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -629,13 +599,12 @@ components:
               name: "ApiError"
               message: "One of the api errors appears here"
 
-
     RefreshTokenValidationError:
       description: UNPROCESSABLE ENTITY
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationErrorResponse'
+            $ref: "#/components/schemas/ValidationErrorResponse"
           example:
             success: false
             error:
@@ -645,9 +614,8 @@ components:
               errors:
                 refreshToken: ["refresh token must not be empty"]
 
-
     RefreshTokensUnauthorizedErrors:
-      description: | 
+      description: |
         UNAUTHORIZED
 
         #### Refresh Tokens Unauthorized Errors
@@ -658,7 +626,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -666,9 +634,8 @@ components:
               name: "ApiError"
               message: "one of the error messages appears here"
 
-    
     VerifyTokenUnauthorizedErrors:
-      description: | 
+      description: |
         UNAUTHORIZED
 
         #### TokenError
@@ -683,7 +650,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           examples:
             TokenError:
               value:
@@ -700,9 +667,8 @@ components:
                   name: "ApiError"
                   message: "refresh|resetPassword|verifyEmail token is not valid"
 
-
     ForgotPasswordEmailErrors:
-      description: | 
+      description: |
         BAD REQUEST
 
         #### ApiError
@@ -710,7 +676,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -718,9 +684,8 @@ components:
               name: "ApiError"
               message: "No recipients defined"
 
-
     ForgotPasswordValidationErrors:
-      description: | 
+      description: |
         UNPROCESSABLE ENTITY
 
         #### ValidationErrors
@@ -729,7 +694,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationErrorResponse'
+            $ref: "#/components/schemas/ValidationErrorResponse"
           example:
             success: false
             error:
@@ -739,9 +704,8 @@ components:
               errors:
                 email: ["email validation errors appear in a string array"]
 
-
     ResetPasswordValidationErrors:
-      description: | 
+      description: |
         UNPROCESSABLE ENTITY
 
         #### ValidationErrors
@@ -754,7 +718,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationErrorResponse'
+            $ref: "#/components/schemas/ValidationErrorResponse"
           example:
             success: false
             error:
@@ -762,13 +726,13 @@ components:
               name: ValidationError
               message: The request could not be validated
               errors:
-                password: ["password validation errors appear in a string array"]
+                password:
+                  ["password validation errors appear in a string array"]
                 passwordConfirmation: ["should match with the password"]
                 token: ["The query parameter 'token' must not be empty"]
 
-
     SendVerificationEmailErrors:
-      description: | 
+      description: |
         BAD REQUEST
 
         #### ApiError
@@ -777,7 +741,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -785,9 +749,8 @@ components:
               name: "ApiError"
               message: "One of the api errors appears here"
 
-
     SendEmailInternalServerError:
-      description: | 
+      description: |
         INTERNAL SERVER ERROR
 
         #### SmtpError: SMTP server is out of service
@@ -795,7 +758,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -803,13 +766,12 @@ components:
               name: "SmtpError"
               message: "SMTP server is out of service"
 
-
     VerifyEmailTokenValidationError:
       description: UNPROCESSABLE ENTITY
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationErrorResponse'
+            $ref: "#/components/schemas/ValidationErrorResponse"
           example:
             success: false
             error:
@@ -819,13 +781,12 @@ components:
               errors:
                 token: ["The query parameter 'token' must not be empty"]
 
-
     DisabledForbiddenError:
       description: FORBIDDEN
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -833,13 +794,12 @@ components:
               name: "ApiError"
               message: "You are disabled, call the system administrator"
 
-
     ParamIdValidationError:
       description: UNPROCESSABLE ENTITY
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationErrorResponse'
+            $ref: "#/components/schemas/ValidationErrorResponse"
           example:
             success: false
             error:
@@ -848,7 +808,6 @@ components:
               message: The request could not be validated
               errors:
                 id: ["The param id must be a 24-character number"]
-
 
     AuthUserQueryParamsValidationErrors:
       description: |
@@ -866,7 +825,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationErrorResponse'
+            $ref: "#/components/schemas/ValidationErrorResponse"
           example:
             success: false
             error:
@@ -875,12 +834,13 @@ components:
               message: The request could not be validated
               errors:
                 email: ["The query param 'email' must be in valid form"]
-                isDisabled: ["The query param 'isDisabled' must be boolean value"]
-                isEmailVerified: ["The query param 'isEmailVerified' must be boolean value"]
+                isDisabled:
+                  ["The query param 'isDisabled' must be boolean value"]
+                isEmailVerified:
+                  ["The query param 'isEmailVerified' must be boolean value"]
                 page: ["The query param 'page' must be numeric value"]
                 size: ["The query param 'size' can be at most 50"]
                 sort: ["The parameter can only appear once in the query string"]
-
 
     ChangePasswordValidationErrors:
       description: |
@@ -897,7 +857,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationErrorResponse'
+            $ref: "#/components/schemas/ValidationErrorResponse"
           example:
             success: false
             error:
@@ -905,10 +865,11 @@ components:
               name: ValidationError
               message: The request could not be validated
               errors:
-                currentPassword: ["must not be empty", "incorrect current password"]
-                password: ["password validation errors appear in a string array"]
+                currentPassword:
+                  ["must not be empty", "incorrect current password"]
+                password:
+                  ["password validation errors appear in a string array"]
                 passwordConfirmation: ["should match with the password"]
-
 
     UserQueryParamsValidationErrors:
       description: |
@@ -928,7 +889,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationErrorResponse'
+            $ref: "#/components/schemas/ValidationErrorResponse"
           example:
             success: false
             error:
@@ -938,11 +899,11 @@ components:
               errors:
                 email: ["The query param 'email' must be in valid form"]
                 role: ["The query param 'role' could be one of admin, user"]
-                name: ["The query param 'name' must be minumum 2-length charachter"]
+                name:
+                  ["The query param 'name' must be minumum 2-length charachter"]
                 page: ["The query param 'page' must be numeric value"]
                 size: ["The query param 'size' can be at most 50"]
                 sort: ["The parameter can only appear once in the query string"]
-
 
     AddUserValidationErrors:
       description: |
@@ -967,7 +928,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationErrorResponse'
+            $ref: "#/components/schemas/ValidationErrorResponse"
           example:
             success: false
             error:
@@ -976,9 +937,11 @@ components:
               message: The request could not be validated
               errors:
                 email: ["email validation errors appear in a string array"]
-                body: ["There is no correspondent authenticated user with the same id and email"]
+                body:
+                  [
+                    "There is no correspondent authenticated user with the same id and email",
+                  ]
                 name: ["requires minimum 2 characters"]
-
 
     UpdateUserValidationErrors:
       description: |
@@ -998,7 +961,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationErrorResponse'
+            $ref: "#/components/schemas/ValidationErrorResponse"
           example:
             success: false
             error:
@@ -1006,10 +969,12 @@ components:
               name: ValidationError
               message: The request could not be validated
               errors:
-                body: ["The request body should contain at least one of the name, gender, country"]
+                body:
+                  [
+                    "The request body should contain at least one of the name, gender, country",
+                  ]
                 gender: ["could be male, female or none"]
                 country: ["must be 3-letter standart country code"]
-
 
     ChangeRoleValidationErrors:
       description: |
@@ -1025,7 +990,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationErrorResponse'
+            $ref: "#/components/schemas/ValidationErrorResponse"
           example:
             success: false
             error:
@@ -1037,13 +1002,12 @@ components:
                 id: ["The param id must be a 24-character number"]
                 role: ["role could be one of admin,user"]
 
-
     NoUserFound:
       description: NOT FOUND
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -1051,13 +1015,12 @@ components:
               name: "ApiError"
               message: "No user found"
 
-
     InternalServerError:
       description: INTERNAL SERVER ERROR
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -1065,13 +1028,12 @@ components:
               name: "ApiError"
               message: "Internal Server Error"
 
-
     Unauthorized:
       description: UNAUTHORIZED
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -1079,13 +1041,12 @@ components:
               name: "ApiError"
               message: "Unauthorized"
 
-
     Forbidden:
       description: FORBIDDEN
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             success: false
             error:
@@ -1093,10 +1054,9 @@ components:
               name: "ApiError"
               message: "Forbidden"
 
-
   ##################### PARAMETERS *********************
   parameters:
-    param-authuser-id:  
+    param-authuser-id:
       in: path
       name: id
       schema:
@@ -1196,7 +1156,6 @@ components:
 
   ##################### EXAPLES *********************
   examples:
-
     response-authuser:
       id: 6152fde5c127504eab292d24
       email: talatkuyuk@gmail.com
@@ -1204,7 +1163,6 @@ components:
       isDisabled: false
       createdAt: 1632828901965
       services: { "emailpassword": "registered" }
-
 
     response-tokens:
       access:
@@ -1214,71 +1172,71 @@ components:
         token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MTUyZmRlNWMxMjc1MDRlYWIyOTJkMjQiLCJpYXQiOjE2MzI4Mjg5MDIsImV4cCI6MTYzNTQyMDkwMiwianRpIjoiMGZmNmZkNzMzYjQ3NWQxY2EzZjMyZTYyN2RmMTQwNjEiLCJ1YSI6InZzY29kZS1yZXN0Y2xpZW50IiwidHlwZSI6InJlZnJlc2giLCJuYmYiOjE2MzI4NTA1MDJ9.mlBB7txKnFW6XPVO1eeQ9W9UkaOzaSIgIWGiDUGqAxg
         expires: 2021-10-28T11:35:02.042Z
 
-
     response-query-authusers:
       summary: it returns the authusers queried
       value:
         success: true,
-        data: {
-          authusers: [
-            {
-              id: 6152fde5c127504eab292d24,
-              email: user1@gmail.com,
-              isEmailVerified: false,
-              isDisabled: false,
-              createdAt: 1632828901111,
-              services: { emailpassword: registered }
-            },
-            {
-              id: 6152fde5c127504eab292d25,
-              email: user2@gmail.com,
-              isEmailVerified: false,
-              isDisabled: false,
-              createdAt: 1632828902222,
-              services: { emailpassword: unregistered, google: "63876327467767364" }
-            },
-          ],
-          totalCount: 2,
-          pagination: {
-            currentPage: 1,
-            totalPages: 1,
-            perPage: 20,
+        data:
+          {
+            authusers:
+              [
+                {
+                  id: 6152fde5c127504eab292d24,
+                  email: user1@gmail.com,
+                  isEmailVerified: false,
+                  isDisabled: false,
+                  createdAt: 1632828901111,
+                  services: { emailpassword: registered },
+                },
+                {
+                  id: 6152fde5c127504eab292d25,
+                  email: user2@gmail.com,
+                  isEmailVerified: false,
+                  isDisabled: false,
+                  createdAt: 1632828902222,
+                  services:
+                    {
+                      emailpassword: unregistered,
+                      google: "63876327467767364",
+                    },
+                },
+              ],
+            totalCount: 2,
+            pagination:
+              { pageIndex: 0, pageNumber: 1, pageCount: 1, pageSize: 20 },
           }
-        }
 
-                    
     response-query-users:
       summary: it returns the authusers queried
       value:
         success: true,
-        data: {
-          users: [
-            {
-              id: 6152fde5c127504eab292d24,
-              email: user1@gmail.com,
-              role: "admin",
-              name: "User1 Brown",
-              gender: "male",
-              country: "TUR",
-              createdAt: 1632828901111,
-            },
-            {
-              id: 6152fde5c127504eab292d25,
-              email: user2@gmail.com,
-              role: "admin",
-              name: "User2 Brown",
-              gender: "female",
-              country: "USA",
-              createdAt: 1632828902222,
-            },
-          ],
-          totalCount: 2,
-          pagination: {
-            currentPage: 1,
-            totalPages: 1,
-            perPage: 20,
+        data:
+          {
+            users:
+              [
+                {
+                  id: 6152fde5c127504eab292d24,
+                  email: user1@gmail.com,
+                  role: "admin",
+                  name: "User1 Brown",
+                  gender: "male",
+                  country: "TUR",
+                  createdAt: 1632828901111,
+                },
+                {
+                  id: 6152fde5c127504eab292d25,
+                  email: user2@gmail.com,
+                  role: "admin",
+                  name: "User2 Brown",
+                  gender: "female",
+                  country: "USA",
+                  createdAt: 1632828902222,
+                },
+              ],
+            totalCount: 2,
+            pagination:
+              { pageIndex: 0, pageNumber: 1, pageCount: 1, pageSize: 20 },
           }
-        }
 
     response-user:
       id: 6152fde5c127504eab292d24
@@ -1327,4 +1285,3 @@ components:
           scopes:
             email: https://www.googleapis.com/auth/userinfo.email
             profile: https://www.googleapis.com/auth/userinfo.profile
-            

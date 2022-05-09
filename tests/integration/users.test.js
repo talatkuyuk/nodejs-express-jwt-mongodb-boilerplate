@@ -233,9 +233,10 @@ describe("PATH /users", () => {
       // check the pagination
       expect(response.body.data.totalCount).toBe(9); // 3 of the users are deleted
       expect(response.body.data.pagination).toEqual({
-        currentPage: 1,
-        totalPages: 1,
-        perPage: 20,
+        pageIndex: 0,
+        pageNumber: 1,
+        pageCount: 1,
+        pageSize: 20,
       });
 
       // get an user (10th)
@@ -280,9 +281,10 @@ describe("PATH /users", () => {
       // check the pagination
       expect(response.body.data.totalCount).toBe(3); // 5 were disabled but one deleted
       expect(response.body.data.pagination).toEqual({
-        currentPage: 1,
-        totalPages: 1,
-        perPage: 20,
+        pageIndex: 0,
+        pageNumber: 1,
+        pageCount: 1,
+        pageSize: 20,
       });
 
       // query filter female; and check the count; and control the list
@@ -302,9 +304,10 @@ describe("PATH /users", () => {
       // check the pagination
       expect(response.body.data.totalCount).toBe(4); // 5 were female but one deleted
       expect(response.body.data.pagination).toEqual({
-        currentPage: 1,
-        totalPages: 2,
-        perPage: 2,
+        pageIndex: 0,
+        pageNumber: 1,
+        pageCount: 2,
+        pageSize: 2,
       });
 
       // get the second page
@@ -324,9 +327,10 @@ describe("PATH /users", () => {
       // check the pagination
       expect(response.body.data.totalCount).toBe(4); // 5 were female but one deleted
       expect(response.body.data.pagination).toEqual({
-        currentPage: 2,
-        totalPages: 2,
-        perPage: 2,
+        pageIndex: 1,
+        pageNumber: 2,
+        pageCount: 2,
+        pageSize: 2,
       });
 
       // change the role of the test user

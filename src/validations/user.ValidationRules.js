@@ -48,7 +48,24 @@ const once = (value) => {
   return true;
 };
 
+const only = (body) => {
+  const validKeys = [
+    "page",
+    "size",
+    "sort",
+    "email",
+    "role",
+    "name",
+    "gender",
+    "country",
+  ];
+  if (Object.keys(body).every((key) => validKeys.includes(key))) return true;
+  else throw new Error("Any extra parameter is not allowed");
+};
+
 const getUsers = [
+  body().custom(only),
+
   query("email")
     .custom(once)
     .trim()

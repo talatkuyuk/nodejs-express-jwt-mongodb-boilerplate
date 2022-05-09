@@ -5,14 +5,14 @@
     security:
       - BearerAuth: []
     parameters:
-      - $ref: '#/components/parameters/query-param-page'
-      - $ref: '#/components/parameters/query-param-size'
-      - $ref: '#/components/parameters/query-param-sort'
-      - $ref: '#/components/parameters/query-param-email'
-      - $ref: '#/components/parameters/query-param-role'
-      - $ref: '#/components/parameters/query-param-name'
-      - $ref: '#/components/parameters/query-param-gender'
-      - $ref: '#/components/parameters/query-param-country'
+      - $ref: "#/components/parameters/query-param-page"
+      - $ref: "#/components/parameters/query-param-size"
+      - $ref: "#/components/parameters/query-param-sort"
+      - $ref: "#/components/parameters/query-param-email"
+      - $ref: "#/components/parameters/query-param-role"
+      - $ref: "#/components/parameters/query-param-name"
+      - $ref: "#/components/parameters/query-param-gender"
+      - $ref: "#/components/parameters/query-param-country"
     responses:
       200:
         description: The list of the users with paginary info
@@ -30,34 +30,35 @@
                     users:
                       type: array
                       items:
-                        $ref: '#/components/schemas/user'
+                        $ref: "#/components/schemas/user"
                     totalCount:
                       type: number
                     pagination:
                       type: object
                       properties:
-                        currentPage:
+                        pageIndex:
                           type: number
-                        totalPages:
+                        pageNumber:
                           type: number
-                        perPage:
+                        pageCount:
+                          type: number
+                        pageSize:
                           type: number
             examples:
               _:
-                $ref: '#/components/examples/response-query-users'
+                $ref: "#/components/examples/response-query-users"
       401:
-        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
+        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
       422:
-        $ref: '#/components/responses/UserQueryParamsValidationErrors'
+        $ref: "#/components/responses/UserQueryParamsValidationErrors"
       500:
-        $ref: '#/components/responses/InternalServerError'
-
+        $ref: "#/components/responses/InternalServerError"
 
 /users/{id}:
   parameters:
-    - $ref: '#/components/parameters/param-user-id'
+    - $ref: "#/components/parameters/param-user-id"
 
   get:
     summary: Get an user
@@ -79,19 +80,19 @@
                   type: object
                   properties:
                     user:
-                      $ref: '#/components/schemas/user'
+                      $ref: "#/components/schemas/user"
                       example:
-                        $ref: '#components/examples/response-user'
+                        $ref: "#components/examples/response-user"
       401:
-        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
+        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
       404:
-        $ref: '#/components/responses/NoUserFound'
+        $ref: "#/components/responses/NoUserFound"
       422:
-        $ref: '#/components/responses/ParamIdValidationError'
+        $ref: "#/components/responses/ParamIdValidationError"
       500:
-        $ref: '#/components/responses/InternalServerError'
+        $ref: "#/components/responses/InternalServerError"
 
   post:
     summary: Add an user
@@ -103,10 +104,10 @@
       content:
         application/x-www-form-urlencoded:
           schema:
-            $ref: '#/components/schemas/form-add-user'
+            $ref: "#/components/schemas/form-add-user"
         application/json:
           schema:
-            $ref: '#/components/schemas/form-add-user'
+            $ref: "#/components/schemas/form-add-user"
     responses:
       201:
         description: Created
@@ -122,17 +123,17 @@
                   type: object
                   properties:
                     user:
-                      $ref: '#/components/schemas/user'
+                      $ref: "#/components/schemas/user"
                       example:
-                        $ref: '#components/examples/response-user'
+                        $ref: "#components/examples/response-user"
       401:
-        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
+        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
       422:
-        $ref: '#/components/responses/AddUserValidationErrors'
+        $ref: "#/components/responses/AddUserValidationErrors"
       500:
-        $ref: '#/components/responses/InternalServerError'
+        $ref: "#/components/responses/InternalServerError"
 
   put:
     summary: Update an user
@@ -144,23 +145,23 @@
       content:
         application/x-www-form-urlencoded:
           schema:
-            $ref: '#/components/schemas/form-update-user'
+            $ref: "#/components/schemas/form-update-user"
         application/json:
           schema:
-            $ref: '#/components/schemas/form-update-user'
+            $ref: "#/components/schemas/form-update-user"
     responses:
       200:
-        $ref: '#/components/responses/SuccessResponse'
+        $ref: "#/components/responses/SuccessResponse"
       401:
-        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
+        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
       404:
-        $ref: '#/components/responses/NoUserFound'
+        $ref: "#/components/responses/NoUserFound"
       422:
-        $ref: '#/components/responses/UpdateUserValidationErrors'
+        $ref: "#/components/responses/UpdateUserValidationErrors"
       500:
-        $ref: '#/components/responses/InternalServerError'
+        $ref: "#/components/responses/InternalServerError"
 
   patch:
     summary: Change the user role
@@ -172,23 +173,23 @@
       content:
         application/x-www-form-urlencoded:
           schema:
-            $ref: '#/components/schemas/form-change-role'
+            $ref: "#/components/schemas/form-change-role"
         application/json:
           schema:
-            $ref: '#/components/schemas/form-change-role'
+            $ref: "#/components/schemas/form-change-role"
     responses:
       200:
-        $ref: '#/components/responses/SuccessResponse'
+        $ref: "#/components/responses/SuccessResponse"
       401:
-        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
+        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
       404:
-        $ref: '#/components/responses/NoUserFound'
+        $ref: "#/components/responses/NoUserFound"
       422:
-        $ref: '#/components/responses/ChangeRoleValidationErrors'
+        $ref: "#/components/responses/ChangeRoleValidationErrors"
       500:
-        $ref: '#/components/responses/InternalServerError'
+        $ref: "#/components/responses/InternalServerError"
 
   delete:
     summary: Delete an user
@@ -197,14 +198,14 @@
       - BearerAuth: []
     responses:
       200:
-        $ref: '#/components/responses/SuccessResponse'
+        $ref: "#/components/responses/SuccessResponse"
       401:
-        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors'
+        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
       404:
-        $ref: '#/components/responses/NoUserFound'
+        $ref: "#/components/responses/NoUserFound"
       422:
-        $ref: '#/components/responses/ParamIdValidationError'
+        $ref: "#/components/responses/ParamIdValidationError"
       500:
-        $ref: '#/components/responses/InternalServerError'
+        $ref: "#/components/responses/InternalServerError"

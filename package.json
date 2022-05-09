@@ -66,6 +66,7 @@
     "cross-env": "^7.0.3",
     "jest": "^27.4.7",
     "node-mocks-http": "^1.11.0",
+    "nodemon": "^2.0.15",
     "prettier": "^2.5.1",
     "shelljs": "^0.8.5",
     "supertest": "^6.2.2"
