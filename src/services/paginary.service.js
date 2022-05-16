@@ -1,4 +1,3 @@
-const Utils = require("../utils/Utils");
 const { traceError } = require("../utils/errorUtils");
 
 const paginary = async (query, filter, sort, dbQueryCallback) => {

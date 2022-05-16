@@ -38,29 +38,6 @@ describe("Validate Middleware : Athuser validation rules", () => {
       });
     });
 
-    test("getAuthUsers: should throw error 422, if the query param email is not valid email", async () => {
-      const request = {
-        query: { email: "email@xxx" }, // invalid email form
-      };
-
-      const req = httpMocks.createRequest(request);
-      const res = httpMocks.createResponse();
-      const next = jest.fn();
-
-      await validate(authuserValidation.getAuthUsers)(req, res, next);
-
-      expect(next).toHaveBeenCalledTimes(1);
-      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-
-      // obtain the error from the next function
-      const err = next.mock.calls[0][0];
-
-      TestUtil.validationErrorInMiddleware(err);
-      expect(err.errors).toEqual({
-        email: ["The query param 'email' must be in valid form"],
-      });
-    });
-
     test("getAuthUsers: should throw error 422, if the query param isDisabled is not boolean value", async () => {
       const request = {
         query: { isDisabled: "5" }, // is not boolean

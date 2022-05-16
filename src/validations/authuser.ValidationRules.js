@@ -17,13 +17,7 @@ const once = (value) => {
 };
 
 const getAuthUsers = [
-  query("email")
-    .custom(once)
-    .trim()
-    .toLowerCase()
-    .isEmail()
-    .withMessage("The query param 'email' must be in valid form")
-    .optional(),
+  query("email").custom(once).trim().toLowerCase().optional(),
 
   query("isDisabled")
     .custom(once)

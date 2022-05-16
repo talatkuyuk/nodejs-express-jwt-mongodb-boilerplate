@@ -877,9 +877,8 @@ components:
 
         #### ValidationErrors
         * _The parameter can only appear once in the query string_
-        * _The query param 'email' must be in valid form_
         * _The query param 'role' could be one of admin, user_
-        * _The query param 'name' must be minumum 2-length charachter_
+        * _The query param 'name' must be minumum 1-length charachter_
         * _The query param 'gender' could be only male, female or none_
         * _The query param 'country' code must be in the form of 3-letter standart country code_
         * _The query param 'page' must be numeric value_
