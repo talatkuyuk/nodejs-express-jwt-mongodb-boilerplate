@@ -39,30 +39,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
       });
     });
 
-    test("getUsers: should throw error 422, if the query param email is not valid email", async () => {
-      const request = {
-        query: { email: "email@xxx" }, // invalid email form
-      };
-
-      const req = httpMocks.createRequest(request);
-      const res = httpMocks.createResponse();
-      const next = jest.fn();
-
-      await validate(userValidation.getUsers)(req, res, next);
-
-      expect(next).toHaveBeenCalledTimes(1);
-      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-
-      // obtain the error from the next function
-      const err = next.mock.calls[0][0];
-
-      TestUtil.validationErrorInMiddleware(err);
-      expect(err.errors).toEqual({
-        email: ["The query param 'email' must be in valid form"],
-      });
-    });
-
-    test("getUsers: should throw error 422, if the query param name is less than 2-length charachter", async () => {
+    test("getUsers: should throw error 422, if the query param name is less than 1-length charachter", async () => {
       const request = {
         query: { name: "" }, // less than two
       };
@@ -81,7 +58,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
       TestUtil.validationErrorInMiddleware(err);
       expect(err.errors).toEqual({
-        name: ["The query param 'name' must be minumum 2-length charachter"],
+        name: ["The query param 'name' must be minumum 1-length charachter"],
       });
     });
 
@@ -253,7 +230,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     test("getUsers: should continue next middleware if the query params are valid", async () => {
       const request = {
         query: {
-          email: "email@xxx.com",
+          email: "gmail",
           name: "ta",
           gender: "female",
           country: "TUR",

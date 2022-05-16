@@ -66,20 +66,13 @@ const only = (body) => {
 const getUsers = [
   body().custom(only),
 
-  query("email")
-    .custom(once)
-    .trim()
-    .toLowerCase()
-    .isEmail()
-    .withMessage("The query param 'email' must be in valid form")
-    .optional(),
+  query("email").custom(once).trim().toLowerCase().optional(),
 
   query("name")
     .custom(once)
     .trim()
-    .toLowerCase()
-    .isLength({ min: 2 })
-    .withMessage("The query param 'name' must be minumum 2-length charachter")
+    .isLength({ min: 1 })
+    .withMessage("The query param 'name' must be minumum 1-length charachter")
     .optional(),
 
   query("gender")
