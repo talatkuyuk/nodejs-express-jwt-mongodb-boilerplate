@@ -1,15 +1,14 @@
-const httpStatus = require('http-status');
+const httpStatus = require("http-status");
 
-const ApiError = require('../utils/ApiError');
-const { traceError } = require('../utils/errorUtils');
-const composeFilter = require('../utils/composeFilter');
-const composeSort = require('../utils/composeSort');
-const { User } = require('../models');
+const ApiError = require("../utils/ApiError");
+const { traceError } = require("../utils/errorUtils");
+const composeFilter = require("../utils/composeFilter");
+const composeSort = require("../utils/composeSort");
+const { User } = require("../models");
 
 // SERVICE DEPENDENCIES
-const paginaryService = require('./paginary.service');
-const userDbService = require('./user.db.service');
-
+const paginaryService = require("./paginary.service");
+const userDbService = require("./user.db.service");
 
 /////////////////////////  UTILS  ///////////////////////////////////////
 
@@ -18,19 +17,16 @@ const userDbService = require('./user.db.service');
  * @param {String} id
  * @returns {Promise<Boolean>}
  */
- const isExist = async function (id) {
-	try {
-		const user = await userDbService.getUser({ id });
-	   	return !!user;
-
-	} catch (error) {
-	   throw traceError(error, "UserService : isExist");
-	}
+const isExist = async function (id) {
+  try {
+    const user = await userDbService.getUser({ id });
+    return !!user;
+  } catch (error) {
+    throw traceError(error, "UserService : isExist");
+  }
 };
 
-
 /////////////////////////////////////////////////////////////////////
-
 
 /**
  * Add user with the same authuser.id
@@ -38,85 +34,89 @@ const userDbService = require('./user.db.service');
  * @param {Object} addBody
  * @returns {Promise<User>}
  */
- const addUser = async (id, addBody) => {
-	try {
-		const {email, role, name, gender, country} = addBody;
-		const userx = new User(email, role, name, gender, country);
+const addUser = async (id, addBody) => {
+  try {
+    const { email, role, name, gender, country } = addBody;
+    const userx = new User(email, role, name, gender, country);
 
-		const user = await userDbService.addUser(id, userx);
-		
-		if (!user)
-			throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
+    const user = await userDbService.addUser(id, userx);
 
-		return user;
+    if (!user)
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "The database could not process the request"
+      );
 
-	} catch (error) {
-		throw traceError(error, "UserService : addUser");
-	}
-}
+    return user;
+  } catch (error) {
+    throw traceError(error, "UserService : addUser");
+  }
+};
 
 /**
  * Get User by id
  * @param {string} id
  * @returns {Promise<User?>}
  */
- const getUserById = async (id) => {
-	try {
-		const user = await userDbService.getUser({ id });
-		if (!user) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
-		
-		return user;
-  
-	} catch (error) {
-		throw traceError(error, "UserService : getUserById");
-	}
+const getUserById = async (id) => {
+  try {
+    const user = await userDbService.getUser({ id });
+    if (!user) throw new ApiError(httpStatus.NOT_FOUND, "No user found");
+
+    return user;
+  } catch (error) {
+    throw traceError(error, "UserService : getUserById");
+  }
 };
-
-
 
 /**
  * Get User by email
  * @param {string} email
  * @returns {Promise<User?>}
  */
- const getUserByEmail = async (email) => {
-	try {
-		const user = await userDbService.getUser({ email });
-		if (!user) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+const getUserByEmail = async (email) => {
+  try {
+    const user = await userDbService.getUser({ email });
+    if (!user) throw new ApiError(httpStatus.NOT_FOUND, "No user found");
 
-		return user;
-  
-	} catch (error) {
-		throw traceError(error, "UserService : getUserByEmail");
-	}
+    return user;
+  } catch (error) {
+    throw traceError(error, "UserService : getUserByEmail");
+  }
 };
-
-
 
 /**
  * Get Users in a paginary
  * @param {Object} query
  * @returns {Promise<Object>}
  */
- const getUsers = async (query) => {
-	try {
+const getUsers = async (query) => {
+  try {
+    const fields = {
+      stringFields: ["email", "role", "name", "country", "gender", "createdAt"],
+    };
+    const filter = composeFilter(query, fields);
 
-		const fields = {
-			stringFields: ['email', 'role', 'name', 'country', 'gender'],
-		}
-		const filter = composeFilter(query, fields);
+    const sortingFields = [
+      "email",
+      "role",
+      "name",
+      "country",
+      "gender",
+      "createdAt",
+    ];
+    const sort = composeSort(query, sortingFields);
 
-		const sortingFields = ['email', 'role', 'name', 'country', 'gender', 'createdAt'];
-		const sort = composeSort(query, sortingFields);
-		
-		return await paginaryService.paginary(query, filter, sort, userDbService.getUsers);
-  
-	} catch (error) {
-		throw traceError(error, "UserService : getUsers");
-	}
+    return await paginaryService.paginary(
+      query,
+      filter,
+      sort,
+      userDbService.getUsers
+    );
+  } catch (error) {
+    throw traceError(error, "UserService : getUsers");
+  }
 };
-
-
 
 /**
  * Update user by id
@@ -124,67 +124,58 @@ const userDbService = require('./user.db.service');
  * @param {Object} updateBody
  * @returns {Promise<User?>}
  */
- const updateUser = async (id, updateBody) => {
-	try {
-		const user = await userDbService.updateUser(id, updateBody);
+const updateUser = async (id, updateBody) => {
+  try {
+    const user = await userDbService.updateUser(id, updateBody);
 
-		if (user === null)
-			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
-		
-		return user;
-		
-	} catch (error) {
-	   throw traceError(error, "UserService : updateUser");
-	}
+    if (user === null)
+      throw new ApiError(httpStatus.NOT_FOUND, "No user found");
+
+    return user;
+  } catch (error) {
+    throw traceError(error, "UserService : updateUser");
+  }
 };
-
-
 
 /**
  * Delete User
  * @param {string} id
  * @returns {Promise}
  */
- const deleteUser = async (id) => {
-	try {
-		const result = await userDbService.deleteUser(id);
+const deleteUser = async (id) => {
+  try {
+    const result = await userDbService.deleteUser(id);
 
-		if (!result)
-			throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
-  
-	} catch (error) {
-		throw traceError(error, "UserService : deleteUser");
-	}
+    if (!result) throw new ApiError(httpStatus.NOT_FOUND, "No user found");
+  } catch (error) {
+    throw traceError(error, "UserService : deleteUser");
+  }
 };
-
-
 
 /**
  * Get Deleted User by id
  * @param {string} id
  * @returns {Promise<User?>}
  */
- const getDeletedUserById = async (id) => {
-	try {
-		const user = await userDbService.getDeletedUser({ id });
-		if (!user) throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
+const getDeletedUserById = async (id) => {
+  try {
+    const user = await userDbService.getDeletedUser({ id });
+    if (!user) throw new ApiError(httpStatus.NOT_FOUND, "No user found");
 
-		return user;
-  
-	} catch (error) {
-		throw traceError(error, "UserService : getDeletedUserById");
-	}
+    return user;
+  } catch (error) {
+    throw traceError(error, "UserService : getDeletedUserById");
+  }
 };
 
-
 module.exports = {
-	isExist,
+  isExist,
 
-	addUser,
-	getUserById,
-	getUserByEmail,
-	getUsers,
-	updateUser,
-	deleteUser,
-	getDeletedUserById,
+  addUser,
+  getUserById,
+  getUserByEmail,
+  getUsers,
+  updateUser,
+  deleteUser,
+  getDeletedUserById,
 };

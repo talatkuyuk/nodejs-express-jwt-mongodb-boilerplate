@@ -59,13 +59,48 @@ const getAuthUser = async (query) => {
  * @returns {Promise<QueryResult>}
  */
 const getAuthUsers = async (filter, sort, skip, limit) => {
-  const { email, ...rest } = filter;
-  const matchEmail = email ? { email: { $regex: email } } : {};
+  let matchEmail = {};
+  let matchDate = {};
+
+  const { email, createdAt, ...rest } = filter;
+
+  if (email) matchEmail = { email: { $regex: email } };
+
+  if (createdAt) {
+    var [startDate, endDate] = createdAt.split("-");
+
+    const parsedStartDate = Date.parse(startDate); // unix timestamp
+    const parsedEndDate = Date.parse(endDate); // unix timestamp
+
+    isDateStart = !isNaN(parsedStartDate);
+    isDateEnd = !isNaN(parsedEndDate);
+
+    if (isDateStart && isDateEnd) {
+      matchDate = {
+        createdAt: {
+          $gte: parsedStartDate,
+          $lte: parsedEndDate,
+        },
+      };
+    } else if (isDateStart) {
+      matchDate = {
+        createdAt: {
+          $gte: parsedStartDate,
+        },
+      };
+    } else if (isDateEnd) {
+      matchDate = {
+        createdAt: {
+          $lte: parsedEndDate,
+        },
+      };
+    }
+  }
 
   try {
     const pipeline = [
       {
-        $match: { ...matchEmail, ...rest },
+        $match: { ...matchEmail, ...matchDate, ...rest },
       },
       {
         $project: {
