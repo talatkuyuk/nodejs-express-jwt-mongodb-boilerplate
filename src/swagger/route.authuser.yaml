@@ -133,7 +133,26 @@
         $ref: "#/components/responses/InternalServerError"
 
   put:
-    summary: Disable or able an authuser
+    summary: Disable or enable an authuser (toggle)
+    tags: [AuthUsers]
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        $ref: "#/components/responses/SuccessResponse"
+      401:
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+      403:
+        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+      404:
+        $ref: "#/components/responses/NoUserFound"
+      422:
+        $ref: "#/components/responses/ParamIdValidationError"
+      500:
+        $ref: "#/components/responses/InternalServerError"
+
+  post:
+    summary: Change email verification status of an authuser (toggle)
     tags: [AuthUsers]
     security:
       - BearerAuth: []

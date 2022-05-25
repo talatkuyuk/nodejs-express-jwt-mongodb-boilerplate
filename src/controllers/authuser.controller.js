@@ -94,6 +94,18 @@ const toggleAbility = asyncHandler(async (req, res) => {
   }
 });
 
+const toggleVerification = asyncHandler(async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    await authuserService.toggleVerification(id);
+
+    res.status(httpStatus.OK).send(success);
+  } catch (error) {
+    throw traceError(error, "AuthUserController : toggleVerification");
+  }
+});
+
 const deleteAuthUser = asyncHandler(async (req, res) => {
   try {
     const id = req.params.id;
@@ -114,5 +126,6 @@ module.exports = {
   getAuthUsers,
   changePassword,
   toggleAbility,
+  toggleVerification,
   deleteAuthUser,
 };

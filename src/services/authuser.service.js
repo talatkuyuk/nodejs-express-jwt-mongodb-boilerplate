@@ -159,6 +159,26 @@ const toggleAbility = async (id) => {
 };
 
 /**
+ * Toggle email verification status of an AuthUser
+ * @param {string} id
+ * @returns {Promise}
+ */
+const toggleVerification = async (id) => {
+  try {
+    // to get authuser first is necessary to toggle verification further
+    const authuser = await authuserDbService.getAuthUser({ id });
+
+    if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, "No user found");
+
+    await authuserDbService.updateAuthUser(id, {
+      isEmailVerified: !authuser.isEmailVerified,
+    });
+  } catch (error) {
+    throw traceError(error, "AuthUserService : toggleVerification");
+  }
+};
+
+/**
  * Change password
  * @param {string} id
  * @param {string} currentPassword
@@ -219,6 +239,7 @@ module.exports = {
   getAuthUserByEmail,
   getAuthUsers,
   toggleAbility,
+  toggleVerification,
   changePassword,
   deleteAuthUser,
   getDeletedAuthUserById,

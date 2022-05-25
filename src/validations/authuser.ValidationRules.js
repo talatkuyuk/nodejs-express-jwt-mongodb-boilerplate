@@ -98,6 +98,8 @@ const changePassword = [
 
 const toggleAuthUser = [...check_param_id];
 
+const verifyAuthUser = [...check_param_id];
+
 const deleteAuthUser = [...check_param_id];
 
 module.exports = {
@@ -106,5 +108,6 @@ module.exports = {
   getAuthUsers,
   changePassword,
   toggleAuthUser,
+  verifyAuthUser,
   deleteAuthUser,
 };
