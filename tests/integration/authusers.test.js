@@ -182,11 +182,18 @@ describe("PATH /authusers", () => {
       // update 5th and 10th as email verified
       for (let i = 1; i <= 10; i++) {
         if (i % 5 === 0) {
-          const updatedAuthuser = await authuserDbService.updateAuthUser(
-            authusers[i - 1]["id"],
-            { isEmailVerified: true }
-          );
+          await request(app)
+            .post(`/authusers/${authusers[i - 1]["id"]}`)
+            .set("User-Agent", userAgent)
+            .set("Authorization", `Bearer ${adminAccessToken}`)
+            .send()
+            .expect(httpStatus.OK);
+
           localDb[authusers[i - 1]["email"]].isEmailVerified = true;
+
+          const updatedAuthuser = await authuserDbService.getAuthUser({
+            id: authusers[i - 1]["id"],
+          });
           localDb[authusers[i - 1]["email"]].updatedAt =
             updatedAuthuser.updatedAt;
         }
@@ -388,6 +395,7 @@ describe("PATH /authusers", () => {
 		- try to get an authuser that not exists
 		- try to get authusers with wrong parameters
 		- try to disable an authuser that not exists
+    - try to change email verification status of an authuser that not exists
 		- try to delete an authuser that not exists
 		- try to change another authuser's password
 		- try to change password with validation errors
@@ -462,6 +470,17 @@ describe("PATH /authusers", () => {
       // try to disable an authuser that not exists
       response = await request(app)
         .put("/authusers/123456789012345678901234")
+        .set("User-Agent", userAgent)
+        .set("Authorization", `Bearer ${adminAccessToken}`)
+        .send();
+
+      TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
+      expect(response.body.error.name).toBe("ApiError");
+      expect(response.body.error.message).toBe("No user found");
+
+      // try to change email verification status of an authuser that not exists
+      response = await request(app)
+        .post("/authusers/123456789012345678901234")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send();

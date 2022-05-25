@@ -541,6 +541,69 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
   });
 
+  describe("verifyAuthUser validation", () => {
+    test("verifyAuthUser: should throw error 422, if the param id is not 24-length character", async () => {
+      const request = {
+        params: { id: "1234567890" }, // 10-length string, invalid id
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authuserValidation.verifyAuthUser)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        id: ["The param id must be a 24-character number"],
+      });
+    });
+
+    test("verifyAuthUser: should throw error 422, if the param id is self", async () => {
+      const request = {
+        params: { id: "self" }, // self is not valid here
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authuserValidation.verifyAuthUser)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        id: ["The param id must be a 24-character number"],
+      });
+    });
+
+    test("verifyAuthUser: should continue next middleware if the param id is valid", async () => {
+      const request = {
+        params: { id: "123456789012345678901234" }, // 24-length string, valid id
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authuserValidation.verifyAuthUser)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith();
+    });
+  });
+
   describe("deleteAuthUser validation", () => {
     test("deleteAuthUser: should throw error 422, if the param id is not 24-length character", async () => {
       const request = {
