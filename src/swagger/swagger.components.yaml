@@ -1153,6 +1153,14 @@ components:
         type: string
       description: optional, 3-letter standard country code
 
+    query-param-method:
+      in: query
+      name: method
+      required: true
+      schema:
+        type: string
+      description: token or code as a string
+
   ##################### EXAPLES *********************
   examples:
     response-authuser:
@@ -1252,14 +1260,14 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-    BearerAuth_WithGoogleIdToken:
+    BearerAuth_WithGoogleIdTokenOrAuthCode:
       type: http
       scheme: bearer
-      bearerFormat: google idToken or facebook accessToken
+      bearerFormat: Bearer <google-idToken> or Bearer <google-authCode>
     BearerAuth_WithFacebookAccessToken:
       type: http
       scheme: bearer
-      bearerFormat: google idToken or facebook accessToken
+      bearerFormat: Bearer <facebook accessToken>
     google_id_token:
       type: "oauth2"
       description: This API uses OAuth 2 with the implicit grand flow.
