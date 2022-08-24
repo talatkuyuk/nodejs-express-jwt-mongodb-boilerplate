@@ -1,66 +1,85 @@
-const axios = require('axios');
-const moment = require('moment');
-const {OAuth2Client} = require('google-auth-library');
+const axios = require("axios");
+const moment = require("moment");
+const { OAuth2Client } = require("google-auth-library");
 
-const config = require('../config');
-const { traceError } = require('../utils/errorUtils');
+const config = require("../config");
+const { traceError } = require("../utils/errorUtils");
 
+const google = async (idtoken_or_code, method) => {
+  try {
+    const client = new OAuth2Client(
+      config.google_client_id,
+      config.google_client_secret,
+      "postmessage"
+    );
 
-const google = async (idToken) => {
-	try {
-		const client = new OAuth2Client(config.google_client_id);
+    let idToken;
 
-		const ticket = await client.verifyIdToken({
-			idToken,
-			audience: config.google_client_id,
-		});
+    // if it is a google id token
+    if (method === "token") {
+      idToken = idtoken_or_code;
+    }
 
-		const { sub: id, email, exp } = ticket.getPayload();
+    // if it is a google authorization code
+    if (method === "code") {
+      console.log(idtoken_or_code);
+      const code = idtoken_or_code;
+      const response = await client.getToken(code);
+      idToken = response.tokens.id_token;
+    }
 
-		const expiresIn = exp - moment().unix(); // expires in: the difference
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: config.google_client_id,
+    });
 
-		const google_response = {
-			provider: "google",
-			token: idToken,
-			expiresIn,
-			user: { id, email }
-		}
+    const { sub: id, email, exp } = ticket.getPayload();
 
-		console.log(google_response)
+    const expiresIn = exp - moment().unix(); // expires in: the difference
 
-		return google_response;
+    const google_response = {
+      provider: "google",
+      token: idToken,
+      expiresIn,
+      user: { id, email },
+    };
 
-	} catch (error) {
-		throw traceError(error, "AuthProviders : google");
-	}
+    console.log(google_response);
+
+    return google_response;
+  } catch (error) {
+    if (error.message === "invalid_grant") {
+      error.message = "The getToken method requires an authorization code";
+    }
+    throw traceError(error, "AuthProviders : google");
+  }
 };
 
-const facebook = async (access_token) => {
-	try {
-		const url = 'https://graph.facebook.com/v11.0/me';
-		const params = { access_token, fields: 'id, email' };
+const facebook = async (access_token, method) => {
+  try {
+    const url = "https://graph.facebook.com/v11.0/me";
+    const params = { access_token, fields: "id, email" };
 
-		const response = await axios.get(url, { params });
+    const response = await axios.get(url, { params });
 
-		const { id, email } = response.data;
+    const { id, email } = response.data;
 
-		const expiresIn = 60 * 60 * 24 * 60; // expires in: facebook tokens has long life aproximetly 60 days;
+    const expiresIn = 60 * 60 * 24 * 60; // expires in: facebook tokens has long life aproximetly 60 days;
 
-		const facebook_response = {
-			provider: "facebook",
-			token: access_token,
-			expiresIn,
-			user: { id, email }
-		}
+    const facebook_response = {
+      provider: "facebook",
+      token: access_token,
+      expiresIn,
+      user: { id, email },
+    };
 
-		return facebook_response;
-
-	} catch (error) {
-		throw traceError(error, "AuthProviders : facebook");
-	}
+    return facebook_response;
+  } catch (error) {
+    throw traceError(error, "AuthProviders : facebook");
+  }
 };
 
 module.exports = {
-	google,
-	facebook
+  google,
+  facebook,
 };

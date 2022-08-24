@@ -21,6 +21,7 @@ src/ssl/
 .DS_Store
 .rest_client/
 out/
+google-oauth2.json
 
 # Dependency directories
 node_modules/

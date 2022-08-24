@@ -747,4 +747,88 @@ describe("Validate Middleware : Auth validation rules", () => {
       expect(next).toHaveBeenCalledWith();
     });
   });
+
+  describe("google validation", () => {
+    test("google: should throw error 422, if the query param method is empty", async () => {
+      const request = {
+        query: { method: "" },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authValidation.googleValidationRules)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        method: ["query param 'method' is missing"],
+      });
+    });
+
+    test("google: should throw error 422, if the query param method is not code or token", async () => {
+      const request = {
+        query: {
+          method: "idToken",
+        },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authValidation.googleValidationRules)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        method: ["The query param 'method' could be only token or code"],
+      });
+    });
+
+    test("google: should continue next middleware if the query param method is valid (code)", async () => {
+      const request = {
+        query: {
+          method: "code",
+        },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authValidation.googleValidationRules)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith();
+    });
+
+    test("google: should continue next middleware if the query param method is valid (token)", async () => {
+      const request = {
+        query: {
+          method: "token",
+        },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authValidation.googleValidationRules)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith();
+    });
+  });
 });

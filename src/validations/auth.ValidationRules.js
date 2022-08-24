@@ -1,4 +1,4 @@
-const { body } = require("express-validator");
+const { body, query } = require("express-validator");
 const {
   check_body_email,
   check_body_email_isTaken,
@@ -54,6 +54,15 @@ const verifyEmailValidationRules = [
   body("token").notEmpty().withMessage("token is missing"),
 ];
 
+const googleValidationRules = [
+  query("method")
+    .notEmpty()
+    .withMessage("query param 'method' is missing")
+    .bail()
+    .isIn(["token", "code"])
+    .withMessage("The query param 'method' could be only token or code"),
+];
+
 module.exports = {
   loginValidationRules,
   signupValidationRules,
@@ -61,4 +70,5 @@ module.exports = {
   forgotPasswordValidationRules,
   resetPasswordValidationRules,
   verifyEmailValidationRules,
+  googleValidationRules,
 };

@@ -9,10 +9,10 @@
       content:
         application/x-www-form-urlencoded:
           schema:
-            $ref: '#/components/schemas/form-signup'
+            $ref: "#/components/schemas/form-signup"
         application/json:
           schema:
-            $ref: '#/components/schemas/form-signup'
+            $ref: "#/components/schemas/form-signup"
     responses:
       201:
         description: Created
@@ -28,18 +28,17 @@
                   type: object
                   properties:
                     authuser:
-                      $ref: '#/components/schemas/authuser'
+                      $ref: "#/components/schemas/authuser"
                       example:
-                        $ref: '#components/examples/response-authuser'
+                        $ref: "#components/examples/response-authuser"
                     tokens:
-                      $ref: '#/components/schemas/tokens'
+                      $ref: "#/components/schemas/tokens"
                       example:
-                        $ref: '#components/examples/response-tokens'
+                        $ref: "#components/examples/response-tokens"
       422:
-        $ref: '#/components/responses/SignUpValidationErrors'
+        $ref: "#/components/responses/SignUpValidationErrors"
       500:
-        $ref: '#/components/responses/InternalServerError'
-
+        $ref: "#/components/responses/InternalServerError"
 
 ### LOGIN ###
 /auth/login:
@@ -52,10 +51,10 @@
       content:
         application/x-www-form-urlencoded:
           schema:
-            $ref: '#/components/schemas/form-login'
+            $ref: "#/components/schemas/form-login"
         application/json:
           schema:
-            $ref: '#/components/schemas/form-login'
+            $ref: "#/components/schemas/form-login"
     responses:
       200:
         description: OK
@@ -71,24 +70,23 @@
                   type: object
                   properties:
                     authuser:
-                      $ref: '#/components/schemas/authuser'
+                      $ref: "#/components/schemas/authuser"
                       example:
-                        $ref: '#components/examples/response-authuser'
+                        $ref: "#components/examples/response-authuser"
                     tokens:
-                      $ref: '#/components/schemas/tokens'
+                      $ref: "#/components/schemas/tokens"
                       example:
-                        $ref: '#components/examples/response-tokens'
+                        $ref: "#components/examples/response-tokens"
       401:
-        $ref: '#/components/responses/LoginUnauthorizedFailures'
+        $ref: "#/components/responses/LoginUnauthorizedFailures"
       403:
-        $ref: '#/components/responses/DisabledForbiddenError'
+        $ref: "#/components/responses/DisabledForbiddenError"
       404:
-        $ref: '#/components/responses/NoUserFound'
+        $ref: "#/components/responses/NoUserFound"
       422:
-        $ref: '#/components/responses/LoginValidationErrors'
+        $ref: "#/components/responses/LoginValidationErrors"
       500:
-        $ref: '#/components/responses/InternalServerError'
-
+        $ref: "#/components/responses/InternalServerError"
 
 ### LOGOUT ###
 /auth/logout:
@@ -100,16 +98,15 @@
       - BearerAuth: []
     responses:
       200:
-        $ref: '#/components/responses/SuccessResponse'
+        $ref: "#/components/responses/SuccessResponse"
       401:
-        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
       402:
-        $ref: '#/components/responses/LogoutSignoutUnauthorizedErrors'
+        $ref: "#/components/responses/LogoutSignoutUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/AuthenticateMiddlewareForbiddenErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareForbiddenErrors"
       500:
-        $ref: '#/components/responses/InternalServerError'
-
+        $ref: "#/components/responses/InternalServerError"
 
 ### SIGNOUT ###
 /auth/signout:
@@ -121,14 +118,13 @@
       - BearerAuth: []
     responses:
       200:
-        $ref: '#/components/responses/SuccessResponse'
+        $ref: "#/components/responses/SuccessResponse"
       401:
-        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/AuthenticateMiddlewareForbiddenErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareForbiddenErrors"
       500:
-        $ref: '#/components/responses/InternalServerError'
-
+        $ref: "#/components/responses/InternalServerError"
 
 ### REFRESH-TOKENS ###
 /auth/refresh-tokens:
@@ -141,10 +137,10 @@
       content:
         application/x-www-form-urlencoded:
           schema:
-            $ref: '#/components/schemas/form-refresh-token'
+            $ref: "#/components/schemas/form-refresh-token"
         application/json:
           schema:
-            $ref: '#/components/schemas/form-refresh-token'
+            $ref: "#/components/schemas/form-refresh-token"
     responses:
       200:
         description: OK
@@ -160,50 +156,48 @@
                   type: object
                   properties:
                     tokens:
-                      $ref: '#/components/schemas/tokens'
+                      $ref: "#/components/schemas/tokens"
                       example:
-                        $ref: '#components/examples/response-tokens'
+                        $ref: "#components/examples/response-tokens"
       401:
-        $ref: '#/components/responses/RefreshTokensUnauthorizedErrors'
+        $ref: "#/components/responses/RefreshTokensUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/DisabledForbiddenError'
+        $ref: "#/components/responses/DisabledForbiddenError"
       404:
-        $ref: '#/components/responses/NoUserFound'
+        $ref: "#/components/responses/NoUserFound"
       422:
-        $ref: '#/components/responses/RefreshTokenValidationError'
+        $ref: "#/components/responses/RefreshTokenValidationError"
       500:
-        $ref: '#/components/responses/InternalServerError'
-
+        $ref: "#/components/responses/InternalServerError"
 
 ### FORGOT-PASSWORD ###
 /auth/forgot-password:
   post:
     summary: Forgot password
-    description: sends an email with a link and token in order to reset password 
+    description: sends an email with a link and token in order to reset password
     tags: [Auth]
     requestBody:
       required: true
       content:
         application/x-www-form-urlencoded:
           schema:
-            $ref: '#/components/schemas/form-forgot-password'
+            $ref: "#/components/schemas/form-forgot-password"
         application/json:
           schema:
-            $ref: '#/components/schemas/form-forgot-password'
+            $ref: "#/components/schemas/form-forgot-password"
     responses:
       200:
-        $ref: '#/components/responses/SuccessResponse'
+        $ref: "#/components/responses/SuccessResponse"
       400:
-        $ref: '#/components/responses/ForgotPasswordEmailErrors'
+        $ref: "#/components/responses/ForgotPasswordEmailErrors"
       403:
-        $ref: '#/components/responses/DisabledForbiddenError'
+        $ref: "#/components/responses/DisabledForbiddenError"
       404:
-        $ref: '#/components/responses/NoUserFound'
+        $ref: "#/components/responses/NoUserFound"
       422:
-        $ref: '#/components/responses/ForgotPasswordValidationErrors'
+        $ref: "#/components/responses/ForgotPasswordValidationErrors"
       500:
-        $ref: '#/components/responses/SendEmailInternalServerError'
-
+        $ref: "#/components/responses/SendEmailInternalServerError"
 
 ### RESET-PASSWORD ###
 /auth/reset-password:
@@ -215,24 +209,23 @@
       content:
         application/x-www-form-urlencoded:
           schema:
-            $ref: '#/components/schemas/form-reset-password'
+            $ref: "#/components/schemas/form-reset-password"
         application/json:
           schema:
-            $ref: '#/components/schemas/form-reset-password'
+            $ref: "#/components/schemas/form-reset-password"
     responses:
       200:
-        $ref: '#/components/responses/SuccessResponse'
+        $ref: "#/components/responses/SuccessResponse"
       401:
-        $ref: '#/components/responses/VerifyTokenUnauthorizedErrors'
+        $ref: "#/components/responses/VerifyTokenUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/DisabledForbiddenError'
+        $ref: "#/components/responses/DisabledForbiddenError"
       404:
-        $ref: '#/components/responses/NoUserFound'
+        $ref: "#/components/responses/NoUserFound"
       422:
-        $ref: '#/components/responses/ResetPasswordValidationErrors'
+        $ref: "#/components/responses/ResetPasswordValidationErrors"
       500:
-        $ref: '#/components/responses/InternalServerError'
-
+        $ref: "#/components/responses/InternalServerError"
 
 ### SEND-VERIFICATION-EMAIL ###
 /auth/send-verification-email:
@@ -244,16 +237,15 @@
       - BearerAuth: []
     responses:
       200:
-        $ref: '#/components/responses/SuccessResponse'
+        $ref: "#/components/responses/SuccessResponse"
       400:
-        $ref: '#/components/responses/SendVerificationEmailErrors'
+        $ref: "#/components/responses/SendVerificationEmailErrors"
       401:
-        $ref: '#/components/responses/AuthenticateMiddlewareUnauthorizedErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/AuthenticateMiddlewareForbiddenErrors'
+        $ref: "#/components/responses/AuthenticateMiddlewareForbiddenErrors"
       500:
-        $ref: '#/components/responses/SendEmailInternalServerError'
-
+        $ref: "#/components/responses/SendEmailInternalServerError"
 
 ### VERIFY-EMAIL ###
 /auth/verify-email:
@@ -265,35 +257,36 @@
       content:
         application/x-www-form-urlencoded:
           schema:
-            $ref: '#/components/schemas/form-verify-email'
+            $ref: "#/components/schemas/form-verify-email"
         application/json:
           schema:
-            $ref: '#/components/schemas/form-verify-email'
+            $ref: "#/components/schemas/form-verify-email"
     responses:
       200:
-        $ref: '#/components/responses/SuccessResponse'
+        $ref: "#/components/responses/SuccessResponse"
       401:
-        $ref: '#/components/responses/VerifyTokenUnauthorizedErrors'
+        $ref: "#/components/responses/VerifyTokenUnauthorizedErrors"
       403:
-        $ref: '#/components/responses/DisabledForbiddenError'
+        $ref: "#/components/responses/DisabledForbiddenError"
       404:
-        $ref: '#/components/responses/NoUserFound'
+        $ref: "#/components/responses/NoUserFound"
       422:
-        $ref: '#/components/responses/VerifyEmailTokenValidationError'
+        $ref: "#/components/responses/VerifyEmailTokenValidationError"
       500:
-        $ref: '#/components/responses/InternalServerError'
-
+        $ref: "#/components/responses/InternalServerError"
 
 ### GOOGLE ###
 /auth/google:
   post:
     summary: Login with Google
-    description: receives the google id token in header; and returns the authuser info and tokens
+    description: receives the google id token or google auth code in header; and returns the authuser info and tokens
     tags: [Auth]
     security:
-      - BearerAuth_WithGoogleIdToken: []
+      - BearerAuth_WithGoogleIdTokenOrAuthCode: []
       # - google_id_token: ["email", "profile"]
       # - google_oAuth_2: ["email", "profile"]
+    parameters:
+      - $ref: "#/components/parameters/query-param-method"
     responses:
       200:
         description: OK
@@ -309,23 +302,21 @@
                   type: object
                   properties:
                     authuser:
-                      $ref: '#/components/schemas/authuser'
+                      $ref: "#/components/schemas/authuser"
                       example:
-                        $ref: '#components/examples/response-authuser'
+                        $ref: "#components/examples/response-authuser"
                     tokens:
-                      $ref: '#/components/schemas/tokens'
+                      $ref: "#/components/schemas/tokens"
                       example:
-                        $ref: '#components/examples/response-tokens'
+                        $ref: "#components/examples/response-tokens"
       400:
-        $ref: '#/components/responses/oAuthLoginBadRequests'
+        $ref: "#/components/responses/oAuthLoginBadRequests"
       401:
-        $ref: '#/components/responses/oAuthLoginUnauthorizedFailures'
+        $ref: "#/components/responses/oAuthLoginUnauthorizedFailures"
       403:
-        $ref: '#/components/responses/oAuthLoginForbiddenErrors'
+        $ref: "#/components/responses/oAuthLoginForbiddenErrors"
       500:
-        $ref: '#/components/responses/InternalServerError'
-
-
+        $ref: "#/components/responses/InternalServerError"
 
 ### FACEBOOK ###
 /auth/facebook:
@@ -350,18 +341,18 @@
                   type: object
                   properties:
                     authuser:
-                      $ref: '#/components/schemas/authuser'
+                      $ref: "#/components/schemas/authuser"
                       example:
-                        $ref: '#components/examples/response-authuser'
+                        $ref: "#components/examples/response-authuser"
                     tokens:
-                      $ref: '#/components/schemas/tokens'
+                      $ref: "#/components/schemas/tokens"
                       example:
-                        $ref: '#components/examples/response-tokens'
+                        $ref: "#components/examples/response-tokens"
       400:
-        $ref: '#/components/responses/oAuthLoginBadRequests'
+        $ref: "#/components/responses/oAuthLoginBadRequests"
       401:
-        $ref: '#/components/responses/oAuthLoginUnauthorizedFailures'
+        $ref: "#/components/responses/oAuthLoginUnauthorizedFailures"
       403:
-        $ref: '#/components/responses/oAuthLoginForbiddenErrors'
+        $ref: "#/components/responses/oAuthLoginForbiddenErrors"
       500:
-        $ref: '#/components/responses/InternalServerError'
+        $ref: "#/components/responses/InternalServerError"
