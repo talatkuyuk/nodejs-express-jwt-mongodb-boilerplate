@@ -1,4 +1,4 @@
-@import url('./normalize.css');
+@import url("./normalize.css");
 
 *,
 *::after,
@@ -11,82 +11,106 @@
 }
 
 html {
-	font-size: 10px;
+  font-size: 10px;
 }
 
-@media only screen and (min-width: 320px) { html { font-size: 10px }} /* smaller phone viewpoints */
-@media only screen and (min-width: 480px) { html { font-size: 12px }} /* small devices and most phones */
-@media only screen and (min-width: 768px) { html { font-size: 13px }} /* most tablets */
-@media only screen and (min-width: 992px) { html { font-size: 15px }} /* smaller desktop viewpoints */
-@media only screen and (min-width: 1200px) { html { font-size: 16px }} /* large devices and wide screens */
+@media only screen and (min-width: 320px) {
+  html {
+    font-size: 10px;
+  }
+} /* smaller phone viewpoints */
+@media only screen and (min-width: 480px) {
+  html {
+    font-size: 12px;
+  }
+} /* small devices and most phones */
+@media only screen and (min-width: 768px) {
+  html {
+    font-size: 13px;
+  }
+} /* most tablets */
+@media only screen and (min-width: 992px) {
+  html {
+    font-size: 15px;
+  }
+} /* smaller desktop viewpoints */
+@media only screen and (min-width: 1200px) {
+  html {
+    font-size: 16px;
+  }
+} /* large devices and wide screens */
 
 body {
-	height: 100vh;
-	width: 100%;
-	background: -webkit-linear-gradient(left, rgb(209, 207, 207), rgb(157, 157, 163));
-	font-family: 'Poppins', sans-serif;
+  height: 100vh;
+  width: 100%;
+  background: -webkit-linear-gradient(
+    left,
+    rgb(209, 207, 207),
+    rgb(157, 157, 163)
+  );
+  font-family: "Poppins", sans-serif;
 }
 
 ::selection {
-	background: blueviolet;
-	color: #fff;
+  background: blueviolet;
+  color: #fff;
 }
 
 /***************  HEADER  ******************/
 
 header {
-	width: 100%;
-	height: 2.5em;
+  width: 100%;
+  height: 2.5em;
 
-	font-size: 1.6rem;
-	background-color: rgb(38, 38, 3);
-	color: rgb(250, 249, 249);
+  font-size: 1.6rem;
+  background-color: rgb(38, 38, 3);
+  color: rgb(250, 249, 249);
 
-	display: flex;
-	justify-content: center;
+  display: flex;
+  justify-content: center;
 }
 
 .header-inner-container {
-	width: 95vw;
-	height: 100%;
-	max-width: 1300px;
+  width: 95vw;
+  height: 100%;
+  max-width: 1300px;
 
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 header a {
-	color: rgb(250, 249, 249);
-	text-decoration: none;
+  color: rgb(250, 249, 249);
+  text-decoration: none;
 }
 
 /***************  MAIN CONTAINER  ******************/
 
 main {
-	width: 100%;
-	height: 100%;
-	padding-bottom: 2em;
-	border: 1px solid;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 2em;
+  border: 1px solid;
 
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 /***************  AUTHOUSE CLIENTS  ******************/
 
 .authouse-client {
-	width: 95vw;
-	max-width: 500px;
-	padding: 2em 3em;
-	margin: 1em 0;
-	background: #fff;
-	border-radius: .5em;
-	box-shadow: 0px 15px 20px rgba(0,0,0,0.1);
-	overflow: hidden;
-	position: relative;
-	font-size: 1.4rem;
-	text-align: center;
+  width: 95vw;
+  max-width: 500px;
+  padding: 2em 3em;
+  margin: 1em 0;
+  background: #fff;
+  border-radius: 0.5em;
+  box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  position: relative;
+  font-size: 1.4rem;
+  text-align: center;
 }

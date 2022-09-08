@@ -1,5 +1,5 @@
 {
-	"verbose": true,
-	"ignore": ["*.test.js", "*.spec.js", "swagger.json"],
-	"ext": ".js, .mjs, .json, .yaml"
+  "verbose": true,
+  "ignore": ["*.test.js", "*.spec.js", "swagger.json"],
+  "ext": ".js, .mjs, .json, .yaml"
 }
