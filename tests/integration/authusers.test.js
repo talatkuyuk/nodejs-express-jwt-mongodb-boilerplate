@@ -107,7 +107,7 @@ describe("PATH /authusers", () => {
         isDisabled: false,
         createdAt: expect.any(Number),
         updatedAt: null,
-        services: { emailpassword: "registered" },
+        services: { emailpassword: true },
       });
 
       // check the test authuser's password is hashed
@@ -276,7 +276,7 @@ describe("PATH /authusers", () => {
         isDisabled: true,
         createdAt: expect.any(Number),
         updatedAt: expect.any(Number),
-        services: { emailpassword: "registered" },
+        services: { emailpassword: true },
       });
 
       // query filter disabled, check the count; and control the list
@@ -364,7 +364,7 @@ describe("PATH /authusers", () => {
       // change own password
       const newPassword = "Pass1word+";
       response = await request(app)
-        .patch(`/authusers/password`)
+        .patch("/authusers/password")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send({
@@ -505,7 +505,7 @@ describe("PATH /authusers", () => {
 
       // try to change password with validation errors
       response = await request(app)
-        .patch(`/authusers/password`)
+        .patch("/authusers/password")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send({

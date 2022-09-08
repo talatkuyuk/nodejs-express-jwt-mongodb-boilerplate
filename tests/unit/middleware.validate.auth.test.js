@@ -133,35 +133,36 @@ describe("Validate Middleware : Auth validation rules", () => {
       });
     });
 
-    test("signup: should throw error 422, if the email is already taken", async () => {
-      const request = {
-        body: {
-          email: "user@gmail.com",
-          password: "Pass1word!",
-          passwordConfirmation: "Pass1word!",
-        },
-      };
+    // TODO: the test is moved to integration tests auth.signup.test.js
+    // test("signup: should throw error 422, if the email is already taken and a password is defined", async () => {
+    //   const request = {
+    //     body: {
+    //       email: "user@gmail.com",
+    //       password: "Pass1word!",
+    //       passwordConfirmation: "Pass1word!",
+    //     },
+    //   };
 
-      const req = httpMocks.createRequest(request);
-      const res = httpMocks.createResponse();
-      const next = jest.fn();
+    //   const req = httpMocks.createRequest(request);
+    //   const res = httpMocks.createResponse();
+    //   const next = jest.fn();
 
-      const spyOnEmail = jest.spyOn(authuserService, "isEmailTaken");
-      spyOnEmail.mockResolvedValue(true);
+    //   const spyOnEmail = jest.spyOn(authuserService, "isEmailTaken");
+    //   spyOnEmail.mockResolvedValue(true);
 
-      await validate(authValidation.signupValidationRules)(req, res, next);
+    //   await validate(authValidation.signupValidationRules)(req, res, next);
 
-      expect(next).toHaveBeenCalledTimes(1);
-      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+    //   expect(next).toHaveBeenCalledTimes(1);
+    //   expect(next).toHaveBeenCalledWith(expect.any(ApiError));
 
-      // obtain the error from the next function
-      const err = next.mock.calls[0][0];
+    //   // obtain the error from the next function
+    //   const err = next.mock.calls[0][0];
 
-      TestUtil.validationErrorInMiddleware(err);
-      expect(err.errors).toEqual({
-        email: ["email is already taken"],
-      });
-    });
+    //   TestUtil.validationErrorInMiddleware(err);
+    //   expect(err.errors).toEqual({
+    //     email: ["email is already taken"],
+    //   });
+    // });
 
     test("signup: should throw error 422, if the body contains any other parameter", async () => {
       const request = {
@@ -793,7 +794,7 @@ describe("Validate Middleware : Auth validation rules", () => {
 
       TestUtil.validationErrorInMiddleware(err);
       expect(err.errors).toEqual({
-        method: ["The query param 'method' could be only token or code"],
+        method: ["The query param 'method' could be only 'token' or 'code'"],
       });
     });
 

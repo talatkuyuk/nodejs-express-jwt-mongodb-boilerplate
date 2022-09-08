@@ -30,8 +30,8 @@ const check_body_email = [
 ];
 
 const check_body_email_isTaken = [
-  body("email").custom(async (value) => {
-    if (await authuserService.isEmailTaken(value)) {
+  body("email").custom(async (email) => {
+    if (await authuserService.isEmailTaken(email)) {
       throw new Error("email is already taken");
     } else {
       return true;

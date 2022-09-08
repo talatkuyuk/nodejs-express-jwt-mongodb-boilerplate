@@ -48,9 +48,17 @@ const google = async (idtoken_or_code, method) => {
 
     return google_response;
   } catch (error) {
-    if (error.message === "invalid_grant") {
-      error.message = "The getToken method requires an authorization code";
+    if (method === "code" && error.message === "invalid_grant") {
+      error.message = "The provided google authorization code is not valid";
     }
+
+    if (
+      method === "token" &&
+      error.message.includes("Wrong number of segments in token")
+    ) {
+      error.message = "The provided google id token is not valid";
+    }
+
     throw traceError(error, "AuthProviders : google");
   }
 };
@@ -75,6 +83,10 @@ const facebook = async (access_token, method) => {
 
     return facebook_response;
   } catch (error) {
+    if (error.message === "Request failed with status code 400") {
+      error.message = "The provided facebook access token is not valid";
+    }
+
     throw traceError(error, "AuthProviders : facebook");
   }
 };

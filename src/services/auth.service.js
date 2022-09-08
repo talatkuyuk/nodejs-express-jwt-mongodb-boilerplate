@@ -1,14 +1,13 @@
-const httpStatus = require('http-status');
-const bcrypt = require('bcryptjs');
+const httpStatus = require("http-status");
+const bcrypt = require("bcryptjs");
 
-const ApiError = require('../utils/ApiError');
-const { traceError } = require('../utils/errorUtils');
-const { AuthUser } = require('../models');
+const ApiError = require("../utils/ApiError");
+const { traceError } = require("../utils/errorUtils");
+const { AuthUser } = require("../models");
 
 // SERVICE DEPENDENCIES
-const redisService = require('./redis.service');
-const authuserDbService = require('./authuser.db.service');
-
+const redisService = require("./redis.service");
+const authuserDbService = require("./authuser.db.service");
 
 /////////////////////////  UTILS  ///////////////////////////////////////
 
@@ -17,49 +16,69 @@ const authuserDbService = require('./authuser.db.service');
  * @param {AuthUser} authuser
  * @returns {void}
  */
- const checkAuthuser = function (authuser) {
-	 try {
-		 if (!authuser)
-			 throw new ApiError(httpStatus.NOT_FOUND, 'No user found');
-	 
-		 if (authuser.isDisabled)
-			 throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
-		 
-	 } catch (error) {
-		 throw error;
-	 }
+const checkAuthuser = function (authuser) {
+  try {
+    if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, "No user found");
+
+    if (authuser.isDisabled)
+      throw new ApiError(
+        httpStatus.FORBIDDEN,
+        `You are disabled, call the system administrator`
+      );
+  } catch (error) {
+    throw error;
+  }
 };
 
-
 /////////////////////////////////////////////////////////////////////
-
 
 /**
  * Signup with email and password
  * @param {string} email
  * @param {string} password
+ * @param {import('express').Request} request
  * @returns {Promise<AuthUser>}
  */
-const signupWithEmailAndPassword = async (email, password) => {
-	try {
+const signupWithEmailAndPassword = async (email, password, request) => {
+  try {
+    const authuser = await authuserDbService.getAuthUser({ email });
 
-		const hashedPassword = await bcrypt.hash(password, 8);
-		const authuserx = new AuthUser(email, hashedPassword);
-		authuserx.services = { emailpassword: "registered" };
+    // if authuser exists and password is not null
+    if (authuser && Boolean(authuser.password)) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "email is already taken");
+    }
 
-		const authuser = await authuserDbService.addAuthUser(authuserx);
-		
-		if (!authuser)
-			throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
+    const hashedPassword = await bcrypt.hash(password, 8);
 
-		return authuser;
+    // means the authuser registered with a provider but not email-password, so assign the password
+    if (authuser) {
+      request && (request.isNewAuthuserCreated = false);
 
-	} catch (error) {
-		throw traceError(error, "AuthService : signupWithEmailAndPassword");
-	}
-}
- 			
+      return await authuserDbService.updateAuthUser(authuser.id, {
+        password: hashedPassword,
+        services: { ...authuser.services, emailpassword: false }, // false means the user registers with email while he is already registered with a provider, needs email verification
+      });
+    }
 
+    const authuserDoc = new AuthUser(email, hashedPassword);
+    authuserDoc.services = { emailpassword: true };
+
+    const newauthuser = await authuserDbService.addAuthUser(authuserDoc);
+
+    // TODO: is it necessary? An error in authuserDbService.addAuthUser is already being catched in tyr-catch
+    if (!newauthuser)
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "The database could not process the request"
+      );
+
+    request && (request.isNewAuthuserCreated = true);
+
+    return newauthuser;
+  } catch (error) {
+    throw traceError(error, "AuthService : signupWithEmailAndPassword");
+  }
+};
 
 /**
  * Login with username and password
@@ -68,62 +87,79 @@ const signupWithEmailAndPassword = async (email, password) => {
  * @returns {Promise<AuthUser>}
  */
 const loginWithEmailAndPassword = async (email, password) => {
-	try {
-		const authuser = await authuserDbService.getAuthUser({ email });
+  try {
+    const authuser = await authuserDbService.getAuthUser({ email });
 
-		checkAuthuser(authuser);
+    checkAuthuser(authuser);
 
-		if (!(await authuser.isPasswordMatch(password))) {
-			throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
-		}
+    if (!(await authuser.isPasswordMatch(password))) {
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "Incorrect email or password"
+      );
+    }
 
-		return authuser;
-
-	} catch (error) {
-		throw traceError(error, "AuthService : loginWithEmailAndPassword");
-	}
+    return authuser;
+  } catch (error) {
+    throw traceError(error, "AuthService : loginWithEmailAndPassword");
+  }
 };
 
-
-
 /**
- * Login with oAuth
+ * Login/Signup with a oAuth Provider
  * @param {string} service // "google" | "facebook"
  * @param {string} id
  * @param {string} email
+ * @param {import('express').Request} request
  * @returns {Promise<AuthUser>}
  */
-const loginWithAuthProvider = async (provider, id, email) => {
-	try {
-		const authuser = await authuserDbService.getAuthUser({ email });
+const continueWithAuthProvider = async (provider, id, email, request) => {
+  try {
+    const authuser = await authuserDbService.getAuthUser({ email });
 
-		if (authuser) {
+    if (authuser) {
+      if (authuser.isDisabled) {
+        throw new ApiError(
+          httpStatus.FORBIDDEN,
+          `You are disabled, call the system administrator`
+        );
+      }
 
-			if (authuser.isDisabled)
-				throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
+      request && (request.isNewAuthuserCreated = false);
 
-			if (authuser.services[provider] === id)
-				return authuser;
+      // if the user is registered with the same auth provider
+      if (authuser.services[provider] === id) return authuser;
 
-			return await authuserDbService.updateAuthUser(authuser.id, { services: { ...authuser.services, [provider]: id }, isEmailVerified: true });
-		}
+      // if the user is registered with email or other auth provider
+      return await authuserDbService.updateAuthUser(authuser.id, {
+        isEmailVerified: true,
+        services: { ...authuser.services, [provider]: id },
+      });
+    }
 
-		// if there is no authuser, then create a new one
-		const authuserx = new AuthUser(email, null);
-		authuserx.isEmailVerified = true;
-		authuserx.services = { 
-			emailpassword: "not registered",
-			[provider]: id   // { google: 46598364598354983 }
-		};
+    // if there is no authuser, then create a new one
+    const authuserDoc = new AuthUser(email, null);
+    authuserDoc.isEmailVerified = true;
+    authuserDoc.services = {
+      [provider]: id, // { google: 46598364598354983 }
+    };
 
-		return await authuserDbService.addAuthUser(authuserx);
-		
-	} catch (error) {
-		throw traceError(error, "AuthService : loginWithAuthProvider");
-	}
+    const newauthuser = await authuserDbService.addAuthUser(authuserDoc);
+
+    // TODO: is it necessary? An error in authuserDbService.addAuthUser is already being catched in tyr-catch
+    if (!newauthuser)
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "The database could not process the request"
+      );
+
+    request && (request.isNewAuthuserCreated = true);
+
+    return newauthuser;
+  } catch (error) {
+    throw traceError(error, "AuthService : loginWithAuthProvider");
+  }
 };
-
-
 
 /**
  * Handle the logout process
@@ -132,17 +168,13 @@ const loginWithAuthProvider = async (provider, id, email) => {
  * @returns {Promise}
  */
 const logout = async (id, jti) => {
-	try {
-		
-		// put the access token's jti into the blacklist
-		await redisService.put_into_blacklist("jti", jti);
-		
-	} catch (error) {
-		throw traceError(error, "AuthService : logout");
-	}
+  try {
+    // put the access token's jti into the blacklist
+    await redisService.put_into_blacklist("jti", jti);
+  } catch (error) {
+    throw traceError(error, "AuthService : logout");
+  }
 };
-
-
 
 /**
  * Handle the signout process
@@ -150,22 +182,19 @@ const logout = async (id, jti) => {
  * @param {string} jti
  * @returns {Promise}
  */
- const signout = async (id, jti) => {
-	try {
-		// put the access token's jti into the blacklist
-		await redisService.put_into_blacklist("jti", jti);
+const signout = async (id, jti) => {
+  try {
+    // put the access token's jti into the blacklist
+    await redisService.put_into_blacklist("jti", jti);
 
-		// delete authuser by id; no need to check id in database since passed the authorization soon ago
-		await authuserDbService.deleteAuthUser(id);
+    // delete authuser by id; no need to check id in database since passed the authorization soon ago
+    await authuserDbService.deleteAuthUser(id);
 
-		// delete user data through another request
-		
-	} catch (error) {
-		throw traceError(error, "AuthService : signout");
-	}
+    // delete user data through another request
+  } catch (error) {
+    throw traceError(error, "AuthService : signout");
+  }
 };
-
-
 
 /**
  * Refresh auth tokens
@@ -174,38 +203,32 @@ const logout = async (id, jti) => {
  */
 const refreshAuth = async (id) => {
   try {
-	const authuser = await authuserDbService.getAuthUser({ id });
+    const authuser = await authuserDbService.getAuthUser({ id });
 
-	checkAuthuser(authuser);
+    checkAuthuser(authuser);
 
-	return authuser;
-
+    return authuser;
   } catch (error) {
-	throw traceError(error, "AuthService : refreshAuth");
+    throw traceError(error, "AuthService : refreshAuth");
   }
 };
-
-
 
 /**
  * Forgot password
  * @param {string} email
  * @returns {Promise<AuthUser>}
  */
- const forgotPassword = async (email) => {
-	try {
-	  const authuser = await authuserDbService.getAuthUser({ email });
-  
-	  checkAuthuser(authuser);
-  
-	  return authuser;
-  
-	} catch (error) {
-	  throw traceError(error, "AuthService : forgotPassword");
-	}
-  };
+const forgotPassword = async (email) => {
+  try {
+    const authuser = await authuserDbService.getAuthUser({ email });
 
+    checkAuthuser(authuser);
 
+    return authuser;
+  } catch (error) {
+    throw traceError(error, "AuthService : forgotPassword");
+  }
+};
 
 /**
  * Reset password
@@ -219,35 +242,36 @@ const resetPassword = async (id, newPassword) => {
 
     checkAuthuser(authuser);
 
-	const password = await bcrypt.hash(newPassword, 8);
-    
-    const updatedAuthuser = await authuserDbService.updateAuthUser(authuser.id, { 
-		password, 
-		services: { ...authuser.services, emailpassword: "registered" }
-	});
-	
-	return updatedAuthuser;
+    const password = await bcrypt.hash(newPassword, 8);
 
+    const updatedAuthuser = await authuserDbService.updateAuthUser(
+      authuser.id,
+      {
+        password,
+        services: { ...authuser.services, emailpassword: true },
+      }
+    );
+
+    return updatedAuthuser;
   } catch (error) {
-	throw traceError(error, "AuthService : resetPassword");
+    throw traceError(error, "AuthService : resetPassword");
   }
 };
-
-
 
 /**
  * Check if the authuser's email is already verified
  * @param {boolean} isEmailVerified
  * @returns {any}
  */
- const handleEmailIsVerified = function (isEmailVerified) {
-	if (isEmailVerified) {
-		const error = new ApiError(httpStatus.BAD_REQUEST, "Email is already verified");
-		throw traceError(error, "AuthService : handleEmailIsAlreadyVerified");
-	}
+const handleEmailIsVerified = function (isEmailVerified) {
+  if (isEmailVerified) {
+    const error = new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Email is already verified"
+    );
+    throw traceError(error, "AuthService : handleEmailIsAlreadyVerified");
+  }
 };
-
-
 
 /**
  * Verify email
@@ -257,24 +281,24 @@ const resetPassword = async (id, newPassword) => {
 const verifyEmail = async (id) => {
   try {
     const authuser = await authuserDbService.getAuthUser({ id });
-    
-	checkAuthuser(authuser);
-    
-    const updatedAuthuser = await authuserDbService.updateAuthUser(authuser.id, { isEmailVerified: true });
 
-	return updatedAuthuser;
+    checkAuthuser(authuser);
 
+    const updatedAuthuser = await authuserDbService.updateAuthUser(
+      authuser.id,
+      { isEmailVerified: true }
+    );
+
+    return updatedAuthuser;
   } catch (error) {
-	throw traceError(error, "AuthService : verifyEmail");
+    throw traceError(error, "AuthService : verifyEmail");
   }
 };
-
-
 
 module.exports = {
   signupWithEmailAndPassword,
   loginWithEmailAndPassword,
-  loginWithAuthProvider,
+  continueWithAuthProvider,
   logout,
   signout,
   refreshAuth,

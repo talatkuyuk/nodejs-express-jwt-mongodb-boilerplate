@@ -529,7 +529,7 @@ components:
 
         #### ApiError
         * _You are disabled, call the system administrator_
-        * _The token of the auth provider is allowed to be used only once_
+        * _Unauthorized usage of <provider> authentication is detected_
       content:
         application/json:
           schema:
@@ -547,7 +547,7 @@ components:
 
         #### ApiError
         * _Passport Bearer Strategy related errors._
-        * _provider oAuth token could not be associated with any identification_
+        * _provider authentication could not be associated with any identification_
         * _provider oAuth token does not contain necessary email information_
 
         #### FetchError
