@@ -507,6 +507,39 @@ const findTokenAndRemoveFamily = async (query, command) => {
   }
 };
 
+const generateTokenForTest = (
+  type = tokenTypes.REFRESH,
+  userId = "123456789012345678901234",
+  [interval, durationString] = [1, "days"],
+  userAgent = "n/a",
+  nvb = 0, // minutes
+  jti = "n/a",
+  secret = config.jwt.secret
+) => {
+  try {
+    const expires = moment().add(interval, durationString);
+
+    const payload = {
+      sub: userId,
+      iat: moment().unix(),
+      exp: expires.unix(),
+      jti,
+      ua: userAgent,
+      type,
+    };
+
+    console.log(payload);
+
+    const token = jwt.sign(payload, secret, { notBefore: nvb });
+
+    console.log(token);
+
+    return token;
+  } catch (error) {
+    throw traceError(error, "TokenService : generateTokenForTest");
+  }
+};
+
 module.exports = {
   generateToken,
   verifyToken,
@@ -520,4 +553,5 @@ module.exports = {
   removeTokens,
   updateTokenAsBlacklisted,
   findTokenAndRemoveFamily,
+  generateTokenForTest,
 };
