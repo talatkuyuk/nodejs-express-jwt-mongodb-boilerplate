@@ -56,13 +56,13 @@ router.post(
   "/google",
   validate(googleValidationRules),
   oAuth("google"),
-  authController.loginWithAuthProvider
+  authController.continueWithAuthProvider
 );
 
 router.post(
   "/facebook",
   oAuth("facebook"),
-  authController.loginWithAuthProvider
+  authController.continueWithAuthProvider
 );
 
 module.exports = router;

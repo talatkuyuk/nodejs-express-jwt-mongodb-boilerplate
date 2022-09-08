@@ -438,7 +438,7 @@ describe("PATH /users", () => {
 
       // try to add an user which has not correspondent authuser, get the error
       response = await request(app)
-        .post(`/users/123456789012345678901234`)
+        .post("/users/123456789012345678901234")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send(addForm2);
@@ -552,7 +552,7 @@ describe("PATH /users", () => {
 
       // try to change user's role validation errors
       response = await request(app)
-        .patch(`/users/123456789012345678901234`)
+        .patch("/users/123456789012345678901234")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send({ role: "client", additional: "" });

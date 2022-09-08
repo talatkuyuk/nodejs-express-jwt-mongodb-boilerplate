@@ -21,7 +21,9 @@ const authuserDbService = require("./authuser.db.service");
 const isEmailTaken = async function (email) {
   try {
     const authuser = await authuserDbService.getAuthUser({ email });
-    return !!authuser;
+
+    return !!authuser && Boolean(authuser.password);
+    // return !!authuser;
   } catch (error) {
     throw traceError(error, "AuthUserService : isEmailTaken");
   }
@@ -53,10 +55,10 @@ const isExist = async function (id, email) {
 const addAuthUser = async (email, password) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 8);
-    const authuserx = new AuthUser(email, hashedPassword);
-    authuserx.services = { emailpassword: "registered" };
+    const authuserDoc = new AuthUser(email, hashedPassword);
+    authuserDoc.services = { emailpassword: true };
 
-    const authuser = await authuserDbService.addAuthUser(authuserx);
+    const authuser = await authuserDbService.addAuthUser(authuserDoc);
 
     if (!authuser)
       throw new ApiError(

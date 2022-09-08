@@ -39,7 +39,7 @@ describe("oAuth Middleware", () => {
     });
 
     test("should throw error, if the authorization header is composed in bad format", async () => {
-      const requestHeader = { headers: { Authorization: `Bearer ` } };
+      const requestHeader = { headers: { Authorization: "Bearer " } };
 
       const req = httpMocks.createRequest(requestHeader);
       const res = httpMocks.createResponse();
@@ -65,43 +65,8 @@ describe("oAuth Middleware", () => {
   describe("Failed Authentications with oAuth handled by providers", () => {
     TestUtil.CheckOneOf();
 
-    test("should throw error, if attached id-token is invalid (google) and not provided a method", async () => {
-      const google_id_token = "the-id-token-coming-from-google"; // invalid token
-
-      const requestHeader = {
-        headers: {
-          Authorization: `Bearer ${google_id_token}`,
-        },
-      };
-
-      const req = httpMocks.createRequest(requestHeader);
-      const res = httpMocks.createResponse();
-      const next = jest.fn();
-
-      await oAuth("google")(req, res, next);
-
-      expect(next).toHaveBeenCalledTimes(1);
-      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-
-      // obtain the error from the next function
-      const err = next.mock.calls[0][0];
-
-      // the error comes from the package 'google-auth-library' in authProvider.google
-      expect(err.statusCode).toBe(httpStatus.UNAUTHORIZED);
-      expect(err.name).toBeOneOf(["ApiError", "FetchError"]);
-      if (err.name === "ApiError")
-        expect(err.message).toEqual(
-          `The verifyIdToken method requires an ID Token`
-        );
-      else if (err.name === "FetchError")
-        // if there is no internet connection
-        expect(err.message).toEqual(
-          `Auth provider connection error occured, try later`
-        );
-    });
-
     test("should throw error, if attached id-token is invalid (google)", async () => {
-      const google_id_token = "the-id-token-coming-from-google"; // invalid token
+      const google_id_token = "the-id-token-came-from-google"; // invalid token
 
       const requestHeader = {
         query: { method: "token" },
@@ -127,12 +92,12 @@ describe("oAuth Middleware", () => {
       expect(err.name).toBeOneOf(["ApiError", "FetchError"]);
       if (err.name === "ApiError")
         expect(err.message).toEqual(
-          `Wrong number of segments in token: the-id-token-coming-from-google`
+          "The provided google id token is not valid"
         );
       else if (err.name === "FetchError")
         // if there is no internet connection
         expect(err.message).toEqual(
-          `Auth provider connection error occured, try later`
+          "Auth provider connection error occured, try later"
         );
     });
 
@@ -163,17 +128,17 @@ describe("oAuth Middleware", () => {
       expect(err.name).toBeOneOf(["ApiError", "FetchError"]);
       if (err.name === "ApiError")
         expect(err.message).toEqual(
-          `The getToken method requires an authorization code`
+          "The provided google authorization code is not valid"
         );
       else if (err.name === "FetchError")
         // if there is no internet connection
         expect(err.message).toEqual(
-          `Auth provider connection error occured, try later`
+          "Auth provider connection error occured, try later"
         );
     });
 
     test("should throw error, if attached access-token is invalid (facebook)", async () => {
-      const facebook_access_token = "the-access-token-coming-from-facebook"; // invalid token
+      const facebook_access_token = "the-access-token-came-from-facebook"; // invalid token
 
       const requestHeader = {
         headers: { Authorization: `Bearer ${facebook_access_token}` },
@@ -195,17 +160,19 @@ describe("oAuth Middleware", () => {
       expect(err.statusCode).toBe(httpStatus.UNAUTHORIZED);
       expect(err.name).toBeOneOf(["ApiError", "AxiosError"]);
       if (err.name === "ApiError")
-        expect(err.message).toEqual(`Request failed with status code 400`);
+        expect(err.message).toEqual(
+          "The provided facebook access token is not valid"
+        );
       else if (err.name === "AxiosError")
         // if there is no internet connection
         expect(err.message).toEqual(
-          `Auth provider connection error occured, try later`
+          "Auth provider connection error occured, try later"
         );
     });
 
     test("should throw error, if the oAuth info returned by provider does not give identification (google)", async () => {
       const provider = "google";
-      const google_id_token = "the-id-token-coming-from-google";
+      const google_id_token = "the-id-token-came-from-google";
 
       const customImplementation = () => ({
         provider,
@@ -239,7 +206,7 @@ describe("oAuth Middleware", () => {
       expect(err.statusCode).toBe(httpStatus.UNAUTHORIZED);
       expect(err.name).toBe("ApiError");
       expect(err.message).toContain(
-        `${provider} oAuth token could not be associated with any identification`
+        `${provider} authentication could not be associated with any identification`
       );
 
       expect(req.oAuth).toBeFalsy();
@@ -247,7 +214,7 @@ describe("oAuth Middleware", () => {
 
     test("should throw error, if the oAuth info returned by provider does not give email info (facebook)", async () => {
       const provider = "facebook";
-      const facebook_access_token = "the-access-token-coming-from-facebook";
+      const facebook_access_token = "the-access-token-came-from-facebook";
 
       const customImplementation = () => ({
         provider,
@@ -282,7 +249,7 @@ describe("oAuth Middleware", () => {
       expect(err.statusCode).toBe(httpStatus.UNAUTHORIZED);
       expect(err.name).toBe("ApiError");
       expect(err.message).toContain(
-        `${provider} oAuth token does not contain necessary email information`
+        `${provider} authentication does not contain necessary email information`
       );
 
       expect(req.oAuth).toBeFalsy();
@@ -301,7 +268,7 @@ describe("oAuth Middleware", () => {
       };
 
       const provider = "google";
-      const google_id_token = "the-id-token-coming-from-google";
+      const google_id_token = "the-id-token-came-from-google";
       const provider_response = {
         provider,
         token: google_id_token,
@@ -349,7 +316,7 @@ describe("oAuth Middleware", () => {
 
       const provider = "google";
       const google_auth_code = "the-auth-code-coming-from-google";
-      const google_id_token = "the-id-token-coming-from-google";
+      const google_id_token = "the-id-token-came-from-google";
       const provider_response = {
         provider,
         token: google_id_token,
@@ -396,7 +363,7 @@ describe("oAuth Middleware", () => {
       };
 
       const provider = "facebook";
-      const facebook_access_token = "the-access-token-coming-from-facebook";
+      const facebook_access_token = "the-access-token-came-from-facebook";
       const provider_response = {
         provider,
         token: facebook_access_token,

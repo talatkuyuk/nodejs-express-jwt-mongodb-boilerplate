@@ -23,7 +23,7 @@ const loginValidationRules = [
 
 const signupValidationRules = [
   ...check_body_email,
-  ...check_body_email_isTaken,
+  // ...check_body_email_isTaken, // cancelled and this control is moved to the auth service
   ...check_body_password,
   ...check_body_passwordConfirmation,
 
@@ -60,7 +60,7 @@ const googleValidationRules = [
     .withMessage("query param 'method' is missing")
     .bail()
     .isIn(["token", "code"])
-    .withMessage("The query param 'method' could be only token or code"),
+    .withMessage("The query param 'method' could be only 'token' or 'code'"),
 ];
 
 module.exports = {
