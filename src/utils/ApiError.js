@@ -1,49 +1,51 @@
-
 class ApiError extends Error {
-    constructor(statusCode, error, isOperational = true, errors = null) {
+  constructor(statusCode, error, isOperational = true, errors = null) {
+    if (!statusCode || !error) throw Error("bad ApiError argument");
 
-      if (!statusCode || !error) throw Error("bad ApiError argument");
-      
-      // ApiError accepts any Error instance as the paramater error.
-      if (error instanceof Error) {
-        super(error.message);
-        this.name = error.name === Error.prototype.name ? this.constructor.name : error.name;
-      }
-
-      // ApiError accepts string "error message" or "XxxError: error message" as the paramater error.
-      else if (typeof error === 'string') {
-        if (error.includes(':')) {
-            const [name, message] = error.split(":");
-            super(message.trim());
-            this.name = name.trim();
-        } else {
-            super(error.trim());
-            this.name = this.constructor.name;
-        }
-      }
-
-      // if ApiError may receive an error like object
-      else if (typeof error === 'object') {
-        super(error.message ?? "no specific error message");
-        this.name = error.isAxiosError ? "AxiosError" : error.name ?? this.constructor.name;
-      }
-
-      // if received wrong argument type, throw an error
-      else {
-        throw Error("bad ApiError argument");
-      }
-      
-      this.statusCode = statusCode;
-      this.isOperational = isOperational;
-	    this.errors = errors;
-      this.errorPath = null;
-
-      Error.captureStackTrace(this, this.constructor);
+    // ApiError accepts any Error instance as the paramater error.
+    if (error instanceof Error) {
+      super(error.message);
+      this.name =
+        error.name === Error.prototype.name
+          ? this.constructor.name
+          : error.name;
     }
+
+    // ApiError accepts string "error message" or "XxxError: error message" as the paramater error.
+    else if (typeof error === "string") {
+      if (error.includes(":")) {
+        const [name, message] = error.split(":");
+        super(message.trim());
+        this.name = name.trim();
+      } else {
+        super(error.trim());
+        this.name = this.constructor.name;
+      }
+    }
+
+    // if ApiError may receive an error like object
+    else if (typeof error === "object") {
+      super(error.message ?? "no specific error message");
+      this.name = error.isAxiosError
+        ? "AxiosError"
+        : error.name ?? this.constructor.name;
+    }
+
+    // if received wrong argument type, throw an error
+    else {
+      throw Error("bad ApiError argument");
+    }
+
+    this.statusCode = statusCode;
+    this.isOperational = isOperational;
+    this.errors = errors;
+    this.errorPath = null;
+
+    Error.captureStackTrace(this, this.constructor);
+  }
 }
 
-module.exports =  ApiError;
-
+module.exports = ApiError;
 
 /*
 The error object is a built-in object that provides a standard set of useful information when an error occurs, such as a stack trace and the error message.

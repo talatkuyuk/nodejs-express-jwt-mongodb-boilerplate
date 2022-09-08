@@ -1,13 +1,14 @@
-const morgan = require('morgan');
+const morgan = require("morgan");
 
-const config = require('../config');
-const logger = require('./logger');
+const config = require("../config");
+const logger = require("./logger");
 
 // it tokenizes errorMessage in res.locals as message. It is set via errorHandler in error.js
-morgan.token('user', (req, res) => req?.authuser?.email || 'anonymous');
-morgan.token('error', (req, res) => res.locals.error || '');
+morgan.token("user", (req, res) => req?.authuser?.email || "anonymous");
+morgan.token("error", (req, res) => res.locals.error || "");
 
-const getIpFormat = () => (config.env === 'production' ? ':remote-addr - ' : '');
+const getIpFormat = () =>
+  config.env === "production" ? ":remote-addr - " : "";
 const successResponseFormat = `${getIpFormat()}:method :url :status - :response-time ms - :user`;
 const errorResponseFormat = `${getIpFormat()}:method :url :status - :response-time ms - :user - :error`;
 
