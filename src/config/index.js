@@ -42,6 +42,9 @@ const envVarsSchema = Joi.object()
     JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: Joi.number()
       .default(3600)
       .description("minutes after which verify-email tokens expire"),
+    JWT_VERIFY_SIGNUP_EXPIRATION_MINUTES: Joi.number()
+      .default(60)
+      .description("minutes after which verify-signup tokens expire"),
     JWT_REFRESH_IS_INVALID_NBT: Joi.boolean()
       .default(false)
       .description(
@@ -101,6 +104,7 @@ module.exports = {
     resetPasswordExpirationMinutes:
       envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
     verifyEmailExpirationMinutes: envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
+    verifySignupExpirationMinutes: envVars.JWT_VERIFY_SIGNUP_EXPIRATION_MINUTES,
     isInvalidRefreshNBT: envVars.JWT_REFRESH_IS_INVALID_NBT,
   },
   google_client_id: envVars.GOOGLE_OAUTH_CLIENTID,
@@ -119,5 +123,6 @@ module.exports = {
   },
   resetPasswordUrl: envVars.RESET_PASSWORD_URL,
   verifyEmailUrl: envVars.VERIFY_EMAIL_URL,
+  verifySignupUrl: envVars.VERIFY_SIGNUP_URL,
   raiseErrorWhenRedisDown: envVars.RAISE_ERROR_WHEN_REDIS_DOWN,
 };

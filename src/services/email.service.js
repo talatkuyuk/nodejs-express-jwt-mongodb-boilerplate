@@ -76,8 +76,26 @@ const sendResetPasswordEmail = async (to, token) => {
  */
 const sendVerificationEmail = async (to, token) => {
   const subject = "Email Verification";
-  const verificationEmailUrl = `${config.verifyEmailUrl}?token=${token}`;
-  const text = `Dear user,\n\nTo verify your email, click on this link: ${verificationEmailUrl}\n\nIf you did not create an account, then ignore this email.`;
+  const verifyEmailUrl = `${config.verifyEmailUrl}?token=${token}`;
+  const text = `Dear user,\n\nTo verify your email, click the link: ${verifyEmailUrl}\n\nIf you did not create an account, then ignore this email.`;
+
+  try {
+    await sendEmail(to, subject, text);
+  } catch (error) {
+    throw traceError(error, "EmailService : sendVerificationEmail");
+  }
+};
+
+/**
+ * Send signup verification email
+ * @param {string} to
+ * @param {string} token
+ * @returns {Promise}
+ */
+const sendSignupVerificationEmail = async (to, token) => {
+  const subject = "Signup with email-password Verification";
+  const verifySignuplUrl = `${config.verifySignupUrl}?token=${token}`;
+  const text = `Dear user,\n\nVERY IMPORTANT:\nWe detected you registered with an auth provider before. You try to signup with the email and password as well. If you are not who made this action, DO NOT CLICK THE LINK BELOW, login to our web site and cancel the signup process. If you are the person who try to signup with the email-password, then ignore this warning.\n\nTo verify your signup with email-password process, click the link: ${verifySignuplUrl}`;
 
   try {
     await sendEmail(to, subject, text);
@@ -90,4 +108,5 @@ module.exports = {
   transporter, // it is exported for mocking in jest
   sendResetPasswordEmail,
   sendVerificationEmail,
+  sendSignupVerificationEmail,
 };
