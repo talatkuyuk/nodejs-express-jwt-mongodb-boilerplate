@@ -63,6 +63,7 @@ const login = asyncHandler(async (req, res) => {
       email,
       password
     );
+
     const tokens = await tokenService.generateAuthTokens(
       authuser.id,
       userAgent
@@ -97,6 +98,7 @@ const continueWithAuthProvider = asyncHandler(async (req, res) => {
       email,
       req // iot convey info back about whether a new authuser is created or not
     );
+
     const tokens = await tokenService.generateAuthTokens(
       authuser.id,
       userAgent
@@ -118,7 +120,28 @@ const continueWithAuthProvider = asyncHandler(async (req, res) => {
         },
       });
   } catch (error) {
-    throw traceError(error, "AuthController : oAuth");
+    throw traceError(error, "AuthController : continueWithAuthProvider");
+  }
+});
+
+const unlinkAuthProvider = asyncHandler(async (req, res) => {
+  try {
+    const myAuthuser = req.authuser;
+    const providerToBeUnlinked = req.query.provider;
+
+    const authuser = await authService.unlinkAuthProvider(
+      myAuthuser,
+      providerToBeUnlinked
+    );
+
+    res.status(httpStatus.OK).send({
+      success: true,
+      data: {
+        authuser: authuser.filter(),
+      },
+    });
+  } catch (error) {
+    throw traceError(error, "AuthController : unlinkAuthProvider");
   }
 });
 
@@ -273,10 +296,58 @@ const verifyEmail = asyncHandler(async (req, res) => {
   }
 });
 
+const sendSignupVerificationEmail = asyncHandler(async (req, res, next) => {
+  try {
+    const {
+      id,
+      email,
+      services: { emailpassword },
+    } = req.authuser;
+
+    authService.handleSignupIsVerified(emailpassword);
+
+    const verifySignupToken = await tokenService.generateVerifySignupToken(id);
+
+    await emailService.sendSignupVerificationEmail(
+      email,
+      verifySignupToken.token
+    );
+
+    res.status(httpStatus.OK).send(success);
+  } catch (error) {
+    throw traceError(error, "AuthController : sendSignupVerificationEmail");
+  }
+});
+
+const verifySignup = asyncHandler(async (req, res) => {
+  try {
+    const token = req.body.token;
+
+    const { user: id } = await tokenService.verifyToken(
+      token,
+      tokenTypes.VERIFY_SIGNUP
+    );
+
+    const authuser = await authService.verifySignup(id);
+
+    await tokenService.removeTokens({
+      user: authuser.id,
+      type: tokenTypes.VERIFY_SIGNUP,
+    });
+
+    req.authuser = authuser; // for morgan logger to tokenize it as user
+
+    res.status(httpStatus.OK).send(success);
+  } catch (error) {
+    throw traceError(error, "AuthController : verifySignup");
+  }
+});
+
 module.exports = {
   signup,
   login,
   continueWithAuthProvider,
+  unlinkAuthProvider,
   logout,
   signout,
   refreshTokens,
@@ -284,4 +355,6 @@ module.exports = {
   resetPassword,
   sendVerificationEmail,
   verifyEmail,
+  sendSignupVerificationEmail,
+  verifySignup,
 };

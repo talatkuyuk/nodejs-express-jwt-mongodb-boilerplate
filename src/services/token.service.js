@@ -295,6 +295,7 @@ const generateAccessToken = (userId, userAgent, jti) => {
       config.jwt.accessExpirationMinutes,
       "minutes"
     );
+
     const accessToken = generateToken(
       userId,
       accessTokenExpires,
@@ -302,6 +303,7 @@ const generateAccessToken = (userId, userAgent, jti) => {
       jti,
       userAgent
     );
+
     return { token: accessToken, expires: accessTokenExpires };
   } catch (error) {
     throw traceError(error, "TokenService : generateAccessToken");
@@ -309,7 +311,7 @@ const generateAccessToken = (userId, userAgent, jti) => {
 };
 
 /**
- * Generate refresh token and save the token document to db
+ * Generate refresh token and save the token document into db
  * @param {string} userId
  * @returns {Promise<Token>}
  */
@@ -319,6 +321,7 @@ const generateRefreshToken = async (userId, userAgent, jti, family) => {
       config.jwt.refreshExpirationDays,
       "days"
     );
+
     const tokenString = generateToken(
       userId,
       refreshTokenExpires,
@@ -352,7 +355,7 @@ const generateRefreshToken = async (userId, userAgent, jti, family) => {
 };
 
 /**
- * Generate reset password token and save the token document to db
+ * Generate reset password token and save the token document into db
  * @param {string} userId
  * @returns {Promise<Token>}
  */
@@ -362,6 +365,7 @@ const generateResetPasswordToken = async (userId) => {
       config.jwt.resetPasswordExpirationMinutes,
       "minutes"
     );
+
     const tokenString = generateToken(
       userId,
       expires,
@@ -390,7 +394,7 @@ const generateResetPasswordToken = async (userId) => {
 };
 
 /**
- * Generate verify email token and save the token document to db
+ * Generate verify email token and save the token document into db
  * @param {string} userId
  * @returns {Promise<Token>}
  */
@@ -400,6 +404,7 @@ const generateVerifyEmailToken = async (userId) => {
       config.jwt.verifyEmailExpirationMinutes,
       "minutes"
     );
+
     const tokenString = generateToken(userId, expires, tokenTypes.VERIFY_EMAIL);
 
     const tokenObject = new Token(
@@ -420,6 +425,45 @@ const generateVerifyEmailToken = async (userId) => {
     return verifyEmailToken;
   } catch (error) {
     throw traceError(error, "TokenService : generateVerifyEmailToken");
+  }
+};
+
+/**
+ * Generate verify signup token and save the token document into db
+ * @param {string} userId
+ * @returns {Promise<Token>}
+ */
+const generateVerifySignupToken = async (userId) => {
+  try {
+    const expires = moment().add(
+      config.jwt.verifySignupExpirationMinutes,
+      "minutes"
+    );
+
+    const tokenString = generateToken(
+      userId,
+      expires,
+      tokenTypes.VERIFY_SIGNUP
+    );
+
+    const tokenObject = new Token(
+      tokenString,
+      userId,
+      expires.toDate(),
+      tokenTypes.VERIFY_SIGNUP
+    );
+
+    const verifySignupToken = await tokenDbService.addToken(tokenObject);
+
+    if (!verifySignupToken)
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "The database could not process the request"
+      );
+
+    return verifySignupToken;
+  } catch (error) {
+    throw traceError(error, "TokenService : generateVerifySignupToken");
   }
 };
 
@@ -549,6 +593,7 @@ module.exports = {
   generateRefreshToken,
   generateResetPasswordToken,
   generateVerifyEmailToken,
+  generateVerifySignupToken,
   removeToken,
   removeTokens,
   updateTokenAsBlacklisted,

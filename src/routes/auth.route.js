@@ -13,6 +13,8 @@ const {
   resetPasswordValidationRules,
   verifyEmailValidationRules,
   googleValidationRules,
+  unlinkValidationRules,
+  verifySignupValidationRules,
 } = require("../validations/auth.ValidationRules");
 
 router.post("/signup", validate(signupValidationRules), authController.signup);
@@ -63,6 +65,27 @@ router.post(
   "/facebook",
   oAuth("facebook"),
   authController.continueWithAuthProvider
+);
+
+router.post(
+  "/unlink",
+  authenticate,
+  authorize("unlink"),
+  validate(unlinkValidationRules),
+  authController.unlinkAuthProvider
+);
+
+router.post(
+  "/send-signup-verification-email",
+  authenticate,
+  authorize(),
+  authController.sendSignupVerificationEmail
+);
+
+router.post(
+  "/verify-signup",
+  validate(verifySignupValidationRules),
+  authController.verifySignup
 );
 
 module.exports = router;
