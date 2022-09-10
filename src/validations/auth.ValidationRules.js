@@ -63,17 +63,17 @@ const googleValidationRules = [
     .withMessage("The query param 'method' could be only 'token' or 'code'"),
 ];
 
-const unlinkValidationRules = [
+const verifySignupValidationRules = [
+  body("token").notEmpty().withMessage("token is missing"),
+];
+
+const unlinkProviderValidationRules = [
   query("provider")
     .notEmpty()
     .withMessage("query param 'provider' is missing")
     .bail()
     .isIn(["emailpassword", "google", "facebook"])
     .withMessage("The query param 'provider' should be an auth provider"),
-];
-
-const verifySignupValidationRules = [
-  body("token").notEmpty().withMessage("token is missing"),
 ];
 
 module.exports = {
@@ -84,6 +84,6 @@ module.exports = {
   resetPasswordValidationRules,
   verifyEmailValidationRules,
   googleValidationRules,
-  unlinkValidationRules,
   verifySignupValidationRules,
+  unlinkProviderValidationRules,
 };
