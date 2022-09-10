@@ -41,12 +41,11 @@ const sendEmail = async (to, subject, text) => {
         ),
         "EmailService : sendEmail"
       );
-    else if (code && command)
+    else
       throw traceError(
-        new ApiError(httpStatus.BAD_REQUEST, `ApiError : ${message}`),
+        new ApiError(httpStatus.BAD_REQUEST, `SmtpError : ${message}`),
         "EmailService : sendEmail"
       );
-    else throw traceError(error, "EmailService : sendEmail");
   }
 };
 
@@ -106,6 +105,7 @@ const sendSignupVerificationEmail = async (to, token) => {
 
 module.exports = {
   transporter, // it is exported for mocking in jest
+  sendEmail, // it is exported for mocking in jest
   sendResetPasswordEmail,
   sendVerificationEmail,
   sendSignupVerificationEmail,
