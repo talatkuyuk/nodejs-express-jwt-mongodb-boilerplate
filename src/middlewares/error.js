@@ -55,7 +55,12 @@ const handler = (err, req, res, next) => {
     },
   };
 
-  !isOperational && process.exit(1);
+  if (!isOperational) {
+    console.log("The programmer error is NOT operational !");
+    console.log(response);
+
+    process.exit(1);
+  }
 
   res.status(statusCode).send(response);
 };
