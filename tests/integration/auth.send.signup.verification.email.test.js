@@ -20,38 +20,41 @@ const { setupRedis } = require("../setup/setupRedis");
 setupTestDatabase();
 setupRedis();
 
-describe("POST /auth/send-verification-email", () => {
+describe("POST /auth/send-signup-verification-email", () => {
   const userAgent = "from-jest-test";
-  let accessToken, authuserId, authuseEmail;
+  let accessToken, authuserId, authuserEmail;
 
   beforeEach(async () => {
-    const { authuser, tokens } = await TestUtil.createAuthUser(
-      "talat@google.com",
-      "Pass1word!",
-      userAgent
-    );
+    const { authuser, tokens } = await TestUtil.createAuthUser({
+      email: "talat@google.com",
+      password: "Pass1word!",
+      services: {},
+      userAgent,
+    });
 
     authuserId = authuser.id;
-    authuseEmail = authuser.email;
+    authuserEmail = authuser.email;
     accessToken = tokens.access.token;
   });
 
-  describe("Failed send-verification-email process", () => {
+  describe("Failed send-signup-verification-email process", () => {
     test("should return status 400, if the email is already verified", async () => {
       // update the authuser with isEmailVerifid true
       await authuserDbService.updateAuthUser(authuserId, {
-        isEmailVerified: true,
+        services: {
+          emailpassword: true,
+        },
       });
 
       const response = await request(app)
-        .post("/auth/send-verification-email")
+        .post("/auth/send-signup-verification-email")
         .set("Authorization", `Bearer ${accessToken}`)
         .set("User-Agent", userAgent)
         .send();
 
       TestUtil.errorExpectations(response, httpStatus.BAD_REQUEST);
       expect(response.body.error.name).toBe("ApiError");
-      expect(response.body.error.message).toEqual("Email is already verified");
+      expect(response.body.error.message).toEqual("Signup is already verified");
     });
 
     test("should return status 500, if the email service does not respond", async () => {
@@ -72,7 +75,7 @@ describe("POST /auth/send-verification-email", () => {
         .mockImplementation(() => Promise.reject(smtpResponse));
 
       const response = await request(app)
-        .post("/auth/send-verification-email")
+        .post("/auth/send-signup-verification-email")
         .set("Authorization", `Bearer ${accessToken}`)
         .set("User-Agent", userAgent)
         .send();
@@ -98,30 +101,31 @@ describe("POST /auth/send-verification-email", () => {
         .mockImplementation(() => Promise.reject(smtpResponse));
 
       const response = await request(app)
-        .post("/auth/send-verification-email")
+        .post("/auth/send-signup-verification-email")
         .set("Authorization", `Bearer ${accessToken}`)
         .set("User-Agent", userAgent)
         .send();
 
       TestUtil.errorExpectations(response, httpStatus.BAD_REQUEST);
-      expect(response.body.error.name).toBe("ApiError");
+      expect(response.body.error.name).toBe("SmtpError");
       expect(response.body.error.message).toEqual("No recipients defined");
     });
   });
 
-  describe("Success send-verification-email process", () => {
-    test("should return status 204, generate and store verify-email token in db", async () => {
-      // spy on transporter and sendVerificationEmail of the emailService
+  describe("Success send-signup-verification-email process", () => {
+    test("should return status 204, generate and store verify-signup token in db", async () => {
+      // spy on transporter and sendSignupVerificationEmail of the emailService
       jest
         .spyOn(emailService.transporter, "sendMail")
         .mockResolvedValue("The verification email is sent.");
-      const spyOnSendVerificationEmail = jest.spyOn(
+
+      const spyOnSendSignupVerificationEmail = jest.spyOn(
         emailService,
-        "sendVerificationEmail"
+        "sendSignupVerificationEmail"
       );
 
       const response = await request(app)
-        .post("/auth/send-verification-email")
+        .post("/auth/send-signup-verification-email")
         .set("Authorization", `Bearer ${accessToken}`)
         .set("User-Agent", userAgent)
         .send();
@@ -129,25 +133,27 @@ describe("POST /auth/send-verification-email", () => {
       expect(response.status).toBe(httpStatus.OK);
       expect(response.body.success).toBe(true);
 
-      expect(spyOnSendVerificationEmail).toHaveBeenCalledWith(
-        authuseEmail,
+      expect(spyOnSendSignupVerificationEmail).toHaveBeenCalledWith(
+        authuserEmail,
         expect.any(String)
       );
 
       // obtain the token from the function on that spied
-      const verifyEmailToken = spyOnSendVerificationEmail.mock.calls[0][1];
+      const verifySignupToken =
+        spyOnSendSignupVerificationEmail.mock.calls[0][1];
 
       // check the verify email token belongs to the authuser
-      const { sub } = jwt.decode(verifyEmailToken, config.jwt.secret);
+      const { sub } = jwt.decode(verifySignupToken, config.jwt.secret);
       expect(sub).toEqual(authuserId);
 
       // check the verify email token is stored in db
-      const verifyEmailTokenDoc = await tokenDbService.getToken({
-        token: verifyEmailToken,
+      const verifySignupTokenDoc = await tokenDbService.getToken({
+        token: verifySignupToken,
         user: authuserId,
-        type: tokenTypes.VERIFY_EMAIL,
+        type: tokenTypes.VERIFY_SIGNUP,
       });
-      expect(verifyEmailTokenDoc.user).toEqual(authuserId);
+
+      expect(verifySignupTokenDoc.user).toEqual(authuserId);
     });
   });
 });

@@ -4,6 +4,7 @@ const { validate } = require("../../src/middlewares");
 const authValidation = require("../../src/validations/auth.ValidationRules");
 const ApiError = require("../../src/utils/ApiError");
 const { authuserService } = require("../../src/services");
+const { authProvider } = require("../../src/config/providers");
 
 const TestUtil = require("../testutils/TestUtil");
 
@@ -827,6 +828,206 @@ describe("Validate Middleware : Auth validation rules", () => {
       const next = jest.fn();
 
       await validate(authValidation.googleValidationRules)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith();
+    });
+  });
+
+  describe("verifySignup validation", () => {
+    test("verifySignup: should throw error 422, if the body is empty", async () => {
+      const request = {
+        body: {},
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authValidation.verifySignupValidationRules)(
+        req,
+        res,
+        next
+      );
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        token: ["token is missing"],
+      });
+    });
+
+    test("verifySignup: should throw error 422, if the token is empty", async () => {
+      const request = {
+        body: {
+          token: "",
+        },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authValidation.verifySignupValidationRules)(
+        req,
+        res,
+        next
+      );
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        token: ["token is missing"],
+      });
+    });
+
+    test("verifySignup: should continue next middleware if the body elements are valid", async () => {
+      const request = {
+        body: {
+          token: "json-web-token-for-refresh-token",
+        },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authValidation.verifySignupValidationRules)(
+        req,
+        res,
+        next
+      );
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith();
+    });
+  });
+
+  describe("unlinkProvider validation", () => {
+    test("unlinkProvider: should throw error 422, if the query param provider is empty", async () => {
+      const request = {
+        query: { provider: "" },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authValidation.unlinkProviderValidationRules)(
+        req,
+        res,
+        next
+      );
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        provider: ["query param 'provider' is missing"],
+      });
+    });
+
+    test("unlinkProvider: should throw error 422, if the query param provider is not an auth provider", async () => {
+      const request = {
+        query: {
+          provider: "authprovider", // it is not emailpassword, google, or facebook
+        },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authValidation.unlinkProviderValidationRules)(
+        req,
+        res,
+        next
+      );
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        provider: ["The query param 'provider' should be an auth provider"],
+      });
+    });
+
+    test("unlinkProvider: should continue next middleware if the query param provider is valid (emailpassword)", async () => {
+      const request = {
+        query: {
+          provider: authProvider.EMAILPASSWORD,
+        },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authValidation.unlinkProviderValidationRules)(
+        req,
+        res,
+        next
+      );
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith();
+    });
+
+    test("unlinkProvider: should continue next middleware if the query param provider is valid (google)", async () => {
+      const request = {
+        query: {
+          provider: authProvider.GOOGLE,
+        },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authValidation.unlinkProviderValidationRules)(
+        req,
+        res,
+        next
+      );
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith();
+    });
+
+    test("unlinkProvider: should continue next middleware if the query param provider is valid (facebook)", async () => {
+      const request = {
+        query: {
+          provider: authProvider.FACEBOOK,
+        },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authValidation.unlinkProviderValidationRules)(
+        req,
+        res,
+        next
+      );
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();

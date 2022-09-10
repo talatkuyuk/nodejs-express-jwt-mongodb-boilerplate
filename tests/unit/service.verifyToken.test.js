@@ -18,6 +18,29 @@ setupRedis();
 describe("Test for Refresh Token Rotation", () => {
   TestUtil.MatchErrors();
 
+  /* The possible token errors
+  ---TokenExpiredError---
+  err = {
+    name: 'TokenExpiredError',
+    message: 'jwt expired',
+    expiredAt: 1408621000
+  }
+
+  ---JsonWebTokenError---
+  err = {
+    name: 'JsonWebTokenError',
+    message: <one of the message below>
+  }
+
+  'jwt malformed'
+  'jwt signature is required'
+  'invalid signature'
+  'jwt audience invalid. expected: [OPTIONS AUDIENCE]'
+  'jwt issuer invalid. expected: [OPTIONS ISSUER]'
+  'jwt id invalid. expected: [OPTIONS JWT ID]'
+  'jwt subject invalid. expected: [OPTIONS SUBJECT]'
+  */
+
   describe("Tests for Token Errors", () => {
     test("should throw ApiError with code 401 if the reset password token is expired", async () => {
       const token = testData.RESET_PASSWORD_TOKEN_EXPIRED;
@@ -48,7 +71,7 @@ describe("Test for Refresh Token Rotation", () => {
     });
 
     test("should throw ApiError with code 401 if the token is malformed (Undefined)", async () => {
-      const token = testData.VERIFY_EMAIL_TOKEN_UNDEFINED; // there is no such token in testData in order to simulate "undefined"
+      const token = undefined;
       const type = tokenTypes.VERIFY_EMAIL;
 
       const expectedError = new ApiError(
@@ -67,12 +90,25 @@ describe("Test for Refresh Token Rotation", () => {
       const type = tokenTypes.REFRESH;
       const token = tokenService.generateTokenForTest(type); // There is no such token in the database
 
-      console.log(token);
+      const expectedError = new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "the token is not valid"
+      );
+
+      expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(
+        expect.toBeMatchedWithError(expectedError)
+      );
+    });
+
+    test("should throw ApiError with code 401 if the verified token is not in the database (token, type, user)", async () => {
+      const type = tokenTypes.VERIFY_SIGNUP;
+      const token = tokenService.generateTokenForTest(type); // There is no such token in the database
 
       const expectedError = new ApiError(
         httpStatus.UNAUTHORIZED,
         "the token is not valid"
       );
+
       expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(
         expect.toBeMatchedWithError(expectedError)
       );
@@ -105,6 +141,22 @@ describe("Test for Refresh Token Rotation", () => {
         verifyEmailToken.token,
         tokenTypes.VERIFY_EMAIL
       );
+
+      expect(data).toEqual(expect.any(Token));
+    });
+
+    test("Verify-Signup Token: should return the token document", async () => {
+      const userId = "613b417848981bfd6e91c662";
+
+      const verifySignupToken = await tokenService.generateVerifySignupToken(
+        userId
+      );
+
+      const data = await tokenService.verifyToken(
+        verifySignupToken.token,
+        tokenTypes.VERIFY_SIGNUP
+      );
+
       expect(data).toEqual(expect.any(Token));
     });
   });
