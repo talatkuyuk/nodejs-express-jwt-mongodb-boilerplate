@@ -5,6 +5,12 @@ const { traceError } = require("../utils/errorUtils");
 const { userDbService } = require("../services");
 const { roleRights } = require("../config/roles");
 
+/**
+ * It is a middleware; attaches the user into request and check the user role and authorization
+ * @param {string | string[] | undefined} requiredRights
+ * @returns {function}
+ */
+
 const authorize =
   (...requiredRights) =>
   async (req, res, next) => {
@@ -15,11 +21,11 @@ const authorize =
         if (user) req.user = user;
       }
 
-      // if there is no user (forexample just after signup), set the role as "user"
-      const role = req.user ? req.user.role : "user";
-
       // if no requiredRights, the request has been granted what to do
       if (requiredRights.length === 0) return next();
+
+      // if there is no user (forexample just after signup), set the role as "user"
+      const role = req.user ? req.user.role : "user";
 
       const userRights = roleRights[role];
 
