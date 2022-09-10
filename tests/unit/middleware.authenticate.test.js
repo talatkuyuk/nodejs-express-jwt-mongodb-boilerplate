@@ -140,11 +140,11 @@ describe("Auth Middleware", () => {
     let accessToken, refreshToken, authuserId;
 
     beforeEach(async () => {
-      const { authuser, tokens } = await TestUtil.createAuthUser(
-        "talat@google.com",
-        "Pass1word!",
-        userAgent
-      );
+      const { authuser, tokens } = await TestUtil.createAuthUser({
+        email: "talat@google.com",
+        password: "Pass1word!",
+        userAgent,
+      });
 
       authuserId = authuser.id;
       accessToken = tokens.access.token;
@@ -200,11 +200,11 @@ describe("Auth Middleware", () => {
       // This means that it is stolen, the only prevention is to check the useragent which is embedded in the access token
       const userAgent2 = "from-google-chrome";
 
-      const { tokens: tokens2 } = await TestUtil.createAuthUser(
-        "talat@google.com",
-        "Pass1word!",
-        userAgent2
-      );
+      const { tokens: tokens2 } = await TestUtil.createAuthUser({
+        email: "talat@google.com",
+        password: "Pass1word!",
+        userAgent: userAgent2,
+      });
 
       // authuser tries to use authuser2's access token but using different user agent
       const requestHeader = {
@@ -311,11 +311,11 @@ describe("Auth Middleware", () => {
     test("should continue next middleware with user is attached to the request", async () => {
       const userAgent = "from-jest-test";
 
-      const { authuser, tokens } = await TestUtil.createAuthUser(
-        "talat@google.com",
-        "Pass1word!",
-        userAgent
-      );
+      const { authuser, tokens } = await TestUtil.createAuthUser({
+        email: "talat@google.com",
+        password: "Pass1word!",
+        userAgent,
+      });
 
       const requestHeader = {
         headers: { Authorization: `Bearer ${tokens.access.token}` },

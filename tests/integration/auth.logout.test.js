@@ -23,11 +23,11 @@ describe("POST /auth/logout", () => {
   let refreshTokenId, refreshTokenJti, refreshTokenFamily;
 
   beforeEach(async () => {
-    const { authuser, tokens } = await TestUtil.createAuthUser(
-      "talat@google.com",
-      "Pass1word!",
-      userAgent
-    );
+    const { authuser, tokens } = await TestUtil.createAuthUser({
+      email: "talat@google.com",
+      password: "Pass1word!",
+      userAgent,
+    });
 
     authuserId = authuser.id;
     accessToken = tokens.access.token;
