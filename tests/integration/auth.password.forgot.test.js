@@ -61,13 +61,13 @@ describe("POST /auth/forgot-password", () => {
     });
 
     test("should return status 500, if the email service does not respond", async () => {
-      const authuserx = AuthUser.fromDoc({
+      const authuserDoc = AuthUser.fromDoc({
         email: "talat@gmail.com",
         password: await bcrypt.hash("Pass1word.", 8),
       });
 
-      // ad the authuserx into db
-      const authuser = await authuserDbService.addAuthUser(authuserx);
+      // ad the authuserDoc into db
+      const authuser = await authuserDbService.addAuthUser(authuserDoc);
 
       const smtpResponse = {
         code: "EENVELOPE",
@@ -98,13 +98,13 @@ describe("POST /auth/forgot-password", () => {
     });
 
     test("should return status 400, if the email recipient is empty", async () => {
-      const authuserx = AuthUser.fromDoc({
+      const authuserDoc = AuthUser.fromDoc({
         email: "talat@gmail.com",
         password: await bcrypt.hash("Pass1word.", 8),
       });
 
-      // ad the authuserx into db
-      const authuser = await authuserDbService.addAuthUser(authuserx);
+      // ad the authuserDoc into db
+      const authuser = await authuserDbService.addAuthUser(authuserDoc);
 
       const smtpResponse = {
         code: "EENVELOPE",
@@ -124,20 +124,20 @@ describe("POST /auth/forgot-password", () => {
         .send(forgotPasswordForm);
 
       TestUtil.errorExpectations(response, httpStatus.BAD_REQUEST);
-      expect(response.body.error.name).toBe("ApiError");
+      expect(response.body.error.name).toBe("SmtpError");
       expect(response.body.error.message).toEqual("No recipients defined");
     });
   });
 
   describe("Success forgot-password process", () => {
     test("should return status 204, generate and store reset-password token in db", async () => {
-      const authuserx = AuthUser.fromDoc({
+      const authuserDoc = AuthUser.fromDoc({
         email: "talat@gmail.com",
         password: await bcrypt.hash("Pass1word.", 8),
       });
 
-      // ad the authuserx into db
-      const authuser = await authuserDbService.addAuthUser(authuserx);
+      // ad the authuserDoc into db
+      const authuser = await authuserDbService.addAuthUser(authuserDoc);
 
       // spy on transporter and sendResetPasswordEmail of the emailService
       jest

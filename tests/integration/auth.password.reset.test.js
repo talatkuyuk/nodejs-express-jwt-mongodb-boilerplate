@@ -275,13 +275,13 @@ describe("POST /auth/reset-password", () => {
     });
 
     test("should return status 404, if the user is disabled", async () => {
-      const authuserx = AuthUser.fromDoc({
+      const authuserDoc = AuthUser.fromDoc({
         email: "talat@gmail.com",
         password: "no-matters-for-this-test",
       });
 
       // add the authuser into db
-      const authuser = await authuserDbService.addAuthUser(authuserx);
+      const authuser = await authuserDbService.addAuthUser(authuserDoc);
 
       // generate and add valid reset-password token into db
       const resetPasswordToken = await tokenService.generateResetPasswordToken(
@@ -311,13 +311,13 @@ describe("POST /auth/reset-password", () => {
 
   describe("Success reset-password process", () => {
     test("should return status 204, delete reset-password tokens of the user", async () => {
-      const authuserx = AuthUser.fromDoc({
+      const authuserDoc = AuthUser.fromDoc({
         email: "talat@gmail.com",
         password: "no-matters-for-this-test",
       });
 
       // add the authuser into db
-      const authuser = await authuserDbService.addAuthUser(authuserx);
+      const authuser = await authuserDbService.addAuthUser(authuserDoc);
 
       // generate and add valid reset-password token into db
       const resetPasswordToken = await tokenService.generateResetPasswordToken(

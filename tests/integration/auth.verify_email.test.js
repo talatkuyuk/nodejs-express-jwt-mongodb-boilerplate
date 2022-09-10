@@ -32,9 +32,9 @@ describe("POST /auth/verify-email", () => {
 
     test("should return 422 Validation Error if the token is undefined", async () => {
       const verifyEmailForm = {
-        token: testData.VERIFY_EMAIL_TOKEN_UNDEFINED,
-        // there is no such token in the testData in order to simulate "undefined"
+        token: undefined,
       };
+
       const response = await request(app)
         .post("/auth/verify-email")
         .send(verifyEmailForm);
@@ -155,13 +155,13 @@ describe("POST /auth/verify-email", () => {
     });
 
     test("should return status 404, if the user is disabled", async () => {
-      const authuserx = AuthUser.fromDoc({
+      const authuserDoc = AuthUser.fromDoc({
         email: "talat@gmail.com",
         password: "no-matters-for-this-test",
       });
 
       // add the authuser into db
-      const authuser = await authuserDbService.addAuthUser(authuserx);
+      const authuser = await authuserDbService.addAuthUser(authuserDoc);
 
       // generate and add valid verify-email token into db
       const verifyEmailToken = await tokenService.generateVerifyEmailToken(
@@ -187,13 +187,13 @@ describe("POST /auth/verify-email", () => {
 
   describe("Success verify-email process", () => {
     test("should return status 204, delete verify-email tokens of the user", async () => {
-      const authuserx = AuthUser.fromDoc({
+      const authuserDoc = AuthUser.fromDoc({
         email: "talat@gmail.com",
         password: "no-matters-for-this-test",
       });
 
       // add the authuser into db
-      const authuser = await authuserDbService.addAuthUser(authuserx);
+      const authuser = await authuserDbService.addAuthUser(authuserDoc);
 
       // generate and add valid verify-email token into db
       const verifyEmailToken = await tokenService.generateVerifyEmailToken(
