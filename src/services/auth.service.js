@@ -177,6 +177,13 @@ const unlinkAuthProvider = async (authuser, provider) => {
       );
     }
 
+    if (Object.keys(authuser.services).length === 1) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "There must be one auth provider at least"
+      );
+    }
+
     const newAuthProviders = { ...authuser.services };
     delete newAuthProviders[provider];
 

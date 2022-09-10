@@ -10,8 +10,6 @@ module.exports.roleRights = {
     //authuser related
     "get-authuser@self",
     "change-password@self",
-    //auth related
-    "unlink@self",
   ],
   admin: [
     //user related
@@ -32,6 +30,5 @@ module.exports.roleRights = {
     "delete-authuser",
     //self related
     "change-password@self",
-    "unlink@self",
   ],
 };
