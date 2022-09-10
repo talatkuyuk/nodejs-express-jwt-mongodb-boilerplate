@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { authenticate, authorize, validate, oAuth } = require("../middlewares");
+const { authenticate, validate, oAuth } = require("../middlewares");
 
 const { authController } = require("../controllers");
 
@@ -13,15 +13,15 @@ const {
   resetPasswordValidationRules,
   verifyEmailValidationRules,
   googleValidationRules,
-  unlinkValidationRules,
+  unlinkProviderValidationRules,
   verifySignupValidationRules,
 } = require("../validations/auth.ValidationRules");
 
 router.post("/signup", validate(signupValidationRules), authController.signup);
 router.post("/login", validate(loginValidationRules), authController.login);
 
-router.post("/logout", authenticate, authorize(), authController.logout);
-router.post("/signout", authenticate, authorize(), authController.signout);
+router.post("/logout", authenticate, authController.logout);
+router.post("/signout", authenticate, authController.signout);
 
 router.post(
   "/refresh-tokens",
@@ -44,7 +44,6 @@ router.post(
 router.post(
   "/send-verification-email",
   authenticate,
-  authorize(),
   authController.sendVerificationEmail
 );
 
@@ -68,17 +67,8 @@ router.post(
 );
 
 router.post(
-  "/unlink",
-  authenticate,
-  authorize("unlink"),
-  validate(unlinkValidationRules),
-  authController.unlinkAuthProvider
-);
-
-router.post(
   "/send-signup-verification-email",
   authenticate,
-  authorize(),
   authController.sendSignupVerificationEmail
 );
 
@@ -86,6 +76,13 @@ router.post(
   "/verify-signup",
   validate(verifySignupValidationRules),
   authController.verifySignup
+);
+
+router.post(
+  "/unlink",
+  authenticate,
+  validate(unlinkProviderValidationRules),
+  authController.unlinkAuthProvider
 );
 
 module.exports = router;
