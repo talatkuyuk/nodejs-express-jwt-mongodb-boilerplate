@@ -159,10 +159,10 @@ class TestUtil {
     expect(err.errorPath).toBeNull();
   };
 
-  static createAuthUser = async (email, password, userAgent) => {
-    const authUserInstance = AuthUser.fromDoc({ email, password });
+  static createAuthUser = async ({ userAgent, ...authuserObject }) => {
+    const authUserDoc = AuthUser.fromDoc(authuserObject);
 
-    const authuser = await authuserDbService.addAuthUser(authUserInstance);
+    const authuser = await authuserDbService.addAuthUser(authUserDoc);
     const tokens = await tokenService.generateAuthTokens(
       authuser.id,
       userAgent

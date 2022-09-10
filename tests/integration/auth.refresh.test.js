@@ -43,11 +43,11 @@ describe("POST /auth/refresh-tokens", () => {
     let refreshTokenId, refreshTokenFamily;
 
     beforeEach(async () => {
-      const { authuser, tokens } = await TestUtil.createAuthUser(
-        "talat@google.com",
-        "Pass1word!",
-        userAgent
-      );
+      const { authuser, tokens } = await TestUtil.createAuthUser({
+        email: "talat@google.com",
+        password: "Pass1word!",
+        userAgent,
+      });
 
       authuserId = authuser.id;
       accessToken = tokens.access.token;
@@ -249,11 +249,11 @@ describe("POST /auth/refresh-tokens", () => {
     let refreshToken, authuserId;
 
     beforeEach(async () => {
-      const { authuser } = await TestUtil.createAuthUser(
-        "talat@google.com",
-        "Pass1word!",
-        userAgent
-      );
+      const { authuser } = await TestUtil.createAuthUser({
+        email: "talat@google.com",
+        password: "Pass1word!",
+        userAgent,
+      });
 
       authuserId = authuser.id;
 
@@ -328,11 +328,11 @@ describe("POST /auth/refresh-tokens", () => {
     const userAgent = "from-jest-test";
 
     test("should return status 201; and return valid tokens in json form", async () => {
-      const { authuser } = await TestUtil.createAuthUser(
-        "talat@google.com",
-        "Pass1word!",
-        userAgent
-      );
+      const { authuser } = await TestUtil.createAuthUser({
+        email: "talat@google.com",
+        password: "Pass1word!",
+        userAgent,
+      });
 
       // create for that authuser refreshtoken (not expired but "not valid before" is 0 in order not to be trapped)
       const jti = crypto.randomBytes(16).toString("hex");
