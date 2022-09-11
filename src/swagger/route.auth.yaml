@@ -14,8 +14,29 @@
           schema:
             $ref: "#/components/schemas/form-signup"
     responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  value: true
+                data:
+                  type: object
+                  properties:
+                    authuser:
+                      $ref: "#/components/schemas/authuser"
+                      example:
+                        $ref: "#components/examples/response-authuser"
+                    tokens:
+                      $ref: "#/components/schemas/tokens"
+                      example:
+                        $ref: "#components/examples/response-tokens"
       201:
-        description: Created
+        description: CREATED
         content:
           application/json:
             schema:
@@ -257,10 +278,10 @@
       content:
         application/x-www-form-urlencoded:
           schema:
-            $ref: "#/components/schemas/form-verify-email"
+            $ref: "#/components/schemas/form-token-inside"
         application/json:
           schema:
-            $ref: "#/components/schemas/form-verify-email"
+            $ref: "#/components/schemas/form-token-inside"
     responses:
       200:
         $ref: "#/components/responses/SuccessResponse"
@@ -271,7 +292,55 @@
       404:
         $ref: "#/components/responses/NoUserFound"
       422:
-        $ref: "#/components/responses/VerifyEmailTokenValidationError"
+        $ref: "#/components/responses/VerifyTokenValidationError"
+      500:
+        $ref: "#/components/responses/InternalServerError"
+
+### SEND-SIGNUP-VERIFICATION-EMAIL ###
+/auth/send-signup-verification-email:
+  post:
+    summary: Send signup verification email
+    description: An email will be sent to verify signup.
+    tags: [Auth]
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        $ref: "#/components/responses/SuccessResponse"
+      400:
+        $ref: "#/components/responses/SendSignupVerificationEmailErrors"
+      401:
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+      403:
+        $ref: "#/components/responses/AuthenticateMiddlewareForbiddenErrors"
+      500:
+        $ref: "#/components/responses/SendEmailInternalServerError"
+
+### VERIFY-SIGNUP ###
+/auth/verify-signup:
+  post:
+    summary: Verify signup when the user registered with an auth provider before
+    tags: [Auth]
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: "#/components/schemas/form-token-inside"
+        application/json:
+          schema:
+            $ref: "#/components/schemas/form-token-inside"
+    responses:
+      200:
+        $ref: "#/components/responses/SuccessResponse"
+      401:
+        $ref: "#/components/responses/VerifyTokenUnauthorizedErrors"
+      403:
+        $ref: "#/components/responses/DisabledForbiddenError"
+      404:
+        $ref: "#/components/responses/NoUserFound"
+      422:
+        $ref: "#/components/responses/VerifyTokenValidationError"
       500:
         $ref: "#/components/responses/InternalServerError"
 
@@ -309,12 +378,35 @@
                       $ref: "#/components/schemas/tokens"
                       example:
                         $ref: "#components/examples/response-tokens"
+      201:
+        description: CREATED
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  value: true
+                data:
+                  type: object
+                  properties:
+                    authuser:
+                      $ref: "#/components/schemas/authuser"
+                      example:
+                        $ref: "#components/examples/response-authuser"
+                    tokens:
+                      $ref: "#/components/schemas/tokens"
+                      example:
+                        $ref: "#components/examples/response-tokens"
       400:
         $ref: "#/components/responses/oAuthLoginBadRequests"
       401:
         $ref: "#/components/responses/oAuthLoginUnauthorizedFailures"
       403:
         $ref: "#/components/responses/oAuthLoginForbiddenErrors"
+      422:
+        $ref: "#/components/responses/GoogleLoginValidationErrors"
       500:
         $ref: "#/components/responses/InternalServerError"
 
@@ -348,11 +440,70 @@
                       $ref: "#/components/schemas/tokens"
                       example:
                         $ref: "#components/examples/response-tokens"
+      201:
+        description: CREATED
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  value: true
+                data:
+                  type: object
+                  properties:
+                    authuser:
+                      $ref: "#/components/schemas/authuser"
+                      example:
+                        $ref: "#components/examples/response-authuser"
+                    tokens:
+                      $ref: "#/components/schemas/tokens"
+                      example:
+                        $ref: "#components/examples/response-tokens"
       400:
         $ref: "#/components/responses/oAuthLoginBadRequests"
       401:
         $ref: "#/components/responses/oAuthLoginUnauthorizedFailures"
       403:
         $ref: "#/components/responses/oAuthLoginForbiddenErrors"
+      500:
+        $ref: "#/components/responses/InternalServerError"
+
+### UNLINK ###
+/auth/unlink:
+  post:
+    summary: Unlink an auth provider
+    tags: [Auth]
+    security:
+      - BearerAuth: []
+    parameters:
+      - $ref: "#/components/parameters/query-param-provider"
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  value: true
+                data:
+                  type: object
+                  properties:
+                    authuser:
+                      $ref: "#/components/schemas/authuser"
+                      example:
+                        $ref: "#components/examples/response-authuser"
+      400:
+        $ref: "#/components/responses/UnlinkProviderBadRequests"
+      401:
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+      403:
+        $ref: "#/components/responses/AuthenticateMiddlewareForbiddenErrors"
+      422:
+        $ref: "#/components/responses/UnlinkProviderValidationErrors"
       500:
         $ref: "#/components/responses/InternalServerError"
