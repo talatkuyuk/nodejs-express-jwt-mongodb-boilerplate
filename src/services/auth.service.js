@@ -163,13 +163,15 @@ const continueWithAuthProvider = async (provider, id, email, request) => {
 };
 
 /**
- * Unlink an auth provider
+ * Unlink an auth provider (called from an authorized route)
  * @param {Authuser} authuser
  * @param {string} provider
  * @returns {Promise<AuthUser>}
  */
 const unlinkAuthProvider = async (authuser, provider) => {
   try {
+    // checkAuthuser(authuser); not necessary since the authorize middleware handles this
+
     if (!authuser.services?.hasOwnProperty(provider)) {
       throw new ApiError(
         httpStatus.BAD_REQUEST,
