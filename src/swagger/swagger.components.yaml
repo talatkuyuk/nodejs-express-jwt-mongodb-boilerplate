@@ -93,16 +93,16 @@ components:
         passwordConfirmation: Pass1word!
         token: lkfkldE-reset-password-token-oflkmFDDkf
 
-    # VERIFY EMAIL FORM IN REQUEST.BODY
-    form-verify-email:
+    # VERIFY EMAIL OR VERIFY SIGNUP FORM IN REQUEST.BODY
+    form-token-inside:
       type: object
       # required:
       #   - token
       properties:
         token:
           type: string
-          description: reset password token
-          example: lkfkldE-verify-email-token-oflkmFDDkf
+          description: jwt for verification
+          example: json-web-token-string
 
     # ADD AUTHUSER FORM IN REQUEST.BODY
     form-add-authuser:
@@ -737,7 +737,9 @@ components:
 
         #### ApiError
         * _Email is already verified_
-        * _No recipients defined_
+
+        ### SmtpError
+        * _Error message which comes from the SMTP server_
       content:
         application/json:
           schema:
@@ -747,7 +749,7 @@ components:
             error:
               code: 400
               name: "ApiError"
-              message: "One of the api errors appears here"
+              message: "Email is already verified"
 
     SendEmailInternalServerError:
       description: |
@@ -766,7 +768,7 @@ components:
               name: "SmtpError"
               message: "SMTP server is out of service"
 
-    VerifyEmailTokenValidationError:
+    VerifyTokenValidationError:
       description: UNPROCESSABLE ENTITY
       content:
         application/json:
@@ -780,6 +782,84 @@ components:
               message: The request could not be validated
               errors:
                 token: ["The query parameter 'token' must not be empty"]
+
+    SendSignupVerificationEmailErrors:
+      description: |
+        BAD REQUEST
+
+        #### ApiError
+        * _Signup is already verified_
+
+        ### SmtpError
+        * _Error message which comes from the SMTP server_
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error:
+              code: 400
+              name: "ApiError"
+              message: "_Signup is already verified"
+
+    GoogleLoginValidationErrors:
+      description: |
+        UNPROCESSABLE ENTITY
+
+        #### ValidationErrors
+        * _query param 'method' is missing_
+        * _The query param 'method' could be only 'token' or 'code'_
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationErrorResponse"
+          example:
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                provider: ["query param 'method' is missing"]
+
+    UnlinkProviderValidationErrors:
+      description: |
+        UNPROCESSABLE ENTITY
+
+        #### ValidationErrors
+        * _query param 'provider' is missing_
+        * _The query param 'provider' should be an auth provider_
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationErrorResponse"
+          example:
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                provider: ["query param 'provider' is missing"]
+
+    UnlinkProviderBadRequests:
+      description: |
+        BAD_REQUEST
+
+        #### ApiError
+        * _The auth provider is already unlinked_
+        * _There must be one auth provider at least_
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error:
+              code: 400
+              name: "ApiError"
+              message: "One of the error messages appears here"
 
     DisabledForbiddenError:
       description: FORBIDDEN
@@ -1160,6 +1240,14 @@ components:
       schema:
         type: string
       description: token or code as a string
+
+    query-param-provider:
+      in: query
+      name: provider
+      required: true
+      schema:
+        type: string
+      description: emailpassword | google | facebook as an auth provider
 
   ##################### EXAPLES *********************
   examples:

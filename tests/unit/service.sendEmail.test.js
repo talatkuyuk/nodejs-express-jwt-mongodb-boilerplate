@@ -35,12 +35,13 @@ describe("Failed send-verification-email process", () => {
     ).rejects.toThrow(expect.toBeMatchedWithError(expectedError));
   });
 
-  test("should return status 400, if the email recipient is empty", async () => {
+  test("should return status 500, if an error occured", async () => {
+    const errorMessage = "the error message";
+
     const smtpResponse = {
       code: "EENVELOPE",
-      command: "API",
       name: "Error",
-      message: "No recipients defined",
+      message: errorMessage,
     };
 
     // spy on transporter to produce error
@@ -50,29 +51,7 @@ describe("Failed send-verification-email process", () => {
 
     const expectedError = new ApiError(
       httpStatus.BAD_REQUEST,
-      "SmtpError: No recipients defined"
-    );
-
-    expect(() =>
-      emailService.sendEmail("", "subject", "body-text")
-    ).rejects.toThrow(expect.toBeMatchedWithError(expectedError));
-  });
-
-  test("should return status 500, if the email recipient is empty", async () => {
-    const smtpResponse = {
-      code: "EENVELOPE",
-      name: "Error",
-      message: "the error message",
-    };
-
-    // spy on transporter to produce error
-    jest
-      .spyOn(emailService.transporter, "sendMail")
-      .mockImplementation(() => Promise.reject(smtpResponse));
-
-    const expectedError = new ApiError(
-      httpStatus.BAD_REQUEST,
-      "SmtpError: the error message"
+      `SmtpError: ${errorMessage}`
     );
 
     expect(() =>
