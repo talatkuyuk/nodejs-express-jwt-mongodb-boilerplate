@@ -132,46 +132,52 @@
       500:
         $ref: "#/components/responses/InternalServerError"
 
-  put:
-    summary: Disable or enable an authuser (toggle)
-    tags: [AuthUsers]
-    security:
-      - BearerAuth: []
-    responses:
-      200:
-        $ref: "#/components/responses/SuccessResponse"
-      401:
-        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
-      403:
-        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
-      404:
-        $ref: "#/components/responses/NoUserFound"
-      422:
-        $ref: "#/components/responses/ParamIdValidationError"
-      500:
-        $ref: "#/components/responses/InternalServerError"
-
-  post:
-    summary: Change email verification status of an authuser (toggle)
-    tags: [AuthUsers]
-    security:
-      - BearerAuth: []
-    responses:
-      200:
-        $ref: "#/components/responses/SuccessResponse"
-      401:
-        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
-      403:
-        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
-      404:
-        $ref: "#/components/responses/NoUserFound"
-      422:
-        $ref: "#/components/responses/ParamIdValidationError"
-      500:
-        $ref: "#/components/responses/InternalServerError"
-
   delete:
     summary: Delete an authuser
+    tags: [AuthUsers]
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        $ref: "#/components/responses/SuccessResponse"
+      401:
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+      403:
+        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+      404:
+        $ref: "#/components/responses/NoUserFound"
+      422:
+        $ref: "#/components/responses/ParamIdValidationError"
+      500:
+        $ref: "#/components/responses/InternalServerError"
+
+/authusers/{id}/toggle-ability:
+  parameters:
+    - $ref: "#/components/parameters/param-authuser-id"
+  patch:
+    summary: Toggle enable or disable status of an authuser
+    tags: [AuthUsers]
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        $ref: "#/components/responses/SuccessResponse"
+      401:
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+      403:
+        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+      404:
+        $ref: "#/components/responses/NoUserFound"
+      422:
+        $ref: "#/components/responses/ParamIdValidationError"
+      500:
+        $ref: "#/components/responses/InternalServerError"
+
+/authusers/{id}/toggle-verification:
+  parameters:
+    - $ref: "#/components/parameters/param-authuser-id"
+  patch:
+    summary: Toggle email verification status of an authuser
     tags: [AuthUsers]
     security:
       - BearerAuth: []

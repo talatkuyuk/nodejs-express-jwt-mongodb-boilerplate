@@ -31,19 +31,19 @@ router.get(
   authuserController.getAuthUser
 );
 
-router.put(
-  "/:id",
+router.patch(
+  "/:id/toggle-ability",
   authenticate,
-  authorize("toggle-authuser"),
-  validate(authuserValidation.toggleAuthUser),
+  authorize("toggle-ability-authuser"),
+  validate(authuserValidation.toggleAbility),
   authuserController.toggleAbility
 );
 
-router.post(
-  "/:id",
+router.patch(
+  "/:id/toggle-verification",
   authenticate,
-  authorize("verify-authuser"),
-  validate(authuserValidation.verifyAuthUser),
+  authorize("toggle-verification-authuser"),
+  validate(authuserValidation.toggleVerification),
   authuserController.toggleVerification
 );
 
