@@ -92,7 +92,7 @@ describe("Test for Refresh Token Rotation", () => {
 
       const expectedError = new ApiError(
         httpStatus.UNAUTHORIZED,
-        "the token is not valid"
+        "The token is not valid"
       );
 
       expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(
@@ -106,7 +106,7 @@ describe("Test for Refresh Token Rotation", () => {
 
       const expectedError = new ApiError(
         httpStatus.UNAUTHORIZED,
-        "the token is not valid"
+        "The token is not valid"
       );
 
       expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(

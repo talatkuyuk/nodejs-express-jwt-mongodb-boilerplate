@@ -32,7 +32,7 @@ const authorize =
       if (!userRights)
         throw new ApiError(
           httpStatus.FORBIDDEN,
-          "Forbidden, (you do not have appropriate right)"
+          "You do not have appropriate right"
         );
 
       const userRightsWithoutSelf = userRights.map(
@@ -47,7 +47,7 @@ const authorize =
         if (index === -1)
           throw new ApiError(
             httpStatus.FORBIDDEN,
-            "Forbidden, (you do not have appropriate right)"
+            "You do not have appropriate right"
           );
 
         // if no param.id, let it is handled by validator !!!, not here but take care in validator
@@ -55,7 +55,7 @@ const authorize =
           if (req.params.id !== "self" && req.params.id !== req.authuser.id)
             throw new ApiError(
               httpStatus.FORBIDDEN,
-              "Forbidden, (only self-data)"
+              "You are not authorized other than your data"
             );
       });
 

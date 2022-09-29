@@ -54,7 +54,7 @@ describe("POST /auth/logout", () => {
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
       expect(response.body.error.message).toEqual(
-        "refresh token is in the blacklist"
+        "The refresh token is blacklisted"
       );
     });
 
@@ -77,7 +77,9 @@ describe("POST /auth/logout", () => {
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
-      expect(response.body.error.message).toEqual("refresh token is not valid");
+      expect(response.body.error.message).toEqual(
+        "The refresh token is not valid"
+      );
     });
 
     test("should return 403 in case the refresh token is used before than valid", async () => {
@@ -96,7 +98,7 @@ describe("POST /auth/logout", () => {
       TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
       expect(response.body.error.name).toEqual("ApiError");
       expect(response.body.error.message).toEqual(
-        "Access token is in the blacklist"
+        "The access token is blacklisted, you have to re-login"
       );
     });
   });

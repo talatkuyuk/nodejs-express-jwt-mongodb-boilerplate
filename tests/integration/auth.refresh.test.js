@@ -64,7 +64,9 @@ describe("POST /auth/refresh-tokens", () => {
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
-      expect(response.body.error.message).toEqual("refresh token is not valid");
+      expect(response.body.error.message).toEqual(
+        "The refresh token is not valid"
+      );
     });
 
     test("should return 401 and disable family if refresh token is blacklisted (first time violation)", async () => {
@@ -101,7 +103,7 @@ describe("POST /auth/refresh-tokens", () => {
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
       expect(response.body.error.message).toEqual(
-        "Unauthorized usage of refresh token has been detected"
+        "The refresh token is blacklisted"
       );
 
       // check the whole refresh token's family are in db // up to now, 3 refresh tokens would be added above
@@ -161,7 +163,7 @@ describe("POST /auth/refresh-tokens", () => {
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
       expect(response.body.error.message).toEqual(
-        "Unauthorized usage of refresh token has been detected"
+        "The refresh token is blacklisted"
       );
 
       // check the whole refresh token's family are removed from db // up to now, 3 refresh tokens would be added above
@@ -211,7 +213,7 @@ describe("POST /auth/refresh-tokens", () => {
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
       expect(response.body.error.message).toEqual(
-        "The refresh token is expired. You have to re-login to get authentication."
+        "The refresh token is expired, you have to re-login"
       );
 
       // check the whole refresh token's family are removed from db
@@ -289,7 +291,7 @@ describe("POST /auth/refresh-tokens", () => {
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
       expect(response.body.error.message).toEqual(
-        "Your browser/agent seems changed or updated, you have to re-login."
+        "Your browser/agent seems changed or updated, you have to re-login"
       );
     });
 

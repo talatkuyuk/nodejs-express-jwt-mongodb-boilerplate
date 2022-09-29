@@ -43,7 +43,7 @@ describe("Authorization Middleware: Check the user right(s)", () => {
 
     const expectedError = new ApiError(
       httpStatus.FORBIDDEN,
-      "Forbidden, (only self-data)"
+      "You are not authorized other than your data"
     );
 
     expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -79,7 +79,7 @@ describe("Authorization Middleware: Check the user right(s)", () => {
 
     const expectedError = new ApiError(
       httpStatus.FORBIDDEN,
-      "Forbidden, (only self-data)"
+      "You are not authorized other than your data"
     );
 
     expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -107,7 +107,7 @@ describe("Authorization Middleware: Check the user right(s)", () => {
 
     const expectedError = new ApiError(
       httpStatus.FORBIDDEN,
-      "Forbidden, (you do not have appropriate right)"
+      "You do not have appropriate right"
     );
 
     expect(next).toHaveBeenCalledWith(expect.any(ApiError));

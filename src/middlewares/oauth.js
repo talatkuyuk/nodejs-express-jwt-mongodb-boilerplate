@@ -60,7 +60,7 @@ const oAuth = (service) => async (req, res, next) => {
           if (await redisService.check_in_blacklist(oAuth.token)) {
             throw new ApiError(
               httpStatus.FORBIDDEN,
-              `Unauthorized usage of ${oAuth.provider} authentication is detected`
+              `The ${oAuth.provider} token is blacklisted, you have to re-login`
             );
           }
 

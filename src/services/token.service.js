@@ -76,13 +76,10 @@ const verifyToken = async (token, type) => {
     });
 
     if (!tokenDoc)
-      throw new ApiError(httpStatus.UNAUTHORIZED, `the token is not valid`);
+      throw new ApiError(httpStatus.UNAUTHORIZED, "The token is not valid");
 
     if (tokenDoc.blacklisted)
-      throw new ApiError(
-        httpStatus.UNAUTHORIZED,
-        `the token is in the blacklist`
-      );
+      throw new ApiError(httpStatus.UNAUTHORIZED, "The token is blacklisted");
 
     return tokenDoc;
   } catch (error) {
@@ -123,7 +120,10 @@ const refreshTokenRotation = async (refreshToken, userAgent) => {
     });
 
     if (!refreshTokenDoc) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, "refresh token is not valid");
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "The refresh token is not valid"
+      );
     }
 
     // Step-2: control if that RT is blacklisted
@@ -137,7 +137,7 @@ const refreshTokenRotation = async (refreshToken, userAgent) => {
 
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
-        "Unauthorized usage of refresh token has been detected"
+        "The refresh token is blacklisted"
       );
     }
 
@@ -149,7 +149,7 @@ const refreshTokenRotation = async (refreshToken, userAgent) => {
 
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
-        `Your browser/agent seems changed or updated, you have to re-login.`
+        "Your browser/agent seems changed or updated, you have to re-login"
       );
     }
 
@@ -165,7 +165,7 @@ const refreshTokenRotation = async (refreshToken, userAgent) => {
     console.log(`refreshTokenRotation: in catch error`);
 
     if (error.name === "NotBeforeError") {
-      console.log(`refreshTokenRotation: error.name is NotBeforeError`);
+      console.log(`refreshTokenRotation:  The error is NotBeforeError`);
 
       if (config.jwt.isInvalidRefreshNBT) {
         // Step-3a: if it is before than notValidBefore time,
@@ -186,7 +186,7 @@ const refreshTokenRotation = async (refreshToken, userAgent) => {
     }
 
     if (error.name === "TokenExpiredError") {
-      console.log(`refreshTokenRotation: error.name is TokenExpiredError`);
+      console.log("refreshTokenRotation: The error is TokenExpiredError");
 
       // Step-3b: if it is expired (means it is not blacklisted and it is the last issued RT)
 
@@ -197,7 +197,7 @@ const refreshTokenRotation = async (refreshToken, userAgent) => {
 
       error = new ApiError(
         httpStatus.UNAUTHORIZED,
-        `The refresh token is expired. You have to re-login to get authentication.`
+        "The refresh token is expired, you have to re-login"
       );
     }
 
@@ -530,7 +530,10 @@ const findTokenAndRemoveFamily = async (query, command) => {
     // any bad usage of refresh token can cause it be deleted
     // TODO: make an analyze here how this situation happen
     if (!tokenDoc)
-      throw new ApiError(httpStatus.UNAUTHORIZED, "refresh token is not valid");
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "The refresh token is not valid"
+      );
 
     // normally a refresh token can be blacklisted in only refresh token rotation,
     // during the refresh token rotation, access token that paired with refresh token is also blacklisted in cache
@@ -540,7 +543,7 @@ const findTokenAndRemoveFamily = async (query, command) => {
     if (tokenDoc.blacklisted)
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
-        "refresh token is in the blacklist"
+        "The refresh token is blacklisted"
       );
 
     if (command === "family") await removeTokens({ family: tokenDoc.family });
