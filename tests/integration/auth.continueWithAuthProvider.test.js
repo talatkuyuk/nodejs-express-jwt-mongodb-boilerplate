@@ -280,7 +280,7 @@ describe("POST /auth/google & auth/facebook", () => {
       TestUtil.errorExpectations(response2, httpStatus.FORBIDDEN);
       expect(response2.body.error.name).toBe("ApiError");
       expect(response2.body.error.message).toEqual(
-        `Unauthorized usage of ${provider} authentication is detected`
+        `The ${provider} token is blacklisted, you have to re-login`
       );
     });
 

@@ -160,7 +160,7 @@ describe("Auth Middleware", () => {
       };
       const expectedError = new ApiError(
         httpStatus.UNAUTHORIZED,
-        "Access token does not refer any user"
+        "The access token does not refer any user"
       );
 
       await commonFailedTestProcess(requestHeader, expectedError);
@@ -213,7 +213,7 @@ describe("Auth Middleware", () => {
       };
       const expectedError = new ApiError(
         httpStatus.UNAUTHORIZED,
-        "Your browser/agent seems changed or updated, you have to re-login."
+        "Your browser/agent seems changed or updated, you have to re-login"
       );
 
       await commonFailedTestProcess(requestHeader, expectedError);
@@ -268,7 +268,7 @@ describe("Auth Middleware", () => {
       };
       const expectedError = new ApiError(
         httpStatus.FORBIDDEN,
-        "Access token is in the blacklist"
+        "The access token is blacklisted, you have to re-login"
       );
 
       await commonFailedTestProcess(requestHeader, expectedError);

@@ -106,7 +106,7 @@ describe("POST /auth/verify-email", () => {
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
-      expect(response.body.error.message).toEqual("the token is not valid");
+      expect(response.body.error.message).toEqual("The token is not valid");
     });
 
     test("should return status 401, if the token is blacklisted in the database", async () => {
@@ -128,9 +128,7 @@ describe("POST /auth/verify-email", () => {
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
-      expect(response.body.error.message).toEqual(
-        "the token is in the blacklist"
-      );
+      expect(response.body.error.message).toEqual("The token is blacklisted");
     });
   });
 
