@@ -13,21 +13,22 @@ module.exports.roleRights = {
   ],
   admin: [
     //user related
+    "query-users",
     "get-user",
     "add-user",
     "update-user",
     "delete-user",
-    "query-users",
-    "query-users-joined",
     "change-role",
     //authuser related
-    "add-authuser",
-    "get-authuser",
     "query-authusers",
-    "query-authusers-joined",
-    "toggle-authuser",
-    "verify-authuser",
+    "get-authuser",
+    "add-authuser",
+    "toggle-ability-authuser",
+    "toggle-verification-authuser",
     "delete-authuser",
+    //joined related
+    "query-users-joined",
+    "query-authusers-joined",
     //self related
     "change-password@self",
   ],

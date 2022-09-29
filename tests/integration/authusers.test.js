@@ -4,11 +4,7 @@ const bcrypt = require("bcryptjs");
 
 const app = require("../../src/core/express");
 
-const {
-  authuserService,
-  userService,
-  authuserDbService,
-} = require("../../src/services");
+const { authuserService, userService, authuserDbService } = require("../../src/services");
 
 const TestUtil = require("../testutils/TestUtil");
 
@@ -25,14 +21,11 @@ describe("PATH /authusers", () => {
 
   beforeEach(async () => {
     // create an authuser
-    const response = await request(app)
-      .post("/auth/signup")
-      .set("User-Agent", userAgent)
-      .send({
-        email: "admin@gmail.com",
-        password: "Pass1word!",
-        passwordConfirmation: "Pass1word!",
-      });
+    const response = await request(app).post("/auth/signup").set("User-Agent", userAgent).send({
+      email: "admin@gmail.com",
+      password: "Pass1word!",
+      passwordConfirmation: "Pass1word!",
+    });
 
     adminAccessToken = response.body.data.tokens.access.token;
     adminAuthuserId = response.body.data.authuser.id; // used in below test
@@ -60,7 +53,7 @@ describe("PATH /authusers", () => {
 		- check random 8th authuser exists in db
 		- get all authusers and check the count
 		- update even ones as disabled, toggleAbility
-		- update 5th and 10th as email verified
+		- update 5th and 10th as email verified, toggleVerification
 		- delete 3th, 6th and 9th
 		- control the 3th, 6th and 9th authusers are in the deletedauthusers
 		- get an authuser, check the data
@@ -91,12 +84,8 @@ describe("PATH /authusers", () => {
 
       // check the testAuthuser created above
       expect(response.status).toBe(httpStatus.CREATED);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
-      expect(response.headers["location"]).toEqual(
-        expect.stringContaining("/authusers/")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
+      expect(response.headers["location"]).toEqual(expect.stringContaining("/authusers/"));
       expect(response.body.success).toBe(true);
       expect(response.body.data).not.toHaveProperty("tokens");
       expect(testAuthuser).not.toHaveProperty("password");
@@ -138,10 +127,7 @@ describe("PATH /authusers", () => {
       }
 
       // check random 8th authuser exists in db
-      data = await authuserService.isExist(
-        localDb["user8@gmail.com"].id,
-        "user8@gmail.com"
-      );
+      data = await authuserService.isExist(localDb["user8@gmail.com"].id, "user8@gmail.com");
       expect(data).toBeTruthy();
 
       // get all authusers and check the count
@@ -152,9 +138,7 @@ describe("PATH /authusers", () => {
         .send();
 
       expect(response.status).toBe(httpStatus.OK);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
       expect(response.body.success).toBe(true);
       expect(response.body.data.authusers.length).toBe(12); // including admin and test authusers
       expect(authusers.length).toBe(10);
@@ -163,7 +147,7 @@ describe("PATH /authusers", () => {
       for (let i = 1; i <= 10; i++) {
         if (i % 2 === 0) {
           await request(app)
-            .put(`/authusers/${authusers[i - 1]["id"]}`)
+            .patch(`/authusers/${authusers[i - 1]["id"]}/toggle-ability`)
             .set("User-Agent", userAgent)
             .set("Authorization", `Bearer ${adminAccessToken}`)
             .send()
@@ -174,16 +158,15 @@ describe("PATH /authusers", () => {
           const updatedAuthuser = await authuserDbService.getAuthUser({
             id: authusers[i - 1]["id"],
           });
-          localDb[authusers[i - 1]["email"]].updatedAt =
-            updatedAuthuser.updatedAt;
+          localDb[authusers[i - 1]["email"]].updatedAt = updatedAuthuser.updatedAt;
         }
       }
 
-      // update 5th and 10th as email verified
+      // update 5th and 10th as email verified, toggleVerification
       for (let i = 1; i <= 10; i++) {
         if (i % 5 === 0) {
           await request(app)
-            .post(`/authusers/${authusers[i - 1]["id"]}`)
+            .patch(`/authusers/${authusers[i - 1]["id"]}/toggle-verification`)
             .set("User-Agent", userAgent)
             .set("Authorization", `Bearer ${adminAccessToken}`)
             .send()
@@ -194,8 +177,7 @@ describe("PATH /authusers", () => {
           const updatedAuthuser = await authuserDbService.getAuthUser({
             id: authusers[i - 1]["id"],
           });
-          localDb[authusers[i - 1]["email"]].updatedAt =
-            updatedAuthuser.updatedAt;
+          localDb[authusers[i - 1]["email"]].updatedAt = updatedAuthuser.updatedAt;
         }
       }
 
@@ -214,17 +196,11 @@ describe("PATH /authusers", () => {
       }
 
       // control the 3th, 6th and 9th authusers are in the deletedauthusers
-      authuser = await authuserService.getDeletedAuthUserById(
-        authusers[8]["id"]
-      );
+      authuser = await authuserService.getDeletedAuthUserById(authusers[8]["id"]);
       expect(authuser).toBeDefined();
-      authuser = await authuserService.getDeletedAuthUserById(
-        authusers[5]["id"]
-      );
+      authuser = await authuserService.getDeletedAuthUserById(authusers[5]["id"]);
       expect(authuser).toBeDefined();
-      authuser = await authuserService.getDeletedAuthUserById(
-        authusers[2]["id"]
-      );
+      authuser = await authuserService.getDeletedAuthUserById(authusers[2]["id"]);
       expect(authuser.deletedAt).toEqual(expect.any(Number));
 
       // get all authusers
@@ -242,9 +218,7 @@ describe("PATH /authusers", () => {
 
       // check localDb is equal to db result
       const arraysort = (a, b) => a.createdAt - b.createdAt;
-      expect(response.body.data.authusers.sort(arraysort)).toEqual(
-        Object.values(localDb).sort(arraysort)
-      );
+      expect(response.body.data.authusers.sort(arraysort)).toEqual(Object.values(localDb).sort(arraysort));
 
       // check the pagination
       expect(response.body.data.totalCount).toBe(9); // 3 of the authusers are deleted
@@ -264,9 +238,7 @@ describe("PATH /authusers", () => {
 
       // check the authuser data
       expect(response.status).toBe(httpStatus.OK);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
       expect(response.body.success).toBe(true);
       expect(response.body.data.authuser).not.toHaveProperty("password");
       expect(response.body.data.authuser).toEqual({
@@ -469,7 +441,7 @@ describe("PATH /authusers", () => {
 
       // try to disable an authuser that not exists
       response = await request(app)
-        .put("/authusers/123456789012345678901234")
+        .patch("/authusers/123456789012345678901234/toggle-ability")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send();
@@ -480,7 +452,7 @@ describe("PATH /authusers", () => {
 
       // try to change email verification status of an authuser that not exists
       response = await request(app)
-        .post("/authusers/123456789012345678901234")
+        .patch("/authusers/123456789012345678901234/toggle-verification")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send();

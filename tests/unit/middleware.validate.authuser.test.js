@@ -80,9 +80,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
       TestUtil.validationErrorInMiddleware(err);
       expect(err.errors).toEqual({
-        isEmailVerified: [
-          "The query param 'isEmailVerified' must be boolean value",
-        ],
+        isEmailVerified: ["The query param 'isEmailVerified' must be boolean value"],
       });
     });
 
@@ -174,9 +172,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
       TestUtil.validationErrorInMiddleware(err);
       expect(err.errors).toEqual({
-        sort: [
-          "The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter",
-        ],
+        sort: ["The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter"],
       });
     });
 
@@ -332,9 +328,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
       TestUtil.validationErrorInMiddleware(err);
       expect(err.errors).toEqual({
-        password: [
-          "must contain uppercase, lowercase, number and special char",
-        ],
+        password: ["must contain uppercase, lowercase, number and special char"],
         passwordConfirmation: ["should match with the password"],
       });
     });
@@ -478,8 +472,8 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
   });
 
-  describe("toggleAuthUser validation", () => {
-    test("toggleAuthUser: should throw error 422, if the param id is not 24-length character", async () => {
+  describe("toggleAbility validation", () => {
+    test("toggleAbility: should throw error 422, if the param id is not 24-length character", async () => {
       const request = {
         params: { id: "1234567890" }, // 10-length string, invalid id
       };
@@ -488,7 +482,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authuserValidation.toggleAuthUser)(req, res, next);
+      await validate(authuserValidation.toggleAbility)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -502,7 +496,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
       });
     });
 
-    test("toggleAuthUser: should throw error 422, if the param id is self", async () => {
+    test("toggleAbility: should throw error 422, if the param id is self", async () => {
       const request = {
         params: { id: "self" }, // self is not valid here
       };
@@ -511,7 +505,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authuserValidation.toggleAuthUser)(req, res, next);
+      await validate(authuserValidation.toggleAbility)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -525,7 +519,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
       });
     });
 
-    test("toggleAuthUser: should continue next middleware if the param id is valid", async () => {
+    test("toggleAbility: should continue next middleware if the param id is valid", async () => {
       const request = {
         params: { id: "123456789012345678901234" }, // 24-length string, valid id
       };
@@ -534,15 +528,15 @@ describe("Validate Middleware : Athuser validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authuserValidation.toggleAuthUser)(req, res, next);
+      await validate(authuserValidation.toggleAbility)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();
     });
   });
 
-  describe("verifyAuthUser validation", () => {
-    test("verifyAuthUser: should throw error 422, if the param id is not 24-length character", async () => {
+  describe("toggleVerification validation", () => {
+    test("toggleVerification: should throw error 422, if the param id is not 24-length character", async () => {
       const request = {
         params: { id: "1234567890" }, // 10-length string, invalid id
       };
@@ -551,7 +545,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authuserValidation.verifyAuthUser)(req, res, next);
+      await validate(authuserValidation.toggleVerification)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -565,7 +559,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
       });
     });
 
-    test("verifyAuthUser: should throw error 422, if the param id is self", async () => {
+    test("toggleVerification: should throw error 422, if the param id is self", async () => {
       const request = {
         params: { id: "self" }, // self is not valid here
       };
@@ -574,7 +568,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authuserValidation.verifyAuthUser)(req, res, next);
+      await validate(authuserValidation.toggleVerification)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -588,7 +582,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
       });
     });
 
-    test("verifyAuthUser: should continue next middleware if the param id is valid", async () => {
+    test("toggleVerification: should continue next middleware if the param id is valid", async () => {
       const request = {
         params: { id: "123456789012345678901234" }, // 24-length string, valid id
       };
@@ -597,7 +591,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authuserValidation.verifyAuthUser)(req, res, next);
+      await validate(authuserValidation.toggleVerification)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();
@@ -792,9 +786,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
       TestUtil.validationErrorInMiddleware(err);
       expect(err.errors).toEqual({
-        password: [
-          "must contain uppercase, lowercase, number and special char",
-        ],
+        password: ["must contain uppercase, lowercase, number and special char"],
         passwordConfirmation: ["should match with the password"],
       });
     });
