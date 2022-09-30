@@ -5,8 +5,7 @@ const logger = require("../core/logger");
 const ApiError = require("../utils/ApiError");
 
 // Throw ApiError for the routes that are not defined
-const notFound = (req, res, next) =>
-  next(new ApiError(httpStatus.NOT_FOUND, "Not found"));
+const notFound = (req, res, next) => next(new ApiError(httpStatus.NOT_FOUND, "Not found"));
 
 // Convert errors to ApiError if it is not
 const converter = (err, req, res, next) => {
@@ -29,8 +28,7 @@ const converter = (err, req, res, next) => {
 
 // Prepare the response having the error
 const handler = (err, req, res, next) => {
-  let { statusCode, name, message, isOperational, errors, errorPath, stack } =
-    err;
+  let { statusCode, name, message, isOperational, errors, errorPath, stack } = err;
 
   // morgan handler uses the res.locals.error to tokenize
   res.locals.error = `${name}: ${message}`;
@@ -56,7 +54,9 @@ const handler = (err, req, res, next) => {
   };
 
   if (!isOperational) {
-    console.log("The programmer error is NOT operational !");
+    console.log("The programmer error is NOT operational!");
+
+    // ReferenceError, TypeError etc.
     console.log(response);
 
     process.exit(1);

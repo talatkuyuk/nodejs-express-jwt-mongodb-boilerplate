@@ -92,6 +92,17 @@ const toggleAbility = [...check_param_id];
 
 const toggleVerification = [...check_param_id];
 
+const unlinkProvider = [
+  ...check_param_id,
+
+  query("provider")
+    .notEmpty()
+    .withMessage("query param 'provider' is missing")
+    .bail()
+    .isIn(["emailpassword", "google", "facebook"])
+    .withMessage("The query param 'provider' should be an auth provider"),
+];
+
 const deleteAuthUser = [...check_param_id];
 
 module.exports = {
@@ -101,5 +112,6 @@ module.exports = {
   changePassword,
   toggleAbility,
   toggleVerification,
+  unlinkProvider,
   deleteAuthUser,
 };

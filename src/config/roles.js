@@ -25,6 +25,7 @@ module.exports.roleRights = {
     "add-authuser",
     "toggle-ability-authuser",
     "toggle-verification-authuser",
+    "unlink-provider-authuser",
     "delete-authuser",
     //joined related
     "query-users-joined",

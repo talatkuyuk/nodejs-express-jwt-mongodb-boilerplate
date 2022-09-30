@@ -127,9 +127,7 @@ describe("Validate Middleware : Auth validation rules", () => {
 
       TestUtil.validationErrorInMiddleware(err);
       expect(err.errors).toEqual({
-        password: [
-          "must contain uppercase, lowercase, number and special char",
-        ],
+        password: ["must contain uppercase, lowercase, number and special char"],
         passwordConfirmation: ["should match with the password"],
       });
     });
@@ -353,11 +351,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.refreshTokensValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.refreshTokensValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -382,11 +376,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.refreshTokensValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.refreshTokensValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -411,11 +401,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.refreshTokensValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.refreshTokensValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();
@@ -432,11 +418,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.forgotPasswordValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.forgotPasswordValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -461,11 +443,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.forgotPasswordValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.forgotPasswordValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -490,11 +468,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.forgotPasswordValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.forgotPasswordValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -519,11 +493,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.forgotPasswordValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.forgotPasswordValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();
@@ -540,11 +510,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.resetPasswordValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.resetPasswordValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -573,11 +539,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.resetPasswordValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.resetPasswordValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -606,11 +568,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.resetPasswordValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.resetPasswordValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -638,11 +596,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.resetPasswordValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.resetPasswordValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -652,9 +606,7 @@ describe("Validate Middleware : Auth validation rules", () => {
 
       TestUtil.validationErrorInMiddleware(err);
       expect(err.errors).toEqual({
-        password: [
-          "must contain uppercase, lowercase, number and special char",
-        ],
+        password: ["must contain uppercase, lowercase, number and special char"],
         passwordConfirmation: ["should match with the password"],
       });
     });
@@ -672,11 +624,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.resetPasswordValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.resetPasswordValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();
@@ -844,11 +792,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.verifySignupValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.verifySignupValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -873,11 +817,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.verifySignupValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.verifySignupValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -902,11 +842,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.verifySignupValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.verifySignupValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();
@@ -914,20 +850,37 @@ describe("Validate Middleware : Auth validation rules", () => {
   });
 
   describe("unlinkProvider validation", () => {
+    test("unlinkProvider: should throw error 422, if the request doesn't contain any query param provider", async () => {
+      const request = {}; // there is no query
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authValidation.unlinkProviderValidationRules)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        provider: ["query param 'provider' is missing"],
+      });
+    });
+
     test("unlinkProvider: should throw error 422, if the query param provider is empty", async () => {
       const request = {
-        query: { provider: "" },
+        query: { provider: "" }, // it is empty
       };
 
       const req = httpMocks.createRequest(request);
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.unlinkProviderValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.unlinkProviderValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -952,11 +905,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.unlinkProviderValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.unlinkProviderValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -970,10 +919,10 @@ describe("Validate Middleware : Auth validation rules", () => {
       });
     });
 
-    test("unlinkProvider: should continue next middleware if the query param provider is valid (emailpassword)", async () => {
+    test("unlinkProvider: should continue next middleware if the query param provider is valid", async () => {
       const request = {
         query: {
-          provider: authProvider.EMAILPASSWORD,
+          provider: authProvider.EMAILPASSWORD, // valid provider
         },
       };
 
@@ -981,11 +930,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.unlinkProviderValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.unlinkProviderValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();
@@ -994,7 +939,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     test("unlinkProvider: should continue next middleware if the query param provider is valid (google)", async () => {
       const request = {
         query: {
-          provider: authProvider.GOOGLE,
+          provider: authProvider.GOOGLE, // valid provider
         },
       };
 
@@ -1002,11 +947,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.unlinkProviderValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.unlinkProviderValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();
@@ -1015,7 +956,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     test("unlinkProvider: should continue next middleware if the query param provider is valid (facebook)", async () => {
       const request = {
         query: {
-          provider: authProvider.FACEBOOK,
+          provider: authProvider.FACEBOOK, // valid provider
         },
       };
 
@@ -1023,11 +964,7 @@ describe("Validate Middleware : Auth validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(authValidation.unlinkProviderValidationRules)(
-        req,
-        res,
-        next
-      );
+      await validate(authValidation.unlinkProviderValidationRules)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();

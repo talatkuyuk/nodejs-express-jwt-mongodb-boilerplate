@@ -20,10 +20,7 @@ const signup = asyncHandler(async (req, res) => {
       req // iot convey info back about whether a new authuser is created or not
     );
 
-    const tokens = await tokenService.generateAuthTokens(
-      authuser.id,
-      userAgent
-    );
+    const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
     req.authuser = authuser; // for morgan logger to tokenize it as user
 
@@ -33,22 +30,18 @@ const signup = asyncHandler(async (req, res) => {
     res.set("Access-Control-Expose-Headers", "X-New-Authuser");
 
     // TODO: control if it necessary, can a user get own info using this path ???
-    res.location(
-      `${req.protocol}://${req.get("host")}/authusers/${authuser.id}`
-    );
+    res.location(`${req.protocol}://${req.get("host")}/authusers/${authuser.id}`);
 
-    res
-      .status(req.isNewAuthuserCreated ? httpStatus.CREATED : httpStatus.OK)
-      .send({
-        success: true,
-        data: {
-          authuser: authuser.filter(),
-          tokens: {
-            access: tokens.access,
-            refresh: tokens.refresh.filter(),
-          },
+    res.status(req.isNewAuthuserCreated ? httpStatus.CREATED : httpStatus.OK).send({
+      success: true,
+      data: {
+        authuser: authuser.filter(),
+        tokens: {
+          access: tokens.access,
+          refresh: tokens.refresh.filter(),
         },
-      });
+      },
+    });
   } catch (error) {
     throw traceError(error, "AuthController : signup");
   }
@@ -59,15 +52,9 @@ const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     const userAgent = req.useragent.source;
 
-    const authuser = await authService.loginWithEmailAndPassword(
-      email,
-      password
-    );
+    const authuser = await authService.loginWithEmailAndPassword(email, password);
 
-    const tokens = await tokenService.generateAuthTokens(
-      authuser.id,
-      userAgent
-    );
+    const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
     req.authuser = authuser; // for morgan logger to tokenize it as user
 
@@ -99,26 +86,21 @@ const continueWithAuthProvider = asyncHandler(async (req, res) => {
       req // iot convey info back about whether a new authuser is created or not
     );
 
-    const tokens = await tokenService.generateAuthTokens(
-      authuser.id,
-      userAgent
-    );
+    const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
     res.set("X-New-Authuser", req.isNewAuthuserCreated);
     res.set("Access-Control-Expose-Headers", "X-New-Authuser");
 
-    res
-      .status(req.isNewAuthuserCreated ? httpStatus.CREATED : httpStatus.OK)
-      .send({
-        success: true,
-        data: {
-          authuser: authuser.filter(),
-          tokens: {
-            access: tokens.access,
-            refresh: tokens.refresh.filter(),
-          },
+    res.status(req.isNewAuthuserCreated ? httpStatus.CREATED : httpStatus.OK).send({
+      success: true,
+      data: {
+        authuser: authuser.filter(),
+        tokens: {
+          access: tokens.access,
+          refresh: tokens.refresh.filter(),
         },
-      });
+      },
+    });
   } catch (error) {
     throw traceError(error, "AuthController : continueWithAuthProvider");
   }
@@ -127,12 +109,9 @@ const continueWithAuthProvider = asyncHandler(async (req, res) => {
 const unlinkAuthProvider = asyncHandler(async (req, res) => {
   try {
     const myAuthuser = req.authuser;
-    const providerToBeUnlinked = req.query.provider;
+    const provider = req.query.provider;
 
-    const authuser = await authService.unlinkAuthProvider(
-      myAuthuser,
-      providerToBeUnlinked
-    );
+    const authuser = await authService.unlinkAuthProvider(myAuthuser, provider);
 
     res.status(httpStatus.OK).send({
       success: true,
@@ -183,18 +162,11 @@ const refreshTokens = asyncHandler(async (req, res) => {
     const userAgent = req.useragent.source;
 
     // ensure the refresh token blacklisted during RTR and get back the document
-    const { user: id, family } = await tokenService.refreshTokenRotation(
-      refreshtoken,
-      userAgent
-    );
+    const { user: id, family } = await tokenService.refreshTokenRotation(refreshtoken, userAgent);
 
     const authuser = await authService.refreshAuth(id);
 
-    const tokens = await tokenService.generateAuthTokens(
-      authuser.id,
-      userAgent,
-      family
-    );
+    const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent, family);
 
     req.authuser = authuser; // for morgan logger to tokenize it as user
 
@@ -218,9 +190,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     const authuser = await authService.forgotPassword(email);
 
-    const resetPasswordToken = await tokenService.generateResetPasswordToken(
-      authuser.id
-    );
+    const resetPasswordToken = await tokenService.generateResetPasswordToken(authuser.id);
 
     await emailService.sendResetPasswordEmail(email, resetPasswordToken.token);
 
@@ -236,10 +206,7 @@ const resetPassword = asyncHandler(async (req, res) => {
   try {
     const { token, password } = req.body;
 
-    const { user: id } = await tokenService.verifyToken(
-      token,
-      tokenTypes.RESET_PASSWORD
-    );
+    const { user: id } = await tokenService.verifyToken(token, tokenTypes.RESET_PASSWORD);
 
     const authuser = await authService.resetPassword(id, password);
 
@@ -276,10 +243,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
   try {
     const token = req.body.token;
 
-    const { user: id } = await tokenService.verifyToken(
-      token,
-      tokenTypes.VERIFY_EMAIL
-    );
+    const { user: id } = await tokenService.verifyToken(token, tokenTypes.VERIFY_EMAIL);
 
     const authuser = await authService.verifyEmail(id);
 
@@ -308,10 +272,7 @@ const sendSignupVerificationEmail = asyncHandler(async (req, res, next) => {
 
     const verifySignupToken = await tokenService.generateVerifySignupToken(id);
 
-    await emailService.sendSignupVerificationEmail(
-      email,
-      verifySignupToken.token
-    );
+    await emailService.sendSignupVerificationEmail(email, verifySignupToken.token);
 
     res.status(httpStatus.OK).send(success);
   } catch (error) {
@@ -323,10 +284,7 @@ const verifySignup = asyncHandler(async (req, res) => {
   try {
     const token = req.body.token;
 
-    const { user: id } = await tokenService.verifyToken(
-      token,
-      tokenTypes.VERIFY_SIGNUP
-    );
+    const { user: id } = await tokenService.verifyToken(token, tokenTypes.VERIFY_SIGNUP);
 
     const authuser = await authService.verifySignup(id);
 

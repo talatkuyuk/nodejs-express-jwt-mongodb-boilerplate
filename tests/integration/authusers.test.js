@@ -54,6 +54,7 @@ describe("PATH /authusers", () => {
 		- get all authusers and check the count
 		- update even ones as disabled, toggleAbility
 		- update 5th and 10th as email verified, toggleVerification
+    - unlink provider
 		- delete 3th, 6th and 9th
 		- control the 3th, 6th and 9th authusers are in the deletedauthusers
 		- get an authuser, check the data
@@ -180,6 +181,47 @@ describe("PATH /authusers", () => {
           localDb[authusers[i - 1]["email"]].updatedAt = updatedAuthuser.updatedAt;
         }
       }
+
+      // test the unlink provider of 4th authuser
+      await authuserDbService.updateAuthUser(authusers[3]["id"], {
+        services: {
+          emailpassword: true,
+          google: "google-id-string",
+          facebook: "facebook-id-string",
+        },
+      });
+
+      response = await request(app)
+        .patch(`/authusers/${authusers[3]["id"]}/unlink-provider?provider=google`)
+        .set("User-Agent", userAgent)
+        .set("Authorization", `Bearer ${adminAccessToken}`)
+        .send()
+        .expect(httpStatus.OK);
+
+      expect(response.body.data.authuser.services).not.toHaveProperty("google");
+      expect(response.body.data.authuser.services).toHaveProperty("facebook");
+      expect(response.body.data.authuser.services).toHaveProperty("emailpassword");
+
+      response = await request(app)
+        .patch(`/authusers/${authusers[3]["id"]}/unlink-provider?provider=emailpassword`)
+        .set("User-Agent", userAgent)
+        .set("Authorization", `Bearer ${adminAccessToken}`)
+        .send()
+        .expect(httpStatus.OK);
+
+      expect(response.body.data.authuser.services).not.toHaveProperty("google");
+      expect(response.body.data.authuser.services).not.toHaveProperty("emailpassword");
+      expect(response.body.data.authuser.services).toHaveProperty("facebook");
+
+      localDb[authusers[3]["email"]].updatedAt = response.body.data.authuser.updatedAt;
+      localDb[authusers[3]["email"]].services = response.body.data.authuser.services;
+
+      // check the 4th authuser's password is null; because the emailpassword is unlinked
+      const { password: password2 } = await authuserDbService.getAuthUser({
+        id: response.body.data.authuser.id,
+      });
+
+      expect(password2).toBeNull();
 
       // delete 3th, 6th and 9th
       for (let i = 1; i <= 10; i++) {
@@ -368,6 +410,10 @@ describe("PATH /authusers", () => {
 		- try to get authusers with wrong parameters
 		- try to disable an authuser that not exists
     - try to change email verification status of an authuser that not exists
+    - try to unlink provider, authuser does not exist
+    - try to unlink provider which is already unlinked
+    - try to unlink provider which is the only auth provider in services
+    - try to unlink provider without query param provider
 		- try to delete an authuser that not exists
 		- try to change another authuser's password
 		- try to change password with validation errors
@@ -383,12 +429,14 @@ describe("PATH /authusers", () => {
       };
 
       // add an authuser
-      await request(app)
+      response = await request(app)
         .post("/authusers")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send(addForm)
         .expect(httpStatus.CREATED);
+
+      const authuser = response.body.data.authuser;
 
       // try to add another authuser with the same email, get the error
       response = await request(app)
@@ -460,6 +508,51 @@ describe("PATH /authusers", () => {
       TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
       expect(response.body.error.name).toBe("ApiError");
       expect(response.body.error.message).toBe("No user found");
+
+      // try to unlink provider, authuser does not exist
+      response = await request(app)
+        .patch(`/authusers/123456789012345678901234/unlink-provider?provider=google`)
+        .set("User-Agent", userAgent)
+        .set("Authorization", `Bearer ${adminAccessToken}`)
+        .send();
+
+      TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
+      expect(response.body.error.name).toBe("ApiError");
+      expect(response.body.error.message).toBe("No user found");
+
+      // try to unlink provider which is already unlinked
+      response = await request(app)
+        .patch(`/authusers/${authuser.id}/unlink-provider?provider=google`)
+        .set("User-Agent", userAgent)
+        .set("Authorization", `Bearer ${adminAccessToken}`)
+        .send();
+
+      TestUtil.errorExpectations(response, httpStatus.BAD_REQUEST);
+      expect(response.body.error.name).toBe("ApiError");
+      expect(response.body.error.message).toBe("The auth provider is already unlinked");
+
+      // try to unlink provider which is the only auth provider in services
+      response = await request(app)
+        .patch(`/authusers/${authuser.id}/unlink-provider?provider=emailpassword`)
+        .set("User-Agent", userAgent)
+        .set("Authorization", `Bearer ${adminAccessToken}`)
+        .send();
+
+      TestUtil.errorExpectations(response, httpStatus.BAD_REQUEST);
+      expect(response.body.error.name).toBe("ApiError");
+      expect(response.body.error.message).toBe("There must be one auth provider at least");
+
+      // try to unlink provider without query param provider
+      response = await request(app)
+        .patch(`/authusers/${authuser.id}/unlink-provider`)
+        .set("User-Agent", userAgent)
+        .set("Authorization", `Bearer ${adminAccessToken}`)
+        .send();
+
+      TestUtil.validationErrorExpectations(response);
+      expect(response.body.error.errors).toEqual({
+        provider: ["query param 'provider' is missing"],
+      });
 
       // try to delete an authuser that not exists
       response = await request(app)

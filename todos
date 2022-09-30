@@ -1,4 +1,8 @@
+write tests for authuser unlink
+//TODO: change the phrase services to providers
 //TODO: according to changes in the error message texts, update the swagger docs
+//TODO: analyza again the auth routes which will be POST, PUT, or PATCH
+//TODO: consider change password into auth or add additionally
 //TODO: implement tokenDAO
 //TODO: implement authuserDAO
 //TODO: implement userDAO
