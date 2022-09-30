@@ -195,6 +195,46 @@
       500:
         $ref: "#/components/responses/InternalServerError"
 
+/authusers/{id}/unlink-provider:
+  parameters:
+    - $ref: "#/components/parameters/param-authuser-id"
+    - $ref: "#/components/parameters/query-param-provider"
+  patch:
+    summary: Unlink an auth provider from the authuser
+    tags: [AuthUsers]
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  value: true
+                data:
+                  type: object
+                  properties:
+                    authuser:
+                      $ref: "#/components/schemas/authuser"
+                      example:
+                        $ref: "#components/examples/response-authuser"
+      400:
+        $ref: "#/components/responses/UnlinkProviderBadRequests"
+      401:
+        $ref: "#/components/responses/AuthenticateMiddlewareUnauthorizedErrors"
+      403:
+        $ref: "#/components/responses/AuthenticateAndAuthorizeMiddlewaresForbiddenErrors"
+      404:
+        $ref: "#/components/responses/NoUserFound"
+      422:
+        $ref: "#/components/responses/ParamIdAndUnlinkProviderValidationErrors"
+      500:
+        $ref: "#/components/responses/InternalServerError"
+
 /authusers/password:
   patch:
     summary: Change own password

@@ -5,6 +5,7 @@ const authuserValidation = require("../../src/validations/authuser.ValidationRul
 const ApiError = require("../../src/utils/ApiError");
 const { authuserService } = require("../../src/services");
 const { AuthUser } = require("../../src/models");
+const { authProvider } = require("../../src/config/providers");
 
 const TestUtil = require("../testutils/TestUtil");
 
@@ -592,6 +593,168 @@ describe("Validate Middleware : Athuser validation rules", () => {
       const next = jest.fn();
 
       await validate(authuserValidation.toggleVerification)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith();
+    });
+  });
+
+  describe("unlinkProvider validation", () => {
+    test("unlinkProvider: should throw error 422, if the param id is not 24-length character", async () => {
+      const request = {
+        params: { id: "1234567890" }, // 10-length string, invalid id
+        query: { provider: authProvider.GOOGLE },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authuserValidation.unlinkProvider)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        id: ["The param id must be a 24-character number"],
+      });
+    });
+
+    test("unlinkProvider: should throw error 422, if the param id is self", async () => {
+      const request = {
+        params: { id: "self" }, // self is not valid here
+        query: { provider: authProvider.EMAILPASSWORD },
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authuserValidation.unlinkProvider)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        id: ["The param id must be a 24-character number"],
+      });
+    });
+
+    test("unlinkProvider: should throw error 422, if the request doesn't contain any query param provider", async () => {
+      const request = {
+        params: { id: "123456789012345678901234" }, // there is no query
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authuserValidation.unlinkProvider)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        provider: ["query param 'provider' is missing"],
+      });
+    });
+
+    test("unlinkProvider: should throw error 422, if the query param provider is empty", async () => {
+      const request = {
+        params: { id: "123456789012345678901234" },
+        query: { provider: "" }, // it is empty
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authuserValidation.unlinkProvider)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        provider: ["query param 'provider' is missing"],
+      });
+    });
+
+    test("unlinkProvider: should throw error 422, if the query param provider is not an auth provider", async () => {
+      const request = {
+        params: { id: "123456789012345678901234" },
+        query: { provider: "authprovider" }, // it is not emailpassword, google, or facebook
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authuserValidation.unlinkProvider)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        provider: ["The query param 'provider' should be an auth provider"],
+      });
+    });
+
+    test("unlinkProvider: should throw error 422, if the both id and query param provider are invalid", async () => {
+      const request = {
+        params: { id: "1234567890" }, // 10-length string, invalid id
+        query: { provider: "authprovider" }, // it is not emailpassword, google, or facebook
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authuserValidation.unlinkProvider)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
+
+      // obtain the error from the next function
+      const err = next.mock.calls[0][0];
+
+      TestUtil.validationErrorInMiddleware(err);
+      expect(err.errors).toEqual({
+        id: ["The param id must be a 24-character number"],
+        provider: ["The query param 'provider' should be an auth provider"],
+      });
+    });
+
+    test("unlinkProvider: should continue next middleware if the param id is valid and the valid provider is provided", async () => {
+      const request = {
+        params: { id: "123456789012345678901234" }, // 24-length string, valid id
+        query: { provider: authProvider.FACEBOOK }, // valid provider
+      };
+
+      const req = httpMocks.createRequest(request);
+      const res = httpMocks.createResponse();
+      const next = jest.fn();
+
+      await validate(authuserValidation.unlinkProvider)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();

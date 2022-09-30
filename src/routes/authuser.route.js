@@ -47,6 +47,14 @@ router.patch(
   authuserController.toggleVerification
 );
 
+router.patch(
+  "/:id/unlink-provider",
+  authenticate,
+  authorize("unlink-provider-authuser"),
+  validate(authuserValidation.unlinkProvider),
+  authuserController.unlinkProvider
+);
+
 router.delete(
   "/:id",
   authenticate,

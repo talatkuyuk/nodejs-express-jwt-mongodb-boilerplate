@@ -6,6 +6,7 @@ const { traceError } = require("../utils/errorUtils");
 const composeFilter = require("../utils/composeFilter");
 const composeSort = require("../utils/composeSort");
 const { AuthUser } = require("../models");
+const { authProvider } = require("../config/providers");
 
 // SERVICE DEPENDENCIES
 const paginaryService = require("./paginary.service");
@@ -60,11 +61,7 @@ const addAuthUser = async (email, password) => {
 
     const authuser = await authuserDbService.addAuthUser(authuserDoc);
 
-    if (!authuser)
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "The database could not process the request"
-      );
+    if (!authuser) throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
 
     return authuser;
   } catch (error) {
@@ -75,7 +72,7 @@ const addAuthUser = async (email, password) => {
 /**
  * Get AuthUser by id
  * @param {string} id
- * @returns {Promise<AuthUser?>}
+ * @returns {Promise<AuthUser>}
  */
 const getAuthUserById = async (id) => {
   try {
@@ -92,7 +89,7 @@ const getAuthUserById = async (id) => {
 /**
  * Get AuthUser by email
  * @param {string} email
- * @returns {Promise<AuthUser?>}
+ * @returns {Promise<AuthUser>}
  */
 const getAuthUserByEmail = async (email) => {
   try {
@@ -121,20 +118,10 @@ const getAuthUsers = async (query) => {
 
     console.log(filter);
 
-    const sortingFields = [
-      "email",
-      "isEmailVerified",
-      "isDisabled",
-      "createdAt",
-    ];
+    const sortingFields = ["email", "isEmailVerified", "isDisabled", "createdAt"];
     const sort = composeSort(query, sortingFields);
 
-    return await paginaryService.paginary(
-      query,
-      filter,
-      sort,
-      authuserDbService.getAuthUsers
-    );
+    return await paginaryService.paginary(query, filter, sort, authuserDbService.getAuthUsers);
   } catch (error) {
     throw traceError(error, "AuthUserService : getAuthUsers");
   }
@@ -147,10 +134,8 @@ const getAuthUsers = async (query) => {
  */
 const toggleAbility = async (id) => {
   try {
-    // to get authuser first is necessary to toggle disable further
-    const authuser = await authuserDbService.getAuthUser({ id });
-
-    if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, "No user found");
+    // get authuser first, it is necessary to toggle ability
+    const authuser = await getAuthUserById(id);
 
     await authuserDbService.updateAuthUser(id, {
       isDisabled: !authuser.isDisabled,
@@ -167,16 +152,51 @@ const toggleAbility = async (id) => {
  */
 const toggleVerification = async (id) => {
   try {
-    // to get authuser first is necessary to toggle verification further
-    const authuser = await authuserDbService.getAuthUser({ id });
-
-    if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, "No user found");
+    // get authuser first, it is necessary to toggle verification
+    const authuser = await getAuthUserById(id);
 
     await authuserDbService.updateAuthUser(id, {
       isEmailVerified: !authuser.isEmailVerified,
     });
   } catch (error) {
     throw traceError(error, "AuthUserService : toggleVerification");
+  }
+};
+
+/**
+ * Unlink an auth provider (called from an authorized route)
+ * @param {string} id
+ * @param {string} provider
+ * @returns {Promise<AuthUser>}
+ */
+const unlinkProvider = async (id, provider) => {
+  try {
+    const authuser = await getAuthUserById(id);
+
+    if (!authuser.services?.hasOwnProperty(provider)) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "The auth provider is already unlinked");
+    }
+
+    if (Object.keys(authuser.services).length === 1) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "There must be one auth provider at least");
+    }
+
+    const newAuthProviders = { ...authuser.services };
+    delete newAuthProviders[provider];
+
+    let updateBody = {
+      services: newAuthProviders,
+    };
+
+    if (provider === authProvider.EMAILPASSWORD) {
+      updateBody.password = null;
+    }
+
+    const authuserUpdated = await authuserDbService.updateAuthUser(authuser.id, updateBody);
+
+    return authuserUpdated;
+  } catch (error) {
+    throw traceError(error, "AuthUserService : unlinkProvider");
   }
 };
 
@@ -242,6 +262,7 @@ module.exports = {
   getAuthUsers,
   toggleAbility,
   toggleVerification,
+  unlinkProvider,
   changePassword,
   deleteAuthUser,
   getDeletedAuthUserById,

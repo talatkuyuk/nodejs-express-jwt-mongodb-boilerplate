@@ -16,9 +16,7 @@ const addAuthUser = asyncHandler(async (req, res) => {
 
     // no need to generate tokens since the user is going to login self
 
-    res.location(
-      `${req.protocol}://${req.get("host")}/authusers/${authuser.id}`
-    );
+    res.location(`${req.protocol}://${req.get("host")}/authusers/${authuser.id}`);
     res.status(httpStatus.CREATED).send({
       success: true,
       data: {
@@ -106,6 +104,24 @@ const toggleVerification = asyncHandler(async (req, res) => {
   }
 });
 
+const unlinkProvider = asyncHandler(async (req, res) => {
+  try {
+    const id = req.params.id;
+    const provider = req.query.provider;
+
+    const authuser = await authuserService.unlinkProvider(id, provider);
+
+    res.status(httpStatus.OK).send({
+      success: true,
+      data: {
+        authuser: authuser.filter(),
+      },
+    });
+  } catch (error) {
+    throw traceError(error, "AuthUserController : unlinkProvider");
+  }
+});
+
 const deleteAuthUser = asyncHandler(async (req, res) => {
   try {
     const id = req.params.id;
@@ -127,5 +143,6 @@ module.exports = {
   changePassword,
   toggleAbility,
   toggleVerification,
+  unlinkProvider,
   deleteAuthUser,
 };

@@ -387,8 +387,7 @@ components:
               message: The request could not be validated
               errors:
                 email: ["email validation errors appear in a string array"]
-                password:
-                  ["password validation errors appear in a string array"]
+                password: ["password validation errors appear in a string array"]
                 passwordConfirmation: ["should match with the password"]
 
     LoginValidationErrors:
@@ -726,8 +725,7 @@ components:
               name: ValidationError
               message: The request could not be validated
               errors:
-                password:
-                  ["password validation errors appear in a string array"]
+                password: ["password validation errors appear in a string array"]
                 passwordConfirmation: ["should match with the password"]
                 token: ["The query parameter 'token' must not be empty"]
 
@@ -914,13 +912,33 @@ components:
               message: The request could not be validated
               errors:
                 email: ["The query param 'email' must be in valid form"]
-                isDisabled:
-                  ["The query param 'isDisabled' must be boolean value"]
-                isEmailVerified:
-                  ["The query param 'isEmailVerified' must be boolean value"]
+                isDisabled: ["The query param 'isDisabled' must be boolean value"]
+                isEmailVerified: ["The query param 'isEmailVerified' must be boolean value"]
                 page: ["The query param 'page' must be numeric value"]
                 size: ["The query param 'size' can be at most 50"]
                 sort: ["The parameter can only appear once in the query string"]
+
+    ParamIdAndUnlinkProviderValidationErrors:
+      description: |
+        UNPROCESSABLE ENTITY
+
+        #### ValidationErrors
+        * _The param id must be a 24-character number_
+        * _query param 'provider' is missing_
+        * _The query param 'provider' should be an auth provider_
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationErrorResponse"
+          example:
+            success: false
+            error:
+              code: 422
+              name: ValidationError
+              message: The request could not be validated
+              errors:
+                id: ["The param id must be a 24-character number"]
+                provider: ["query param 'provider' is missing"]
 
     ChangePasswordValidationErrors:
       description: |
@@ -945,10 +963,8 @@ components:
               name: ValidationError
               message: The request could not be validated
               errors:
-                currentPassword:
-                  ["must not be empty", "incorrect current password"]
-                password:
-                  ["password validation errors appear in a string array"]
+                currentPassword: ["must not be empty", "incorrect current password"]
+                password: ["password validation errors appear in a string array"]
                 passwordConfirmation: ["should match with the password"]
 
     UserQueryParamsValidationErrors:
@@ -978,8 +994,7 @@ components:
               errors:
                 email: ["The query param 'email' must be in valid form"]
                 role: ["The query param 'role' could be one of admin, user"]
-                name:
-                  ["The query param 'name' must be minumum 2-length charachter"]
+                name: ["The query param 'name' must be minumum 2-length charachter"]
                 page: ["The query param 'page' must be numeric value"]
                 size: ["The query param 'size' can be at most 50"]
                 sort: ["The parameter can only appear once in the query string"]
@@ -1016,10 +1031,7 @@ components:
               message: The request could not be validated
               errors:
                 email: ["email validation errors appear in a string array"]
-                body:
-                  [
-                    "There is no correspondent authenticated user with the same id and email",
-                  ]
+                body: ["There is no correspondent authenticated user with the same id and email"]
                 name: ["requires minimum 2 characters"]
 
     UpdateUserValidationErrors:
@@ -1048,10 +1060,7 @@ components:
               name: ValidationError
               message: The request could not be validated
               errors:
-                body:
-                  [
-                    "The request body should contain at least one of the name, gender, country",
-                  ]
+                body: ["The request body should contain at least one of the name, gender, country"]
                 gender: ["could be male, female or none"]
                 country: ["must be 3-letter standart country code"]
 
@@ -1140,7 +1149,7 @@ components:
       name: id
       schema:
         type: string
-      required: false
+      required: true
       description: the authuser id
       allowEmptyValue: true
 
@@ -1197,7 +1206,7 @@ components:
       name: id
       schema:
         type: string
-      required: false
+      required: true
       description: the user id
       allowEmptyValue: true
 
@@ -1289,16 +1298,11 @@ components:
                   isEmailVerified: false,
                   isDisabled: false,
                   createdAt: 1632828902222,
-                  services:
-                    {
-                      emailpassword: unregistered,
-                      google: "63876327467767364",
-                    },
+                  services: { emailpassword: unregistered, google: "63876327467767364" },
                 },
               ],
             totalCount: 2,
-            pagination:
-              { pageIndex: 0, pageNumber: 1, pageCount: 1, pageSize: 20 },
+            pagination: { pageIndex: 0, pageNumber: 1, pageCount: 1, pageSize: 20 },
           }
 
     response-query-users:
@@ -1329,8 +1333,7 @@ components:
                 },
               ],
             totalCount: 2,
-            pagination:
-              { pageIndex: 0, pageNumber: 1, pageCount: 1, pageSize: 20 },
+            pagination: { pageIndex: 0, pageNumber: 1, pageCount: 1, pageSize: 20 },
           }
 
     response-user:
