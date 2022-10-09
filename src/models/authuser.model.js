@@ -8,7 +8,7 @@ class AuthUser {
     isDisabled = false,
     createdAt = Date.now(),
     updatedAt = null,
-    services
+    providers
   ) {
     this.email = email;
     this.password = password;
@@ -16,7 +16,7 @@ class AuthUser {
     this.isDisabled = isDisabled;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
-    this.services = services;
+    this.providers = providers;
   }
 
   transformId(id) {
@@ -35,7 +35,7 @@ class AuthUser {
       doc.isDisabled,
       doc.createdAt,
       doc.updatedAt,
-      doc.services
+      doc.providers
     );
     doc._id && authuser.transformId(doc._id);
     doc.deletedAt && (authuser.deletedAt = doc.deletedAt); // for deletedauthusers

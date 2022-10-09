@@ -265,7 +265,7 @@ const sendSignupVerificationEmail = asyncHandler(async (req, res, next) => {
     const {
       id,
       email,
-      services: { emailpassword },
+      providers: { emailpassword },
     } = req.authuser;
 
     authService.handleSignupIsVerified(emailpassword);

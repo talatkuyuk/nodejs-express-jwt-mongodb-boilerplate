@@ -38,9 +38,7 @@ describe("POST /auth/login", () => {
       const response = await request(app).post("/auth/login").send(loginForm);
 
       TestUtil.validationErrorExpectations(response);
-      expect(response.body.error.errors.email).toEqual([
-        "must be valid email address",
-      ]);
+      expect(response.body.error.errors.email).toEqual(["must be valid email address"]);
       expect(response.body.error.errors).not.toHaveProperty("password");
     });
 
@@ -53,9 +51,7 @@ describe("POST /auth/login", () => {
 
       TestUtil.validationErrorExpectations(response);
       expect(response.body.error.errors).not.toHaveProperty("email");
-      expect(response.body.error.errors.password).toEqual([
-        "must not be empty",
-      ]);
+      expect(response.body.error.errors.password).toEqual(["must not be empty"]);
     });
 
     test("should return 422 Validation Error if occurs both email, password validation errors", async () => {
@@ -104,9 +100,7 @@ describe("POST /auth/login", () => {
       const response = await request(app).post("/auth/login").send(loginForm);
 
       TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
-      expect(response.body.error.message).toEqual(
-        "You are disabled, call the system administrator"
-      );
+      expect(response.body.error.message).toEqual("You are disabled, call the system administrator");
     });
 
     test("should return status 401, if the password is wrong", async () => {
@@ -126,9 +120,7 @@ describe("POST /auth/login", () => {
       const response = await request(app).post("/auth/login").send(loginForm);
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
-      expect(response.body.error.message).toEqual(
-        "Incorrect email or password"
-      );
+      expect(response.body.error.message).toEqual("Incorrect email or password");
     });
   });
 
@@ -139,7 +131,7 @@ describe("POST /auth/login", () => {
       const authuserDoc = AuthUser.fromDoc({
         email: "talat@gmail.com",
         password: hashedPassword,
-        services: { emailpassword: true },
+        providers: { emailpassword: true },
       });
 
       const authuser = await authuserDbService.addAuthUser(authuserDoc);
@@ -152,14 +144,9 @@ describe("POST /auth/login", () => {
       const response = await request(app).post("/auth/login").send(loginForm);
 
       expect(response.status).toBe(httpStatus.OK);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
-      TestUtil.CheckTokenConsistency(
-        response.body.data.tokens,
-        response.body.data.authuser.id
-      );
+      TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
       // check the whole response body expected
       expect(response.body).toEqual({
@@ -172,7 +159,7 @@ describe("POST /auth/login", () => {
             isDisabled: false,
             createdAt: expect.any(Number), // 1631868212022
             updatedAt: null,
-            services: {
+            providers: {
               emailpassword: true,
             },
           },

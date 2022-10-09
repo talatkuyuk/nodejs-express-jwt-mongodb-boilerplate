@@ -38,9 +38,7 @@ describe("POST /auth/unlink", () => {
         .send();
 
       TestUtil.validationErrorExpectations(response);
-      expect(response.body.error.errors.provider).toEqual([
-        "query param 'provider' is missing",
-      ]);
+      expect(response.body.error.errors.provider).toEqual(["query param 'provider' is missing"]);
       expect(response.body.error.errors).not.toHaveProperty("body");
     });
 
@@ -52,16 +50,14 @@ describe("POST /auth/unlink", () => {
         .send();
 
       TestUtil.validationErrorExpectations(response);
-      expect(response.body.error.errors.provider).toEqual([
-        "The query param 'provider' should be an auth provider",
-      ]);
+      expect(response.body.error.errors.provider).toEqual(["The query param 'provider' should be an auth provider"]);
       expect(response.body.error.errors).not.toHaveProperty("body");
     });
   });
 
   describe("Failed Unlink Auth Provider", () => {
     test("should return status 400, if the auth provider is already unlinked", async () => {
-      // facebook is not in the authuser's services !
+      // facebook is not in the authuser's provider !
 
       const response = await request(app)
         .post("/auth/unlink?provider=facebook") // facebook
@@ -71,14 +67,12 @@ describe("POST /auth/unlink", () => {
 
       TestUtil.errorExpectations(response, httpStatus.BAD_REQUEST);
       expect(response.body.error.name).toBe("ApiError");
-      expect(response.body.error.message).toEqual(
-        "The auth provider is already unlinked"
-      );
+      expect(response.body.error.message).toEqual("The auth provider is already unlinked");
     });
 
     test("should return status 400, if one auth provider is left", async () => {
       await authuserDbService.updateAuthUser(authuserId, {
-        services: {
+        providers: {
           google: "google-id-for-the-authuser",
         },
       });
@@ -91,16 +85,14 @@ describe("POST /auth/unlink", () => {
 
       TestUtil.errorExpectations(response, httpStatus.BAD_REQUEST);
       expect(response.body.error.name).toBe("ApiError");
-      expect(response.body.error.message).toEqual(
-        "There must be one auth provider at least"
-      );
+      expect(response.body.error.message).toEqual("There must be one auth provider at least");
     });
   });
 
   describe("Success Unlink Auth Provider", () => {
     test("should return status 200, and return authuser after the auth provider is unlinked (emailpassword)", async () => {
       await authuserDbService.updateAuthUser(authuserId, {
-        services: {
+        providers: {
           emailpassword: true,
           google: "google-id-for-the-authuser",
         },
@@ -122,7 +114,7 @@ describe("POST /auth/unlink", () => {
             isDisabled: false,
             createdAt: expect.any(Number), // 1631868212022
             updatedAt: expect.any(Number),
-            services: {
+            providers: {
               // emailpassword is gone
               google: "google-id-for-the-authuser",
             },
@@ -140,7 +132,7 @@ describe("POST /auth/unlink", () => {
 
     test("should return status 200, and return authuser after the auth provider is unlinked (google)", async () => {
       await authuserDbService.updateAuthUser(authuserId, {
-        services: {
+        providers: {
           emailpassword: true,
           google: "google-id-for-the-authuser",
         },
@@ -162,7 +154,7 @@ describe("POST /auth/unlink", () => {
             isDisabled: false,
             createdAt: expect.any(Number), // 1631868212022
             updatedAt: expect.any(Number),
-            services: {
+            providers: {
               // google is gone
               emailpassword: true,
             },

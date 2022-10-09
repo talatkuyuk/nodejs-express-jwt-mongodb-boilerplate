@@ -245,7 +245,7 @@ components:
         createdAt:
           type: date-time
           description: unix time like 7635472654762
-        services:
+        providers:
           type: object
           properties:
             emailpassword:
@@ -1266,7 +1266,7 @@ components:
       isEmailVerified: false
       isDisabled: false
       createdAt: 1632828901965
-      services: { "emailpassword": "registered" }
+      providers: { "emailpassword": "registered" }
 
     response-tokens:
       access:
@@ -1290,7 +1290,7 @@ components:
                   isEmailVerified: false,
                   isDisabled: false,
                   createdAt: 1632828901111,
-                  services: { emailpassword: registered },
+                  providers: { emailpassword: registered },
                 },
                 {
                   id: 6152fde5c127504eab292d25,
@@ -1298,7 +1298,7 @@ components:
                   isEmailVerified: false,
                   isDisabled: false,
                   createdAt: 1632828902222,
-                  services: { emailpassword: unregistered, google: "63876327467767364" },
+                  providers: { emailpassword: unregistered, google: "63876327467767364" },
                 },
               ],
             totalCount: 2,

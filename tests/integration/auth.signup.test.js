@@ -22,16 +22,12 @@ describe("POST /auth/signup", () => {
         password: "Pass1word.",
         passwordConfirmation: "Pass1word.",
       };
-      const response = await request(app)
-        .post("/auth/signup")
-        .send(registerform);
+      const response = await request(app).post("/auth/signup").send(registerform);
 
       TestUtil.validationErrorExpectations(response);
       expect(response.body.error.errors.email).toEqual(["must not be empty"]);
       expect(response.body.error.errors).not.toHaveProperty("password");
-      expect(response.body.error.errors).not.toHaveProperty(
-        "passwordConfirmation"
-      );
+      expect(response.body.error.errors).not.toHaveProperty("passwordConfirmation");
     });
 
     test("should return 422 Validation Error if email is invalid form", async () => {
@@ -40,18 +36,12 @@ describe("POST /auth/signup", () => {
         password: "Pass1word.",
         passwordConfirmation: "Pass1word.",
       };
-      const response = await request(app)
-        .post("/auth/signup")
-        .send(registerform);
+      const response = await request(app).post("/auth/signup").send(registerform);
 
       TestUtil.validationErrorExpectations(response);
-      expect(response.body.error.errors.email).toEqual([
-        "must be valid email address",
-      ]);
+      expect(response.body.error.errors.email).toEqual(["must be valid email address"]);
       expect(response.body.error.errors).not.toHaveProperty("password");
-      expect(response.body.error.errors).not.toHaveProperty(
-        "passwordConfirmation"
-      );
+      expect(response.body.error.errors).not.toHaveProperty("passwordConfirmation");
     });
 
     test("should return 422 Validation Error if password is empty", async () => {
@@ -60,18 +50,12 @@ describe("POST /auth/signup", () => {
         password: "",
         passwordConfirmation: "",
       };
-      const response = await request(app)
-        .post("/auth/signup")
-        .send(registerform);
+      const response = await request(app).post("/auth/signup").send(registerform);
 
       TestUtil.validationErrorExpectations(response);
       expect(response.body.error.errors).not.toHaveProperty("email");
-      expect(response.body.error.errors.password).toEqual([
-        "must not be empty",
-      ]);
-      expect(response.body.error.errors.passwordConfirmation).toEqual([
-        "must not be empty",
-      ]);
+      expect(response.body.error.errors.password).toEqual(["must not be empty"]);
+      expect(response.body.error.errors.passwordConfirmation).toEqual(["must not be empty"]);
     });
 
     test("should return 422 Validation Error if password length is less than 8 characters", async () => {
@@ -80,18 +64,12 @@ describe("POST /auth/signup", () => {
         password: "12aA",
         passwordConfirmation: "12aA",
       };
-      const response = await request(app)
-        .post("/auth/signup")
-        .send(registerform);
+      const response = await request(app).post("/auth/signup").send(registerform);
 
       TestUtil.validationErrorExpectations(response);
       expect(response.body.error.errors).not.toHaveProperty("email");
-      expect(response.body.error.errors).not.toHaveProperty(
-        "passwordConfirmation"
-      );
-      expect(response.body.error.errors.password).toEqual([
-        "must be minimum 8 characters",
-      ]);
+      expect(response.body.error.errors).not.toHaveProperty("passwordConfirmation");
+      expect(response.body.error.errors.password).toEqual(["must be minimum 8 characters"]);
     });
 
     test("should return 422 Validation Error if password does not contain at least one uppercase, one lowercase, one number and one special char", async () => {
@@ -100,15 +78,11 @@ describe("POST /auth/signup", () => {
         password: "11aaAA88",
         passwordConfirmation: "11aaAA88",
       };
-      const response = await request(app)
-        .post("/auth/signup")
-        .send(registerform);
+      const response = await request(app).post("/auth/signup").send(registerform);
 
       TestUtil.validationErrorExpectations(response);
       expect(response.body.error.errors).not.toHaveProperty("email");
-      expect(response.body.error.errors).not.toHaveProperty(
-        "passwordConfirmation"
-      );
+      expect(response.body.error.errors).not.toHaveProperty("passwordConfirmation");
       expect(response.body.error.errors.password).toEqual([
         "must contain uppercase, lowercase, number and special char",
       ]);
@@ -120,16 +94,12 @@ describe("POST /auth/signup", () => {
         password: "11aaAA88+",
         passwordConfirmation: "11aaAA88$",
       };
-      const response = await request(app)
-        .post("/auth/signup")
-        .send(registerform);
+      const response = await request(app).post("/auth/signup").send(registerform);
 
       TestUtil.validationErrorExpectations(response);
       expect(response.body.error.errors).not.toHaveProperty("email");
       expect(response.body.error.errors).not.toHaveProperty("password");
-      expect(response.body.error.errors.passwordConfirmation).toEqual([
-        "should match with the password",
-      ]);
+      expect(response.body.error.errors.passwordConfirmation).toEqual(["should match with the password"]);
     });
 
     test("should return 422 Validation Error if occurs all email, password, confirmation password validation errors", async () => {
@@ -138,9 +108,7 @@ describe("POST /auth/signup", () => {
         password: "11aaAA",
         passwordConfirmation: "11aaAA88$",
       };
-      const response = await request(app)
-        .post("/auth/signup")
-        .send(registerform);
+      const response = await request(app).post("/auth/signup").send(registerform);
 
       TestUtil.validationErrorExpectations(response);
       expect(response.body.error.errors).toEqual({
@@ -166,9 +134,7 @@ describe("POST /auth/signup", () => {
         passwordConfirmation: "Pass1word.",
       };
 
-      const response = await request(app)
-        .post("/auth/signup")
-        .send(registerform);
+      const response = await request(app).post("/auth/signup").send(registerform);
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.message).toEqual("email is already taken");
@@ -184,7 +150,7 @@ describe("POST /auth/signup", () => {
         email: google_email,
         password: null, // the user registered with an auth provider
         isEmailVerified: true,
-        services: {
+        providers: {
           google: google_id,
         },
       });
@@ -197,22 +163,13 @@ describe("POST /auth/signup", () => {
         passwordConfirmation: "Pass1word.",
       };
 
-      const response = await request(app)
-        .post("/auth/signup")
-        .send(registerform);
+      const response = await request(app).post("/auth/signup").send(registerform);
 
       expect(response.status).toBe(httpStatus.OK);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
-      expect(response.headers["location"]).toEqual(
-        expect.stringContaining("/authusers/")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
+      expect(response.headers["location"]).toEqual(expect.stringContaining("/authusers/"));
 
-      TestUtil.CheckTokenConsistency(
-        response.body.data.tokens,
-        response.body.data.authuser.id
-      );
+      TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
       // check the whole response body expected
       expect(response.body).toEqual({
@@ -225,7 +182,7 @@ describe("POST /auth/signup", () => {
             isDisabled: false,
             createdAt: expect.any(Number), // 1631868212022
             updatedAt: expect.any(Number),
-            services: {
+            providers: {
               emailpassword: false, // means that the user needs to verify the password assignment with his email
               google: google_id,
             },
@@ -242,7 +199,7 @@ describe("POST /auth/signup", () => {
         email: response.body.data.authuser.email,
       });
 
-      expect(authuser.services["google"]).toBe(google_id);
+      expect(authuser.providers["google"]).toBe(google_id);
 
       expect(authuser).toEqual(
         expect.objectContaining({
@@ -253,10 +210,7 @@ describe("POST /auth/signup", () => {
       // check the authuser's password is setted and hashed in the database
       expect(authuser.password).not.toBeNull(); // before it was null
       expect(authuser.password).not.toEqual(registerform.password);
-      const data = await bcrypt.compare(
-        registerform.password,
-        authuser.password
-      );
+      const data = await bcrypt.compare(registerform.password, authuser.password);
       expect(data).toBeTruthy();
     });
 
@@ -267,22 +221,13 @@ describe("POST /auth/signup", () => {
         passwordConfirmation: "Pass1word.",
       };
 
-      const response = await request(app)
-        .post("/auth/signup")
-        .send(registerform);
+      const response = await request(app).post("/auth/signup").send(registerform);
 
       expect(response.status).toBe(httpStatus.CREATED);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
-      expect(response.headers["location"]).toEqual(
-        expect.stringContaining("/authusers/")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
+      expect(response.headers["location"]).toEqual(expect.stringContaining("/authusers/"));
 
-      TestUtil.CheckTokenConsistency(
-        response.body.data.tokens,
-        response.body.data.authuser.id
-      );
+      TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
       // check the whole response body expected
       expect(response.body).toEqual({
@@ -295,7 +240,7 @@ describe("POST /auth/signup", () => {
             isDisabled: false,
             createdAt: expect.any(Number), // 1631868212022
             updatedAt: null,
-            services: {
+            providers: {
               emailpassword: true,
             },
           },
@@ -319,10 +264,7 @@ describe("POST /auth/signup", () => {
 
       // check the new authuser password is hashed in the database
       expect(authuser.password).not.toEqual(registerform.password);
-      const data = await bcrypt.compare(
-        registerform.password,
-        authuser.password
-      );
+      const data = await bcrypt.compare(registerform.password, authuser.password);
       expect(data).toBeTruthy();
     });
   });

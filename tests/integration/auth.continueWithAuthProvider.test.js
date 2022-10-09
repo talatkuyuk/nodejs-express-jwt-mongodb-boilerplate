@@ -22,21 +22,15 @@ describe("POST /auth/google & auth/facebook", () => {
       const response = await request(app).post("/auth/google").send();
 
       TestUtil.validationErrorExpectations(response);
-      expect(response.body.error.errors.method).toEqual([
-        "query param 'method' is missing",
-      ]);
+      expect(response.body.error.errors.method).toEqual(["query param 'method' is missing"]);
       expect(response.body.error.errors).not.toHaveProperty("body");
     });
 
     test("should return status 422, if the query param 'method' is other than 'code' or 'token'", async () => {
-      const response = await request(app)
-        .post("/auth/google?method=idtoken")
-        .send();
+      const response = await request(app).post("/auth/google?method=idtoken").send();
 
       TestUtil.validationErrorExpectations(response);
-      expect(response.body.error.errors.method).toEqual([
-        "The query param 'method' could be only 'token' or 'code'",
-      ]);
+      expect(response.body.error.errors.method).toEqual(["The query param 'method' could be only 'token' or 'code'"]);
       expect(response.body.error.errors).not.toHaveProperty("body");
     });
   });
@@ -54,19 +48,14 @@ describe("POST /auth/google & auth/facebook", () => {
       expect(response.body.error.name).toBeOneOf(["ApiError", "FetchError"]);
 
       if (response.body.error.name === "ApiError")
-        expect(response.body.error.message).toEqual(
-          "The provided google id token is not valid"
-        );
+        expect(response.body.error.message).toEqual("The provided google id token is not valid");
       else if (response.body.error.name === "FetchError")
         // if there is no internet connection
-        expect(response.body.error.message).toContain(
-          "Auth provider connection error occured, try later"
-        );
+        expect(response.body.error.message).toContain("Auth provider connection error occured, try later");
     });
 
     test("should return status 401, if the google authorization code is invalid", async () => {
-      const google_authorization_code =
-        "the-wrong-authorization-code-came-from-google";
+      const google_authorization_code = "the-wrong-authorization-code-came-from-google";
 
       const response = await request(app)
         .post("/auth/google?method=code")
@@ -77,14 +66,10 @@ describe("POST /auth/google & auth/facebook", () => {
       expect(response.body.error.name).toBeOneOf(["ApiError", "FetchError"]);
 
       if (response.body.error.name === "ApiError")
-        expect(response.body.error.message).toEqual(
-          "The provided google authorization code is not valid"
-        );
+        expect(response.body.error.message).toEqual("The provided google authorization code is not valid");
       else if (response.body.error.name === "FetchError")
         // if there is no internet connection
-        expect(response.body.error.message).toContain(
-          "Auth provider connection error occured, try later"
-        );
+        expect(response.body.error.message).toContain("Auth provider connection error occured, try later");
     });
 
     test("should return status 401, if the info returned by google does not give identification", async () => {
@@ -96,9 +81,7 @@ describe("POST /auth/google & auth/facebook", () => {
         user: { id: undefined, email: undefined },
       });
 
-      jest
-        .spyOn(authProviders, "google")
-        .mockImplementation(customImplementation);
+      jest.spyOn(authProviders, "google").mockImplementation(customImplementation);
 
       const response = await request(app)
         .post("/auth/google?method=token")
@@ -114,9 +97,7 @@ describe("POST /auth/google & auth/facebook", () => {
         );
       else if (response.body.error.name === "FetchError")
         // if there is no internet connection
-        expect(response.body.error.message).toContain(
-          "Auth provider connection error occured, try later"
-        );
+        expect(response.body.error.message).toContain("Auth provider connection error occured, try later");
     });
 
     test("should return status 401, if the info returned by google does not give email information", async () => {
@@ -128,9 +109,7 @@ describe("POST /auth/google & auth/facebook", () => {
         user: { id: "google-id-with-some-digits", email: undefined },
       });
 
-      jest
-        .spyOn(authProviders, "google")
-        .mockImplementation(customImplementation);
+      jest.spyOn(authProviders, "google").mockImplementation(customImplementation);
 
       const response = await request(app)
         .post("/auth/google?method=token")
@@ -146,9 +125,7 @@ describe("POST /auth/google & auth/facebook", () => {
         );
       else if (response.body.error.name === "FetchError")
         // if there is no internet connection
-        expect(response.body.error.message).toContain(
-          "Auth provider connection error occured, try later"
-        );
+        expect(response.body.error.message).toContain("Auth provider connection error occured, try later");
     });
   });
 
@@ -165,14 +142,10 @@ describe("POST /auth/google & auth/facebook", () => {
       expect(response.body.error.name).toBeOneOf(["ApiError", "AxiosError"]);
 
       if (response.body.error.name === "ApiError")
-        expect(response.body.error.message).toEqual(
-          "The provided facebook access token is not valid"
-        );
+        expect(response.body.error.message).toEqual("The provided facebook access token is not valid");
       else if (response.body.error.name === "AxiosError")
         // if there is no internet connection
-        expect(response.body.error.message).toContain(
-          "Auth provider connection error occured, try later"
-        );
+        expect(response.body.error.message).toContain("Auth provider connection error occured, try later");
     });
 
     test("should return status 401, if the info returned by facebook does not give identification", async () => {
@@ -184,9 +157,7 @@ describe("POST /auth/google & auth/facebook", () => {
         user: { id: undefined, email: undefined },
       });
 
-      jest
-        .spyOn(authProviders, "facebook")
-        .mockImplementation(customImplementation);
+      jest.spyOn(authProviders, "facebook").mockImplementation(customImplementation);
 
       const response = await request(app)
         .post("/auth/facebook")
@@ -202,9 +173,7 @@ describe("POST /auth/google & auth/facebook", () => {
         );
       else if (response.body.error.name === "FetchError")
         // if there is no internet connection
-        expect(response.body.error.message).toContain(
-          "Auth provider connection error occured, try later"
-        );
+        expect(response.body.error.message).toContain("Auth provider connection error occured, try later");
     });
 
     test("should return status 401, if the info returned by facebook does not give email information", async () => {
@@ -216,9 +185,7 @@ describe("POST /auth/google & auth/facebook", () => {
         user: { id: "facebook-id-with-some-digits", email: undefined },
       });
 
-      jest
-        .spyOn(authProviders, "facebook")
-        .mockImplementation(customImplementation);
+      jest.spyOn(authProviders, "facebook").mockImplementation(customImplementation);
 
       const response = await request(app)
         .post("/auth/facebook")
@@ -234,9 +201,7 @@ describe("POST /auth/google & auth/facebook", () => {
         );
       else if (response.body.error.name === "FetchError")
         // if there is no internet connection
-        expect(response.body.error.message).toContain(
-          "Auth provider connection error occured, try later"
-        );
+        expect(response.body.error.message).toContain("Auth provider connection error occured, try later");
     });
   });
 
@@ -258,9 +223,7 @@ describe("POST /auth/google & auth/facebook", () => {
         user: { id: provider_id, email: provider_email },
       });
 
-      jest
-        .spyOn(authProviders, "google")
-        .mockImplementation(customImplementation);
+      jest.spyOn(authProviders, "google").mockImplementation(customImplementation);
 
       const response1 = await request(app)
         .post("/auth/google?method=token")
@@ -279,9 +242,7 @@ describe("POST /auth/google & auth/facebook", () => {
 
       TestUtil.errorExpectations(response2, httpStatus.FORBIDDEN);
       expect(response2.body.error.name).toBe("ApiError");
-      expect(response2.body.error.message).toEqual(
-        `The ${provider} token is blacklisted, you have to re-login`
-      );
+      expect(response2.body.error.message).toEqual(`The ${provider} token is blacklisted, you have to re-login`);
     });
 
     test("should return status 403, if the authuser is disabled", async () => {
@@ -289,7 +250,7 @@ describe("POST /auth/google & auth/facebook", () => {
         email: "talat@gmail.com",
         password: await bcrypt.hash("Pass1word.", 8),
         isDisabled: true,
-        services: { emailpassword: "registered" },
+        providers: { emailpassword: "registered" },
       });
       await authuserDbService.addAuthUser(authuser);
 
@@ -305,9 +266,7 @@ describe("POST /auth/google & auth/facebook", () => {
         user: { id: google_id, email: google_email },
       });
 
-      jest
-        .spyOn(authProviders, "google")
-        .mockImplementation(customImplementation);
+      jest.spyOn(authProviders, "google").mockImplementation(customImplementation);
 
       const response = await request(app)
         .post("/auth/google?method=token")
@@ -316,15 +275,13 @@ describe("POST /auth/google & auth/facebook", () => {
 
       TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
       expect(response.body.error.name).toBe("ApiError");
-      expect(response.body.error.message).toEqual(
-        "You are disabled, call the system administrator"
-      );
+      expect(response.body.error.message).toEqual("You are disabled, call the system administrator");
 
       const authuser_in_db = await authuserDbService.getAuthUser({
         id: authuser.id,
       });
 
-      expect(authuser_in_db.services[provider]).toBeUndefined();
+      expect(authuser_in_db.providers[provider]).toBeUndefined();
     });
   });
 
@@ -344,9 +301,7 @@ describe("POST /auth/google & auth/facebook", () => {
         user: { id: google_id, email: google_email },
       });
 
-      jest
-        .spyOn(authProviders, "google")
-        .mockImplementation(customImplementation);
+      jest.spyOn(authProviders, "google").mockImplementation(customImplementation);
 
       const response = await request(app)
         .post("/auth/google?method=token")
@@ -355,21 +310,16 @@ describe("POST /auth/google & auth/facebook", () => {
         .send();
 
       expect(response.status).toBe(httpStatus.CREATED);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
       const authuser = await authuserDbService.getAuthUser({
         id: response.body.data.authuser.id,
       });
 
-      expect(authuser.services[provider]).toBeDefined();
+      expect(authuser.providers[provider]).toBeDefined();
       expect(authuser.password).toBeNull();
 
-      TestUtil.CheckTokenConsistency(
-        response.body.data.tokens,
-        response.body.data.authuser.id
-      );
+      TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
       // check the whole response body expected
       expect(response.body).toEqual({
@@ -382,7 +332,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number), // 1631868212022
             updatedAt: null,
-            services: {
+            providers: {
               [provider]: google_id,
             },
           },
@@ -394,12 +344,12 @@ describe("POST /auth/google & auth/facebook", () => {
       TestUtil.CheckRefreshTokenStoredInDB(response);
     });
 
-    test("should return status 200; return the existing authuser adding the auth provider as a service; if there is an authuser with the same email, registered with only email/password", async () => {
+    test("should return status 200; return the existing authuser adding the auth provider as a provider; if there is an authuser with the same email, registered with only email/password", async () => {
       const existingAuthuserDoc = AuthUser.fromDoc({
         email: "talat@gmail.com",
         password: await bcrypt.hash("Pass1word.", 8),
         isEmailVerified: false,
-        services: {
+        providers: {
           emailpassword: true,
         },
       });
@@ -420,9 +370,7 @@ describe("POST /auth/google & auth/facebook", () => {
         user: { id: facebook_id, email: facebook_email },
       });
 
-      jest
-        .spyOn(authProviders, "facebook")
-        .mockImplementation(customImplementation);
+      jest.spyOn(authProviders, "facebook").mockImplementation(customImplementation);
 
       const response = await request(app)
         .post("/auth/facebook")
@@ -431,21 +379,16 @@ describe("POST /auth/google & auth/facebook", () => {
         .send();
 
       expect(response.status).toBe(httpStatus.OK);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
       const authuser_in_db = await authuserDbService.getAuthUser({
         id: authuser.id,
       });
 
-      expect(authuser_in_db.services["emailpassword"]).toBe(true);
-      expect(authuser_in_db.services[provider]).toBeDefined();
+      expect(authuser_in_db.providers["emailpassword"]).toBe(true);
+      expect(authuser_in_db.providers[provider]).toBeDefined();
 
-      TestUtil.CheckTokenConsistency(
-        response.body.data.tokens,
-        response.body.data.authuser.id
-      );
+      TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
       // check the whole response body expected
       expect(response.body).toEqual({
@@ -458,7 +401,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number), // 1631868212022
             updatedAt: expect.any(Number),
-            services: {
+            providers: {
               emailpassword: true,
               [provider]: facebook_id,
             },
@@ -481,7 +424,7 @@ describe("POST /auth/google & auth/facebook", () => {
         password: null,
         isEmailVerified: true,
         updatedAt,
-        services: {
+        providers: {
           google: google_id,
         },
       });
@@ -500,9 +443,7 @@ describe("POST /auth/google & auth/facebook", () => {
         user: { id: google_id, email: google_email },
       });
 
-      jest
-        .spyOn(authProviders, "google")
-        .mockImplementation(customImplementation);
+      jest.spyOn(authProviders, "google").mockImplementation(customImplementation);
 
       const response = await request(app)
         .post("/auth/google?method=token")
@@ -511,21 +452,16 @@ describe("POST /auth/google & auth/facebook", () => {
         .send();
 
       expect(response.status).toBe(httpStatus.OK);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
       const authuser_in_db = await authuserDbService.getAuthUser({
         id: authuser.id,
       });
 
-      expect(authuser_in_db.services["emailpassword"]).toBeUndefined();
-      expect(authuser_in_db.services[provider]).toBeDefined();
+      expect(authuser_in_db.providers["emailpassword"]).toBeUndefined();
+      expect(authuser_in_db.providers[provider]).toBeDefined();
 
-      TestUtil.CheckTokenConsistency(
-        response.body.data.tokens,
-        response.body.data.authuser.id
-      );
+      TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
       // check the whole response body expected
       expect(response.body).toEqual({
@@ -538,7 +474,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number),
             updatedAt: updatedAt, // id did not change
-            services: {
+            providers: {
               [provider]: google_id,
             },
           },
@@ -550,7 +486,7 @@ describe("POST /auth/google & auth/facebook", () => {
       TestUtil.CheckRefreshTokenStoredInDB(response);
     });
 
-    test("should return status 200; return the existing authuser adding the auth provider as a service; if there is an authuser with the same email, registered with only another auth provider", async () => {
+    test("should return status 200; return the existing authuser adding the auth provider as a provider; if there is an authuser with the same email, registered with only another auth provider", async () => {
       const google_email = "talat@gmail.com";
       const google_id = "a-google-id-with-some-digits";
       const facebook_id = "a-facebook-id-with-some-digits";
@@ -559,7 +495,7 @@ describe("POST /auth/google & auth/facebook", () => {
         email: google_email,
         password: null,
         isEmailVerified: true,
-        services: {
+        providers: {
           facebook: facebook_id,
         },
       });
@@ -578,9 +514,7 @@ describe("POST /auth/google & auth/facebook", () => {
         user: { id: google_id, email: google_email },
       });
 
-      jest
-        .spyOn(authProviders, "google")
-        .mockImplementation(customImplementation);
+      jest.spyOn(authProviders, "google").mockImplementation(customImplementation);
 
       const response = await request(app)
         .post("/auth/google?method=token")
@@ -589,22 +523,17 @@ describe("POST /auth/google & auth/facebook", () => {
         .send();
 
       expect(response.status).toBe(httpStatus.OK);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
       const authuser_in_db = await authuserDbService.getAuthUser({
         id: authuser.id,
       });
 
-      expect(authuser_in_db.services["emailpassword"]).toBeUndefined();
-      expect(authuser_in_db.services["facebook"]).toBe(facebook_id);
-      expect(authuser_in_db.services[provider]).toBeDefined();
+      expect(authuser_in_db.providers["emailpassword"]).toBeUndefined();
+      expect(authuser_in_db.providers["facebook"]).toBe(facebook_id);
+      expect(authuser_in_db.providers[provider]).toBeDefined();
 
-      TestUtil.CheckTokenConsistency(
-        response.body.data.tokens,
-        response.body.data.authuser.id
-      );
+      TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
       // check the whole response body expected
       expect(response.body).toEqual({
@@ -617,7 +546,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number),
             updatedAt: expect.any(Number),
-            services: {
+            providers: {
               facebook: facebook_id,
               [provider]: google_id,
             },
@@ -630,7 +559,7 @@ describe("POST /auth/google & auth/facebook", () => {
       TestUtil.CheckRefreshTokenStoredInDB(response);
     });
 
-    test("should return status 200; return the existing authuser adding the auth provider as a service; if there is an authuser with the same email, registered with: email/password and another auth provider", async () => {
+    test("should return status 200; return the existing authuser adding the auth provider as a provider; if there is an authuser with the same email, registered with: email/password and another auth provider", async () => {
       const google_email = "talat@gmail.com";
       const google_id = "a-google-id-with-some-digits";
       const facebook_id = "a-facebook-id-with-some-digits";
@@ -639,7 +568,7 @@ describe("POST /auth/google & auth/facebook", () => {
         email: google_email,
         password: await bcrypt.hash("Pass1word.", 8),
         isEmailVerified: true,
-        services: {
+        providers: {
           emailpassword: true,
           facebook: facebook_id,
         },
@@ -659,9 +588,7 @@ describe("POST /auth/google & auth/facebook", () => {
         user: { id: google_id, email: google_email },
       });
 
-      jest
-        .spyOn(authProviders, "google")
-        .mockImplementation(customImplementation);
+      jest.spyOn(authProviders, "google").mockImplementation(customImplementation);
 
       const response = await request(app)
         .post("/auth/google?method=code")
@@ -670,22 +597,17 @@ describe("POST /auth/google & auth/facebook", () => {
         .send();
 
       expect(response.status).toBe(httpStatus.OK);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
       const authuser_in_db = await authuserDbService.getAuthUser({
         id: authuser.id,
       });
 
-      expect(authuser_in_db.services["emailpassword"]).toBe(true);
-      expect(authuser_in_db.services["facebook"]).toBe(facebook_id);
-      expect(authuser_in_db.services[provider]).toBeDefined();
+      expect(authuser_in_db.providers["emailpassword"]).toBe(true);
+      expect(authuser_in_db.providers["facebook"]).toBe(facebook_id);
+      expect(authuser_in_db.providers[provider]).toBeDefined();
 
-      TestUtil.CheckTokenConsistency(
-        response.body.data.tokens,
-        response.body.data.authuser.id
-      );
+      TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
       // check the whole response body expected
       expect(response.body).toEqual({
@@ -698,7 +620,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number),
             updatedAt: expect.any(Number),
-            services: {
+            providers: {
               emailpassword: true,
               facebook: facebook_id,
               [provider]: google_id,
@@ -722,7 +644,7 @@ describe("POST /auth/google & auth/facebook", () => {
         password: await bcrypt.hash("Pass1word.", 8),
         isEmailVerified: true,
         updatedAt,
-        services: {
+        providers: {
           emailpassword: true,
           google: google_id,
         },
@@ -742,9 +664,7 @@ describe("POST /auth/google & auth/facebook", () => {
         user: { id: google_id, email: google_email },
       });
 
-      jest
-        .spyOn(authProviders, "google")
-        .mockImplementation(customImplementation);
+      jest.spyOn(authProviders, "google").mockImplementation(customImplementation);
 
       const response = await request(app)
         .post("/auth/google?method=token")
@@ -753,21 +673,16 @@ describe("POST /auth/google & auth/facebook", () => {
         .send();
 
       expect(response.status).toBe(httpStatus.OK);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
       const authuser_in_db = await authuserDbService.getAuthUser({
         id: authuser.id,
       });
 
-      expect(authuser_in_db.services["emailpassword"]).toBe(true);
-      expect(authuser_in_db.services[provider]).toBeDefined();
+      expect(authuser_in_db.providers["emailpassword"]).toBe(true);
+      expect(authuser_in_db.providers[provider]).toBeDefined();
 
-      TestUtil.CheckTokenConsistency(
-        response.body.data.tokens,
-        response.body.data.authuser.id
-      );
+      TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
       // check the whole response body expected
       expect(response.body).toEqual({
@@ -780,7 +695,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number),
             updatedAt: updatedAt, // id did not change
-            services: {
+            providers: {
               emailpassword: true,
               [provider]: google_id,
             },
@@ -804,7 +719,7 @@ describe("POST /auth/google & auth/facebook", () => {
         password: await bcrypt.hash("Pass1word.", 8),
         isEmailVerified: true,
         updatedAt,
-        services: {
+        providers: {
           google: google_id,
           facebook: facebook_id,
         },
@@ -824,9 +739,7 @@ describe("POST /auth/google & auth/facebook", () => {
         user: { id: google_id, email: google_email },
       });
 
-      jest
-        .spyOn(authProviders, "google")
-        .mockImplementation(customImplementation);
+      jest.spyOn(authProviders, "google").mockImplementation(customImplementation);
 
       const response = await request(app)
         .post("/auth/google?method=token")
@@ -835,22 +748,17 @@ describe("POST /auth/google & auth/facebook", () => {
         .send();
 
       expect(response.status).toBe(httpStatus.OK);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
       const authuser_in_db = await authuserDbService.getAuthUser({
         id: authuser.id,
       });
 
-      expect(authuser_in_db.services["emailpassword"]).toBeUndefined();
-      expect(authuser_in_db.services["google"]).toBe(google_id);
-      expect(authuser_in_db.services["facebook"]).toBe(facebook_id);
+      expect(authuser_in_db.providers["emailpassword"]).toBeUndefined();
+      expect(authuser_in_db.providers["google"]).toBe(google_id);
+      expect(authuser_in_db.providers["facebook"]).toBe(facebook_id);
 
-      TestUtil.CheckTokenConsistency(
-        response.body.data.tokens,
-        response.body.data.authuser.id
-      );
+      TestUtil.CheckTokenConsistency(response.body.data.tokens, response.body.data.authuser.id);
 
       // check the whole response body expected
       expect(response.body).toEqual({
@@ -863,7 +771,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number),
             updatedAt: updatedAt, // id did not change
-            services: {
+            providers: {
               google: google_id,
               facebook: facebook_id,
             },

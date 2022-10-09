@@ -22,10 +22,7 @@ const checkAuthuser = function (authuser) {
     if (!authuser) throw new ApiError(httpStatus.NOT_FOUND, "No user found");
 
     if (authuser.isDisabled)
-      throw new ApiError(
-        httpStatus.FORBIDDEN,
-        `You are disabled, call the system administrator`
-      );
+      throw new ApiError(httpStatus.FORBIDDEN, `You are disabled, call the system administrator`);
   } catch (error) {
     throw error;
   }
@@ -57,21 +54,17 @@ const signupWithEmailAndPassword = async (email, password, request) => {
 
       return await authuserDbService.updateAuthUser(authuser.id, {
         password: hashedPassword,
-        services: { ...authuser.services, emailpassword: false }, // false means the user registers with email while he is already registered with a provider, needs email verification
+        providers: { ...authuser.providers, emailpassword: false }, // false means the user registers with email while he is already registered with a provider, needs email verification
       });
     }
 
     const authuserDoc = new AuthUser(email, hashedPassword);
-    authuserDoc.services = { emailpassword: true };
+    authuserDoc.providers = { emailpassword: true };
 
     const newauthuser = await authuserDbService.addAuthUser(authuserDoc);
 
     // TODO: is it necessary? An error in authuserDbService.addAuthUser is already being catched in tyr-catch
-    if (!newauthuser)
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "The database could not process the request"
-      );
+    if (!newauthuser) throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
 
     request && (request.isNewAuthuserCreated = true);
 
@@ -94,10 +87,7 @@ const loginWithEmailAndPassword = async (email, password) => {
     checkAuthuser(authuser);
 
     if (!(await authuser.isPasswordMatch(password))) {
-      throw new ApiError(
-        httpStatus.UNAUTHORIZED,
-        "Incorrect email or password"
-      );
+      throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect email or password");
     }
 
     return authuser;
@@ -108,7 +98,7 @@ const loginWithEmailAndPassword = async (email, password) => {
 
 /**
  * Login/Signup with a oAuth Provider
- * @param {string} service // "google" | "facebook"
+ * @param {string} provider // "google" | "facebook"
  * @param {string} id
  * @param {string} email
  * @param {import('express').Request} request
@@ -120,39 +110,32 @@ const continueWithAuthProvider = async (provider, id, email, request) => {
 
     if (authuser) {
       if (authuser.isDisabled) {
-        throw new ApiError(
-          httpStatus.FORBIDDEN,
-          "You are disabled, call the system administrator"
-        );
+        throw new ApiError(httpStatus.FORBIDDEN, "You are disabled, call the system administrator");
       }
 
       request && (request.isNewAuthuserCreated = false);
 
       // if the user is registered with the same auth provider
-      if (authuser.services[provider] === id) return authuser;
+      if (authuser.providers[provider] === id) return authuser;
 
       // if the user is registered with email or other auth provider
       return await authuserDbService.updateAuthUser(authuser.id, {
         isEmailVerified: true,
-        services: { ...authuser.services, [provider]: id },
+        providers: { ...authuser.providers, [provider]: id },
       });
     }
 
     // if there is no authuser, then create a new one
     const authuserDoc = new AuthUser(email, null);
     authuserDoc.isEmailVerified = true;
-    authuserDoc.services = {
+    authuserDoc.providers = {
       [provider]: id, // { google: 46598364598354983 }
     };
 
     const newauthuser = await authuserDbService.addAuthUser(authuserDoc);
 
     // TODO: is it necessary? An error in authuserDbService.addAuthUser is already being catched in tyr-catch
-    if (!newauthuser)
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "The database could not process the request"
-      );
+    if (!newauthuser) throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
 
     request && (request.isNewAuthuserCreated = true);
 
@@ -172,35 +155,26 @@ const unlinkAuthProvider = async (authuser, provider) => {
   try {
     // checkAuthuser(authuser); not necessary since the authorize middleware handles this
 
-    if (!authuser.services?.hasOwnProperty(provider)) {
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "The auth provider is already unlinked"
-      );
+    if (!authuser.providers?.hasOwnProperty(provider)) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "The auth provider is already unlinked");
     }
 
-    if (Object.keys(authuser.services).length === 1) {
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "There must be one auth provider at least"
-      );
+    if (Object.keys(authuser.providers).length === 1) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "There must be one auth provider at least");
     }
 
-    const newAuthProviders = { ...authuser.services };
+    const newAuthProviders = { ...authuser.providers };
     delete newAuthProviders[provider];
 
     let updateBody = {
-      services: newAuthProviders,
+      providers: newAuthProviders,
     };
 
     if (provider === authProvider.EMAILPASSWORD) {
       updateBody.password = null;
     }
 
-    const authuserUpdated = await authuserDbService.updateAuthUser(
-      authuser.id,
-      updateBody
-    );
+    const authuserUpdated = await authuserDbService.updateAuthUser(authuser.id, updateBody);
 
     return authuserUpdated;
   } catch (error) {
@@ -291,13 +265,10 @@ const resetPassword = async (id, newPassword) => {
 
     const password = await bcrypt.hash(newPassword, 8);
 
-    const updatedAuthuser = await authuserDbService.updateAuthUser(
-      authuser.id,
-      {
-        password,
-        services: { ...authuser.services, emailpassword: true },
-      }
-    );
+    const updatedAuthuser = await authuserDbService.updateAuthUser(authuser.id, {
+      password,
+      providers: { ...authuser.providers, emailpassword: true },
+    });
 
     return updatedAuthuser;
   } catch (error) {
@@ -312,10 +283,7 @@ const resetPassword = async (id, newPassword) => {
  */
 const handleEmailIsVerified = function (isEmailVerified) {
   if (isEmailVerified) {
-    const error = new ApiError(
-      httpStatus.BAD_REQUEST,
-      "Email is already verified"
-    );
+    const error = new ApiError(httpStatus.BAD_REQUEST, "Email is already verified");
     throw traceError(error, "AuthService : handleEmailIsVerified");
   }
 };
@@ -331,10 +299,7 @@ const verifyEmail = async (id) => {
 
     checkAuthuser(authuser);
 
-    const updatedAuthuser = await authuserDbService.updateAuthUser(
-      authuser.id,
-      { isEmailVerified: true }
-    );
+    const updatedAuthuser = await authuserDbService.updateAuthUser(authuser.id, { isEmailVerified: true });
 
     return updatedAuthuser;
   } catch (error) {
@@ -343,16 +308,13 @@ const verifyEmail = async (id) => {
 };
 
 /**
- * Check if the authuser's services already contain { emailpassword: true }
+ * Check if the authuser's providers already contain { emailpassword: true }
  * @param {boolean} emailpassword
  * @returns {any}
  */
 const handleSignupIsVerified = function (emailpassword) {
   if (emailpassword) {
-    const error = new ApiError(
-      httpStatus.BAD_REQUEST,
-      "Signup is already verified"
-    );
+    const error = new ApiError(httpStatus.BAD_REQUEST, "Signup is already verified");
     throw traceError(error, "AuthService : handleSignupIsVerified");
   }
 };
@@ -368,10 +330,9 @@ const verifySignup = async (id) => {
 
     checkAuthuser(authuser);
 
-    const updatedAuthuser = await authuserDbService.updateAuthUser(
-      authuser.id,
-      { services: { ...authuser.services, emailpassword: true } }
-    );
+    const updatedAuthuser = await authuserDbService.updateAuthUser(authuser.id, {
+      providers: { ...authuser.providers, emailpassword: true },
+    });
 
     return updatedAuthuser;
   } catch (error) {
