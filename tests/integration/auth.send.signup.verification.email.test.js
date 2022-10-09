@@ -5,11 +5,7 @@ const jwt = require("jsonwebtoken");
 const app = require("../../src/core/express");
 const config = require("../../src/config");
 
-const {
-  authuserDbService,
-  tokenDbService,
-  emailService,
-} = require("../../src/services");
+const { authuserDbService, tokenDbService, emailService } = require("../../src/services");
 const { tokenTypes } = require("../../src/config/tokens");
 
 const TestUtil = require("../testutils/TestUtil");
@@ -28,7 +24,7 @@ describe("POST /auth/send-signup-verification-email", () => {
     const { authuser, tokens } = await TestUtil.createAuthUser({
       email: "talat@google.com",
       password: "Pass1word!",
-      services: {},
+      providers: {},
       userAgent,
     });
 
@@ -41,7 +37,7 @@ describe("POST /auth/send-signup-verification-email", () => {
     test("should return status 400, if the email is already verified", async () => {
       // update the authuser with isEmailVerifid true
       await authuserDbService.updateAuthUser(authuserId, {
-        services: {
+        providers: {
           emailpassword: true,
         },
       });
@@ -70,9 +66,7 @@ describe("POST /auth/send-signup-verification-email", () => {
       };
 
       // spy on transporter to produce error
-      jest
-        .spyOn(emailService.transporter, "sendMail")
-        .mockImplementation(() => Promise.reject(smtpResponse));
+      jest.spyOn(emailService.transporter, "sendMail").mockImplementation(() => Promise.reject(smtpResponse));
 
       const response = await request(app)
         .post("/auth/send-signup-verification-email")
@@ -82,9 +76,7 @@ describe("POST /auth/send-signup-verification-email", () => {
 
       TestUtil.errorExpectations(response, httpStatus.INTERNAL_SERVER_ERROR);
       expect(response.body.error.name).toBe("SmtpError");
-      expect(response.body.error.message).toEqual(
-        "SMTP server is out of service"
-      );
+      expect(response.body.error.message).toEqual("SMTP server is out of service");
     });
 
     test("should return status 400, if the email recipient is empty", async () => {
@@ -96,9 +88,7 @@ describe("POST /auth/send-signup-verification-email", () => {
       };
 
       // spy on transporter to produce error
-      jest
-        .spyOn(emailService.transporter, "sendMail")
-        .mockImplementation(() => Promise.reject(smtpResponse));
+      jest.spyOn(emailService.transporter, "sendMail").mockImplementation(() => Promise.reject(smtpResponse));
 
       const response = await request(app)
         .post("/auth/send-signup-verification-email")
@@ -115,14 +105,9 @@ describe("POST /auth/send-signup-verification-email", () => {
   describe("Success send-signup-verification-email process", () => {
     test("should return status 204, generate and store verify-signup token in db", async () => {
       // spy on transporter and sendSignupVerificationEmail of the emailService
-      jest
-        .spyOn(emailService.transporter, "sendMail")
-        .mockResolvedValue("The verification email is sent.");
+      jest.spyOn(emailService.transporter, "sendMail").mockResolvedValue("The verification email is sent.");
 
-      const spyOnSendSignupVerificationEmail = jest.spyOn(
-        emailService,
-        "sendSignupVerificationEmail"
-      );
+      const spyOnSendSignupVerificationEmail = jest.spyOn(emailService, "sendSignupVerificationEmail");
 
       const response = await request(app)
         .post("/auth/send-signup-verification-email")
@@ -133,14 +118,10 @@ describe("POST /auth/send-signup-verification-email", () => {
       expect(response.status).toBe(httpStatus.OK);
       expect(response.body.success).toBe(true);
 
-      expect(spyOnSendSignupVerificationEmail).toHaveBeenCalledWith(
-        authuserEmail,
-        expect.any(String)
-      );
+      expect(spyOnSendSignupVerificationEmail).toHaveBeenCalledWith(authuserEmail, expect.any(String));
 
       // obtain the token from the function on that spied
-      const verifySignupToken =
-        spyOnSendSignupVerificationEmail.mock.calls[0][1];
+      const verifySignupToken = spyOnSendSignupVerificationEmail.mock.calls[0][1];
 
       // check the verify email token belongs to the authuser
       const { sub } = jwt.decode(verifySignupToken, config.jwt.secret);

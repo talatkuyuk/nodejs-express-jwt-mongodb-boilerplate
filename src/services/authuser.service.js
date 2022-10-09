@@ -57,7 +57,7 @@ const addAuthUser = async (email, password) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 8);
     const authuserDoc = new AuthUser(email, hashedPassword);
-    authuserDoc.services = { emailpassword: true };
+    authuserDoc.providers = { emailpassword: true };
 
     const authuser = await authuserDbService.addAuthUser(authuserDoc);
 
@@ -173,19 +173,19 @@ const unlinkProvider = async (id, provider) => {
   try {
     const authuser = await getAuthUserById(id);
 
-    if (!authuser.services?.hasOwnProperty(provider)) {
+    if (!authuser.providers?.hasOwnProperty(provider)) {
       throw new ApiError(httpStatus.BAD_REQUEST, "The auth provider is already unlinked");
     }
 
-    if (Object.keys(authuser.services).length === 1) {
+    if (Object.keys(authuser.providers).length === 1) {
       throw new ApiError(httpStatus.BAD_REQUEST, "There must be one auth provider at least");
     }
 
-    const newAuthProviders = { ...authuser.services };
+    const newAuthProviders = { ...authuser.providers };
     delete newAuthProviders[provider];
 
     let updateBody = {
-      services: newAuthProviders,
+      providers: newAuthProviders,
     };
 
     if (provider === authProvider.EMAILPASSWORD) {

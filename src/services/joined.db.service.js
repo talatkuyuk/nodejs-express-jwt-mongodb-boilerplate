@@ -26,26 +26,20 @@ const getAuthUserJoined = async (id) => {
           isEmailVerified: 1,
           isDisabled: 1,
           createdAt: 1,
-          services: 1,
+          providers: 1,
           user: "$details",
         },
       },
     ];
 
     const db = mongodb.getDatabase();
-    const authuserDocContainer = await db
-      .collection("authusers")
-      .aggregate(pipeline)
-      .toArray();
+    const authuserDocContainer = await db.collection("authusers").aggregate(pipeline).toArray();
 
     let authuser = null,
       user = null;
 
-    authuserDocContainer &&
-      (authuser = AuthUser.fromDoc(authuserDocContainer[0]));
-    authuserDocContainer &&
-      authuser &&
-      (user = User.fromDoc(authuserDocContainer[0]["user"]));
+    authuserDocContainer && (authuser = AuthUser.fromDoc(authuserDocContainer[0]));
+    authuserDocContainer && authuser && (user = User.fromDoc(authuserDocContainer[0]["user"]));
 
     return { authuser, user };
   } catch (error) {
@@ -61,13 +55,7 @@ const getAuthUserJoined = async (id) => {
  * @param {number} page - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const getAuthUsersJoined = async (
-  filterLeft,
-  filterRight,
-  sort,
-  skip,
-  limit
-) => {
+const getAuthUsersJoined = async (filterLeft, filterRight, sort, skip, limit) => {
   try {
     const pipeline = [
       {
@@ -92,7 +80,7 @@ const getAuthUsersJoined = async (
           isEmailVerified: 1,
           isDisabled: 1,
           createdAt: 1,
-          services: 1,
+          providers: 1,
           role: "$details.role",
           name: "$details.name",
           gender: "$details.gender",
@@ -169,7 +157,7 @@ const getUsersJoined = async (filterLeft, filterRight, sort, skip, limit) => {
           createdAt: 1,
           isEmailVerified: "$details.isEmailVerified",
           isDisabled: "$details.isDisabled",
-          services: "$details.services",
+          providers: "$details.providers",
         },
       },
       {

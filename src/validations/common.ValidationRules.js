@@ -12,10 +12,10 @@ const check_param_id_custom = [
 ];
 
 const check_param_id = [
-  param("id")
-    .isLength({ min: 24, max: 24 })
-    .withMessage("The param id must be a 24-character number"),
+  param("id").isLength({ min: 24, max: 24 }).withMessage("The param id must be a 24-character number"),
 ];
+
+// const check_param_id = [param("id").isNumeric().withMessage("The param 'id' must be numeric value")];
 
 const check_body_email = [
   body("email")

@@ -19,9 +19,7 @@ const addAuthUser = async (authuser) => {
     console.log(`1 record is created in authusers. (${result.insertedId})`);
 
     // get the inserted document back
-    const authuserInserted = await db
-      .collection("authusers")
-      .findOne({ _id: result.insertedId });
+    const authuserInserted = await db.collection("authusers").findOne({ _id: result.insertedId });
 
     return AuthUser.fromDoc(authuserInserted);
   } catch (error) {
@@ -111,7 +109,7 @@ const getAuthUsers = async (filter, sort, skip, limit) => {
           isDisabled: 1,
           createdAt: 1,
           updatedAt: 1,
-          services: 1,
+          providers: 1,
         },
       },
       {
@@ -181,9 +179,7 @@ const deleteAuthUser = async (id) => {
     console.log("deleteAuthUser: ", id);
 
     const db = mongodb.getDatabase();
-    const result = await db
-      .collection("authusers")
-      .findOneAndDelete({ _id: ObjectId(id) });
+    const result = await db.collection("authusers").findOneAndDelete({ _id: ObjectId(id) });
 
     if (result.ok !== 1) return false;
     if (result.value === null) return false;
@@ -195,9 +191,7 @@ const deleteAuthUser = async (id) => {
     const result2 = await toDeletedAuthUsers(authuser);
     if (result2 == null) {
       // do not raise error but log the issue
-      console.log(
-        `deleteAuthUser: The authuser ${id} could not added into deletedauthusers`
-      );
+      console.log(`deleteAuthUser: The authuser ${id} could not added into deletedauthusers`);
     }
 
     return true;
@@ -220,20 +214,14 @@ const toDeletedAuthUsers = async (deletedAuthUser) => {
     deletedAuthUser["deletedAt"] = Date.now();
 
     const db = mongodb.getDatabase();
-    const result = await db
-      .collection("deletedauthusers")
-      .insertOne(deletedAuthUser);
+    const result = await db.collection("deletedauthusers").insertOne(deletedAuthUser);
 
     if (!result.acknowledged) return null;
 
-    console.log(
-      `1 record is created in deletedauthusers. ${result.insertedId}`
-    );
+    console.log(`1 record is created in deletedauthusers. ${result.insertedId}`);
 
     // get the inserted document back
-    const deletedAuthuserInserted = await db
-      .collection("deletedauthusers")
-      .findOne({ _id: result.insertedId });
+    const deletedAuthuserInserted = await db.collection("deletedauthusers").findOne({ _id: result.insertedId });
 
     return deletedAuthuserInserted;
   } catch (error) {

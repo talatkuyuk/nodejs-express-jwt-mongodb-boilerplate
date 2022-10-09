@@ -97,7 +97,7 @@ describe("PATH /authusers", () => {
         isDisabled: false,
         createdAt: expect.any(Number),
         updatedAt: null,
-        services: { emailpassword: true },
+        providers: { emailpassword: true },
       });
 
       // check the test authuser's password is hashed
@@ -184,7 +184,7 @@ describe("PATH /authusers", () => {
 
       // test the unlink provider of 4th authuser
       await authuserDbService.updateAuthUser(authusers[3]["id"], {
-        services: {
+        providers: {
           emailpassword: true,
           google: "google-id-string",
           facebook: "facebook-id-string",
@@ -198,9 +198,9 @@ describe("PATH /authusers", () => {
         .send()
         .expect(httpStatus.OK);
 
-      expect(response.body.data.authuser.services).not.toHaveProperty("google");
-      expect(response.body.data.authuser.services).toHaveProperty("facebook");
-      expect(response.body.data.authuser.services).toHaveProperty("emailpassword");
+      expect(response.body.data.authuser.providers).not.toHaveProperty("google");
+      expect(response.body.data.authuser.providers).toHaveProperty("facebook");
+      expect(response.body.data.authuser.providers).toHaveProperty("emailpassword");
 
       response = await request(app)
         .patch(`/authusers/${authusers[3]["id"]}/unlink-provider?provider=emailpassword`)
@@ -209,12 +209,12 @@ describe("PATH /authusers", () => {
         .send()
         .expect(httpStatus.OK);
 
-      expect(response.body.data.authuser.services).not.toHaveProperty("google");
-      expect(response.body.data.authuser.services).not.toHaveProperty("emailpassword");
-      expect(response.body.data.authuser.services).toHaveProperty("facebook");
+      expect(response.body.data.authuser.providers).not.toHaveProperty("google");
+      expect(response.body.data.authuser.providers).not.toHaveProperty("emailpassword");
+      expect(response.body.data.authuser.providers).toHaveProperty("facebook");
 
       localDb[authusers[3]["email"]].updatedAt = response.body.data.authuser.updatedAt;
-      localDb[authusers[3]["email"]].services = response.body.data.authuser.services;
+      localDb[authusers[3]["email"]].providers = response.body.data.authuser.providers;
 
       // check the 4th authuser's password is null; because the emailpassword is unlinked
       const { password: password2 } = await authuserDbService.getAuthUser({
@@ -290,7 +290,7 @@ describe("PATH /authusers", () => {
         isDisabled: true,
         createdAt: expect.any(Number),
         updatedAt: expect.any(Number),
-        services: { emailpassword: true },
+        providers: { emailpassword: true },
       });
 
       // query filter disabled, check the count; and control the list
@@ -412,7 +412,7 @@ describe("PATH /authusers", () => {
     - try to change email verification status of an authuser that not exists
     - try to unlink provider, authuser does not exist
     - try to unlink provider which is already unlinked
-    - try to unlink provider which is the only auth provider in services
+    - try to unlink provider which is the only auth provider in providers
     - try to unlink provider without query param provider
 		- try to delete an authuser that not exists
 		- try to change another authuser's password
