@@ -27,9 +27,8 @@ Choose one of below commands
 
 I added two remotes `origin` and `heroku`
 
-> git add remote <github-repo>
-> git add remote <heroku-repo>
+$ git add remote <github-repo>  
+$ git add remote <heroku-repo>
 
-to see: git remote -v
-git push origin main
-git push heroku main
+$ git push origin main  
+$ git push heroku main
