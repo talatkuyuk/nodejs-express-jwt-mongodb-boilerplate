@@ -47,7 +47,7 @@ describe("PATH /users", () => {
     /*
 		The Success Test Scenario
 		-------------------------
-		- add an authuser and user correspondent
+		- add an test authuser and test user correspondent
 		- check its properties and the password is hashed
 		- add 10 authusers and 10 users correspondent
 		- check random 8th user exists in db
@@ -58,27 +58,30 @@ describe("PATH /users", () => {
 		- get an user, check the data
 		- query filter, check the count; and control the list
 		- check the paginations, get iterations and check the counts and pagination infos
+    - delete test authuser but not delete corresponded user; re-add the test authuser having different id; add the corresponded user; now check whether there are two users with the same email
 		*/
 
     test("success scenario", async () => {
       let response, data, user;
       const authusers = []; // holds the static data of the 10 authusers to be created
 
-      // add an authuser
+      // add a test authuser
+      const addFormForTestAuthuser = {
+        email: "test@gmail.com",
+        password: "Pass1word!",
+        passwordConfirmation: "Pass1word!",
+      };
+
       response = await request(app)
         .post("/authusers")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
-        .send({
-          email: "test@gmail.com",
-          password: "Pass1word!",
-          passwordConfirmation: "Pass1word!",
-        })
+        .send(addFormForTestAuthuser)
         .expect(httpStatus.CREATED);
 
       const testAuthuser = response.body.data.authuser;
 
-      const addForm = {
+      const addFormForTestUser = {
         email: testAuthuser.email,
         role: "user",
         name: "Mr.Test",
@@ -89,7 +92,7 @@ describe("PATH /users", () => {
         .post(`/users/${testAuthuser.id}`)
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
-        .send(addForm);
+        .send(addFormForTestUser);
 
       const testUser = response.body.data.user;
 
@@ -351,6 +354,56 @@ describe("PATH /users", () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.users.length).toBe(2); // 2 admin users
+
+      // delete test authuser but not delete corresponded user;
+      // re-add the test authuser having different id;
+      // add the corresponded user;
+      // now check whether there are two users with the same email
+
+      await request(app)
+        .delete(`/authusers/${testAuthuser.id}`)
+        .set("User-Agent", userAgent)
+        .set("Authorization", `Bearer ${adminAccessToken}`)
+        .send()
+        .expect(httpStatus.OK);
+
+      response = await request(app)
+        .post("/authusers")
+        .set("User-Agent", userAgent)
+        .set("Authorization", `Bearer ${adminAccessToken}`)
+        .send(addFormForTestAuthuser)
+        .expect(httpStatus.CREATED);
+
+      const testAuthuser2 = response.body.data.authuser;
+
+      const addFormForTestUser2 = {
+        email: addFormForTestAuthuser.email,
+        role: "user",
+        name: "Mr.Test 2",
+      };
+
+      response = await request(app)
+        .post(`/users/${testAuthuser2.id}`)
+        .set("User-Agent", userAgent)
+        .set("Authorization", `Bearer ${adminAccessToken}`)
+        .send(addFormForTestUser2);
+
+      response = await request(app)
+        .get("/users")
+        .set("User-Agent", userAgent)
+        .set("Authorization", `Bearer ${adminAccessToken}`)
+        .query({ email: addFormForTestAuthuser.email })
+        .send()
+        .expect(httpStatus.OK);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.users.length).toBe(2);
+      expect(response.body.data.users[0]["email"]).toBe(
+        addFormForTestAuthuser.email
+      );
+      expect(response.body.data.users[1]["email"]).toBe(
+        addFormForTestAuthuser.email
+      );
     });
   });
 
