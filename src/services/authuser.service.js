@@ -61,7 +61,11 @@ const addAuthUser = async (email, password) => {
 
     const authuser = await authuserDbService.addAuthUser(authuserDoc);
 
-    if (!authuser) throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
+    if (!authuser)
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "The database could not process the request"
+      );
 
     return authuser;
   } catch (error) {
@@ -118,10 +122,20 @@ const getAuthUsers = async (query) => {
 
     console.log(filter);
 
-    const sortingFields = ["email", "isEmailVerified", "isDisabled", "createdAt"];
+    const sortingFields = [
+      "email",
+      "isEmailVerified",
+      "isDisabled",
+      "createdAt",
+    ];
     const sort = composeSort(query, sortingFields);
 
-    return await paginaryService.paginary(query, filter, sort, authuserDbService.getAuthUsers);
+    return await paginaryService.paginary(
+      query,
+      filter,
+      sort,
+      authuserDbService.getAuthUsers
+    );
   } catch (error) {
     throw traceError(error, "AuthUserService : getAuthUsers");
   }
@@ -171,14 +185,22 @@ const toggleVerification = async (id) => {
  */
 const unlinkProvider = async (id, provider) => {
   try {
+    // throw new ApiError(httpStatus.BAD_REQUEST, `I can not do ${provider}`);
+
     const authuser = await getAuthUserById(id);
 
     if (!authuser.providers?.hasOwnProperty(provider)) {
-      throw new ApiError(httpStatus.BAD_REQUEST, "The auth provider is already unlinked");
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "The auth provider is already unlinked"
+      );
     }
 
     if (Object.keys(authuser.providers).length === 1) {
-      throw new ApiError(httpStatus.BAD_REQUEST, "There must be one auth provider at least");
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "There must be one auth provider at least"
+      );
     }
 
     const newAuthProviders = { ...authuser.providers };
@@ -192,7 +214,10 @@ const unlinkProvider = async (id, provider) => {
       updateBody.password = null;
     }
 
-    const authuserUpdated = await authuserDbService.updateAuthUser(authuser.id, updateBody);
+    const authuserUpdated = await authuserDbService.updateAuthUser(
+      authuser.id,
+      updateBody
+    );
 
     return authuserUpdated;
   } catch (error) {

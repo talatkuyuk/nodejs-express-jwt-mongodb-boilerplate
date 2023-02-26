@@ -20,11 +20,8 @@ async function start() {
 
     if (config.server === "https" || config.server === "both") {
       const port = process.env.PORT || config.porthttps;
-      const key = fs.readFileSync(
-        SSLdirectory + "server.decrypted.key",
-        "utf8"
-      );
-      const cert = fs.readFileSync(SSLdirectory + "server.crt", "utf8");
+      const key = fs.readFileSync(SSLdirectory + "localhost-key.pem", "utf8");
+      const cert = fs.readFileSync(SSLdirectory + "localhost.pem", "utf8");
       const credentials = { key, cert };
 
       httpsServer = https.createServer(credentials, app);
@@ -64,9 +61,7 @@ const exitHandler = async (code) => {
     });
 
     await mongodb.disconnect((result) => {
-      logger.info(
-        `exithandler: Mongodb connection is closed with ${result}.tk`
-      );
+      logger.info(`exithandler: Mongodb connection is closed with ${result}.tk`);
     });
 
     await redis.disconnect((result) => {

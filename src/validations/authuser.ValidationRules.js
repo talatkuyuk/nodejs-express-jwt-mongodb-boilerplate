@@ -11,7 +11,8 @@ const {
 ////////////////////////////////////////////////////////////////////////
 
 const once = (value) => {
-  if (typeof value === "object") throw new Error("The parameter can only appear once in the query string");
+  if (typeof value === "object")
+    throw new Error("The parameter can only appear once in the query string");
   return true;
 };
 
@@ -34,7 +35,12 @@ const getAuthUsers = [
     .withMessage("The query param 'isEmailVerified' must be boolean value")
     .optional(),
 
-  query("page").custom(once).trim().isNumeric().withMessage("The query param 'page' must be numeric value").optional(),
+  query("page")
+    .custom(once)
+    .trim()
+    .isNumeric()
+    .withMessage("The query param 'page' must be numeric value")
+    .optional(),
 
   query("size")
     .custom(once)
@@ -50,7 +56,9 @@ const getAuthUsers = [
     .custom(once)
     .trim()
     .matches(/^[a-zA-Z/./|\s]+$/i)
-    .withMessage("The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter")
+    .withMessage(
+      "The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter"
+    )
     .optional(),
 ];
 
