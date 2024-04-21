@@ -10,6 +10,7 @@ const authuserRoute = require("./authuser.route");
 const userRoute = require("./user.route");
 const joinedRoute = require("./joined.route");
 const docsRoute = require("./docs.route");
+const newslatterRoute = require("./newslatter.route");
 
 const mongodb = require("../core/mongodb");
 const redis = require("../core/redis");
@@ -137,5 +138,6 @@ router.use("/auth", authRoute);
 router.use("/authusers", authuserRoute);
 router.use("/users", userRoute);
 router.use("/joined", joinedRoute);
+router.use("/newslatter", newslatterRoute);
 
 module.exports = router;

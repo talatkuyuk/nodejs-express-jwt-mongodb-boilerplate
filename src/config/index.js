@@ -72,6 +72,11 @@ const envVarsSchema = Joi.object()
     RAISE_ERROR_WHEN_REDIS_DOWN: Joi.boolean()
       .description("set the behaviour of the app when redis is down")
       .default(false),
+    MAILCHIMP_SERVER_PREFIX: Joi.string().description(
+      "mailchimp server prefix"
+    ),
+    MAILCHIMP_APIKEY: Joi.string().description("mailchimp api key"),
+    MAILCHIMP_AUDIENCE_ID: Joi.string().description("mailchimp audience id"),
   })
   .unknown();
 
@@ -125,4 +130,7 @@ module.exports = {
   verifyEmailUrl: envVars.VERIFY_EMAIL_URL,
   verifySignupUrl: envVars.VERIFY_SIGNUP_URL,
   raiseErrorWhenRedisDown: envVars.RAISE_ERROR_WHEN_REDIS_DOWN,
+  mailchimp_server_prefix: envVars.MAILCHIMP_SERVER_PREFIX,
+  mailchimp_apikey: envVars.MAILCHIMP_APIKEY,
+  mailchimp_audience_id: envVars.MAILCHIMP_AUDIENCE_ID,
 };
