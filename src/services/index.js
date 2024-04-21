@@ -13,3 +13,5 @@ module.exports.joinedDbService = require("./joined.db.service");
 module.exports.authProviders = require("./authProviders");
 module.exports.paginaryService = require("./paginary.service");
 module.exports.redisService = require("./redis.service");
+
+module.exports.mailchimp = require("./mailchimp");
