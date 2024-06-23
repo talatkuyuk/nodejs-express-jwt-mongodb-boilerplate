@@ -13,6 +13,7 @@ const validate = (rules) => async (req, res, next) => {
       includeOptionals: false,
       onlyValidData: false,
     });
+
     console.log(bodyData);
 
     const validationErrors = validationResult(req);
@@ -24,9 +25,9 @@ const validate = (rules) => async (req, res, next) => {
     // convert errors object to errors object as structured below at the end of the file.
     validationErrors.array().map((err) => {
       // oneOf([check(...).exists(), ...]) --> param: "_error" (see at users validation)
-      if (err.param === "_error") err.param = "body";
+      if (err.path === "_error" || !err.path) err.path = "body";
 
-      const key = err.param || err.location;
+      const key = err.path || err.location;
       errors[key] = errors[key] ? [...errors[key], err.msg] : [err.msg];
     });
 

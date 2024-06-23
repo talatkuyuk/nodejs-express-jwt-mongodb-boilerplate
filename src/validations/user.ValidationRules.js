@@ -197,7 +197,11 @@ const updateUser = [
       check("gender").exists(),
       check("country").exists(),
     ],
-    "The request body should contain at least one of the name, gender, country"
+    {
+      errorType: "flat",
+      message:
+        "The request body should contain at least one of the name, gender, country",
+    }
   ),
 
   body()
