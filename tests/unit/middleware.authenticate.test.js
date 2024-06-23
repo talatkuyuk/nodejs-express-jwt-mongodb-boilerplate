@@ -47,7 +47,7 @@ describe("Auth Middleware", () => {
 
   describe("Request Header and Access Token Errors", () => {
     test("should throw ApiError with code 401, if Authorization Header is absent", async () => {
-      const requestHeader = null;
+      const requestHeader = undefined;
       const expectedError = new ApiError(
         httpStatus.UNAUTHORIZED,
         "No auth token"

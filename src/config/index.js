@@ -129,8 +129,8 @@ module.exports = {
   resetPasswordUrl: envVars.RESET_PASSWORD_URL,
   verifyEmailUrl: envVars.VERIFY_EMAIL_URL,
   verifySignupUrl: envVars.VERIFY_SIGNUP_URL,
-  raiseErrorWhenRedisDown: envVars.RAISE_ERROR_WHEN_REDIS_DOWN,
   mailchimp_server_prefix: envVars.MAILCHIMP_SERVER_PREFIX,
   mailchimp_apikey: envVars.MAILCHIMP_APIKEY,
   mailchimp_audience_id: envVars.MAILCHIMP_AUDIENCE_ID,
+  raiseErrorWhenRedisDown: envVars.RAISE_ERROR_WHEN_REDIS_DOWN,
 };

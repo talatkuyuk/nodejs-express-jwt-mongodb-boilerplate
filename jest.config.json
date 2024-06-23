@@ -4,5 +4,8 @@
   "verbose": true,
   "testTimeout": 50000,
   "restoreMocks": true,
-  "resetModules": true
+  "resetModules": true,
+  "moduleNameMapper": {
+    "^axios$": "axios/dist/node/axios.cjs"
+  }
 }

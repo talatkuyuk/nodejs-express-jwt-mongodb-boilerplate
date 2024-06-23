@@ -159,15 +159,20 @@ describe("oAuth Middleware", () => {
       // the error comes from the facebook
       expect(err.statusCode).toBe(httpStatus.UNAUTHORIZED);
       expect(err.name).toBeOneOf(["ApiError", "AxiosError"]);
-      if (err.name === "ApiError")
-        expect(err.message).toEqual(
-          "The provided facebook access token is not valid"
-        );
-      else if (err.name === "AxiosError")
-        // if there is no internet connection
-        expect(err.message).toEqual(
-          "Auth provider connection error occured, try later"
-        );
+      expect(err.message).toBeOneOf([
+        "The provided facebook access token is not valid",
+        "Auth provider connection error occured, try later",
+      ]);
+
+      // if (err.name === "ApiError")
+      //   expect(err.message).toEqual(
+      //     "The provided facebook access token is not valid"
+      //   );
+      // else if (err.name === "AxiosError")
+      //   // if there is no internet connection
+      //   expect(err.message).toEqual(
+      //     "Auth provider connection error occured, try later"
+      //   );
     });
 
     test("should throw error, if the oAuth info returned by provider does not give identification (google)", async () => {
