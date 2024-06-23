@@ -2,8 +2,8 @@ const path = require("path");
 const Joi = require("joi");
 
 require("dotenv-safe").config({
-  path: path.join(__dirname, "../../.env"), // defult, path: path.resolve(process.cwd(), '.env')
-  example: path.join(__dirname, "../../.env.example"), // default, example: path.resolve(process.cwd(), '.env.example')
+  path: path.resolve(process.cwd(), ".env"),
+  example: path.resolve(process.cwd(), ".env.example"),
 });
 
 // actually, above options are default, so you can use like below as well
