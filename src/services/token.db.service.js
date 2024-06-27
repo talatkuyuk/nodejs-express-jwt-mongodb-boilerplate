@@ -15,7 +15,7 @@ const { traceError } = require("../utils/errorUtils");
  */
 const addToken = async (tokenDoc) => {
   try {
-    tokenDoc.user = ObjectId(tokenDoc.user);
+    tokenDoc.user = ObjectId.createFromHexString(tokenDoc.user);
 
     const db = mongodb.getDatabase();
     const result = await db.collection("tokens").insertOne(tokenDoc);
@@ -45,11 +45,11 @@ const getToken = async (query) => {
     console.log("getToken: ", query);
 
     if (query.id) {
-      query = { ...query, _id: ObjectId(query.id) };
+      query = { ...query, _id: ObjectId.createFromHexString(query.id) };
       delete query.id;
     }
 
-    query.user && (query.user = ObjectId(query.user));
+    query.user && (query.user = ObjectId.createFromHexString(query.user));
 
     const db = mongodb.getDatabase();
     const result = await db.collection("tokens").findOne(query);
@@ -69,7 +69,7 @@ const getTokens = async (query) => {
   try {
     console.log("getTokens: ", query);
 
-    query.user && (query.user = ObjectId(query.user));
+    query.user && (query.user = ObjectId.createFromHexString(query.user));
 
     const db = mongodb.getDatabase();
     const tokens = await db
@@ -110,14 +110,16 @@ const updateToken = async (id, updateBody) => {
     const result = await db
       .collection("tokens")
       .findOneAndUpdate(
-        { _id: ObjectId(id) },
+        { _id: typeof id === "string" ? ObjectId.createFromHexString(id) : id },
         { $set: { ...updateBody } },
         { returnDocument: ReturnDocument.AFTER }
       );
 
-    console.log(`${result.ok} record is updated in tokens`);
+    if (!result) return;
 
-    return Token.fromDoc(result.value);
+    console.log(`${result._id} record is updated in tokens`);
+
+    return Token.fromDoc(result);
   } catch (error) {
     throw traceError(error, "TokenDbService : updateToken");
   }
@@ -133,9 +135,9 @@ const deleteToken = async (id) => {
     console.log("deleteToken: ", id);
 
     const db = mongodb.getDatabase();
-    const result = await db
-      .collection("tokens")
-      .deleteOne({ _id: ObjectId(id) });
+    const result = await db.collection("tokens").deleteOne({
+      _id: typeof id === "string" ? ObjectId.createFromHexString(id) : id,
+    });
 
     return {
       isDeleted: result.acknowledged,
@@ -155,7 +157,7 @@ const deleteTokens = async (query) => {
   try {
     console.log("deleteTokens: ", query);
 
-    query.user && (query.user = ObjectId(query.user));
+    query.user && (query.user = ObjectId.createFromHexString(query.user));
 
     const db = mongodb.getDatabase();
     const result = await db.collection("tokens").deleteMany(query);

@@ -8,7 +8,7 @@ const getAuthUserJoined = async (id) => {
   try {
     const pipeline = [
       {
-        $match: { _id: ObjectId(id) },
+        $match: { _id: ObjectId.createFromHexString(id) },
       },
       {
         $lookup: {

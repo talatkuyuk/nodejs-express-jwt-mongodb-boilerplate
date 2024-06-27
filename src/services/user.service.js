@@ -120,7 +120,7 @@ const getUsers = async (query) => {
 
 /**
  * Update user by id
- * @param {ObjectId} id
+ * @param {string | ObjectId} id
  * @param {Object} updateBody
  * @returns {Promise<User?>}
  */

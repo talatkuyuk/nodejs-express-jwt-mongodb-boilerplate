@@ -19,7 +19,9 @@ const addAuthUser = async (authuser) => {
     console.log(`1 record is created in authusers. (${result.insertedId})`);
 
     // get the inserted document back
-    const authuserInserted = await db.collection("authusers").findOne({ _id: result.insertedId });
+    const authuserInserted = await db
+      .collection("authusers")
+      .findOne({ _id: result.insertedId });
 
     return AuthUser.fromDoc(authuserInserted);
   } catch (error) {
@@ -35,7 +37,7 @@ const addAuthUser = async (authuser) => {
 const getAuthUser = async (query) => {
   try {
     if (query.id) {
-      query = { ...query, _id: ObjectId(query.id) };
+      query = { ...query, _id: ObjectId.createFromHexString(query.id) };
       delete query.id;
     }
 
@@ -143,27 +145,27 @@ const getAuthUsers = async (filter, sort, skip, limit) => {
 
 /**
  * Update authuser by id
- * @param {ObjectId} id
+ * @param {string | ObjectId} id
  * @param {Object} updateBody
  * @returns {Promise<AuthUser?>}
  */
 const updateAuthUser = async (id, updateBody) => {
   try {
-    console.log("updateAuthUser: ", updateBody);
+    console.log("updateAuthUser: ", id, updateBody);
 
     const db = mongodb.getDatabase();
     const result = await db
       .collection("authusers")
       .findOneAndUpdate(
-        { _id: ObjectId(id) },
+        { _id: typeof id === "string" ? ObjectId.createFromHexString(id) : id },
         { $set: { ...updateBody, updatedAt: Date.now() } },
         { returnDocument: ReturnDocument.AFTER }
       );
 
-    const count = result.value === null ? 0 : 1;
+    const count = result === null ? 0 : 1;
     console.log(`${count} record is updated in authusers. (${id})`);
 
-    return AuthUser.fromDoc(result.value);
+    return AuthUser.fromDoc(result);
   } catch (error) {
     throw traceError(error, "AuthUserDbService : updateAuthUser");
   }
@@ -171,7 +173,7 @@ const updateAuthUser = async (id, updateBody) => {
 
 /**
  * Delete authuser by id
- * @param {ObjectId} id
+ * @param {string | ObjectId} id
  * @returns {Promise<boolean>}
  */
 const deleteAuthUser = async (id) => {
@@ -179,19 +181,22 @@ const deleteAuthUser = async (id) => {
     console.log("deleteAuthUser: ", id);
 
     const db = mongodb.getDatabase();
-    const result = await db.collection("authusers").findOneAndDelete({ _id: ObjectId(id) });
+    const result = await db.collection("authusers").findOneAndDelete({
+      _id: typeof id === "string" ? ObjectId.createFromHexString(id) : id,
+    });
 
-    if (result.ok !== 1) return false;
-    if (result.value === null) return false;
+    if (!result) return false;
 
     console.log(`deleteAuthUser: The authuser ${id} is deleted in authusers`);
 
-    const authuser = AuthUser.fromDoc(result.value);
+    const authuser = AuthUser.fromDoc(result);
 
     const result2 = await toDeletedAuthUsers(authuser);
     if (result2 == null) {
       // do not raise error but log the issue
-      console.log(`deleteAuthUser: The authuser ${id} could not added into deletedauthusers`);
+      console.log(
+        `deleteAuthUser: The authuser ${id} could not added into deletedauthusers`
+      );
     }
 
     return true;
@@ -209,19 +214,25 @@ const toDeletedAuthUsers = async (deletedAuthUser) => {
   try {
     console.log("toDeletedAuthUsers: ", deletedAuthUser.id);
 
-    deletedAuthUser["_id"] = ObjectId(deletedAuthUser.id);
+    deletedAuthUser["_id"] = ObjectId.createFromHexString(deletedAuthUser.id);
     delete deletedAuthUser.id;
     deletedAuthUser["deletedAt"] = Date.now();
 
     const db = mongodb.getDatabase();
-    const result = await db.collection("deletedauthusers").insertOne(deletedAuthUser);
+    const result = await db
+      .collection("deletedauthusers")
+      .insertOne(deletedAuthUser);
 
     if (!result.acknowledged) return null;
 
-    console.log(`1 record is created in deletedauthusers. ${result.insertedId}`);
+    console.log(
+      `1 record is created in deletedauthusers. ${result.insertedId}`
+    );
 
     // get the inserted document back
-    const deletedAuthuserInserted = await db.collection("deletedauthusers").findOne({ _id: result.insertedId });
+    const deletedAuthuserInserted = await db
+      .collection("deletedauthusers")
+      .findOne({ _id: result.insertedId });
 
     return deletedAuthuserInserted;
   } catch (error) {
@@ -239,7 +250,7 @@ const getDeletedAuthUser = async (query) => {
     console.log("getDeletedAuthUser: ", query);
 
     if (query.id) {
-      query = { ...query, _id: ObjectId(query.id) };
+      query = { ...query, _id: ObjectId.createFromHexString(query.id) };
       delete query.id;
     }
 
