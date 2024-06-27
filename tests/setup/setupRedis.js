@@ -6,9 +6,12 @@ const setupRedis = () => {
   });
 
   afterAll(async () => {
-    await redis.disconnect((result) => {
-      console.log(`setupRedis: Redis client quit with ${result}`);
-    });
+    const client = redis.getRedisClient();
+
+    if (client.isOpen) {
+      await client.flushAll();
+      await client.disconnect();
+    }
   });
 };
 

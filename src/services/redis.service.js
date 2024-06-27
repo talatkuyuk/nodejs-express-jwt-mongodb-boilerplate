@@ -16,11 +16,11 @@ const put_into_blacklist = async (box, put) => {
   try {
     const redisClient = getRedisClient();
 
-    if (redisClient) {
-      // setex(key, timeout, value); returns "OK" or throw an error if timeout is not number of seconds
+    if (redisClient.isOpen) {
+      // setEx(key, timeout, value); returns "OK" or throw an error if timeout is not number of seconds
 
       if (box === "jti") {
-        var result = await redisClient.setex(
+        var result = await redisClient.setEx(
           `blacklist_${put}`,
           config.jwt.accessExpirationMinutes * 60,
           "value"
@@ -29,18 +29,18 @@ const put_into_blacklist = async (box, put) => {
 
       if (box === "token") {
         // some authproviders' tokens have long life up to 60days (see facebook access token)
-        var result = await redisClient.setex(
+        var result = await redisClient.setEx(
           `blacklist_${put.token}`,
           put.expiresIn,
           "value"
         );
       }
 
-      logger.info(`Redis Service [setex]: ${result} for ${box} ${put}`);
+      logger.info(`Redis Service [setEx]: ${result} for ${box} ${put}`);
 
       return result === "OK";
     } else {
-      logger.warn("Redis Client is down at the moment of a setex operation");
+      logger.warn("Redis Client is down at the moment of a setEx operation");
 
       if (config.raiseErrorWhenRedisDown)
         throw new ApiError(
@@ -63,7 +63,7 @@ const check_in_blacklist = async (check) => {
   try {
     const redisClient = getRedisClient();
 
-    if (redisClient) {
+    if (redisClient.isOpen) {
       // get(key); returns value as a string or returns null if the key does not exist
       const result = await redisClient.get(`blacklist_${check}`);
 
