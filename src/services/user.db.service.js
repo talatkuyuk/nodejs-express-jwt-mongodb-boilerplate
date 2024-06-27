@@ -14,7 +14,7 @@ const addUser = async (id, user) => {
   try {
     const db = mongodb.getDatabase();
     const result = await db.collection("users").insertOne({
-      _id: ObjectId(id),
+      _id: ObjectId.createFromHexString(id),
       ...user,
     });
 
@@ -41,7 +41,7 @@ const addUser = async (id, user) => {
 const getUser = async (query) => {
   try {
     if (query.id) {
-      query = { ...query, _id: ObjectId(query.id) };
+      query = { ...query, _id: ObjectId.createFromHexString(query.id) };
       delete query.id;
     }
 
@@ -153,27 +153,27 @@ const getUsers = async (filter, sort, skip, limit) => {
 
 /**
  * Update user by id
- * @param {ObjectId} id
+ * @param {string | ObjectId} id
  * @param {Object} updateBody
  * @returns {Promise<User?>}
  */
 const updateUser = async (id, updateBody) => {
   try {
-    console.log("updateUser: ", updateBody);
+    console.log("updateUser: ", id, updateBody);
 
     const db = mongodb.getDatabase();
     const result = await db
       .collection("users")
       .findOneAndUpdate(
-        { _id: ObjectId(id) },
+        { _id: typeof id === "string" ? ObjectId.createFromHexString(id) : id },
         { $set: { ...updateBody, updatedAt: Date.now() } },
         { returnDocument: ReturnDocument.AFTER }
       );
 
-    const count = result.value == null ? 0 : 1;
+    const count = result == null ? 0 : 1;
     console.log(`${count} record is updated in users`);
 
-    return User.fromDoc(result.value);
+    return User.fromDoc(result);
   } catch (error) {
     throw traceError(error, "UserDbService : updateUser");
   }
@@ -181,7 +181,7 @@ const updateUser = async (id, updateBody) => {
 
 /**
  * Delete user by id
- * @param {ObjectId} id
+ * @param {string | ObjectId} id
  * @returns {Promise<boolean>}
  */
 const deleteUser = async (id) => {
@@ -189,16 +189,15 @@ const deleteUser = async (id) => {
     console.log("deleteUser: ", id);
 
     const db = mongodb.getDatabase();
-    const result = await db
-      .collection("users")
-      .findOneAndDelete({ _id: ObjectId(id) });
+    const result = await db.collection("users").findOneAndDelete({
+      _id: typeof id === "string" ? ObjectId.createFromHexString(id) : id,
+    });
 
-    if (result.ok !== 1) return false;
-    if (result.value === null) return false;
+    if (!result) return false;
 
     console.log(`deleteUser: The user ${id} is deleted in users`);
 
-    const user = User.fromDoc(result.value);
+    const user = User.fromDoc(result);
 
     const result2 = await toDeletedUsers(user);
     if (result2 == null) {
@@ -223,7 +222,7 @@ const toDeletedUsers = async (deletedUser) => {
   try {
     console.log("toDeletedAuthUsers: ", deletedUser.id);
 
-    deletedUser["_id"] = ObjectId(deletedUser.id);
+    deletedUser["_id"] = ObjectId.createFromHexString(deletedUser.id);
     delete deletedUser.id;
     deletedUser["deletedAt"] = Date.now();
 
@@ -255,7 +254,7 @@ const getDeletedUser = async (query) => {
     console.log("getDeletedUser: ", query);
 
     if (query.id) {
-      query = { ...query, _id: ObjectId(query.id) };
+      query = { ...query, _id: ObjectId.createFromHexString(query.id) };
       delete query.id;
     }
 

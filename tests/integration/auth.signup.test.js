@@ -176,7 +176,7 @@ describe("POST /auth/signup", () => {
         success: true,
         data: {
           authuser: {
-            id: expect.stringMatching(/^[0-9a-fA-F]{24}$/), // valid mongodb ObjectID: 24-size hex value
+            id: expect.stringMatching(/^[0-9a-fA-F]{24}$/), // valid mongodb ObjectId: 24-size hex value
             email: google_email,
             isEmailVerified: true,
             isDisabled: false,
@@ -234,7 +234,7 @@ describe("POST /auth/signup", () => {
         success: true,
         data: {
           authuser: {
-            id: expect.stringMatching(/^[0-9a-fA-F]{24}$/), // valid mongodb ObjectID: 24-size hex value
+            id: expect.stringMatching(/^[0-9a-fA-F]{24}$/), // valid mongodb ObjectId: 24-size hex value
             email: registerform.email,
             isEmailVerified: false, // the user needs to verify his email
             isDisabled: false,
