@@ -4,30 +4,39 @@ const config = require("../config");
 const logger = require("../core/logger");
 const ApiError = require("../utils/ApiError");
 
-// Throw ApiError for the routes that are not defined
-const notFound = (req, res, next) => next(new ApiError(httpStatus.NOT_FOUND, "Not found"));
+/**
+ * Throw ApiError for the routes that are not defined
+ * @type {import('express').RequestHandler}
+ */
+const notFound = (_req, _res, next) => next(new ApiError(httpStatus.NOT_FOUND, "Not found"));
 
-// Convert errors to ApiError if it is not
-const converter = (err, req, res, next) => {
+/**
+ * Convert errors to ApiError if it is not
+ * @type {import('express').ErrorRequestHandler}
+ */
+const converter = (err, _req, _res, next) => {
   if (err instanceof ApiError) next(err);
 
   let convertedError;
 
+  !err.errorPath && (err.errorPath = "Catched in error middleware");
+
   if (err instanceof MongoError) {
     !err.message && (err.message = "Database error in MongoDB");
-    !err.errorPath && (err.errorPath = "Catched in error middleware");
     convertedError = new ApiError(httpStatus.BAD_REQUEST, err, true);
   } else {
     !err.message && (err.message = "Internal server error");
-    !err.errorPath && (err.errorPath = "Catched in error middleware");
     convertedError = new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err, false);
   }
 
   next(convertedError);
 };
 
-// Prepare the response having the error
-const handler = (err, req, res, next) => {
+/**
+ * Prepare the response having the error
+ * @type {import('express').ErrorRequestHandler}
+ */
+const handler = (err, _req, res, _next) => {
   let { statusCode, name, message, isOperational, errors, errorPath, stack } = err;
 
   // morgan handler uses the res.locals.error to tokenize

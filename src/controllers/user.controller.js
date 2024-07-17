@@ -8,24 +8,33 @@ const { userService } = require("../services");
 
 const success = { success: true };
 
-const addUser = asyncHandler(async (req, res) => {
-  try {
-    const addBody = req.body;
-    const id = req.params.id;
+const addUser = asyncHandler(
+  /**
+   * @typedef {import("../services/user.service").AddUserBody} AddUserBody
+   *
+   * @param {import('express').Request<{id: string}, any, AddUserBody, any>} req
+   * @param {import('express').Response} res
+   * @returns {Promise<void>}
+   */
+  async (req, res) => {
+    try {
+      const addBody = req.body;
+      const id = req.params.id;
 
-    const user = await userService.addUser(id, addBody);
+      const user = await userService.addUser(id, addBody);
 
-    res.location(`${req.protocol}://${req.get("host")}/users/${user.id}`);
-    res.status(httpStatus.CREATED).send({
-      success: true,
-      data: {
-        user: user.filter(),
-      },
-    });
-  } catch (error) {
-    throw traceError(error, "UserController : addUser");
-  }
-});
+      res.location(`${req.protocol}://${req.get("host")}/users/${user.id}`);
+      res.status(httpStatus.CREATED).send({
+        success: true,
+        data: {
+          user: user.filter(),
+        },
+      });
+    } catch (error) {
+      throw traceError(error, "UserController : addUser");
+    }
+  },
+);
 
 const getUser = asyncHandler(async (req, res) => {
   try {
@@ -48,51 +57,87 @@ const getUser = asyncHandler(async (req, res) => {
   }
 });
 
-const getUsers = asyncHandler(async (req, res) => {
-  try {
-    const query = req.query;
+/**
+ * Controller to get users.
+ */
+const getUsers = asyncHandler(
+  /**
+   * @typedef {import("../services/user.service").UserQuery} UserQuery
+   *
+   * @param {import('express').Request<{}, any, any, UserQuery>} req
+   * @param {import('express').Response} res
+   * @returns {Promise<void>}
+   */
+  async (req, res) => {
+    try {
+      const query = req.query;
 
-    const result = await userService.getUsers(query);
+      const result = await userService.getUsers(query);
 
-    res.status(httpStatus.OK).send({
-      success: true,
-      data: result,
-    });
-  } catch (error) {
-    throw traceError(error, "UserController : getUsers");
-  }
-});
+      res.status(httpStatus.OK).send({
+        success: true,
+        data: {
+          users: result.users.map((a) => a.filter()),
+          pagination: result.pagination,
+          totalCount: result.totalCount,
+        },
+      });
+    } catch (error) {
+      throw traceError(error, "UserController : getUsers");
+    }
+  },
+);
 
-const updateUser = asyncHandler(async (req, res) => {
-  try {
-    const id = req.params.id;
-    const updateBody = req.body;
+const updateUser = asyncHandler(
+  /**
+   * @typedef {import("../services/user.service").UpdateUserBody} UpdateUserBody
+   *
+   * @param {import('express').Request<{id: string}, any, UpdateUserBody, any>} req
+   * @param {import('express').Response} res
+   * @returns {Promise<void>}
+   */
+  async (req, res) => {
+    try {
+      const id = req.params.id;
+      const updateBody = req.body;
 
-    const user = await userService.updateUser(id, updateBody);
+      const user = await userService.updateUser(id, updateBody);
 
-    res.status(httpStatus.OK).send({
-      success: true,
-      data: {
-        user: user.filter(),
-      },
-    });
-  } catch (error) {
-    throw traceError(error, "UserController : updateUser");
-  }
-});
+      res.status(httpStatus.OK).send({
+        success: true,
+        data: {
+          user: user.filter(),
+        },
+      });
+    } catch (error) {
+      throw traceError(error, "UserController : updateUser");
+    }
+  },
+);
 
-const changeRole = asyncHandler(async (req, res) => {
-  try {
-    const id = req.params.id;
-    const role = req.body.role;
+const changeRole = asyncHandler(
+  /**
+   * @typedef {Object} ChangeRoleBody
+   * @property {"user"|"admin"} role
+   * @property {string} password
+   *
+   * @param {import('express').Request<{id: string}, any, ChangeRoleBody, any>} req
+   * @param {import('express').Response} res
+   * @returns {Promise<void>}
+   */
+  async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { role } = req.body;
 
-    await userService.updateUser(id, { role });
+      await userService.updateUser(id, { role });
 
-    res.status(httpStatus.OK).send(success);
-  } catch (error) {
-    throw traceError(error, "UserController : changeRole");
-  }
-});
+      res.status(httpStatus.OK).send(success);
+    } catch (error) {
+      throw traceError(error, "UserController : changeRole");
+    }
+  },
+);
 
 const deleteUser = asyncHandler(async (req, res) => {
   try {

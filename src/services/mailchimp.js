@@ -10,54 +10,66 @@ mailchimp.setConfig({
 });
 
 /**
- * Check the key and return whether it is in Redis cache or not
+ * Subscribe to Mailchimp
  * @param {string} email
- * @param {string?} name
+ * @param {string} name
  * @returns {Promise<void>}
  */
 const subscribe = async (email, name) => {
   try {
-    await mailchimp.lists.addListMember(config.mailchimp_audience_id, {
+    const response = await mailchimp.lists.addListMember(config.mailchimp_audience_id, {
       email_address: email,
       status: "pending",
       merge_fields: {
         NAME: name,
       },
     });
-  } catch (error) {
-    const parsedError = JSON.parse(error.response.error.text);
 
-    let message;
+    if ("detail" in response) {
+      let message;
 
-    switch (parsedError.title) {
-      case "Invalid Resource":
-        message = "email is invalid";
-        break;
+      switch (response.title) {
+        case "Invalid Resource":
+          message = "email is invalid";
+          break;
 
-      case "Member Exists":
-        message = "email is already subscribed";
-        break;
+        case "Member Exists":
+          message = "email is already subscribed";
+          break;
 
-      default:
-        message = "email subscription is failed";
-        break;
+        default:
+          message = "email subscription is failed";
+          break;
+      }
+
+      throw new ApiError(response.status, message);
     }
+  } catch (error) {
+    // const parsedError = JSON.parse(error.response.error.text);
 
-    const mailchimpError = new ApiError(parsedError.status, message);
-    throw traceError(mailchimpError, "Mailchimp : subscribe");
+    throw traceError(error, "Mailchimp : subscribe");
   }
 };
 
-const unsubscribe = async (email, name) => {
-  // TODO
+/**
+ * Unsubscribe from Mailchimp
+ * @param {string} email
+ * @returns {Promise<void>}
+ */
+const unsubscribe = async (email) => {
+  const response = await mailchimp.lists.deleteListMember(config.mailchimp_audience_id, email);
+
+  if ("detail" in response) {
+    throw new ApiError(response.status, response.detail);
+  }
 };
 
-const getAudience = async (email, name) => {
-  // TODO
-};
+// const getAudience = async (email, name) => {
+//   // TODO
+// };
 
 module.exports = {
   subscribe,
   unsubscribe,
-  getAudience,
+  // getAudience,
 };

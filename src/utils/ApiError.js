@@ -1,45 +1,73 @@
-class ApiError extends Error {
-  constructor(statusCode, error, isOperational = true, errors = null) {
-    if (!statusCode || !error) throw Error("bad ApiError argument");
+const axios = require("axios").default;
 
-    // ApiError accepts any Error instance as the paramater error.
-    if (error instanceof Error) {
-      super(error.message);
-      this.name =
-        error.name === Error.prototype.name
-          ? this.constructor.name
-          : error.name;
+/**
+ * Class representing an ApiError.
+ * @extends Error
+ */
+class ApiError extends Error {
+  /**
+   * @param {number} statusCode
+   * @param {Error | string | Object | unknown} error
+   * @param {boolean} [isOperational = true]
+   * @param {Object.<string, string[]>} [errors]
+   */
+  constructor(statusCode, error, isOperational = true, errors) {
+    if (!statusCode) throw new Error("bad ApiError argument (missing statusCode)");
+    if (!error) throw new Error("bad ApiError argument (missing error)");
+
+    if (error instanceof ApiError) {
+      throw new Error("bad ApiError argument (error can't be ApiError)");
     }
 
     // ApiError accepts string "error message" or "XxxError: error message" as the paramater error.
-    else if (typeof error === "string") {
+    if (typeof error === "string") {
       if (error.includes(":")) {
-        const [name, message] = error.split(":");
-        super(message.trim());
-        this.name = name.trim();
+        const [name, message] = error.split(":").map((p) => p.trim());
+        super(message);
+        this.name = name;
       } else {
         super(error.trim());
         this.name = this.constructor.name;
       }
     }
 
-    // if ApiError may receive an error like object
+    // if ApiError receive an error like object
     else if (typeof error === "object") {
-      super(error.message ?? "no specific error message");
-      this.name = error.isAxiosError
-        ? "AxiosError"
-        : error.name ?? this.constructor.name;
+      if (axios.isAxiosError(error)) {
+        super(error.message);
+        this.name = "AxiosError";
+      }
+      // ApiError accepts any Error instance as the paramater error.
+      else if (error instanceof Error) {
+        super(error.message);
+        this.name = error.name === Error.prototype.name ? this.constructor.name : error.name;
+      } else if (error.hasOwnProperty("message") && error.hasOwnProperty("name")) {
+        // @ts-ignore
+        super(error.message);
+        // @ts-ignore
+        this.name = error.name ?? this.constructor.name;
+      } else {
+        super("no specific error message");
+        this.name = "UnknownError";
+      }
     }
 
     // if received wrong argument type, throw an error
     else {
-      throw Error("bad ApiError argument");
+      throw new Error("bad ApiError argument (error is unknown)");
     }
 
-    this.statusCode = statusCode;
-    this.isOperational = isOperational;
-    this.errors = errors;
+    /** @type {string|null} */
     this.errorPath = null;
+
+    /** @type {number} */
+    this.statusCode = statusCode;
+
+    /** @type {boolean} */
+    this.isOperational = isOperational;
+
+    /** @type {Object.<string, string[]>|undefined} */
+    this.errors = errors;
 
     Error.captureStackTrace(this, this.constructor);
   }

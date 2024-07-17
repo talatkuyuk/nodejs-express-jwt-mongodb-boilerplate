@@ -5,7 +5,6 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
 const app = require("../../src/core/express");
-const config = require("../../src/config");
 
 const {
   authuserDbService,
@@ -39,21 +38,40 @@ describe("POST /auth/refresh-tokens", () => {
 
   describe("Failed Refresh Token Rotation", () => {
     const userAgent = "from-jest-test";
-    let accessToken, refreshToken, authuserId;
-    let refreshTokenId, refreshTokenFamily;
+
+    /** @type {string} */
+    let accessToken;
+
+    /** @type {string} */
+    let refreshToken;
+
+    /** @type {string} */
+    let authuserId;
+
+    /** @type {string} */
+    let refreshTokenId;
+
+    /** @type {string} */
+    let refreshTokenFamily;
 
     beforeEach(async () => {
-      const { authuser, tokens } = await TestUtil.createAuthUser({
+      const { authuser, tokens } = await TestUtil.createAuthUser(userAgent, {
         email: "talat@google.com",
         password: "Pass1word!",
-        userAgent,
       });
 
       authuserId = authuser.id;
       accessToken = tokens.access.token;
       refreshToken = tokens.refresh.token;
-      refreshTokenId = tokens.refresh.id;
-      refreshTokenFamily = tokens.refresh.family;
+
+      const refreshTokenInstance = await tokenDbService.getToken({ token: refreshToken });
+
+      if (!refreshTokenInstance) {
+        throw new Error("Unexpected fail in db operation while getting a token");
+      }
+
+      refreshTokenId = refreshTokenInstance.id;
+      refreshTokenFamily = refreshTokenInstance.family;
     });
 
     test("should return 401 if refresh token is not in the db", async () => {
@@ -64,9 +82,7 @@ describe("POST /auth/refresh-tokens", () => {
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
-      expect(response.body.error.message).toEqual(
-        "The refresh token is not valid"
-      );
+      expect(response.body.error.message).toEqual("The refresh token is not valid");
     });
 
     test("should return 401 and disable family if refresh token is blacklisted (first time violation)", async () => {
@@ -79,7 +95,7 @@ describe("POST /auth/refresh-tokens", () => {
         token: testData.REFRESH_TOKEN_VALID,
         user: authuserId,
         type: tokenTypes.REFRESH,
-        expires: "no-matter-for-the-test",
+        expires: new Date(new Date().getTime() + 10 * 60000), // 10 mins later
         jti: "i-am-supposed-to-be-blacklisted",
         family: refreshTokenFamily,
         blacklisted: false,
@@ -89,7 +105,7 @@ describe("POST /auth/refresh-tokens", () => {
         token: testData.REFRESH_TOKEN_EXPIRED,
         user: authuserId,
         type: tokenTypes.REFRESH,
-        expires: "no-matter-for-the-test",
+        expires: new Date(new Date().getTime() + 10 * 60000), // 10 mins later
         jti: "i-am-supposed-to-be-blacklisted-too",
         family: refreshTokenFamily,
         blacklisted: false,
@@ -102,9 +118,7 @@ describe("POST /auth/refresh-tokens", () => {
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
-      expect(response.body.error.message).toEqual(
-        "The refresh token is blacklisted"
-      );
+      expect(response.body.error.message).toEqual("The refresh token is blacklisted");
 
       // check the whole refresh token's family are in db // up to now, 3 refresh tokens would be added above
       const data = await tokenDbService.getTokens({
@@ -117,14 +131,12 @@ describe("POST /auth/refresh-tokens", () => {
       expect(control).toBe(true);
 
       // check the first refresh token above is added into blacklist cache
-      const result1 = await redisService.check_in_blacklist(
-        "i-am-supposed-to-be-blacklisted"
-      );
+      const result1 = await redisService.check_in_blacklist("i-am-supposed-to-be-blacklisted");
       expect(result1).toBe(true);
 
       // check the second refresh token above is added into blacklist cache as well
       const result2 = await redisService.check_in_blacklist(
-        "i-am-supposed-to-be-blacklisted-too"
+        "i-am-supposed-to-be-blacklisted-too",
       );
       expect(result2).toBe(true);
     });
@@ -139,8 +151,7 @@ describe("POST /auth/refresh-tokens", () => {
         token: testData.REFRESH_TOKEN_VALID,
         user: authuserId,
         type: tokenTypes.REFRESH,
-        expires: "no-matter-for-the-test",
-        jti: "no-matter-for-the-test",
+        expires: new Date(new Date().getTime() + 10 * 60000), // 10 mins later
         family: refreshTokenFamily,
         blacklisted: true,
       });
@@ -149,8 +160,7 @@ describe("POST /auth/refresh-tokens", () => {
         token: testData.REFRESH_TOKEN_EXPIRED,
         user: authuserId,
         type: tokenTypes.REFRESH,
-        expires: "no-matter-for-the-test",
-        jti: "no-matter-for-the-test",
+        expires: new Date(new Date().getTime() + 10 * 60000), // 10 mins later
         family: refreshTokenFamily,
         blacklisted: true,
       });
@@ -162,9 +172,7 @@ describe("POST /auth/refresh-tokens", () => {
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
-      expect(response.body.error.message).toEqual(
-        "The refresh token is blacklisted"
-      );
+      expect(response.body.error.message).toEqual("The refresh token is blacklisted");
 
       // check the whole refresh token's family are removed from db // up to now, 3 refresh tokens would be added above
       const data = await tokenDbService.getTokens({
@@ -184,14 +192,14 @@ describe("POST /auth/refresh-tokens", () => {
       });
 
       // produce new expired refresh token for the same authuser
-      const { jti } = jwt.decode(accessToken, config.jwt.secret);
+      const payload = jwt.decode(accessToken, { json: true });
       refreshToken = tokenService.generateToken(
         authuserId,
         moment().add(1, "milliseconds"),
         tokenTypes.REFRESH,
-        jti,
+        payload?.jti,
         userAgent,
-        0
+        0,
       );
 
       // put the expired refresh token into db
@@ -199,10 +207,8 @@ describe("POST /auth/refresh-tokens", () => {
         token: refreshToken,
         user: authuserId,
         type: tokenTypes.REFRESH,
-        expires: "no-matter-for-the-test",
-        jti: "no-matter-for-the-test",
+        expires: new Date(new Date().getTime() + 10 * 60000), // 10 mins later
         family: "i-am-supposed-to-be-deleted",
-        blacklisted: false,
       });
 
       const response = await request(app)
@@ -213,7 +219,7 @@ describe("POST /auth/refresh-tokens", () => {
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
       expect(response.body.error.message).toEqual(
-        "The refresh token is expired, you have to re-login"
+        "The refresh token is expired, you have to re-login",
       );
 
       // check the whole refresh token's family are removed from db
@@ -233,28 +239,32 @@ describe("POST /auth/refresh-tokens", () => {
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
       expect(response.body.error.message).toEqual(
-        "Unauthorized usage of refresh token has been detected"
+        "Unauthorized usage of refresh token has been detected",
       );
 
       // no need to check family of the refresh token is removed or blacklisted here since this control is handled in the above tests
       // (means that disableFamilyRefreshToken in Token Service is tested, it is fine.)
 
       // check the authuser's access token is added into blacklist cache
-      const { jti } = jwt.decode(accessToken, config.jwt.secret);
-      const result = await redisService.check_in_blacklist(jti);
+      const payload = jwt.decode(accessToken, { json: true });
+      const result = await redisService.check_in_blacklist(payload?.jti);
       expect(result).toBe(true);
     });
   });
 
   describe("Failed refresh process after Refresh Token JWT Verification", () => {
     const userAgent = "from-jest-test";
-    let refreshToken, authuserId;
+
+    /** @type {string} */
+    let authuserId;
+
+    /** @type {string} */
+    let refreshToken;
 
     beforeEach(async () => {
-      const { authuser } = await TestUtil.createAuthUser({
+      const { authuser } = await TestUtil.createAuthUser(userAgent, {
         email: "talat@google.com",
         password: "Pass1word!",
-        userAgent,
       });
 
       authuserId = authuser.id;
@@ -267,7 +277,7 @@ describe("POST /auth/refresh-tokens", () => {
         tokenTypes.REFRESH,
         jti,
         userAgent,
-        0
+        0,
       );
 
       // save that refresh token into db
@@ -275,10 +285,7 @@ describe("POST /auth/refresh-tokens", () => {
         token: refreshToken,
         user: authuserId,
         type: tokenTypes.REFRESH,
-        expires: "no-matter-for-the-test",
-        jti: "no-matter-for-the-test",
-        family: "no-matter-for-the-test",
-        blacklisted: false,
+        expires: new Date(new Date().getTime() + 10 * 60000), // 10 mins later
       });
     });
 
@@ -291,7 +298,7 @@ describe("POST /auth/refresh-tokens", () => {
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
       expect(response.body.error.message).toEqual(
-        "Your browser/agent seems changed or updated, you have to re-login"
+        "Your browser/agent seems changed or updated, you have to re-login",
       );
     });
 
@@ -321,7 +328,7 @@ describe("POST /auth/refresh-tokens", () => {
       TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
       expect(response.body.error.name).toEqual("ApiError");
       expect(response.body.error.message).toEqual(
-        "You are disabled, call the system administrator"
+        "You are disabled, call the system administrator",
       );
     });
   });
@@ -330,10 +337,9 @@ describe("POST /auth/refresh-tokens", () => {
     const userAgent = "from-jest-test";
 
     test("should return status 201; and return valid tokens in json form", async () => {
-      const { authuser } = await TestUtil.createAuthUser({
+      const { authuser } = await TestUtil.createAuthUser(userAgent, {
         email: "talat@google.com",
         password: "Pass1word!",
-        userAgent,
       });
 
       // create for that authuser refreshtoken (not expired but "not valid before" is 0 in order not to be trapped)
@@ -344,7 +350,7 @@ describe("POST /auth/refresh-tokens", () => {
         tokenTypes.REFRESH,
         jti,
         userAgent,
-        0
+        0,
       );
 
       // save that refresh token into db
@@ -352,10 +358,7 @@ describe("POST /auth/refresh-tokens", () => {
         token: refreshToken,
         user: authuser.id,
         type: tokenTypes.REFRESH,
-        expires: "no-matter-for-the-test",
-        jti: "no-matter-for-the-test",
-        family: "no-matter-for-the-test",
-        blacklisted: false,
+        expires: new Date(new Date().getTime() + 10 * 60000), // 10 mins later
       });
 
       const response = await request(app)
@@ -364,9 +367,7 @@ describe("POST /auth/refresh-tokens", () => {
         .send({ refreshToken });
 
       expect(response.status).toBe(httpStatus.OK);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
       expect(response.body).toEqual({
         success: true,

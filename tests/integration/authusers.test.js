@@ -6,18 +6,42 @@ const app = require("../../src/core/express");
 
 const { authuserService, userService, authuserDbService } = require("../../src/services");
 
-const TestUtil = require("../testutils/TestUtil");
-
 const { setupTestDatabase } = require("../setup/setupTestDatabase");
 const { setupRedis } = require("../setup/setupRedis");
+
+const AuthUser = require("../../src/models/authuser.model");
+const TestUtil = require("../testutils/TestUtil");
 
 setupTestDatabase();
 setupRedis();
 
+/**
+ * @typedef {Object} AuthProviders
+ * @property {boolean} [emailpassword]
+ * @property {string} [google]
+ * @property {string} [facebook]
+ *
+ * @typedef {Object} AuthuserInResponse
+ * @property {string} id
+ * @property {string} email
+ * @property {boolean} isEmailVerified
+ * @property {boolean} isDisabled
+ * @property {AuthProviders} [providers]
+ * @property {number} createdAt
+ * @property {number|null} [updatedAt]
+ */
+
 describe("PATH /authusers", () => {
   const userAgent = "from-jest-test";
+
+  /** @type {Record<string, AuthuserInResponse>} */
   const localDb = {}; // reflects the database authusers collection
-  let adminAccessToken, adminAuthuserId;
+
+  /** @type {string} */
+  let adminAccessToken;
+
+  /** @type {string} */
+  let adminAuthuserId;
 
   beforeEach(async () => {
     // create an authuser
@@ -27,9 +51,12 @@ describe("PATH /authusers", () => {
       passwordConfirmation: "Pass1word!",
     });
 
+    expect(response.body.error).toBeUndefined();
+
     adminAccessToken = response.body.data.tokens.access.token;
     adminAuthuserId = response.body.data.authuser.id; // used in below test
 
+    /** @type {AuthuserInResponse} */
     const adminAuthuser = response.body.data.authuser;
 
     // add admin authusers to localDb
@@ -65,7 +92,15 @@ describe("PATH /authusers", () => {
 		*/
 
     test("success scenario", async () => {
-      let response, data, authuser;
+      let response;
+
+      /** @type {boolean} */
+      let check;
+
+      /** @type {AuthUser|null} */
+      let authuserInstance = null;
+
+      /** @type {AuthuserInResponse[]} */
       const authusers = []; // holds the static data of the 10 authusers to be created
 
       const addForm = {
@@ -81,6 +116,9 @@ describe("PATH /authusers", () => {
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send(addForm);
 
+      expect(response.body.error).toBeUndefined();
+
+      /** @type {AuthuserInResponse} */
       const testAuthuser = response.body.data.authuser;
 
       // check the testAuthuser created above
@@ -101,11 +139,20 @@ describe("PATH /authusers", () => {
       });
 
       // check the test authuser's password is hashed
-      const { password } = await authuserDbService.getAuthUser({
+      authuserInstance = await authuserDbService.getAuthUser({
         id: testAuthuser.id,
       });
-      data = await bcrypt.compare(addForm.password, password);
-      expect(data).toBeTruthy();
+
+      if (!authuserInstance) {
+        throw new Error("Unexpected fail in db operation while gettitng test authuser");
+      }
+
+      expect(authuserInstance.password).not.toBeNull();
+
+      if (authuserInstance.password) {
+        check = await bcrypt.compare(addForm.password, authuserInstance.password);
+        expect(check).toBeTruthy();
+      }
 
       // add test authuser to localDb
       localDb[testAuthuser.email] = testAuthuser;
@@ -122,14 +169,17 @@ describe("PATH /authusers", () => {
             passwordConfirmation: "Pass1word!",
           });
 
+        expect(response.body.error).toBeUndefined();
+
+        /** @type {AuthuserInResponse} */
         const authuser = response.body.data.authuser;
         authusers.push(authuser);
         localDb[authuser.email] = authuser;
       }
 
       // check random 8th authuser exists in db
-      data = await authuserService.isExist(localDb["user8@gmail.com"].id, "user8@gmail.com");
-      expect(data).toBeTruthy();
+      check = await authuserService.isExist(localDb["user8@gmail.com"].id, "user8@gmail.com");
+      expect(check).toBeTruthy();
 
       // get all authusers and check the count
       response = await request(app)
@@ -137,6 +187,8 @@ describe("PATH /authusers", () => {
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send();
+
+      expect(response.body.error).toBeUndefined();
 
       expect(response.status).toBe(httpStatus.OK);
       expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
@@ -147,38 +199,52 @@ describe("PATH /authusers", () => {
       // update even ones as disabled, toggleAbility
       for (let i = 1; i <= 10; i++) {
         if (i % 2 === 0) {
-          await request(app)
+          response = await request(app)
             .patch(`/authusers/${authusers[i - 1]["id"]}/toggle-ability`)
             .set("User-Agent", userAgent)
             .set("Authorization", `Bearer ${adminAccessToken}`)
             .send()
             .expect(httpStatus.OK);
 
+          expect(response.body.error).toBeUndefined();
+
           localDb[authusers[i - 1]["email"]].isDisabled = true;
 
-          const updatedAuthuser = await authuserDbService.getAuthUser({
+          const updatedAuthuserInstance = await authuserDbService.getAuthUser({
             id: authusers[i - 1]["id"],
           });
-          localDb[authusers[i - 1]["email"]].updatedAt = updatedAuthuser.updatedAt;
+
+          if (!updatedAuthuserInstance) {
+            throw new Error("Unexpected fail in db operation while gettitng updated authuser");
+          }
+
+          localDb[authusers[i - 1]["email"]].updatedAt = updatedAuthuserInstance.updatedAt;
         }
       }
 
       // update 5th and 10th as email verified, toggleVerification
       for (let i = 1; i <= 10; i++) {
         if (i % 5 === 0) {
-          await request(app)
+          response = await request(app)
             .patch(`/authusers/${authusers[i - 1]["id"]}/toggle-verification`)
             .set("User-Agent", userAgent)
             .set("Authorization", `Bearer ${adminAccessToken}`)
             .send()
             .expect(httpStatus.OK);
 
+          expect(response.body.error).toBeUndefined();
+
           localDb[authusers[i - 1]["email"]].isEmailVerified = true;
 
-          const updatedAuthuser = await authuserDbService.getAuthUser({
+          const updatedAuthuserInstance = await authuserDbService.getAuthUser({
             id: authusers[i - 1]["id"],
           });
-          localDb[authusers[i - 1]["email"]].updatedAt = updatedAuthuser.updatedAt;
+
+          if (!updatedAuthuserInstance) {
+            throw new Error("Unexpected fail in db operation while gettitng updated authuser");
+          }
+
+          localDb[authusers[i - 1]["email"]].updatedAt = updatedAuthuserInstance.updatedAt;
         }
       }
 
@@ -198,6 +264,8 @@ describe("PATH /authusers", () => {
         .send()
         .expect(httpStatus.OK);
 
+      expect(response.body.error).toBeUndefined();
+
       expect(response.body.data.authuser.providers).not.toHaveProperty("google");
       expect(response.body.data.authuser.providers).toHaveProperty("facebook");
       expect(response.body.data.authuser.providers).toHaveProperty("emailpassword");
@@ -209,6 +277,8 @@ describe("PATH /authusers", () => {
         .send()
         .expect(httpStatus.OK);
 
+      expect(response.body.error).toBeUndefined();
+
       expect(response.body.data.authuser.providers).not.toHaveProperty("google");
       expect(response.body.data.authuser.providers).not.toHaveProperty("emailpassword");
       expect(response.body.data.authuser.providers).toHaveProperty("facebook");
@@ -217,33 +287,35 @@ describe("PATH /authusers", () => {
       localDb[authusers[3]["email"]].providers = response.body.data.authuser.providers;
 
       // check the 4th authuser's password is null; because the emailpassword is unlinked
-      const { password: password2 } = await authuserDbService.getAuthUser({
+      authuserInstance = await authuserDbService.getAuthUser({
         id: response.body.data.authuser.id,
       });
 
-      expect(password2).toBeNull();
+      expect(authuserInstance?.password).toBeNull();
 
       // delete 3th, 6th and 9th
       for (let i = 1; i <= 10; i++) {
         if (i % 3 === 0) {
-          await request(app)
+          response = await request(app)
             .delete(`/authusers/${authusers[i - 1]["id"]}`)
             .set("User-Agent", userAgent)
             .set("Authorization", `Bearer ${adminAccessToken}`)
             .send()
             .expect(httpStatus.OK);
 
+          expect(response.body.error).toBeUndefined();
+
           delete localDb[authusers[i - 1]["email"]];
         }
       }
 
       // control the 3th, 6th and 9th authusers are in the deletedauthusers
-      authuser = await authuserService.getDeletedAuthUserById(authusers[8]["id"]);
-      expect(authuser).toBeDefined();
-      authuser = await authuserService.getDeletedAuthUserById(authusers[5]["id"]);
-      expect(authuser).toBeDefined();
-      authuser = await authuserService.getDeletedAuthUserById(authusers[2]["id"]);
-      expect(authuser.deletedAt).toEqual(expect.any(Number));
+      authuserInstance = await authuserService.getDeletedAuthUserById(authusers[8]["id"]);
+      expect(authuserInstance).toBeDefined();
+      authuserInstance = await authuserService.getDeletedAuthUserById(authusers[5]["id"]);
+      expect(authuserInstance).toBeDefined();
+      authuserInstance = await authuserService.getDeletedAuthUserById(authusers[2]["id"]);
+      expect(authuserInstance.deletedAt).toEqual(expect.any(Number));
 
       // get all authusers
       response = await request(app)
@@ -253,14 +325,24 @@ describe("PATH /authusers", () => {
         .send()
         .expect(httpStatus.OK);
 
+      expect(response.body.error).toBeUndefined();
+
       // check the last added one is the first authuser, the default sort is descending createdAt
       expect(response.body.success).toBe(true);
       expect(response.body.data.authusers.length).toBe(9);
       expect(response.body.data.authusers[0]["email"]).toBe("user10@gmail.com");
 
-      // check localDb is equal to db result
+      /**
+       * check localDb is equal to db result
+       * @param {AuthuserInResponse} a
+       * @param {AuthuserInResponse} b
+       * @returns
+       */
       const arraysort = (a, b) => a.createdAt - b.createdAt;
-      expect(response.body.data.authusers.sort(arraysort)).toEqual(Object.values(localDb).sort(arraysort));
+
+      expect(response.body.data.authusers.sort(arraysort)).toEqual(
+        Object.values(localDb).sort(arraysort),
+      );
 
       // check the pagination
       expect(response.body.data.totalCount).toBe(9); // 3 of the authusers are deleted
@@ -277,6 +359,8 @@ describe("PATH /authusers", () => {
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send();
+
+      expect(response.body.error).toBeUndefined();
 
       // check the authuser data
       expect(response.status).toBe(httpStatus.OK);
@@ -299,9 +383,11 @@ describe("PATH /authusers", () => {
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .query({ isDisabled: true, sort: "createdAt.asc" })
-        .send()
-        .expect(httpStatus.OK);
+        .send();
 
+      expect(response.body.error).toBeUndefined();
+
+      expect(response.status).toBe(httpStatus.OK);
       expect(response.body.success).toBe(true);
       expect(response.body.data.authusers.length).toBe(4);
       expect(response.body.data.authusers[0]["email"]).toBe("user2@gmail.com");
@@ -329,9 +415,11 @@ describe("PATH /authusers", () => {
           sort: "email",
           size: 2,
         })
-        .send()
-        .expect(httpStatus.OK);
+        .send();
 
+      expect(response.body.error).toBeUndefined();
+
+      expect(response.status).toBe(httpStatus.OK);
       expect(response.body.success).toBe(true);
       expect(response.body.data.authusers.length).toBe(2);
       expect(response.body.data.authusers[0]["email"]).toBe("admin@gmail.com");
@@ -358,9 +446,11 @@ describe("PATH /authusers", () => {
           size: 2,
           page: 2,
         })
-        .send()
-        .expect(httpStatus.OK);
+        .send();
 
+      expect(response.body.error).toBeUndefined();
+
+      expect(response.status).toBe(httpStatus.OK);
       expect(response.body.success).toBe(true);
       expect(response.body.data.authusers.length).toBe(2);
       expect(response.body.data.authusers[0]["email"]).toBe("user1@gmail.com");
@@ -387,15 +477,26 @@ describe("PATH /authusers", () => {
           passwordConfirmation: newPassword,
         });
 
+      expect(response.body.error).toBeUndefined();
+
       expect(response.status).toBe(httpStatus.OK);
       expect(response.body.success).toBe(true);
 
       // check the admin authuser's new password is hashed
-      const { password: hashedPassword } = await authuserDbService.getAuthUser({
+      authuserInstance = await authuserDbService.getAuthUser({
         id: adminAuthuserId,
       });
-      data = await bcrypt.compare(newPassword, hashedPassword);
-      expect(data).toBeTruthy();
+
+      if (!authuserInstance) {
+        throw new Error("Unexpected fail in db operation while gettitng test authuser");
+      }
+
+      expect(authuserInstance.password).not.toBeNull();
+
+      if (authuserInstance.password) {
+        check = await bcrypt.compare(newPassword, authuserInstance.password);
+        expect(check).toBeTruthy();
+      }
     });
   });
 

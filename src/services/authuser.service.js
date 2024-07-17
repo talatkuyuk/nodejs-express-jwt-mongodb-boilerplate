@@ -1,10 +1,10 @@
+/** @typedef {import('../models/authuser.model')} AuthUser */
+
 const httpStatus = require("http-status");
 const bcrypt = require("bcryptjs");
 
 const ApiError = require("../utils/ApiError");
 const { traceError } = require("../utils/errorUtils");
-const composeFilter = require("../utils/composeFilter");
-const composeSort = require("../utils/composeSort");
 const { AuthUser } = require("../models");
 const { authProvider } = require("../config/providers");
 
@@ -16,15 +16,14 @@ const authuserDbService = require("./authuser.db.service");
 
 /**
  * Check if the email is already taken
- * @param {String} email
- * @returns {Promise<Boolean>}
+ * @param {string} email
+ * @returns {Promise<boolean>}
  */
 const isEmailTaken = async function (email) {
   try {
     const authuser = await authuserDbService.getAuthUser({ email });
 
     return !!authuser && Boolean(authuser.password);
-    // return !!authuser;
   } catch (error) {
     throw traceError(error, "AuthUserService : isEmailTaken");
   }
@@ -32,9 +31,9 @@ const isEmailTaken = async function (email) {
 
 /**
  * Check if the authuser exists; and check the id and the email match
- * @param {String} id
- * @param {String} email
- * @returns {Promise<Boolean>}
+ * @param {string} id
+ * @param {string} email
+ * @returns {Promise<boolean>}
  */
 const isExist = async function (id, email) {
   try {
@@ -56,16 +55,18 @@ const isExist = async function (id, email) {
 const addAuthUser = async (email, password) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 8);
-    const authuserDoc = new AuthUser(email, hashedPassword);
-    authuserDoc.providers = { emailpassword: true };
 
-    const authuser = await authuserDbService.addAuthUser(authuserDoc);
+    const authuser = await authuserDbService.addAuthUser({
+      email,
+      password: hashedPassword,
+      isDisabled: false,
+      isEmailVerified: false,
+      providers: { emailpassword: true },
+    });
 
-    if (!authuser)
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "The database could not process the request"
-      );
+    if (!authuser) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
+    }
 
     return authuser;
   } catch (error) {
@@ -109,33 +110,56 @@ const getAuthUserByEmail = async (email) => {
 
 /**
  * Get AuthUsers in a paginary
- * @param {Object} query
- * @returns {Promise<Object>}
+ * @typedef {Object} AuthuserQuery
+ * @property {string} [email]
+ * @property {string} [isEmailVerified]
+ * @property {string} [isDisabled]
+ * @property {string} [createdAt]
+ * @property {string} page
+ * @property {string} size
+ * @property {string} sort
+ *
+ * @typedef {Object} AuthuserQueryResult
+ * @property {AuthUser[]} authusers
+ * @property {number} totalCount
+ * @property {import('./paginary.service').Pagination} pagination
+ *
+ * @param {AuthuserQuery} query
+ * @returns {Promise<AuthuserQueryResult>}
  */
 const getAuthUsers = async (query) => {
   try {
-    const fields = {
+    const filter = paginaryService.composeFilter(query, {
       stringFields: ["email", "createdAt"],
       booleanFields: ["isEmailVerified", "isDisabled"],
-    };
-    const filter = composeFilter(query, fields);
+    });
 
-    console.log(filter);
+    const sortingFields = ["email", "isEmailVerified", "isDisabled", "createdAt"];
+    const sort = paginaryService.composeSort(query.sort, sortingFields);
 
-    const sortingFields = [
-      "email",
-      "isEmailVerified",
-      "isDisabled",
-      "createdAt",
-    ];
-    const sort = composeSort(query, sortingFields);
+    const { page, skip, limit } = paginaryService.composePaginationFactors(
+      query.page,
+      query.size,
+    );
 
-    return await paginaryService.paginary(
-      query,
+    console.log({ filter, sort, page, skip, limit });
+
+    const { authusers, totalCount } = await authuserDbService.getAuthUsers(
       filter,
       sort,
-      authuserDbService.getAuthUsers
+      skip,
+      limit,
     );
+
+    console.log({ authusers, totalCount });
+
+    const pagination = paginaryService.composePagination(totalCount, page, limit);
+
+    return {
+      authusers,
+      totalCount,
+      pagination,
+    };
   } catch (error) {
     throw traceError(error, "AuthUserService : getAuthUsers");
   }
@@ -144,7 +168,7 @@ const getAuthUsers = async (query) => {
 /**
  * Enable & Disable AuthUser
  * @param {string} id
- * @returns {Promise}
+ * @returns {Promise<void>}
  */
 const toggleAbility = async (id) => {
   try {
@@ -162,7 +186,7 @@ const toggleAbility = async (id) => {
 /**
  * Toggle email verification status of an AuthUser
  * @param {string} id
- * @returns {Promise}
+ * @returns {Promise<void>}
  */
 const toggleVerification = async (id) => {
   try {
@@ -180,46 +204,38 @@ const toggleVerification = async (id) => {
 /**
  * Unlink an auth provider (called from an authorized route)
  * @param {string} id
- * @param {string} provider
+ * @param {import('./authProviders').AuthProvider} provider
  * @returns {Promise<AuthUser>}
  */
 const unlinkProvider = async (id, provider) => {
   try {
-    // throw new ApiError(httpStatus.BAD_REQUEST, `I can not do ${provider}`);
-
     const authuser = await getAuthUserById(id);
 
-    if (!authuser.providers?.hasOwnProperty(provider)) {
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "The auth provider is already unlinked"
-      );
-    }
+    if (authuser.providers) {
+      if (!authuser.providers.hasOwnProperty(provider)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "The auth provider is already unlinked");
+      }
 
-    if (Object.keys(authuser.providers).length === 1) {
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "There must be one auth provider at least"
-      );
+      if (Object.keys(authuser.providers).length === 1) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "There must be one auth provider at least");
+      }
+    } else {
+      throw new ApiError(httpStatus.BAD_REQUEST, "The auth provider is already unlinked");
     }
 
     const newAuthProviders = { ...authuser.providers };
     delete newAuthProviders[provider];
 
-    let updateBody = {
+    const updatedAuthuser = await authuserDbService.updateAuthUser(authuser.id, {
       providers: newAuthProviders,
-    };
+      ...(provider === authProvider.EMAILPASSWORD && { password: null }),
+    });
 
-    if (provider === authProvider.EMAILPASSWORD) {
-      updateBody.password = null;
+    if (!updatedAuthuser) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
     }
 
-    const authuserUpdated = await authuserDbService.updateAuthUser(
-      authuser.id,
-      updateBody
-    );
-
-    return authuserUpdated;
+    return updatedAuthuser;
   } catch (error) {
     throw traceError(error, "AuthUserService : unlinkProvider");
   }
@@ -228,9 +244,8 @@ const unlinkProvider = async (id, provider) => {
 /**
  * Change password
  * @param {string} id
- * @param {string} currentPassword
  * @param {string} newPassword
- * @returns {Promise}
+ * @returns {Promise<void>}
  */
 const changePassword = async (id, newPassword) => {
   try {
@@ -246,7 +261,7 @@ const changePassword = async (id, newPassword) => {
 /**
  * Delete AuthUser
  * @param {string} id
- * @returns {Promise}
+ * @returns {Promise<void>}
  */
 const deleteAuthUser = async (id) => {
   try {
@@ -263,7 +278,7 @@ const deleteAuthUser = async (id) => {
 /**
  * Get Deleted AuthUser by id
  * @param {string} id
- * @returns {Promise<AuthUser?>}
+ * @returns {Promise<AuthUser>}
  */
 const getDeletedAuthUserById = async (id) => {
   try {

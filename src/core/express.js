@@ -5,18 +5,23 @@ let crossdomain = require("helmet-crossdomain");
 let noCache = require("nocache");
 let cors = require("cors");
 const passport = require("passport");
-var xss = require("xss-clean");
+var { xss } = require("express-xss-sanitizer");
 const useragent = require("express-useragent");
-const mongoSanitize = require("express-mongo-sanitize");
+const expressMongoSanitize = require("express-mongo-sanitize");
 
 const routes = require("../routes");
 const config = require("../config");
 const morgan = require("./morgan");
 
+const { authLimiter, error } = require("../middlewares");
+
 const { jwtStrategy, googleStrategy, facebookStrategy } = require("./passport");
-const { error, authLimiter } = require("../middlewares");
 
 // *****************************************************************
+/**
+ *
+ * @param {import('express').Application} app
+ */
 function initViewEngine(app) {
   // View engine setup  (needs "views" directory )
   app.set("views", path.join(__dirname, "../views"));
@@ -50,7 +55,7 @@ if (config.env !== "test") {
 }
 
 // set security HTTP headers
-app.use(helmet());
+app.use(helmet.default());
 
 // Sets X-Permitted-Cross-Domain-Policies: none
 app.use(crossdomain());
@@ -103,19 +108,19 @@ if (config.env === "production") {
 
 // remove dollar sign, and dot operators from the request against malicious mongoDB operations
 app.use(
-  mongoSanitize({
+  expressMongoSanitize({
     replaceWith: "_",
-    onSanitize: ({ req, key }) => {
+    onSanitize: ({ key }) => {
       console.warn(`The request[${key}] is sanitized.`);
     },
-  })
+  }),
 );
 
 // sanitize the requests against XSS attacks
 app.use(xss());
 
 // app.use(async function (req, res, next) {
-// 	await new Promise(resolve => setTimeout(resolve, 0)).then(()=>{console.log(req.useragent.source); next()});
+// 	await new Promise(resolve => setTimeout(resolve, 0)).then(()=>{console.log(req.useragent?.source); next()});
 // });
 
 // routes

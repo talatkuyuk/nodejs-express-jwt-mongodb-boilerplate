@@ -1,9 +1,24 @@
+/**
+ * @typedef {import("mongodb").WithId<import("mongodb").Document>[]} Documents
+ * @typedef {import('../models/authuser.model')} AuthUser
+ * @typedef {import('../models/user.model')} User
+ */
+
 const mongodb = require("../core/mongodb");
 const ObjectId = require("mongodb").ObjectId;
 
 const { traceError } = require("../utils/errorUtils");
 const { AuthUser, User } = require("../models");
 
+/**
+ * @typedef {Object} AuthuserAndUser
+ * @property {AuthUser|undefined} authuser
+ * @property {User|undefined} user
+ *
+ * Get authuser and user together by id
+ * @param {string} id
+ * @returns {Promise<AuthuserAndUser>}
+ */
 const getAuthUserJoined = async (id) => {
   try {
     const pipeline = [
@@ -25,23 +40,35 @@ const getAuthUserJoined = async (id) => {
           password: 1,
           isEmailVerified: 1,
           isDisabled: 1,
-          createdAt: 1,
           providers: 1,
+          createdAt: 1,
           user: "$details",
         },
       },
     ];
 
     const db = mongodb.getDatabase();
-    const authuserDocContainer = await db.collection("authusers").aggregate(pipeline).toArray();
+    const agregate_result = await db.collection("authusers").aggregate(pipeline).toArray();
 
-    let authuser = null,
-      user = null;
+    console.log({ agregate_result });
 
-    authuserDocContainer && (authuser = AuthUser.fromDoc(authuserDocContainer[0]));
-    authuserDocContainer && authuser && (user = User.fromDoc(authuserDocContainer[0]["user"]));
+    const document = /** @type {import("mongodb").WithId<import("mongodb").Document>} */ (
+      agregate_result[0]
+    );
 
-    return { authuser, user };
+    console.log({ document });
+
+    if (!document) {
+      return {
+        authuser: undefined,
+        user: undefined,
+      };
+    }
+
+    return {
+      authuser: AuthUser.fromDoc(document),
+      user: document["user"] ? User.fromDoc(document["user"]) : undefined,
+    };
   } catch (error) {
     throw traceError(error, "JoinedDbService : getAuthUserJoined");
   }
@@ -51,9 +78,9 @@ const getAuthUserJoined = async (id) => {
  * @param {Object} filterLeft - Mongo filter for authusers
  * @param {Object} filterRight - Mongo filter for users
  * @param {Object} sort - Sort option in the format: { field1: 1, field2: -1}
+ * @param {number} skip - Number of records skipped, refers the page
  * @param {number} limit - Maximum number of results per page (default = 20)
- * @param {number} page - Current page (default = 1)
- * @returns {Promise<QueryResult>}
+ * @returns {Promise<Documents>}
  */
 const getAuthUsersJoined = async (filterLeft, filterRight, sort, skip, limit) => {
   try {
@@ -79,8 +106,8 @@ const getAuthUsersJoined = async (filterLeft, filterRight, sort, skip, limit) =>
           email: 1,
           isEmailVerified: 1,
           isDisabled: 1,
-          createdAt: 1,
           providers: 1,
+          createdAt: 1,
           role: "$details.role",
           name: "$details.name",
           gender: "$details.gender",
@@ -113,7 +140,13 @@ const getAuthUsersJoined = async (filterLeft, filterRight, sort, skip, limit) =>
     ];
 
     const db = mongodb.getDatabase();
-    return await db.collection("authusers").aggregate(pipeline).toArray();
+    const agregate_result = await db.collection("authusers").aggregate(pipeline).toArray();
+
+    const documents = /** @type {import("mongodb").WithId<import("mongodb").Document>[]} */ (
+      agregate_result[0]
+    );
+
+    return documents;
   } catch (error) {
     throw traceError(error, "JoinedDbService : getAuthUsersJoined");
   }
@@ -124,9 +157,9 @@ const getAuthUsersJoined = async (filterLeft, filterRight, sort, skip, limit) =>
  * @param {Object} filterLeft - Mongo filter for users
  * @param {Object} filterRight - Mongo filter for authusers
  * @param {Object} sort - Sort option in the format: { field1: 1, field2: -1}
+ * @param {number} skip - Number of records skipped, refers the page
  * @param {number} limit - Maximum number of results per page (default = 20)
- * @param {number} page - Current page (default = 1)
- * @returns {Promise<QueryResult>}
+ * @returns {Promise<Documents>}
  */
 const getUsersJoined = async (filterLeft, filterRight, sort, skip, limit) => {
   try {
@@ -186,7 +219,13 @@ const getUsersJoined = async (filterLeft, filterRight, sort, skip, limit) => {
     ];
 
     const db = mongodb.getDatabase();
-    return await db.collection("users").aggregate(pipeline).toArray();
+    const agregate_result = await db.collection("ßusers").aggregate(pipeline).toArray();
+
+    const documents = /** @type {import("mongodb").WithId<import("mongodb").Document>[]} */ (
+      agregate_result[0]
+    );
+
+    return documents;
   } catch (error) {
     throw traceError(error, "JoinedDbService : getUsersJoined");
   }

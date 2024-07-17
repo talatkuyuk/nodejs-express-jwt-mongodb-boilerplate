@@ -12,6 +12,7 @@ const TestUtil = require("../testutils/TestUtil");
 describe("Validate Middleware : Athuser validation rules", () => {
   describe("getAuthUsers validation", () => {
     test("getAuthUsers: should throw error 422, if a query param has multiple value", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: {
           email: ["email@xxx.com", "email@yyy.com"], // multiple value
@@ -40,6 +41,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("getAuthUsers: should throw error 422, if the query param isDisabled is not boolean value", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: { isDisabled: "5" }, // is not boolean
       };
@@ -63,6 +65,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("getAuthUsers: should throw error 422, if the query param isEmailVerified is not boolean value", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: { isEmailVerified: "truex" }, // is not boolean
       };
@@ -86,6 +89,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("getAuthUsers: should throw error 422, if the query param page is not numeric value", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: { page: "" }, // is not numeric
       };
@@ -109,6 +113,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("getAuthUsers: should throw error 422, if the query param size is not numeric value", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: { size: "a" }, // is not numeric
       };
@@ -132,6 +137,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("getAuthUsers: should throw error 422, if the query param size is not between 1-50", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: { size: "0" }, // is not between 1-50
       };
@@ -155,6 +161,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("getAuthUsers: should throw error 422, if the query param sort contains an invalid character", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: { sort: "email, createdAt" }, // includes comma (only . period and | pipedelimeter allowed)
       };
@@ -178,6 +185,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("getAuthUsers: should continue next middleware if the query params are valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: {
           email: "email@xxx.com",
@@ -213,6 +221,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
   describe("addAuthUser validation", () => {
     test("addAuthUser: should throw error 422, if the body is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {},
       };
@@ -241,6 +250,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("addAuthUser: should throw error 422, if the email and password is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "",
@@ -272,6 +282,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("addAuthUser: should throw error 422, if the email and password are not in valid form", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail", // invalid email form
@@ -304,6 +315,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("addAuthUser: should throw error 422, if the password is not valid and confirmation does not match", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail.com",
@@ -335,6 +347,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("addAuthUser: should throw error 422, if the email is already taken", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail.com",
@@ -365,6 +378,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("addAuthUser: should throw error 422, if the body contains any other parameter", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail.com",
@@ -396,6 +410,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("addAuthUser: should continue next middleware if the body elements are valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail.com",
@@ -420,6 +435,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
   describe("getAuthUser validation", () => {
     test("getAuthUser: should throw error 422, if the param id is not 24-length character", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "1234567890" }, // 10-length string, invalid id
       };
@@ -443,6 +459,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("getAuthUser: should continue next middleware if the param id is valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "123456789012345678901234" }, // 24-length string, valid id
       };
@@ -458,6 +475,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("getAuthUser: should continue next middleware if the param id is self", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "self" }, // self is valid for here
       };
@@ -475,6 +493,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
   describe("toggleAbility validation", () => {
     test("toggleAbility: should throw error 422, if the param id is not 24-length character", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "1234567890" }, // 10-length string, invalid id
       };
@@ -498,6 +517,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("toggleAbility: should throw error 422, if the param id is self", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "self" }, // self is not valid here
       };
@@ -521,6 +541,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("toggleAbility: should continue next middleware if the param id is valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "123456789012345678901234" }, // 24-length string, valid id
       };
@@ -538,6 +559,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
   describe("toggleVerification validation", () => {
     test("toggleVerification: should throw error 422, if the param id is not 24-length character", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "1234567890" }, // 10-length string, invalid id
       };
@@ -561,6 +583,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("toggleVerification: should throw error 422, if the param id is self", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "self" }, // self is not valid here
       };
@@ -584,6 +607,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("toggleVerification: should continue next middleware if the param id is valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "123456789012345678901234" }, // 24-length string, valid id
       };
@@ -601,6 +625,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
   describe("unlinkProvider validation", () => {
     test("unlinkProvider: should throw error 422, if the param id is not 24-length character", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "1234567890" }, // 10-length string, invalid id
         query: { provider: authProvider.GOOGLE },
@@ -625,6 +650,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("unlinkProvider: should throw error 422, if the param id is self", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "self" }, // self is not valid here
         query: { provider: authProvider.EMAILPASSWORD },
@@ -649,6 +675,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("unlinkProvider: should throw error 422, if the request doesn't contain any query param provider", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "123456789012345678901234" }, // there is no query
       };
@@ -672,6 +699,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("unlinkProvider: should throw error 422, if the query param provider is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "123456789012345678901234" },
         query: { provider: "" }, // it is empty
@@ -696,6 +724,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("unlinkProvider: should throw error 422, if the query param provider is not an auth provider", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "123456789012345678901234" },
         query: { provider: "authprovider" }, // it is not emailpassword, google, or facebook
@@ -720,6 +749,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("unlinkProvider: should throw error 422, if the both id and query param provider are invalid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "1234567890" }, // 10-length string, invalid id
         query: { provider: "authprovider" }, // it is not emailpassword, google, or facebook
@@ -745,6 +775,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("unlinkProvider: should continue next middleware if the param id is valid and the valid provider is provided", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "123456789012345678901234" }, // 24-length string, valid id
         query: { provider: authProvider.FACEBOOK }, // valid provider
@@ -763,6 +794,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
   describe("deleteAuthUser validation", () => {
     test("deleteAuthUser: should throw error 422, if the param id is not 24-length character", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "1234567890" }, // 10-length string, invalid id
       };
@@ -786,6 +818,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("deleteAuthUser: should throw error 422, if the param id is self", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "self" }, // self is invalid here
       };
@@ -809,6 +842,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
     });
 
     test("deleteAuthUser: should continue next middleware if the param id is valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         params: { id: "123456789012345678901234" }, // 24-length string, valid id
       };
@@ -827,17 +861,20 @@ describe("Validate Middleware : Athuser validation rules", () => {
   describe("change password validation", () => {
     test("changePassword: should throw error 422, if the body is empty", async () => {
       const authuser = new AuthUser("user@gmail.com", "password");
+
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {},
-        authuser, // it is attached in authentication middleware
       };
+
+      request.authuser = authuser; // it is attached in authentication middleware
 
       const req = httpMocks.createRequest(request);
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      const spyOnCurrentPassword = jest.spyOn(req.authuser, "isPasswordMatch");
-      spyOnCurrentPassword.mockResolvedValue(true);
+      const spyOnCurrentPassword = jest.spyOn(request.authuser, "isPasswordMatch");
+      spyOnCurrentPassword.mockResolvedValue(Promise.resolve(true));
 
       await validate(authuserValidation.changePassword)(req, res, next);
 
@@ -857,20 +894,23 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
     test("changePassword: should throw error 422, if the email and password is empty", async () => {
       const authuser = new AuthUser("user@gmail.com", "password");
+
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           currentPassword: "",
           password: "",
         },
-        authuser, // it is attached in authentication middleware
       };
+
+      request.authuser = authuser; // it is attached in authentication middleware
 
       const req = httpMocks.createRequest(request);
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      const spyOnCurrentPassword = jest.spyOn(req.authuser, "isPasswordMatch");
-      spyOnCurrentPassword.mockResolvedValue(true);
+      const spyOnCurrentPassword = jest.spyOn(request.authuser, "isPasswordMatch");
+      spyOnCurrentPassword.mockResolvedValue(Promise.resolve(true));
 
       await validate(authuserValidation.changePassword)(req, res, next);
 
@@ -890,21 +930,24 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
     test("changePassword: should throw error 422, if the password is less than 8 chararcters", async () => {
       const authuser = new AuthUser("user@gmail.com", "password");
+
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           currentPassword: "AaAa1234!",
           password: "1234", // less than 8 characters
           passwordConfirmation: "", // empty
         },
-        authuser, // it is attached in authentication middleware
       };
+
+      request.authuser = authuser; // it is attached in authentication middleware
 
       const req = httpMocks.createRequest(request);
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      const spyOnCurrentPassword = jest.spyOn(req.authuser, "isPasswordMatch");
-      spyOnCurrentPassword.mockResolvedValue(true);
+      const spyOnCurrentPassword = jest.spyOn(request.authuser, "isPasswordMatch");
+      spyOnCurrentPassword.mockResolvedValue(Promise.resolve(true));
 
       await validate(authuserValidation.changePassword)(req, res, next);
 
@@ -923,21 +966,24 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
     test("changePassword: should throw error 422, if the password is not valid and confirmation does not match", async () => {
       const authuser = new AuthUser("user@gmail.com", "password");
+
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           currentPassword: "AaAa1234!",
           password: "Password", // no number and special char
           passwordConfirmation: "Password+", // does not match with the password
         },
-        authuser, // it is attached in authentication middleware
       };
+
+      request.authuser = authuser; // it is attached in authentication middleware
 
       const req = httpMocks.createRequest(request);
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      const spyOnCurrentPassword = jest.spyOn(req.authuser, "isPasswordMatch");
-      spyOnCurrentPassword.mockResolvedValue(true);
+      const spyOnCurrentPassword = jest.spyOn(request.authuser, "isPasswordMatch");
+      spyOnCurrentPassword.mockResolvedValue(Promise.resolve(true));
 
       await validate(authuserValidation.changePassword)(req, res, next);
 
@@ -956,21 +1002,24 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
     test("changePassword: should throw error 422, if the current password is wrong", async () => {
       const authuser = new AuthUser("user@gmail.com", "password");
+
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           currentPassword: "user@gmail.com",
           password: "Pass1word!",
           passwordConfirmation: "Pass1word!",
         },
-        authuser, // it is attached in authentication middleware
       };
+
+      request.authuser = authuser; // it is attached in authentication middleware
 
       const req = httpMocks.createRequest(request);
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      const spyOnCurrentPassword = jest.spyOn(req.authuser, "isPasswordMatch");
-      spyOnCurrentPassword.mockResolvedValue(false); // means that the current password is wrong
+      const spyOnCurrentPassword = jest.spyOn(request.authuser, "isPasswordMatch");
+      spyOnCurrentPassword.mockResolvedValue(Promise.resolve(false)); // means that the current password is wrong
 
       await validate(authuserValidation.changePassword)(req, res, next);
 
@@ -988,21 +1037,24 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
     test("changePassword: should continue next middleware if the body elements are valid", async () => {
       const authuser = new AuthUser("user@gmail.com", "password");
+
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           currentPassword: "user@gmail.com",
           password: "Pass1word!",
           passwordConfirmation: "Pass1word!",
         },
-        authuser, // it is attached in authentication middleware
       };
+
+      request.authuser = authuser; // it is attached in authentication middleware
 
       const req = httpMocks.createRequest(request);
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      const spyOnCurrentPassword = jest.spyOn(req.authuser, "isPasswordMatch");
-      spyOnCurrentPassword.mockResolvedValue(true);
+      const spyOnCurrentPassword = jest.spyOn(request.authuser, "isPasswordMatch");
+      spyOnCurrentPassword.mockResolvedValue(Promise.resolve(true));
 
       await validate(authuserValidation.changePassword)(req, res, next);
 

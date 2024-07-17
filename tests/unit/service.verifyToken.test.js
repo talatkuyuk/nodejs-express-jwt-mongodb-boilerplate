@@ -7,7 +7,6 @@ const { Token } = require("../../src/models");
 const { tokenTypes } = require("../../src/config/tokens");
 
 const testData = require("../testutils/testdata");
-const TestUtil = require("../testutils/TestUtil");
 
 const { setupTestDatabase } = require("../setup/setupTestDatabase");
 const { setupRedis } = require("../setup/setupRedis");
@@ -16,8 +15,6 @@ setupTestDatabase();
 setupRedis();
 
 describe("Test for Refresh Token Rotation", () => {
-  TestUtil.MatchErrors();
-
   /* The possible token errors
   ---TokenExpiredError---
   err = {
@@ -48,11 +45,11 @@ describe("Test for Refresh Token Rotation", () => {
 
       const expectedError = new ApiError(
         httpStatus.UNAUTHORIZED,
-        "TokenExpiredError: jwt expired"
+        "TokenExpiredError: jwt expired",
       );
 
       expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(
-        expect.toBeMatchedWithError(expectedError)
+        expect.toBeMatchedWithError(expectedError),
       );
     });
 
@@ -62,11 +59,11 @@ describe("Test for Refresh Token Rotation", () => {
 
       const expectedError = new ApiError(
         httpStatus.UNAUTHORIZED,
-        "JsonWebTokenError: invalid signature"
+        "JsonWebTokenError: invalid signature",
       );
 
       expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(
-        expect.toBeMatchedWithError(expectedError)
+        expect.toBeMatchedWithError(expectedError),
       );
     });
 
@@ -76,11 +73,12 @@ describe("Test for Refresh Token Rotation", () => {
 
       const expectedError = new ApiError(
         httpStatus.UNAUTHORIZED,
-        "JsonWebTokenError: jwt must be provided"
+        "JsonWebTokenError: jwt must be provided",
       );
 
+      // @ts-expect-error Argument of type 'undefined' is not assignable to parameter of type 'string'
       expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(
-        expect.toBeMatchedWithError(expectedError)
+        expect.toBeMatchedWithError(expectedError),
       );
     });
   });
@@ -90,13 +88,10 @@ describe("Test for Refresh Token Rotation", () => {
       const type = tokenTypes.REFRESH;
       const token = tokenService.generateTokenForTest(type); // There is no such token in the database
 
-      const expectedError = new ApiError(
-        httpStatus.UNAUTHORIZED,
-        "The token is not valid"
-      );
+      const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "The token is not valid");
 
       expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(
-        expect.toBeMatchedWithError(expectedError)
+        expect.toBeMatchedWithError(expectedError),
       );
     });
 
@@ -104,13 +99,10 @@ describe("Test for Refresh Token Rotation", () => {
       const type = tokenTypes.VERIFY_SIGNUP;
       const token = tokenService.generateTokenForTest(type); // There is no such token in the database
 
-      const expectedError = new ApiError(
-        httpStatus.UNAUTHORIZED,
-        "The token is not valid"
-      );
+      const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "The token is not valid");
 
       expect(() => tokenService.verifyToken(token, type)).rejects.toThrow(
-        expect.toBeMatchedWithError(expectedError)
+        expect.toBeMatchedWithError(expectedError),
       );
     });
   });
@@ -119,13 +111,11 @@ describe("Test for Refresh Token Rotation", () => {
     test("Reset-Password Token: should return the token document", async () => {
       const userId = "613b417848981bfd6e91c662";
 
-      const resetPasswordToken = await tokenService.generateResetPasswordToken(
-        userId
-      );
+      const resetPasswordToken = await tokenService.generateResetPasswordToken(userId);
 
       const data = await tokenService.verifyToken(
         resetPasswordToken.token,
-        tokenTypes.RESET_PASSWORD
+        tokenTypes.RESET_PASSWORD,
       );
       expect(data).toEqual(expect.any(Token));
     });
@@ -133,13 +123,11 @@ describe("Test for Refresh Token Rotation", () => {
     test("Verify-Email Token: should return the token document", async () => {
       const userId = "613b417848981bfd6e91c662";
 
-      const verifyEmailToken = await tokenService.generateVerifyEmailToken(
-        userId
-      );
+      const verifyEmailToken = await tokenService.generateVerifyEmailToken(userId);
 
       const data = await tokenService.verifyToken(
         verifyEmailToken.token,
-        tokenTypes.VERIFY_EMAIL
+        tokenTypes.VERIFY_EMAIL,
       );
 
       expect(data).toEqual(expect.any(Token));
@@ -148,13 +136,11 @@ describe("Test for Refresh Token Rotation", () => {
     test("Verify-Signup Token: should return the token document", async () => {
       const userId = "613b417848981bfd6e91c662";
 
-      const verifySignupToken = await tokenService.generateVerifySignupToken(
-        userId
-      );
+      const verifySignupToken = await tokenService.generateVerifySignupToken(userId);
 
       const data = await tokenService.verifyToken(
         verifySignupToken.token,
-        tokenTypes.VERIFY_SIGNUP
+        tokenTypes.VERIFY_SIGNUP,
       );
 
       expect(data).toEqual(expect.any(Token));

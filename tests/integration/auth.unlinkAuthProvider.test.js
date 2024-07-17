@@ -15,13 +15,20 @@ setupRedis();
 
 describe("POST /auth/unlink", () => {
   const userAgent = "from-jest-test";
-  let accessToken, authuserId, authuserEmail;
+
+  /** @type {string} */
+  let accessToken;
+
+  /** @type {string} */
+  let authuserId;
+
+  /** @type {string} */
+  let authuserEmail;
 
   beforeEach(async () => {
-    const { authuser, tokens } = await TestUtil.createAuthUser({
+    const { authuser, tokens } = await TestUtil.createAuthUser(userAgent, {
       email: "talat@google.com",
       password: "Pass1word!",
-      userAgent,
     });
 
     authuserId = authuser.id;
@@ -38,7 +45,9 @@ describe("POST /auth/unlink", () => {
         .send();
 
       TestUtil.validationErrorExpectations(response);
-      expect(response.body.error.errors.provider).toEqual(["query param 'provider' is missing"]);
+      expect(response.body.error.errors.provider).toEqual([
+        "query param 'provider' is missing",
+      ]);
       expect(response.body.error.errors).not.toHaveProperty("body");
     });
 
@@ -50,7 +59,9 @@ describe("POST /auth/unlink", () => {
         .send();
 
       TestUtil.validationErrorExpectations(response);
-      expect(response.body.error.errors.provider).toEqual(["The query param 'provider' should be an auth provider"]);
+      expect(response.body.error.errors.provider).toEqual([
+        "The query param 'provider' should be an auth provider",
+      ]);
       expect(response.body.error.errors).not.toHaveProperty("body");
     });
   });
@@ -126,6 +137,10 @@ describe("POST /auth/unlink", () => {
       const authuser = await authuserDbService.getAuthUser({
         id: authuserId,
       });
+
+      if (!authuser) {
+        throw new Error("Unexpected fail in db operation while getting an authuser");
+      }
 
       expect(authuser.password).toBeNull();
     });

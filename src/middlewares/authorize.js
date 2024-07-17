@@ -1,3 +1,6 @@
+/** @typedef {import('express').RequestHandler} RequestHandler */
+/** @typedef {import('../models/user.model')} User */
+
 const httpStatus = require("http-status");
 
 const ApiError = require("../utils/ApiError");
@@ -11,11 +14,16 @@ const { roleRights } = require("../config/roles");
  * @returns {function}
  */
 
+/**
+ *
+ * @param  {string[]} requiredRights
+ * @returns {RequestHandler}
+ */
 const authorize =
   (...requiredRights) =>
-  async (req, res, next) => {
+  async (req, _res, next) => {
     try {
-      if (!req.user) {
+      if (!req.user && req.authuser) {
         const user = await userDbService.getUser({ id: req.authuser.id });
 
         if (user) req.user = user;
@@ -25,38 +33,26 @@ const authorize =
       if (requiredRights.length === 0) return next();
 
       // if there is no user (forexample just after signup), set the role as "user"
-      const role = req.user ? req.user.role : "user";
+      const role = req.user?.role ?? "user";
 
       const userRights = roleRights[role];
 
-      if (!userRights)
-        throw new ApiError(
-          httpStatus.FORBIDDEN,
-          "You do not have appropriate right"
-        );
+      if (!userRights) {
+        throw new ApiError(httpStatus.FORBIDDEN, "You do not have appropriate right");
+      }
 
-      const userRightsWithoutSelf = userRights.map(
-        (right) => right.split("@")[0]
-      );
+      const userRightsWithoutSelf = userRights.map((right) => right.split("@")[0]);
 
       requiredRights.forEach((requiredRight) => {
-        const index = userRightsWithoutSelf.findIndex(
-          (right) => right === requiredRight
-        );
+        const index = userRightsWithoutSelf.findIndex((right) => right === requiredRight);
 
         if (index === -1)
-          throw new ApiError(
-            httpStatus.FORBIDDEN,
-            "You do not have appropriate right"
-          );
+          throw new ApiError(httpStatus.FORBIDDEN, "You do not have appropriate right");
 
         // if no param.id, let it is handled by validator !!!, not here but take care in validator
         if (userRights[index].includes("self") && req.params && req.params.id)
-          if (req.params.id !== "self" && req.params.id !== req.authuser.id)
-            throw new ApiError(
-              httpStatus.FORBIDDEN,
-              "You are not authorized other than your data"
-            );
+          if (req.params.id !== "self" && req.params.id !== req.authuser?.id)
+            throw new ApiError(httpStatus.FORBIDDEN, "You are authorized only your own data");
       });
 
       next();

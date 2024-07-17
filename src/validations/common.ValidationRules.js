@@ -2,7 +2,7 @@ const { body, param } = require("express-validator");
 const { authuserService } = require("../services");
 
 const check_param_id_custom = [
-  param("id").custom((id, { req }) => {
+  param("id").custom((id) => {
     if (id !== "self" && id.length !== 24) {
       throw new Error("The param id must be a 24-character number");
     } else {

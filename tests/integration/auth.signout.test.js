@@ -3,13 +3,8 @@ const httpStatus = require("http-status");
 const jwt = require("jsonwebtoken");
 
 const app = require("../../src/core/express");
-const config = require("../../src/config");
 
-const {
-  authuserDbService,
-  tokenDbService,
-  redisService,
-} = require("../../src/services");
+const { authuserDbService, tokenDbService, redisService } = require("../../src/services");
 const { tokenTypes } = require("../../src/config/tokens");
 
 const TestUtil = require("../testutils/TestUtil");
@@ -22,13 +17,20 @@ setupRedis();
 
 describe("POST /auth/signout", () => {
   const userAgent = "from-jest-test";
-  let accessToken, refreshToken, authuserId;
+
+  /** @type {string} */
+  let accessToken;
+
+  /** @type {string} */
+  let refreshToken;
+
+  /** @type {string} */
+  let authuserId;
 
   beforeEach(async () => {
-    const { authuser, tokens } = await TestUtil.createAuthUser({
+    const { authuser, tokens } = await TestUtil.createAuthUser(userAgent, {
       email: "talat@google.com",
       password: "Pass1word!",
-      userAgent,
     });
 
     authuserId = authuser.id;
@@ -46,9 +48,7 @@ describe("POST /auth/signout", () => {
         token: "no-matter-for-this-test",
         user: authuserId,
         type: tokenTypes.VERIFY_EMAIL,
-        expires: "no-matter-for-this-test",
-        family: "no-matter-for-this-test",
-        blacklisted: false,
+        expires: new Date(new Date().getTime() + 10 * 60000),
       });
 
       const response = await request(app)
@@ -61,8 +61,9 @@ describe("POST /auth/signout", () => {
       expect(response.body.success).toBe(true);
 
       // check the access token of the authuser is in the blacklist
-      const { jti } = jwt.decode(accessToken, config.jwt.secret);
-      const result = await redisService.check_in_blacklist(jti);
+      const payload = jwt.decode(accessToken, { json: true });
+      if (!payload) throw new Error("Unexpected error while decoding access token");
+      const result = await redisService.check_in_blacklist(payload.jti);
       expect(result).toBe(true);
 
       // check the authuser's whole tokens and are removed from db
@@ -77,8 +78,10 @@ describe("POST /auth/signout", () => {
       const data2 = await authuserDbService.getDeletedAuthUser({
         id: authuserId,
       });
+
       expect(data2).not.toBeNull();
-      expect(data2.deletedAt).not.toBeNull();
+
+      if (data2) expect(data2.deletedAt).not.toBeNull();
     });
   });
 });

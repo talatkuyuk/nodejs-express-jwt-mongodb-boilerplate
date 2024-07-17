@@ -1,18 +1,52 @@
-const mongodb = require("../core/mongodb");
+/**
+ * @typedef {import("mongodb").Document[]} Documents
+ *
+ * @typedef {Object} QueryWithId
+ * @property {string} id
+ * @property {string} [email]
+ *
+ * @typedef {Object} QueryWithEmail
+ * @property {string} email
+ * @property {string} [id]
+ *
+ * @typedef {QueryWithId | QueryWithEmail} GetAuthuserQuery
+ *
+ * @typedef {import('../models/authuser.model')} AuthUser
+ */
+
 const { ObjectId, ReturnDocument } = require("mongodb");
 
+const mongodb = require("../core/mongodb");
 const { AuthUser } = require("../models");
 const { traceError } = require("../utils/errorUtils");
 
 /**
  * Add an authuser into db
- * @param {AuthUser} authuser
- * @returns {Promise<AuthUser?>}
+ * @typedef {Object} AuthuserFieldsForCreate
+ * @property {AuthUser["email"]} email
+ * @property {AuthUser["password"]} [password]
+ * @property {AuthUser["isEmailVerified"]} [isEmailVerified]
+ * @property {AuthUser["isDisabled"]} [isDisabled]
+ * @property {AuthUser["providers"]} [providers]
+ * @property {AuthUser["createdAt"]} [createdAt]
+ * @property {AuthUser["updatedAt"]} [updatedAt]
+ *
+ * @param {AuthuserFieldsForCreate} authuser
+ * @returns {Promise<AuthUser|null>}
  */
 const addAuthUser = async (authuser) => {
   try {
     const db = mongodb.getDatabase();
-    const result = await db.collection("authusers").insertOne(authuser);
+    const result = await db.collection("authusers").insertOne({
+      email: authuser.email,
+      password: typeof authuser.password === "undefined" ? null : authuser.password,
+      isEmailVerified:
+        typeof authuser.isEmailVerified === "undefined" ? false : authuser.isEmailVerified,
+      isDisabled: typeof authuser.isDisabled === "undefined" ? false : authuser.isDisabled,
+      createdAt: typeof authuser.createdAt === "undefined" ? Date.now() : authuser.createdAt,
+      updatedAt: typeof authuser.updatedAt === "undefined" ? null : authuser.updatedAt,
+      ...(authuser.providers && { providers: authuser.providers }),
+    });
 
     if (!result.acknowledged) return null;
 
@@ -23,6 +57,8 @@ const addAuthUser = async (authuser) => {
       .collection("authusers")
       .findOne({ _id: result.insertedId });
 
+    if (!authuserInserted) return null;
+
     return AuthUser.fromDoc(authuserInserted);
   } catch (error) {
     throw traceError(error, "AuthUserDbService : addAuthUser");
@@ -30,21 +66,24 @@ const addAuthUser = async (authuser) => {
 };
 
 /**
- * Get authuser
- * @param {Object} query {id | email}
- * @returns {Promise<AuthUser>}
+ * Get authuser by id or email
+ *
+ * @param {GetAuthuserQuery} query
+ * @returns {Promise<AuthUser|null>}
  */
 const getAuthUser = async (query) => {
   try {
-    if (query.id) {
-      query = { ...query, _id: ObjectId.createFromHexString(query.id) };
-      delete query.id;
-    }
+    const newQuery = {
+      ...(query.id && { _id: ObjectId.createFromHexString(query.id) }),
+      ...(query.email && { email: query.email }),
+    };
 
     const db = mongodb.getDatabase();
-    const doc = await db.collection("authusers").findOne(query);
+    const authuserDoc = await db.collection("authusers").findOne(newQuery);
 
-    return AuthUser.fromDoc(doc);
+    if (!authuserDoc) return null;
+
+    return AuthUser.fromDoc(authuserDoc);
   } catch (error) {
     throw traceError(error, "AuthUserDbService : getAuthUser");
   }
@@ -52,11 +91,27 @@ const getAuthUser = async (query) => {
 
 /**
  * Query for authusers
- * @param {Object} filter - Filter fields for authusers
- * @param {Object} sort - Sort option in the format: { field1: 1, field2: -1}
+ * @typedef {Object} AuthuserQueryResult
+ * @property {AuthUser[]} authusers
+ * @property {number} totalCount
+ *
+ * @typedef {Object} AuthuserFieldsForFilter
+ * @property {string} [email]
+ * @property {boolean} [isEmailVerified]
+ * @property {boolean} [isDisabled]
+ * @property {string} [createdAt]
+ *
+ * @typedef {Object} AuthuserFieldsForSorting
+ * @property {1|-1} [email]
+ * @property {1|-1} [isEmailVerified]
+ * @property {1|-1} [isDisabled]
+ * @property {1|-1} [createdAt]
+ *
+ * @param {AuthuserFieldsForFilter} filter - Filter fields for authusers
+ * @param {AuthuserFieldsForSorting} sort - { field1: 1, field2: -1}
+ * @param {number} skip - Number of records skipped, refers the page
  * @param {number} limit - Maximum number of results per page (default = 20)
- * @param {number} page - Current page (default = 1)
- * @returns {Promise<QueryResult>}
+ * @returns {Promise<AuthuserQueryResult>}
  */
 const getAuthUsers = async (filter, sort, skip, limit) => {
   let matchEmail = {};
@@ -72,8 +127,8 @@ const getAuthUsers = async (filter, sort, skip, limit) => {
     const parsedStartDate = Date.parse(startDate); // unix timestamp
     const parsedEndDate = Date.parse(endDate); // unix timestamp
 
-    isDateStart = !isNaN(parsedStartDate);
-    isDateEnd = !isNaN(parsedEndDate);
+    const isDateStart = !isNaN(parsedStartDate);
+    const isDateEnd = !isNaN(parsedEndDate);
 
     if (isDateStart && isDateEnd) {
       matchDate = {
@@ -104,14 +159,14 @@ const getAuthUsers = async (filter, sort, skip, limit) => {
       },
       {
         $project: {
-          _id: 0,
-          id: "$_id",
+          // _id: 0,
+          // id: "$_id",
           email: 1,
           isEmailVerified: 1,
           isDisabled: 1,
+          providers: 1,
           createdAt: 1,
           updatedAt: 1,
-          providers: 1,
         },
       },
       {
@@ -137,7 +192,28 @@ const getAuthUsers = async (filter, sort, skip, limit) => {
     ];
 
     const db = mongodb.getDatabase();
-    return await db.collection("authusers").aggregate(pipeline).toArray();
+
+    // facet_result ----> [{ authusers: [objects], total: [{ count: n }] }]
+    const facet_result = await db.collection("authusers").aggregate(pipeline).toArray();
+    const document = facet_result[0];
+
+    if (!document) {
+      return { authusers: [], totalCount: 0 };
+    }
+
+    console.log({ document });
+
+    /**
+     * @type {import("mongodb").WithId<import("mongodb").Document>[]}
+     */
+    const authusers = document["authusers"];
+
+    /**
+     * @type {number}
+     */
+    const totalCount = document["total"].length === 0 ? 0 : document["total"][0]["count"];
+
+    return { authusers: authusers.map(AuthUser.fromDoc), totalCount };
   } catch (error) {
     throw traceError(error, "AuthUserDbService : getAuthUsers");
   }
@@ -145,27 +221,35 @@ const getAuthUsers = async (filter, sort, skip, limit) => {
 
 /**
  * Update authuser by id
- * @param {string | ObjectId} id
- * @param {Object} updateBody
- * @returns {Promise<AuthUser?>}
+ * @typedef {Object} AuthuserFieldsForUpdate
+ * @property {AuthUser["email"]} [email]
+ * @property {AuthUser["password"]} [password]
+ * @property {AuthUser["isEmailVerified"]} [isEmailVerified]
+ * @property {AuthUser["isDisabled"]} [isDisabled]
+ * @property {AuthUser["providers"]} [providers]
+ *
+ * @param {string} id
+ * @param {AuthuserFieldsForUpdate} updateBody
+ * @returns {Promise<AuthUser|null>}
  */
 const updateAuthUser = async (id, updateBody) => {
   try {
     console.log("updateAuthUser: ", id, updateBody);
 
     const db = mongodb.getDatabase();
-    const result = await db
+    const authuserDoc = await db
       .collection("authusers")
       .findOneAndUpdate(
-        { _id: typeof id === "string" ? ObjectId.createFromHexString(id) : id },
+        { _id: ObjectId.createFromHexString(id) },
         { $set: { ...updateBody, updatedAt: Date.now() } },
-        { returnDocument: ReturnDocument.AFTER }
+        { returnDocument: ReturnDocument.AFTER },
       );
 
-    const count = result === null ? 0 : 1;
-    console.log(`${count} record is updated in authusers. (${id})`);
+    if (!authuserDoc) return null;
 
-    return AuthUser.fromDoc(result);
+    console.log(`1 record is updated in authusers. (${id})`);
+
+    return AuthUser.fromDoc(authuserDoc);
   } catch (error) {
     throw traceError(error, "AuthUserDbService : updateAuthUser");
   }
@@ -173,89 +257,68 @@ const updateAuthUser = async (id, updateBody) => {
 
 /**
  * Delete authuser by id
- * @param {string | ObjectId} id
- * @returns {Promise<boolean>}
+ * @param {string} id
+ * @returns {Promise<AuthUser|null>}
  */
 const deleteAuthUser = async (id) => {
   try {
     console.log("deleteAuthUser: ", id);
 
     const db = mongodb.getDatabase();
-    const result = await db.collection("authusers").findOneAndDelete({
-      _id: typeof id === "string" ? ObjectId.createFromHexString(id) : id,
+    const deletedAuthuserDoc = await db.collection("authusers").findOneAndDelete({
+      _id: ObjectId.createFromHexString(id),
     });
 
-    if (!result) return false;
+    if (!deletedAuthuserDoc) return null;
 
     console.log(`deleteAuthUser: The authuser ${id} is deleted in authusers`);
 
-    const authuser = AuthUser.fromDoc(result);
+    const deletedAuthuserDoc2 = await db.collection("deletedauthusers").insertOne({
+      ...deletedAuthuserDoc,
+      deletedAt: Date.now(),
+    });
 
-    const result2 = await toDeletedAuthUsers(authuser);
-    if (result2 == null) {
+    if (!deletedAuthuserDoc2.acknowledged) {
       // do not raise error but log the issue
-      console.log(
-        `deleteAuthUser: The authuser ${id} could not added into deletedauthusers`
-      );
+      console.log(`deleteAuthUser: The authuser ${id} could not added into deletedauthusers`);
+
+      return null;
     }
 
-    return true;
+    console.log(`1 record is created in deletedauthusers. ${deletedAuthuserDoc2.insertedId}`);
+
+    // get the inserted document back
+    const deletedAuthuserInserted = await db
+      .collection("deletedauthusers")
+      .findOne({ _id: deletedAuthuserDoc2.insertedId });
+
+    if (!deletedAuthuserInserted) return null;
+
+    return AuthUser.fromDoc(deletedAuthuserInserted);
   } catch (error) {
     throw traceError(error, "AuthUserDbService : deleteAuthUser");
   }
 };
 
 /**
- * Add the deleted authuser to the deletedauthusers
- * @param {AuthUser} deletedAuthUser
- * @returns {Promise<AuthUser?>}
- */
-const toDeletedAuthUsers = async (deletedAuthUser) => {
-  try {
-    console.log("toDeletedAuthUsers: ", deletedAuthUser.id);
-
-    deletedAuthUser["_id"] = ObjectId.createFromHexString(deletedAuthUser.id);
-    delete deletedAuthUser.id;
-    deletedAuthUser["deletedAt"] = Date.now();
-
-    const db = mongodb.getDatabase();
-    const result = await db
-      .collection("deletedauthusers")
-      .insertOne(deletedAuthUser);
-
-    if (!result.acknowledged) return null;
-
-    console.log(
-      `1 record is created in deletedauthusers. ${result.insertedId}`
-    );
-
-    // get the inserted document back
-    const deletedAuthuserInserted = await db
-      .collection("deletedauthusers")
-      .findOne({ _id: result.insertedId });
-
-    return deletedAuthuserInserted;
-  } catch (error) {
-    throw traceError(error, "AuthUserDbService : toDeletedAuthUsers");
-  }
-};
-
-/**
  * Get deleted authuser
- * @param {Object} query {id | email}
- * @returns {Promise<AuthUser?>}
+ *
+ * @param {GetAuthuserQuery} query
+ * @returns {Promise<AuthUser|null>}
  */
 const getDeletedAuthUser = async (query) => {
   try {
     console.log("getDeletedAuthUser: ", query);
 
-    if (query.id) {
-      query = { ...query, _id: ObjectId.createFromHexString(query.id) };
-      delete query.id;
-    }
+    const newQuery = {
+      ...(query.id && { _id: ObjectId.createFromHexString(query.id) }),
+      ...(query.email && { email: query.email }),
+    };
 
     const db = mongodb.getDatabase();
-    const doc = await db.collection("deletedauthusers").findOne(query);
+    const doc = await db.collection("deletedauthusers").findOne(newQuery);
+
+    if (!doc) return null;
 
     return AuthUser.fromDoc(doc);
   } catch (error) {

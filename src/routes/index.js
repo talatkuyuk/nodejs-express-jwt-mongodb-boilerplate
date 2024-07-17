@@ -20,19 +20,18 @@ const { traceError } = require("../utils/errorUtils");
 // for testing purpose in development environment
 router.get(
   "/list",
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (_req, res) => {
     try {
       if (config.env === "development") {
         var database = mongodb.getDatabase();
+
+        /** @type {Record<string, import("mongodb").WithId<import("mongodb").Document>[]>} */
         const response = {};
 
         const collections = await database.listCollections({}).toArray();
 
         for (const collection of collections) {
-          const result = await database
-            .collection(collection.name)
-            .find({})
-            .toArray();
+          const result = await database.collection(collection.name).find({}).toArray();
           response[collection.name] = result;
         }
 
@@ -41,34 +40,39 @@ router.get(
     } catch (error) {
       throw traceError(error, "RouteIndex : getList");
     }
-  })
+  }),
 );
 
 // for testing purpose in development environment
-router.get("/console", (req, res) => {
+router.get("/console", (_req, res) => {
   try {
-    if (config.env === "development") {
-      var database = mongodb.getDatabase();
-      const collection = "authusers";
+    if (config.env !== "development") return;
 
-      // get the first document matched with query
-      const query = { email: new RegExp("[^tk]", "i") };
-      database.collection(collection).findOne(query, function (err, doc) {
-        if (err) throw err;
-        console.log("Query result for the email contains tk : ", doc?.email);
+    var database = mongodb.getDatabase();
+    const collection = "authusers";
+
+    // get the first document matched with query
+    const query = { email: new RegExp("[^tk]", "i") };
+    database
+      .collection(collection)
+      .findOne(query)
+      .then((doc) => {
+        if (doc) {
+          console.log("Query result for the email contains tk : ", doc.email);
+        } else {
+          console.log("There is no email contains tk");
+        }
       });
 
-      // get the first document
-      database.collection(collection).findOne().then(console.log);
+    // get the first document
+    database.collection(collection).findOne().then(console.log);
 
-      // get all documents
-      var cursor = database.collection(collection).find();
-      cursor.each(function (err, item) {
-        if (err) throw err;
-        if (item == null) return; // If null, the cursor is end
-        console.log(item);
-      });
-    }
+    // get all documents
+    var cursor = database.collection(collection).find();
+    cursor.toArray().then((docs) => {
+      docs.forEach(console.log);
+    });
+
     res.status(httpStatus.OK).json("OK");
   } catch (error) {
     throw traceError(error, "RouteIndex : getConsole");
@@ -80,15 +84,14 @@ router.get(
   "/status",
   asyncHandler(async (req, res) => {
     var database = mongodb.getDatabase();
-    var cache = redis.getRedisClient();
 
     let mongoStatus, redisStatus, environment, port;
 
     try {
       environment = process.env.NODE_ENV || config.env;
-      port = process.env.PORT || req.headers.host.split(":")[1];
+      port = process.env.PORT || req.headers.host?.split(":")[1];
 
-      redisStatus = cache?.connected ? "OK" : "DOWN";
+      redisStatus = redis.getRedisClient().isOpen ? "OK" : "DOWN";
 
       const result = await database.admin().ping();
       mongoStatus = result.ok === 1 ? "OK" : "DOWN";
@@ -100,7 +103,7 @@ router.get(
       //throw traceError(error, "RouteIndex : getStatus");
       console.log(traceError(error, "RouteIndex : getStatus"));
     }
-  })
+  }),
 );
 
 // see the mongodb and redis client status
@@ -130,7 +133,7 @@ router.get(
       Promise.reject("Invalid password"); // unhandledRejection event is emitted, the process craches
       res.json("unhandledRejection");
     } else res.json("OK");
-  })
+  }),
 );
 
 router.use("/docs", docsRoute);

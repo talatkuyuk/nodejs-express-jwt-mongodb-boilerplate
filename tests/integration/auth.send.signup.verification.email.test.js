@@ -3,7 +3,6 @@ const httpStatus = require("http-status");
 const jwt = require("jsonwebtoken");
 
 const app = require("../../src/core/express");
-const config = require("../../src/config");
 
 const { authuserDbService, tokenDbService, emailService } = require("../../src/services");
 const { tokenTypes } = require("../../src/config/tokens");
@@ -18,14 +17,21 @@ setupRedis();
 
 describe("POST /auth/send-signup-verification-email", () => {
   const userAgent = "from-jest-test";
-  let accessToken, authuserId, authuserEmail;
+
+  /** @type {string} */
+  let accessToken;
+
+  /** @type {string} */
+  let authuserId;
+
+  /** @type {string} */
+  let authuserEmail;
 
   beforeEach(async () => {
-    const { authuser, tokens } = await TestUtil.createAuthUser({
+    const { authuser, tokens } = await TestUtil.createAuthUser(userAgent, {
       email: "talat@google.com",
       password: "Pass1word!",
       providers: {},
-      userAgent,
     });
 
     authuserId = authuser.id;
@@ -66,7 +72,9 @@ describe("POST /auth/send-signup-verification-email", () => {
       };
 
       // spy on transporter to produce error
-      jest.spyOn(emailService.transporter, "sendMail").mockImplementation(() => Promise.reject(smtpResponse));
+      jest
+        .spyOn(emailService.transporter, "sendMail")
+        .mockImplementation(() => Promise.reject(smtpResponse));
 
       const response = await request(app)
         .post("/auth/send-signup-verification-email")
@@ -88,7 +96,9 @@ describe("POST /auth/send-signup-verification-email", () => {
       };
 
       // spy on transporter to produce error
-      jest.spyOn(emailService.transporter, "sendMail").mockImplementation(() => Promise.reject(smtpResponse));
+      jest
+        .spyOn(emailService.transporter, "sendMail")
+        .mockImplementation(() => Promise.reject(smtpResponse));
 
       const response = await request(app)
         .post("/auth/send-signup-verification-email")
@@ -104,10 +114,23 @@ describe("POST /auth/send-signup-verification-email", () => {
 
   describe("Success send-signup-verification-email process", () => {
     test("should return status 204, generate and store verify-signup token in db", async () => {
-      // spy on transporter and sendSignupVerificationEmail of the emailService
-      jest.spyOn(emailService.transporter, "sendMail").mockResolvedValue("The verification email is sent.");
+      // spy on transporter and resolve interface SentMessageInfo
+      jest.spyOn(emailService.transporter, "sendMail").mockResolvedValue(
+        Promise.resolve({
+          envelope: { from: "from@xxx.com", to: ["to@xxx.com"] },
+          messageId: "fake-message-id",
+          accepted: ["to@xxx.com"],
+          rejected: [],
+          pending: [],
+          response: "The verification email is sent.",
+        }),
+      );
 
-      const spyOnSendSignupVerificationEmail = jest.spyOn(emailService, "sendSignupVerificationEmail");
+      // spy on sendSignupVerificationEmail of the emailService
+      const spyOnSendSignupVerificationEmail = jest.spyOn(
+        emailService,
+        "sendSignupVerificationEmail",
+      );
 
       const response = await request(app)
         .post("/auth/send-signup-verification-email")
@@ -118,23 +141,26 @@ describe("POST /auth/send-signup-verification-email", () => {
       expect(response.status).toBe(httpStatus.OK);
       expect(response.body.success).toBe(true);
 
-      expect(spyOnSendSignupVerificationEmail).toHaveBeenCalledWith(authuserEmail, expect.any(String));
+      expect(spyOnSendSignupVerificationEmail).toHaveBeenCalledWith(
+        authuserEmail,
+        expect.any(String),
+      );
 
       // obtain the token from the function on that spied
       const verifySignupToken = spyOnSendSignupVerificationEmail.mock.calls[0][1];
 
       // check the verify email token belongs to the authuser
-      const { sub } = jwt.decode(verifySignupToken, config.jwt.secret);
-      expect(sub).toEqual(authuserId);
+      const payload = jwt.decode(verifySignupToken, { json: true });
+      expect(payload?.sub).toEqual(authuserId);
 
       // check the verify email token is stored in db
-      const verifySignupTokenDoc = await tokenDbService.getToken({
+      const verifySignupTokenInstance = await tokenDbService.getToken({
         token: verifySignupToken,
         user: authuserId,
         type: tokenTypes.VERIFY_SIGNUP,
       });
 
-      expect(verifySignupTokenDoc.user).toEqual(authuserId);
+      expect(verifySignupTokenInstance?.user).toEqual(authuserId);
     });
   });
 });

@@ -1,7 +1,6 @@
 const { body, query } = require("express-validator");
 const {
   check_body_email,
-  check_body_email_isTaken,
   check_body_password,
   check_body_passwordConfirmation,
 } = require("./common.ValidationRules");
@@ -9,12 +8,10 @@ const {
 const loginValidationRules = [
   ...check_body_email,
 
-  body("password")
-    .exists({ checkFalsy: true })
-    .withMessage("must not be empty"),
+  body("password").exists({ checkFalsy: true }).withMessage("must not be empty"),
 
   body()
-    .custom((body, { req }) => {
+    .custom((_body, { req }) => {
       const validKeys = ["email", "password"];
       return Object.keys(req.body).every((key) => validKeys.includes(key));
     })
@@ -28,7 +25,7 @@ const signupValidationRules = [
   ...check_body_passwordConfirmation,
 
   body()
-    .custom((body, { req }) => {
+    .custom((_body, { req }) => {
       const validKeys = ["email", "password", "passwordConfirmation"];
       return Object.keys(req.body).every((key) => validKeys.includes(key));
     })
@@ -36,9 +33,7 @@ const signupValidationRules = [
 ];
 
 const refreshTokensValidationRules = [
-  body("refreshToken")
-    .notEmpty()
-    .withMessage("refresh token must not be empty"),
+  body("refreshToken").notEmpty().withMessage("refresh token must not be empty"),
 ];
 
 const forgotPasswordValidationRules = [...check_body_email];
@@ -50,9 +45,7 @@ const resetPasswordValidationRules = [
   body("token").notEmpty().withMessage("token is missing"),
 ];
 
-const verifyEmailValidationRules = [
-  body("token").notEmpty().withMessage("token is missing"),
-];
+const verifyEmailValidationRules = [body("token").notEmpty().withMessage("token is missing")];
 
 const googleValidationRules = [
   query("method")
@@ -63,9 +56,7 @@ const googleValidationRules = [
     .withMessage("The query param 'method' could be only 'token' or 'code'"),
 ];
 
-const verifySignupValidationRules = [
-  body("token").notEmpty().withMessage("token is missing"),
-];
+const verifySignupValidationRules = [body("token").notEmpty().withMessage("token is missing")];
 
 const unlinkProviderValidationRules = [
   query("provider")

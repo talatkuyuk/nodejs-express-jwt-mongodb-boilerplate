@@ -1,3 +1,5 @@
+const EventEmitter = require("node:events");
+
 const unhandledErrors = require("../testutils/unhandledErrors");
 
 describe("Process events", () => {
@@ -6,40 +8,43 @@ describe("Process events", () => {
   });
 
   test("should handle uncaughtException", () => {
-    const mError = new Error("Server internal error");
+    const error = new Error("Server internal error");
 
-    jest.spyOn(process, "on").mockImplementation((event, handler) => {
+    const mockProcess = new EventEmitter();
+    jest.spyOn(process, "on").mockImplementation((event, listener) => {
       if (event === "uncaughtException") {
-        handler(mError);
+        listener(error);
       }
+
+      mockProcess.on(event, listener);
+      return process;
     });
 
     jest.spyOn(console, "error").mockReturnValueOnce();
+    // @ts-ignore
     jest.spyOn(process, "exit").mockReturnValueOnce();
 
     unhandledErrors();
 
-    expect(process.on).toBeCalledWith(
-      "uncaughtException",
-      expect.any(Function)
-    );
-    expect(process.exit).toBeCalledWith(1);
-    expect(console.error).toBeCalledWith("Server internal error");
+    expect(process.on).toHaveBeenCalledWith("uncaughtException", expect.any(Function));
+    expect(process.exit).toHaveBeenCalledWith(1);
+    expect(console.error).toHaveBeenCalledWith("Server internal error");
   });
 
   test("should handle unhandledRejection", () => {
-    const mError = new Error("dead lock");
+    const error = new Error("dead lock");
 
-    jest.spyOn(process, "on").mockImplementation((event, handler) => {
+    const mockProcess = new EventEmitter();
+    jest.spyOn(process, "on").mockImplementation((event, listener) => {
       if (event === "unhandledRejection") {
-        handler(mError);
+        listener(error);
       }
+
+      mockProcess.on(event, listener);
+      return process;
     });
 
-    expect(() => unhandledErrors()).toThrowError("dead lock");
-    expect(process.on).toBeCalledWith(
-      "unhandledRejection",
-      expect.any(Function)
-    );
+    expect(() => unhandledErrors()).toThrow("dead lock");
+    expect(process.on).toHaveBeenCalledWith("unhandledRejection", expect.any(Function));
   });
 });
