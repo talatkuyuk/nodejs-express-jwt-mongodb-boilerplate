@@ -1,3 +1,5 @@
+/** @typedef {import('express').RequestHandler} RequestHandler */
+
 const passport = require("passport");
 const httpStatus = require("http-status");
 
@@ -5,19 +7,32 @@ const ApiError = require("../utils/ApiError");
 const { traceError } = require("../utils/errorUtils");
 const { redisService } = require("../services");
 
-// The Strategies which is related with the "service" are registered into the passport in express(app),
-// and the strategy is going to be processed in the passport oAuthVerify, considering the "service"
-const oAuth = (service) => async (req, res, next) => {
+// The Strategies which is related with the "provider" are registered into the passport in express(app),
+// and the strategy is going to be processed in the passport oAuthVerify, considering the "provider"
+
+/**
+ *
+ * @param {import('../services/authProviders').AuthProvider} provider
+ * @returns {RequestHandler}
+ */
+const oAuth = (provider) => async (req, res, next) => {
   return new Promise((resolve, reject) => {
     passport.authenticate(
-      service,
+      provider,
       { session: false },
+      /**
+       * see parameters of {import('passport').AuthenticateCallback}
+       *
+       * @param {any} err
+       * @param {import('../services/authProviders').AuthProviderResult} oAuth
+       * @param {object | string | Array<string | undefined>} info
+       */
       async function (err, oAuth, info) {
         try {
           if (err) {
             if (
               ["ENOTFOUND", "socket", "connection", "ECONNRESET"].some((el) =>
-                err.message?.includes(el)
+                err.message?.includes(el),
               )
             )
               err.message = "Auth provider connection error occured, try later";
@@ -28,31 +43,30 @@ const oAuth = (service) => async (req, res, next) => {
             if (typeof info === "string")
               throw new ApiError(
                 httpStatus.BAD_REQUEST,
-                `Badly formed Authorization Header with Bearer. [${info}]`
+                `Badly formed Authorization Header with Bearer. [${info}]`,
               );
 
-            if (info instanceof Error)
-              throw new ApiError(httpStatus.BAD_REQUEST, info);
+            if (info instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, info);
           }
 
           if (!oAuth) {
             throw new ApiError(
               httpStatus.BAD_REQUEST,
-              "Badly formed Authorization Header with Bearer"
+              "Badly formed Authorization Header with Bearer",
             );
           }
 
-          if (!oAuth.user.id) {
+          if (!oAuth.identity.id) {
             throw new ApiError(
               httpStatus.UNAUTHORIZED,
-              `${service} authentication could not be associated with any identification`
+              `${provider} authentication could not be associated with any identification`,
             );
           }
 
-          if (!oAuth.user.email) {
+          if (!oAuth.identity.email) {
             throw new ApiError(
               httpStatus.UNAUTHORIZED,
-              `${service} authentication does not contain necessary email information`
+              `${provider} authentication does not contain necessary email information`,
             );
           }
 
@@ -60,21 +74,21 @@ const oAuth = (service) => async (req, res, next) => {
           if (await redisService.check_in_blacklist(oAuth.token)) {
             throw new ApiError(
               httpStatus.FORBIDDEN,
-              `The ${oAuth.provider} token is blacklisted, you have to re-login`
+              `The ${provider} token is blacklisted, you have to re-login`,
             );
           }
 
           // if everything is okey, then put the token into the blacklist aiming one-shot usage
           // this time we put the token itself not jti, since all authProviders' tokens does not contain a jti claim
-          await redisService.put_into_blacklist("token", oAuth);
+          await redisService.put_token_into_blacklist(oAuth.token, oAuth.expiresIn);
 
           req.oAuth = oAuth;
 
-          resolve();
+          resolve(undefined);
         } catch (error) {
           reject(traceError(error, "oAuthMiddleware : oAuth(callback)"));
         }
-      }
+      },
     )(req, res, next);
   })
     .then(() => next())

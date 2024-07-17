@@ -1,3 +1,5 @@
+/** @typedef {import("./authusers.test").AuthuserInResponse} AuthuserInResponse */
+
 const request = require("supertest");
 const httpStatus = require("http-status");
 
@@ -5,42 +7,69 @@ const app = require("../../src/core/express");
 
 const { userService, userDbService } = require("../../src/services");
 
-const TestUtil = require("../testutils/TestUtil");
-
 const { setupTestDatabase } = require("../setup/setupTestDatabase");
 const { setupRedis } = require("../setup/setupRedis");
+
+const User = require("../../src/models/user.model");
+const TestUtil = require("../testutils/TestUtil");
 
 setupTestDatabase();
 setupRedis();
 
+/**
+ * @typedef {Object} UserInResponse
+ * @property {string} id
+ * @property {string} email
+ * @property {"user"|"admin"} role
+ * @property {string} [name]
+ * @property {string} [gender]
+ * @property {string} [country]
+ * @property {number} createdAt
+ * @property {number|null} [updatedAt]
+ */
+
 describe("PATH /users", () => {
   const userAgent = "from-jest-test";
+
+  /** @type {Record<string, UserInResponse>} */
   const localDb = {}; // reflects the database users collection
+
+  /** @type {string} */
   let adminAccessToken;
 
   beforeEach(async () => {
     // create an authuser
-    const response = await request(app)
-      .post("/auth/signup")
-      .set("User-Agent", userAgent)
-      .send({
-        email: "admin@gmail.com",
-        password: "Pass1word!",
-        passwordConfirmation: "Pass1word!",
-      });
+    const response = await request(app).post("/auth/signup").set("User-Agent", userAgent).send({
+      email: "admin@gmail.com",
+      password: "Pass1word!",
+      passwordConfirmation: "Pass1word!",
+    });
+
+    expect(response.body.error).toBeUndefined();
 
     adminAccessToken = response.body.data.tokens.access.token;
+
+    /** @type {AuthuserInResponse} */
     const adminAuthuser = response.body.data.authuser;
 
     // create an admin user correspondent with the authuser
-    const adminUser = await userService.addUser(adminAuthuser.id, {
+    const adminUserInstance = await userService.addUser(adminAuthuser.id, {
       email: adminAuthuser.email,
       role: "admin",
       name: "Mr.Admin",
     });
 
-    // add admin authusers to localDb
-    localDb[adminUser.email] = { ...adminUser };
+    // add admin user to localDb
+    localDb[adminUserInstance.email] = {
+      id: adminUserInstance.id,
+      email: adminUserInstance.email,
+      role: adminUserInstance.role,
+      name: adminUserInstance.name,
+      gender: adminUserInstance.gender,
+      country: adminUserInstance.country,
+      createdAt: adminUserInstance.createdAt,
+      updatedAt: adminUserInstance.updatedAt,
+    };
   });
 
   describe("The success scenario for the users", () => {
@@ -62,7 +91,15 @@ describe("PATH /users", () => {
 		*/
 
     test("success scenario", async () => {
-      let response, data, user;
+      let response;
+
+      /** @type {boolean} */
+      let check;
+
+      /** @type {User|null} */
+      let userInstance = null;
+
+      /** @type {AuthuserInResponse[]} */
       const authusers = []; // holds the static data of the 10 authusers to be created
 
       // add a test authuser
@@ -76,9 +113,12 @@ describe("PATH /users", () => {
         .post("/authusers")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
-        .send(addFormForTestAuthuser)
-        .expect(httpStatus.CREATED);
+        .send(addFormForTestAuthuser);
 
+      expect(response.body.error).toBeUndefined();
+      expect(response.status).toBe(httpStatus.CREATED);
+
+      /** @type {AuthuserInResponse} */
       const testAuthuser = response.body.data.authuser;
 
       const addFormForTestUser = {
@@ -94,6 +134,9 @@ describe("PATH /users", () => {
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send(addFormForTestUser);
 
+      await expect(response.body.error).toBeUndefined();
+
+      /** @type {UserInResponse} */
       const testUser = response.body.data.user;
 
       // add test authuser to localDb
@@ -101,12 +144,8 @@ describe("PATH /users", () => {
 
       // check the testUser created above
       expect(response.status).toBe(httpStatus.CREATED);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
-      expect(response.headers["location"]).toEqual(
-        expect.stringContaining("/users/")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
+      expect(response.headers["location"]).toEqual(expect.stringContaining("/users/"));
       expect(response.body.success).toBe(true);
       expect(testUser).toEqual({
         id: testAuthuser.id,
@@ -131,7 +170,11 @@ describe("PATH /users", () => {
             passwordConfirmation: "Pass1word!",
           });
 
-        authusers.push(response.body.data.authuser);
+        expect(response.body.error).toBeUndefined();
+
+        /** @type {AuthuserInResponse} */
+        const authuser = response.body.data.authuser;
+        authusers.push(authuser);
       }
 
       // add ten users correspondent
@@ -148,16 +191,16 @@ describe("PATH /users", () => {
             country: i % 3 == 1 ? "USA" : "TUR",
           });
 
+        expect(response.body.error).toBeUndefined();
+
+        /** @type {UserInResponse} */
         const user = response.body.data.user;
         localDb[user.email] = user;
       }
 
       // check random 8th user exists in db
-      data = await userService.isExist(
-        localDb["user8@gmail.com"].id,
-        "user8@gmail.com"
-      );
-      expect(data).toBeTruthy();
+      check = await userService.isExist(localDb["user8@gmail.com"].id);
+      expect(check).toBeTruthy();
 
       // get all users and check the count
       response = await request(app)
@@ -166,71 +209,88 @@ describe("PATH /users", () => {
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send();
 
+      expect(response.body.error).toBeUndefined();
+
       expect(response.status).toBe(httpStatus.OK);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
       expect(response.body.success).toBe(true);
       expect(response.body.data.users.length).toBe(12); // including admin and test users
 
       // update some as country ITA
       for (let i = 1; i <= 10; i++) {
         if (i % 5 === 0) {
-          await request(app)
+          response = await request(app)
             .put(`/users/${authusers[i - 1]["id"]}`)
             .set("User-Agent", userAgent)
             .set("Authorization", `Bearer ${adminAccessToken}`)
             .send({ country: "ITA" })
             .expect(httpStatus.OK);
 
+          expect(response.body.error).toBeUndefined();
+
           localDb[authusers[i - 1]["email"]].country = "ITA";
 
-          const updatedUser = await userDbService.getUser({
+          const updatedUserInstance = await userDbService.getUser({
             id: authusers[i - 1]["id"],
           });
-          localDb[authusers[i - 1]["email"]].updatedAt = updatedUser.updatedAt;
+
+          if (!updatedUserInstance) {
+            throw new Error("Unexpected fail in db operation while gettitng updated user");
+          }
+
+          localDb[authusers[i - 1]["email"]].updatedAt = updatedUserInstance.updatedAt;
         }
       }
 
       // delete 3th, 6th and 9th
       for (let i = 1; i <= 10; i++) {
         if (i % 3 === 0) {
-          await request(app)
+          response = await request(app)
             .delete(`/users/${authusers[i - 1]["id"]}`)
             .set("User-Agent", userAgent)
             .set("Authorization", `Bearer ${adminAccessToken}`)
             .send()
             .expect(httpStatus.OK);
 
+          expect(response.body.error).toBeUndefined();
+
           delete localDb[authusers[i - 1]["email"]];
         }
       }
 
       // control the 3th, 6th and 9th users are in the deletedusers
-      user = await userService.getDeletedUserById(authusers[8]["id"]);
-      expect(user).toBeDefined();
-      user = await userService.getDeletedUserById(authusers[5]["id"]);
-      expect(user).toBeDefined();
-      user = await userService.getDeletedUserById(authusers[2]["id"]);
-      expect(user.deletedAt).toEqual(expect.any(Number));
+      userInstance = await userService.getDeletedUserById(authusers[8]["id"]);
+      expect(userInstance).toBeDefined();
+      userInstance = await userService.getDeletedUserById(authusers[5]["id"]);
+      expect(userInstance).toBeDefined();
+      userInstance = await userService.getDeletedUserById(authusers[2]["id"]);
+      expect(userInstance?.deletedAt).toEqual(expect.any(Number));
 
       // get all users
       response = await request(app)
         .get("/users")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
-        .send()
-        .expect(httpStatus.OK);
+        .send();
+
+      expect(response.body.error).toBeUndefined();
+      expect(response.status).toBe(httpStatus.OK);
 
       // check the last added one is the first user, the default sort is descending createdAt
       expect(response.body.success).toBe(true);
       expect(response.body.data.users.length).toBe(9);
       expect(response.body.data.users[0]["email"]).toBe("user10@gmail.com");
 
-      // check localDb is equal to db result
+      /**
+       * check localDb is equal to db result
+       * @param {UserInResponse} a
+       * @param {UserInResponse} b
+       * @returns
+       */
       const arraysort = (a, b) => a.createdAt - b.createdAt;
+
       expect(response.body.data.users.sort(arraysort)).toEqual(
-        Object.values(localDb).sort(arraysort)
+        Object.values(localDb).sort(arraysort),
       );
 
       // check the pagination
@@ -249,11 +309,11 @@ describe("PATH /users", () => {
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send();
 
+      expect(response.body.error).toBeUndefined();
+
       // check the user data
       expect(response.status).toBe(httpStatus.OK);
-      expect(response.headers["content-type"]).toEqual(
-        expect.stringContaining("json")
-      );
+      expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
       expect(response.body.success).toBe(true);
       expect(response.body.data.user).toEqual({
         id: authusers[9]["id"],
@@ -272,9 +332,11 @@ describe("PATH /users", () => {
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .query({ country: "USA", sort: "createdAt.asc" })
-        .send()
-        .expect(httpStatus.OK);
+        .send();
 
+      expect(response.body.error).toBeUndefined();
+
+      expect(response.status).toBe(httpStatus.OK);
       expect(response.body.success).toBe(true);
       expect(response.body.data.users.length).toBe(3);
       expect(response.body.data.users[0]["email"]).toBe("user1@gmail.com");
@@ -296,9 +358,11 @@ describe("PATH /users", () => {
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .query({ gender: "female", sort: "email", size: 2 })
-        .send()
-        .expect(httpStatus.OK);
+        .send();
 
+      expect(response.body.error).toBeUndefined();
+
+      expect(response.status).toBe(httpStatus.OK);
       expect(response.body.success).toBe(true);
       expect(response.body.data.users.length).toBe(2);
       expect(response.body.data.users[0]["email"]).toBe("user10@gmail.com");
@@ -319,9 +383,11 @@ describe("PATH /users", () => {
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .query({ gender: "female", sort: "email", size: 2, page: 2 })
-        .send()
-        .expect(httpStatus.OK);
+        .send();
 
+      expect(response.body.error).toBeUndefined();
+
+      expect(response.status).toBe(httpStatus.OK);
       expect(response.body.success).toBe(true);
       expect(response.body.data.users.length).toBe(2);
       expect(response.body.data.users[0]["email"]).toBe("user4@gmail.com");
@@ -337,21 +403,25 @@ describe("PATH /users", () => {
       });
 
       // change the role of the test user
-      await request(app)
+      response = await request(app)
         .patch(`/users/${testUser.id}`)
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
-        .send({ role: "admin" })
-        .expect(httpStatus.OK);
+        .send({ role: "admin" });
+
+      expect(response.body.error).toBeUndefined();
+      expect(response.status).toBe(httpStatus.OK);
 
       response = await request(app)
         .get("/users")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .query({ role: "admin" })
-        .send()
-        .expect(httpStatus.OK);
+        .send();
 
+      expect(response.body.error).toBeUndefined();
+
+      expect(response.status).toBe(httpStatus.OK);
       expect(response.body.success).toBe(true);
       expect(response.body.data.users.length).toBe(2); // 2 admin users
 
@@ -360,20 +430,25 @@ describe("PATH /users", () => {
       // add the corresponded user;
       // now check whether there are two users with the same email
 
-      await request(app)
+      response = await request(app)
         .delete(`/authusers/${testAuthuser.id}`)
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
-        .send()
-        .expect(httpStatus.OK);
+        .send();
+
+      expect(response.body.error).toBeUndefined();
+      expect(response.status).toBe(httpStatus.OK);
 
       response = await request(app)
         .post("/authusers")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
-        .send(addFormForTestAuthuser)
-        .expect(httpStatus.CREATED);
+        .send(addFormForTestAuthuser);
 
+      expect(response.body.error).toBeUndefined();
+      expect(response.status).toBe(httpStatus.CREATED);
+
+      /** @type {AuthuserInResponse} */
       const testAuthuser2 = response.body.data.authuser;
 
       const addFormForTestUser2 = {
@@ -388,22 +463,22 @@ describe("PATH /users", () => {
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .send(addFormForTestUser2);
 
+      expect(response.body.error).toBeUndefined();
+
       response = await request(app)
         .get("/users")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
         .query({ email: addFormForTestAuthuser.email })
-        .send()
-        .expect(httpStatus.OK);
+        .send();
 
+      expect(response.body.error).toBeUndefined();
+
+      expect(response.status).toBe(httpStatus.OK);
       expect(response.body.success).toBe(true);
       expect(response.body.data.users.length).toBe(2);
-      expect(response.body.data.users[0]["email"]).toBe(
-        addFormForTestAuthuser.email
-      );
-      expect(response.body.data.users[1]["email"]).toBe(
-        addFormForTestAuthuser.email
-      );
+      expect(response.body.data.users[0]["email"]).toBe(addFormForTestAuthuser.email);
+      expect(response.body.data.users[1]["email"]).toBe(addFormForTestAuthuser.email);
     });
   });
 
@@ -438,6 +513,7 @@ describe("PATH /users", () => {
         })
         .expect(httpStatus.CREATED);
 
+      /** @type {AuthuserInResponse} */
       const testAuthuser = response.body.data.authuser;
 
       const addForm1 = {
@@ -498,9 +574,7 @@ describe("PATH /users", () => {
 
       TestUtil.validationErrorExpectations(response);
       expect(response.body.error.errors).toEqual({
-        body: [
-          "There is no correspondent authenticated user with the same id and email",
-        ],
+        body: ["There is no correspondent authenticated user with the same id and email"],
       });
 
       // try to get an user with invalid id

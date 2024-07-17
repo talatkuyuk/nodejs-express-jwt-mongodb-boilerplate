@@ -1,3 +1,5 @@
+/** @typedef {import('../models/token.model')} Token */
+
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
 const crypto = require("crypto");
@@ -25,11 +27,11 @@ const redisService = require("./redis.service");
 /**
  * Generate token
  * @param {string} userId
- * @param {Moment} expires
- * @param {tokenTypes} type
- * @param {string} jti
- * @param {string} userAgent
- * @param {Moment} notValidBefore
+ * @param {moment.Moment} expires
+ * @param {import('../config/tokens').TokenType} type
+ * @param {string} [jti]
+ * @param {string} [userAgent]
+ * @param {string|number} [notValidBefore]
  * @param {string} [secret]
  * @returns {string}
  */
@@ -40,7 +42,7 @@ const generateToken = (
   jti = "n/a",
   userAgent = "n/a",
   notValidBefore = 0,
-  secret = config.jwt.secret
+  secret = config.jwt.secret,
 ) => {
   try {
     const now = moment().unix();
@@ -62,86 +64,104 @@ const generateToken = (
  * Verify token and return token document (or throw an error if it is not valid)
  * is used only by auth.service (verifyEmail, resetPassword)
  * @param {string} token
- * @param {string} type
+ * @param {import('../config/tokens').TokenType} type
  * @returns {Promise<Token>}
  */
 const verifyToken = async (token, type) => {
   try {
     const payload = jwt.verify(token, config.jwt.secret);
 
-    const tokenDoc = await tokenDbService.getToken({
+    if (typeof payload === "string") {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "The token is valid but couldn't verified");
+    }
+
+    const tokenInstance = await tokenDbService.getToken({
       token,
       user: payload.sub,
       type,
     });
 
-    if (!tokenDoc)
+    if (!tokenInstance) {
       throw new ApiError(httpStatus.UNAUTHORIZED, "The token is not valid");
+    }
 
-    if (tokenDoc.blacklisted)
+    if (tokenInstance.blacklisted) {
       throw new ApiError(httpStatus.UNAUTHORIZED, "The token is blacklisted");
+    }
 
-    return tokenDoc;
+    return tokenInstance;
   } catch (error) {
+    let err = error;
+
     if (
-      error.name === "TokenExpiredError" ||
-      error.name === "JsonWebTokenError"
+      error instanceof Error &&
+      (error.name === "TokenExpiredError" || error.name === "JsonWebTokenError")
     ) {
-      const err = new ApiError(httpStatus.UNAUTHORIZED, error);
-      throw traceError(err, "TokenService : verifyToken");
-    } else throw traceError(error, "TokenService : verifyToken");
+      err = new ApiError(httpStatus.UNAUTHORIZED, error);
+    }
+
+    throw traceError(err, "TokenService : verifyToken");
+  }
+};
+
+/**
+ * Control if refresh token is in DB and get token instance
+ * @param {string} refreshTokenString
+ * @returns {Promise<Token>}
+ */
+const getRefreshToken = async (refreshTokenString) => {
+  try {
+    const refreshToken = await tokenDbService.getToken({
+      token: refreshTokenString,
+      type: tokenTypes.REFRESH,
+    });
+
+    if (!refreshToken) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "The refresh token is not valid");
+    }
+
+    return refreshToken;
+  } catch (error) {
+    throw traceError(error, "TokenService : getRefreshToken");
   }
 };
 
 /**
  * Establish RTR (Refresh Token Rotation) and return token doc (or throw an error if any security problem)
- * @param {string} token
- * @param {string} userAgent
- * @returns {Promise<Token>}
+ * @param {Token} refreshToken
+ * @param {string} [userAgent]
+ * @returns {Promise<void>}
  */
 const refreshTokenRotation = async (refreshToken, userAgent) => {
-  // Step-1: control if that RT (Refresh Token) is in DB
+  // Step-1: control if that RT (Refresh Token) is in DB (done with getRefreshToken)
   // Step-2: control if that RT is blacklisted
   // Step-3: control if that RT is valid
   // Step-3a: if it is before than notValidBefore time
   // Step-3b: if it is expired
   // Step-4: control if it comes from different user agent
 
-  console.log(`refreshTokenRotation: start`);
-
-  // reachable from both try-catch blocks
-  let refreshTokenDoc = null;
-
   try {
-    // Step-1: control if that RT is in DB
-    refreshTokenDoc = await tokenDbService.getToken({
-      token: refreshToken,
-      type: tokenTypes.REFRESH,
-    });
-
-    if (!refreshTokenDoc) {
-      throw new ApiError(
-        httpStatus.UNAUTHORIZED,
-        "The refresh token is not valid"
-      );
-    }
+    console.log(`refreshTokenRotation: start`);
 
     // Step-2: control if that RT is blacklisted
-    if (refreshTokenDoc.blacklisted) {
-      console.log(
-        `refreshTokenRotation: ${refreshTokenDoc.id} is in blacklisted`
-      );
+    if (refreshToken.blacklisted) {
+      console.log(`refreshTokenRotation: ${refreshToken.id} is in blacklisted`);
 
-      // disable the refresh token family
-      await disableFamilyRefreshToken(refreshTokenDoc);
+      console.log(`refreshTokenRotation: disable family refreshtoken for ${refreshToken.id}`);
 
-      throw new ApiError(
-        httpStatus.UNAUTHORIZED,
-        "The refresh token is blacklisted"
-      );
+      // disable refresh token family including current
+      await disableFamilyRefreshToken(refreshToken.family);
+
+      throw new ApiError(httpStatus.UNAUTHORIZED, "The refresh token is blacklisted");
     }
 
-    const payload = jwt.decode(refreshToken, config.jwt.secret);
+    /**************** USERAGENT CONTROL SECTION **************/
+
+    const payload = jwt.decode(refreshToken.token, { json: true });
+
+    if (!payload) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "The refresh token couldn't be decoded");
+    }
 
     // Step-3: control if it comes from different user agent
     if (payload.ua !== userAgent) {
@@ -149,104 +169,107 @@ const refreshTokenRotation = async (refreshToken, userAgent) => {
 
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
-        "Your browser/agent seems changed or updated, you have to re-login"
+        "Your browser/agent seems changed or updated, you have to re-login",
       );
     }
 
+    /**************** MAIN VERIFICATION SECTION **************/
+
     // Step-4: control if that RT is valid
-    jwt.verify(refreshToken, config.jwt.secret);
+    jwt.verify(refreshToken.token, config.jwt.secret);
 
     // okey then, success refresh token rotation happened;
     // update the refresh token with the { blacklisted: true }
-    await updateTokenAsBlacklisted(refreshTokenDoc.id);
+    await updateTokenAsBlacklisted(refreshToken.id);
 
-    return refreshTokenDoc;
+    // make current refresh token is blacklisted as well
+    refreshToken.blacklisted = true;
   } catch (error) {
     console.log(`refreshTokenRotation: in catch error`);
 
-    if (error.name === "NotBeforeError") {
-      console.log(`refreshTokenRotation:  The error is NotBeforeError`);
+    let err = error;
+
+    if (error instanceof Error && error.name === "NotBeforeError") {
+      console.log(`refreshTokenRotation: The error is NotBeforeError`);
 
       if (config.jwt.isInvalidRefreshNBT) {
         // Step-3a: if it is before than notValidBefore time,
         // Disable the refresh token family since someone else could use it
-        await disableFamilyRefreshToken(refreshTokenDoc);
+        console.log(`refreshTokenRotation: disable family refreshtoken for ${refreshToken.id}`);
 
-        error = new ApiError(
+        await disableFamilyRefreshToken(refreshToken.family);
+
+        err = new ApiError(
           httpStatus.UNAUTHORIZED,
-          "Unauthorized usage of refresh token has been detected"
+          "Unauthorized usage of refresh token has been detected",
         );
       } else {
         // okey then, success refresh token rotation happened;
         // update the refresh token with the { blacklisted: true }
-        await updateTokenAsBlacklisted(refreshTokenDoc.id);
+        await updateTokenAsBlacklisted(refreshToken.id);
 
-        return refreshTokenDoc;
+        // make current refresh token is blacklisted as well
+        refreshToken.blacklisted = true;
       }
     }
 
-    if (error.name === "TokenExpiredError") {
+    if (error instanceof Error && error.name === "TokenExpiredError") {
       console.log("refreshTokenRotation: The error is TokenExpiredError");
 
       // Step-3b: if it is expired (means it is not blacklisted and it is the last issued RT)
 
       // Delete the refresh token family
-      await removeTokens({ family: refreshTokenDoc.family });
+      await removeTokens({ family: refreshToken.family });
 
       // No need to put the related access token into the cached blacklist.
 
-      error = new ApiError(
+      err = new ApiError(
         httpStatus.UNAUTHORIZED,
-        "The refresh token is expired, you have to re-login"
+        "The refresh token is expired, you have to re-login",
       );
     }
 
-    throw traceError(error, "TokenService : refreshTokenRotation");
+    throw traceError(err, "TokenService : refreshTokenRotation");
   }
 };
 
 /**
  * Disable the family of the RT [security problem in RTR (Refresh Token Rotation)] and throw an error
- * @param {Token} refreshTokenDoc
+ * @param {string} family
  * @returns {Promise<void>}
  */
-const disableFamilyRefreshToken = async (refreshTokenDoc) => {
+const disableFamilyRefreshToken = async (family) => {
   try {
-    console.log(
-      `disableFamilyRefreshToken: ${refreshTokenDoc.id} family: ${refreshTokenDoc.family}`
-    );
+    console.log(`disableFamilyRefreshToken: family: ${family}`);
 
     // Get refresh token descandents not in the blacklist
-    const not_blacklisted_family_member_refresh_tokens =
-      await tokenDbService.getTokens({
-        family: refreshTokenDoc.family,
-        blacklisted: false,
-      });
+    const not_blacklisted_family_member_refresh_tokens = await tokenDbService.getTokens({
+      family,
+      blacklisted: false,
+    });
 
     const size = not_blacklisted_family_member_refresh_tokens?.length ?? 0;
-    console.log(
-      `disableFamilyRefreshToken: not-blacklisted-family-size: ${size}`
-    );
+    console.log(`disableFamilyRefreshToken: not-blacklisted-family-size: ${size}`);
 
     // if no not-blacklisted, means that whole family was disabled before,
     // and now, whole family should be deleted because the second bad usage happens
     if (size === 0) {
       // Delete the refresh token family
-      await removeTokens({ family: refreshTokenDoc.family });
+      await removeTokens({ family });
 
       // No need to put the related access token into the cached blacklist, since it was done before
 
       // if there is not-blacklisted, means that the security isssue happens the first time
       // and each refresh token should be blacklisted and so related access token should too.
     } else {
-      for (tokenRecord of not_blacklisted_family_member_refresh_tokens) {
+      for (const tokenRecord of not_blacklisted_family_member_refresh_tokens) {
         console.log(`disableFamilyRefreshToken: in loop: ${tokenRecord.id}`);
 
         // Update each refresh token with the { blacklisted: true }
         await updateTokenAsBlacklisted(tokenRecord.id);
 
         // put the related access token's jti into the blacklist
-        await redisService.put_into_blacklist("jti", tokenRecord.jti);
+        await redisService.put_jti_into_blacklist(tokenRecord.jti);
       }
     }
   } catch (error) {
@@ -256,10 +279,18 @@ const disableFamilyRefreshToken = async (refreshTokenDoc) => {
 
 /**
  * Generate auth tokens
+ * @typedef {Object} TokenResult
+ * @property {string} token
+ * @property {string} expires
+ *
+ * @typedef {Object} AuthTokens
+ * @property {TokenResult} access
+ * @property {TokenResult} refresh
+ *
  * @param {string} userId
- * @param {string} userAgent
- * @param {string} family
- * @returns {Promise<{ access: Object, refresh: Token }>}
+ * @param {string} [userAgent]
+ * @param {string} [family]
+ * @returns {Promise<AuthTokens>}
  */
 const generateAuthTokens = async (userId, userAgent, family) => {
   try {
@@ -268,16 +299,17 @@ const generateAuthTokens = async (userId, userAgent, family) => {
 
     const accessToken = generateAccessToken(userId, userAgent, jti);
 
-    const refreshToken = await generateRefreshToken(
-      userId,
-      userAgent,
-      jti,
-      family
-    );
+    const refreshToken = await generateRefreshToken(userId, userAgent, jti, family);
 
     return {
-      access: accessToken,
-      refresh: refreshToken,
+      access: {
+        token: accessToken.token,
+        expires: accessToken.expires,
+      },
+      refresh: {
+        token: refreshToken.token,
+        expires: refreshToken.expires.toISOString(),
+      },
     };
   } catch (error) {
     throw traceError(error, "TokenService : generateAuthTokens");
@@ -285,68 +317,58 @@ const generateAuthTokens = async (userId, userAgent, family) => {
 };
 
 /**
- * Generate access token
+ * Generate access token, it returns different than others, don't returns Token instance
  * @param {string} userId
- * @returns {Promise<Object>}
+ * @param {string} [userAgent]
+ * @param {string} [jti]
+ * @returns {TokenResult}
  */
 const generateAccessToken = (userId, userAgent, jti) => {
   try {
-    const accessTokenExpires = moment().add(
-      config.jwt.accessExpirationMinutes,
-      "minutes"
-    );
+    const expires = moment().add(config.jwt.accessExpirationMinutes, "minutes");
 
-    const accessToken = generateToken(
-      userId,
-      accessTokenExpires,
-      tokenTypes.ACCESS,
-      jti,
-      userAgent
-    );
+    const tokenString = generateToken(userId, expires, tokenTypes.ACCESS, jti, userAgent);
 
-    return { token: accessToken, expires: accessTokenExpires };
+    return { token: tokenString, expires: expires.toISOString() };
   } catch (error) {
     throw traceError(error, "TokenService : generateAccessToken");
   }
 };
 
 /**
- * Generate refresh token and save the token document into db
+ * Generate refresh token, save the token document into db and returns the Token instance
  * @param {string} userId
+ * @param {string} [userAgent]
+ * @param {string} [jti]
+ * @param {string} [family]
  * @returns {Promise<Token>}
  */
 const generateRefreshToken = async (userId, userAgent, jti, family) => {
   try {
-    const refreshTokenExpires = moment().add(
-      config.jwt.refreshExpirationDays,
-      "days"
-    );
+    const expires = moment().add(config.jwt.refreshExpirationDays, "days");
 
     const tokenString = generateToken(
       userId,
-      refreshTokenExpires,
+      expires,
       tokenTypes.REFRESH,
       jti,
       userAgent,
-      config.jwt.accessExpirationMinutes * 60 // not valid before is 60
+      config.jwt.accessExpirationMinutes * 60, // not valid before is 60
     );
 
-    const tokenObject = new Token(
-      tokenString,
-      userId,
-      refreshTokenExpires.toDate(),
-      tokenTypes.REFRESH,
-      jti,
-      family ?? `${userId}-${jti}`
-    );
+    const refreshToken = await tokenDbService.addToken({
+      token: tokenString,
+      user: userId,
+      expires: expires.toDate(),
+      type: tokenTypes.REFRESH,
+      jti: jti ?? "n/a",
+      family: family ?? `${userId}-${jti}`,
+      blacklisted: false,
+    });
 
-    const refreshToken = await tokenDbService.addToken(tokenObject);
-
-    if (!refreshToken)
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "The database could not process the request"
-      );
+    if (!refreshToken) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
+    }
 
     return refreshToken;
   } catch (error) {
@@ -355,37 +377,29 @@ const generateRefreshToken = async (userId, userAgent, jti, family) => {
 };
 
 /**
- * Generate reset password token and save the token document into db
+ * Generate reset password token, save the token document into db and returns the Token instance
  * @param {string} userId
  * @returns {Promise<Token>}
  */
 const generateResetPasswordToken = async (userId) => {
   try {
-    const expires = moment().add(
-      config.jwt.resetPasswordExpirationMinutes,
-      "minutes"
-    );
+    const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, "minutes");
 
-    const tokenString = generateToken(
-      userId,
-      expires,
-      tokenTypes.RESET_PASSWORD
-    );
+    const tokenString = generateToken(userId, expires, tokenTypes.RESET_PASSWORD);
 
-    const tokenObject = new Token(
-      tokenString,
-      userId,
-      expires.toDate(),
-      tokenTypes.RESET_PASSWORD
-    );
+    /** @type {import("./token.db.service").TokenFields} */
+    const tokenObject = {
+      token: tokenString,
+      user: userId,
+      expires: expires.toDate(),
+      type: tokenTypes.RESET_PASSWORD,
+    };
 
     const resetPasswordToken = await tokenDbService.addToken(tokenObject);
 
-    if (!resetPasswordToken)
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "The database could not process the request"
-      );
+    if (!resetPasswordToken) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
+    }
 
     return resetPasswordToken;
   } catch (error) {
@@ -394,33 +408,28 @@ const generateResetPasswordToken = async (userId) => {
 };
 
 /**
- * Generate verify email token and save the token document into db
+ * Generate verify email token, save the token document into db and returns the Token instance
  * @param {string} userId
  * @returns {Promise<Token>}
  */
 const generateVerifyEmailToken = async (userId) => {
   try {
-    const expires = moment().add(
-      config.jwt.verifyEmailExpirationMinutes,
-      "minutes"
-    );
+    const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, "minutes");
 
     const tokenString = generateToken(userId, expires, tokenTypes.VERIFY_EMAIL);
 
-    const tokenObject = new Token(
-      tokenString,
-      userId,
-      expires.toDate(),
-      tokenTypes.VERIFY_EMAIL
-    );
+    /** @type {import("./token.db.service").TokenFields} */
+    const tokenObject = {
+      token: tokenString,
+      user: userId,
+      expires: expires.toDate(),
+      type: tokenTypes.VERIFY_EMAIL,
+    };
 
     const verifyEmailToken = await tokenDbService.addToken(tokenObject);
 
     if (!verifyEmailToken)
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "The database could not process the request"
-      );
+      throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
 
     return verifyEmailToken;
   } catch (error) {
@@ -429,37 +438,28 @@ const generateVerifyEmailToken = async (userId) => {
 };
 
 /**
- * Generate verify signup token and save the token document into db
+ * Generate verify signup token, save the token document into db and returns the Token instance
  * @param {string} userId
  * @returns {Promise<Token>}
  */
 const generateVerifySignupToken = async (userId) => {
   try {
-    const expires = moment().add(
-      config.jwt.verifySignupExpirationMinutes,
-      "minutes"
-    );
+    const expires = moment().add(config.jwt.verifySignupExpirationMinutes, "minutes");
 
-    const tokenString = generateToken(
-      userId,
-      expires,
-      tokenTypes.VERIFY_SIGNUP
-    );
+    const tokenString = generateToken(userId, expires, tokenTypes.VERIFY_SIGNUP);
 
-    const tokenObject = new Token(
-      tokenString,
-      userId,
-      expires.toDate(),
-      tokenTypes.VERIFY_SIGNUP
-    );
+    /** @type {import("./token.db.service").TokenFields} */
+    const tokenObject = {
+      token: tokenString,
+      user: userId,
+      expires: expires.toDate(),
+      type: tokenTypes.VERIFY_SIGNUP,
+    };
 
     const verifySignupToken = await tokenDbService.addToken(tokenObject);
 
     if (!verifySignupToken)
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "The database could not process the request"
-      );
+      throw new ApiError(httpStatus.BAD_REQUEST, "The database could not process the request");
 
     return verifySignupToken;
   } catch (error) {
@@ -470,15 +470,11 @@ const generateVerifySignupToken = async (userId) => {
 /**
  * Remove the token with the id and issue report
  * @param {string} id
- * @returns {Promise}
+ * @returns {Promise<void>}
  */
 const removeToken = async (id) => {
   try {
-    const { isDeleted, deletedCount } = await tokenDbService.deleteToken(id);
-
-    isDeleted
-      ? console.log(`${deletedCount} token deleted.`)
-      : console.log("No token is deleted.");
+    await tokenDbService.deleteToken(id);
   } catch (error) {
     throw traceError(error, "TokenService : removeToken");
   }
@@ -486,18 +482,21 @@ const removeToken = async (id) => {
 
 /**
  * Remove tokens that queried and issue report
- * @param {Object} query
- * @returns {Promise}
+ * @typedef {Object} TokenFields
+ * @property {Token["token"]} [token]
+ * @property {Token["user"]} [user]
+ * @property {Token["expires"]} [expires]
+ * @property {Token["type"]} [type]
+ * @property {Token["jti"]} [jti]
+ * @property {Token["family"]} [family]
+ * @property {Token["blacklisted"]} [blacklisted]
+ *
+ * @param {TokenFields} query
+ * @returns {Promise<void>}
  */
 const removeTokens = async (query) => {
   try {
-    const { isDeleted, deletedCount } = await tokenDbService.deleteTokens(
-      query
-    );
-
-    isDeleted
-      ? console.log(`${deletedCount} token(s) deleted.`)
-      : console.log("No token deleted.");
+    await tokenDbService.deleteTokens(query);
   } catch (error) {
     throw traceError(error, "TokenService : removeTokens");
   }
@@ -506,7 +505,7 @@ const removeTokens = async (query) => {
 /**
  * Update the token as blacklisted
  * @param {string} id
- * @returns {Promise}
+ * @returns {Promise<void>}
  */
 const updateTokenAsBlacklisted = async (id) => {
   try {
@@ -520,7 +519,7 @@ const updateTokenAsBlacklisted = async (id) => {
  * Find the token and remove family's token or user's tokens according to command option
  * @param {Object} query
  * @param {string} command
- * @returns {Promise}
+ * @returns {Promise<void>}
  */
 const findTokenAndRemoveFamily = async (query, command) => {
   try {
@@ -530,10 +529,7 @@ const findTokenAndRemoveFamily = async (query, command) => {
     // any bad usage of refresh token can cause it be deleted
     // TODO: make an analyze here how this situation happen
     if (!tokenDoc)
-      throw new ApiError(
-        httpStatus.UNAUTHORIZED,
-        "The refresh token is not valid"
-      );
+      throw new ApiError(httpStatus.UNAUTHORIZED, "The refresh token is not valid");
 
     // normally a refresh token can be blacklisted in only refresh token rotation,
     // during the refresh token rotation, access token that paired with refresh token is also blacklisted in cache
@@ -541,10 +537,7 @@ const findTokenAndRemoveFamily = async (query, command) => {
     // what if the redis down during refresh token rotation that causes the refresh token jti is not blacklisted
     // TODO: make a decision here: continue the process and get the user logged out or raise an error
     if (tokenDoc.blacklisted)
-      throw new ApiError(
-        httpStatus.UNAUTHORIZED,
-        "The refresh token is blacklisted"
-      );
+      throw new ApiError(httpStatus.UNAUTHORIZED, "The refresh token is blacklisted");
 
     if (command === "family") await removeTokens({ family: tokenDoc.family });
 
@@ -554,16 +547,35 @@ const findTokenAndRemoveFamily = async (query, command) => {
   }
 };
 
+/**
+ *
+ * @param {import('../config/tokens').TokenType} type
+ * @param {string} [expiresInString]
+ * @param {string} [userId]
+ * @param {string} [userAgent]
+ * @param {number} [nvb]
+ * @param {string} [jti]
+ * @param {string} [secret]
+ * @returns
+ */
 const generateTokenForTest = (
-  type = tokenTypes.REFRESH,
+  type,
+  expiresInString = "1 days",
   userId = "123456789012345678901234",
-  [interval, durationString] = [1, "days"],
   userAgent = "n/a",
   nvb = 0, // minutes
   jti = "n/a",
-  secret = config.jwt.secret
+  secret = config.jwt.secret,
 ) => {
   try {
+    const interval = /** @type {moment.DurationInputArg1} */ (
+      Number(expiresInString.split(" ")[0])
+    );
+
+    const durationString = /** @type {moment.DurationInputArg2} */ (
+      expiresInString.split(" ")[1]
+    );
+
     const expires = moment().add(interval, durationString);
 
     const payload = {
@@ -590,6 +602,7 @@ const generateTokenForTest = (
 module.exports = {
   generateToken,
   verifyToken,
+  getRefreshToken,
   refreshTokenRotation,
   generateAuthTokens,
   generateAccessToken,

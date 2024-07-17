@@ -5,7 +5,6 @@ const bcrypt = require("bcryptjs");
 const app = require("../../src/core/express");
 
 const { authuserDbService } = require("../../src/services");
-const { AuthUser } = require("../../src/models");
 
 const TestUtil = require("../testutils/TestUtil");
 
@@ -85,12 +84,13 @@ describe("POST /auth/login", () => {
 
     test("should return status 403, if the user is disabled", async () => {
       const hashedPassword = await bcrypt.hash("Pass1word.", 8);
-      const authuser = AuthUser.fromDoc({
+
+      await authuserDbService.addAuthUser({
         email: "talat@gmail.com",
         password: hashedPassword,
+        isEmailVerified: false,
         isDisabled: true,
       });
-      await authuserDbService.addAuthUser(authuser);
 
       const loginForm = {
         email: "talat@gmail.com",
@@ -100,17 +100,20 @@ describe("POST /auth/login", () => {
       const response = await request(app).post("/auth/login").send(loginForm);
 
       TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
-      expect(response.body.error.message).toEqual("You are disabled, call the system administrator");
+      expect(response.body.error.message).toEqual(
+        "You are disabled, call the system administrator",
+      );
     });
 
     test("should return status 401, if the password is wrong", async () => {
       const hashedPassword = await bcrypt.hash("Pass1word.", 8);
-      const authuser = AuthUser.fromDoc({
+
+      await authuserDbService.addAuthUser({
         email: "talat@gmail.com",
         password: hashedPassword,
+        isEmailVerified: false,
+        isDisabled: false,
       });
-
-      await authuserDbService.addAuthUser(authuser);
 
       const loginForm = {
         email: "talat@gmail.com",
@@ -128,13 +131,17 @@ describe("POST /auth/login", () => {
     test("should return status 200, user and valid tokens in json form; successfully login user if the request is valid", async () => {
       const hashedPassword = await bcrypt.hash("Pass1word.", 8);
 
-      const authuserDoc = AuthUser.fromDoc({
+      const authuser = await authuserDbService.addAuthUser({
         email: "talat@gmail.com",
         password: hashedPassword,
+        isEmailVerified: false,
+        isDisabled: false,
         providers: { emailpassword: true },
       });
 
-      const authuser = await authuserDbService.addAuthUser(authuserDoc);
+      if (!authuser) {
+        throw new Error("Unexpected db error while adding a document!");
+      }
 
       const loginForm = {
         email: authuser.email,

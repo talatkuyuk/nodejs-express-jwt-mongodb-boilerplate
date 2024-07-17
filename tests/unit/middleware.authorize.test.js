@@ -5,12 +5,9 @@ const { authorize } = require("../../src/middlewares");
 const ApiError = require("../../src/utils/ApiError");
 
 const userDbService = require("../../src/services/user.db.service");
-
-const TestUtil = require("../testutils/TestUtil");
+const User = require("../../src/models/user.model");
 
 describe("Authorization Middleware: Check the user right(s)", () => {
-  TestUtil.MatchErrors();
-
   // I've not create myuser and otheruser objects here, since the spyOn functions and mock implementations could not be cleared for each test.
   // that is why I've created these variables in each test
 
@@ -27,30 +24,30 @@ describe("Authorization Middleware: Check the user right(s)", () => {
     // The authorize middleware process the req.params and the req.authuser (attached in auth middleware) in its logic,
     // so it is enough to have the request object like below
 
+    /** @type {httpMocks.RequestOptions} */
     const request = {
       params: { id: otheruser.id },
-      authuser: myuser,
     };
+
+    request.authuser = myuser; // it is attached in authentication middleware
 
     const req = httpMocks.createRequest(request);
     const res = httpMocks.createResponse();
     const next = jest.fn();
 
     // lets assume that the user has "user" role
-    jest.spyOn(userDbService, "getUser").mockResolvedValue({ role: "user" });
+    jest.spyOn(userDbService, "getUser").mockResolvedValue(new User("user@xxx.com", "user"));
 
     await authorize("get-user")(req, res, next);
 
     const expectedError = new ApiError(
       httpStatus.FORBIDDEN,
-      "You are not authorized other than your data"
+      "You are authorized only your own data",
     );
 
     expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-    expect(next).toHaveBeenCalledWith(
-      expect.toBeMatchedWithError(expectedError)
-    );
-    expect(req.user.role).toEqual("user");
+    expect(next).toHaveBeenCalledWith(expect.toBeMatchedWithError(expectedError));
+    expect(req.user?.role).toEqual("user");
   });
 
   test("should throw ApiError with code 403 even if the admin tries to change password belongs to another user", async () => {
@@ -63,38 +60,39 @@ describe("Authorization Middleware: Check the user right(s)", () => {
       id: "999999999999999999999999",
     };
 
+    /** @type {httpMocks.RequestOptions} */
     const request = {
       params: { id: otheruser.id },
-      authuser: myuser,
     };
+
+    request.authuser = myuser; // it is attached in authentication middleware
 
     const req = httpMocks.createRequest(request);
     const res = httpMocks.createResponse();
     const next = jest.fn();
 
     // lets assume that the user is admin
-    jest.spyOn(userDbService, "getUser").mockResolvedValue({ role: "admin" });
+    jest.spyOn(userDbService, "getUser").mockResolvedValue(new User("user@xxx.com", "admin"));
 
     await authorize("change-password")(req, res, next);
 
     const expectedError = new ApiError(
       httpStatus.FORBIDDEN,
-      "You are not authorized other than your data"
+      "You are authorized only your own data",
     );
 
     expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-    expect(next).toHaveBeenCalledWith(
-      expect.toBeMatchedWithError(expectedError)
-    );
-    expect(req.user.role).toEqual("admin");
+    expect(next).toHaveBeenCalledWith(expect.toBeMatchedWithError(expectedError));
+    expect(req.user?.role).toEqual("admin");
   });
 
   test("should throw ApiError with code 403 if the user does not have appropriate right", async () => {
-    const request = {
-      authuser: {
-        id: "111111111111111111111111",
-      },
-    };
+    /** @type {httpMocks.RequestOptions} */
+    const request = {};
+
+    request.authuser = {
+      id: "111111111111111111111111",
+    }; // it is attached in authentication middleware
 
     const req = httpMocks.createRequest(request);
     const res = httpMocks.createResponse();
@@ -107,13 +105,11 @@ describe("Authorization Middleware: Check the user right(s)", () => {
 
     const expectedError = new ApiError(
       httpStatus.FORBIDDEN,
-      "You do not have appropriate right"
+      "You do not have appropriate right",
     );
 
     expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-    expect(next).toHaveBeenCalledWith(
-      expect.toBeMatchedWithError(expectedError)
-    );
+    expect(next).toHaveBeenCalledWith(expect.toBeMatchedWithError(expectedError));
     expect(req?.user?.role).toBeUndefined();
   });
 
@@ -122,10 +118,13 @@ describe("Authorization Middleware: Check the user right(s)", () => {
     const myuser = {
       id: "111111111111111111111111",
     };
+
+    /** @type {httpMocks.RequestOptions} */
     const request = {
       params: { id: myuser.id },
-      authuser: myuser,
     };
+
+    request.authuser = myuser; // it is attached in authentication middleware
 
     const req = httpMocks.createRequest(request);
     const res = httpMocks.createResponse();
@@ -142,43 +141,47 @@ describe("Authorization Middleware: Check the user right(s)", () => {
 
   test("should continue next middleware if the user has admin right", async () => {
     const id = "111111111111111111111111";
-    const request = {
-      authuser: { id },
-    };
+
+    /** @type {httpMocks.RequestOptions} */
+    const request = {};
+
+    request.authuser = { id }; // it is attached in authentication middleware
 
     const req = httpMocks.createRequest(request);
     const res = httpMocks.createResponse();
     const next = jest.fn();
 
     // lets assume that the user is admin
-    jest
-      .spyOn(userDbService, "getUser")
-      .mockResolvedValue({ id, role: "admin" });
+
+    const user = new User("user@xxx.com", "admin");
+    user.id = id;
+    jest.spyOn(userDbService, "getUser").mockResolvedValue(user);
 
     await authorize("query-users")(req, res, next);
 
     expect(next).toHaveBeenCalledWith();
-    expect(req.user.id).toEqual(id);
-    expect(req.user.role).toEqual("admin");
+    expect(req.user?.id).toEqual(id);
+    expect(req.user?.role).toEqual("admin");
   });
 
   test("should continue next middleware if there is no required rights for the specific express route", async () => {
-    const request = {
-      authuser: {
-        id: "111111111111111111111111",
-      },
+    /** @type {httpMocks.RequestOptions} */
+    const request = {};
+
+    request.authuser = {
+      id: "111111111111111111111111",
     };
 
     const req = httpMocks.createRequest(request);
     const res = httpMocks.createResponse();
     const next = jest.fn();
 
-    jest.spyOn(userDbService, "getUser").mockResolvedValue({ role: "user" });
+    jest.spyOn(userDbService, "getUser").mockResolvedValue(new User("user@xxx.com", "user"));
 
     await authorize()(req, res, next); // no parameter means that there is no required rights and will grant to do regardles of the user role.
 
     expect(next).toHaveBeenCalledWith();
     //expect(req.user.id).toEqual(authuser.id);
-    expect(req.user.role).toEqual("user");
+    expect(req.user?.role).toEqual("user");
   });
 });

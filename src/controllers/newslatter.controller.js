@@ -6,17 +6,28 @@ const { traceError } = require("../utils/errorUtils");
 // SERVICE DEPENDENCIES
 const { mailchimp } = require("../services");
 
-const subscribe = asyncHandler(async (req, res) => {
-  try {
-    const { email, name } = req.body;
+const subscribe = asyncHandler(
+  /**
+   * @typedef {Object} SubscribeNewslatterBody
+   * @property {string} email
+   * @property {string} name
+   *
+   * @param {import('express').Request<{}, any, SubscribeNewslatterBody, any>} req
+   * @param {import('express').Response} res
+   * @returns {Promise<void>}
+   */
+  async (req, res) => {
+    try {
+      const { email, name } = req.body;
 
-    await mailchimp.subscribe(email, name);
+      await mailchimp.subscribe(email, name);
 
-    res.status(httpStatus.OK).send({ success: true });
-  } catch (error) {
-    throw traceError(error, "NewslatterController : subscribe");
-  }
-});
+      res.status(httpStatus.OK).send({ success: true });
+    } catch (error) {
+      throw traceError(error, "NewslatterController : subscribe");
+    }
+  },
+);
 
 module.exports = {
   subscribe,

@@ -1,3 +1,6 @@
+/** @typedef {import('https').Server} HttpsServer */
+/** @typedef {import('http').Server} HttpServer */
+
 const fs = require("fs");
 const http = require("http");
 const https = require("https");
@@ -9,7 +12,12 @@ const logger = require("./core/logger");
 const mongodb = require("./core/mongodb");
 const redis = require("./core/redis");
 
-let httpServer, httpsServer;
+/**@type HttpServer | undefined */
+let httpServer;
+
+/**@type HttpsServer | undefined */
+let httpsServer;
+
 const SSLdirectory = path.join(__dirname, "/ssl/");
 
 async function start() {
@@ -24,7 +32,7 @@ async function start() {
       const cert = fs.readFileSync(SSLdirectory + "localhost.pem", "utf8");
       const credentials = { key, cert };
 
-      httpsServer = https.createServer(credentials, app);
+      const httpsServer = https.createServer(credentials, app);
       httpsServer.listen(port, function () {
         logger.info("Https Server started on port " + port);
       });
@@ -50,6 +58,10 @@ async function start() {
 
 start();
 
+/**
+ *
+ * @param {number | string | null | undefined} code
+ */
 const exitHandler = async (code) => {
   try {
     await httpServer?.close(() => {
@@ -60,12 +72,12 @@ const exitHandler = async (code) => {
       logger.info("exithandler: Https Server closed.tk");
     });
 
-    await mongodb.disconnect((result) => {
-      logger.info(`exithandler: Mongodb connection is closed with ${result}.tk`);
+    await mongodb.disconnect(() => {
+      logger.info(`exithandler: Mongodb connection is closed.tk`);
     });
 
-    await redis.disconnect((result) => {
-      logger.info(`exithandler: Redis client quit with ${result}.tk`);
+    await redis.disconnect(() => {
+      logger.info(`exithandler: Redis client quit.tk`);
     });
 
     process.exit(code);
@@ -94,6 +106,7 @@ process.on("unhandledRejection", (reason, promise) => {
 process.on("SIGINT", cleanup); // SIGINT is emitted when a Node.js process is interrupted, usually with (^-C) keyboard event.
 process.on("SIGTERM", cleanup); // SIGTERM is normally sent by a process monitor to tell Node.js to expect a successful termination.
 
+/** @type NodeJS.SignalsListener */
 function cleanup(signal) {
   logger.error(`${signal} received for the process ${process.pid}`);
   exitHandler(0);

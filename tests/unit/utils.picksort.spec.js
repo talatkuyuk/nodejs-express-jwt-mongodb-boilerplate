@@ -41,15 +41,21 @@ describe("Utils pickSort function", () => {
       const { sort: querySort } = querystring.parse(query.input);
       const expected = query.output;
 
-      expect(
-        Utils.pickSort(querySort, [
-          "id",
-          "email",
-          "isEmailVerified",
-          "isDisabled",
-          "createdAt",
-        ])
-      ).toEqual(expected);
+      console.log({ querySort });
+
+      if (typeof querySort === "undefined" || typeof querySort === "string") {
+        expect(
+          Utils.pickSort(querySort, [
+            "id",
+            "email",
+            "isEmailVerified",
+            "isDisabled",
+            "createdAt",
+          ]),
+        ).toEqual(expected);
+      } else {
+        throw new Error("sort key is to be single in query string");
+      }
     }
   });
 });

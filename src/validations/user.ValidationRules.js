@@ -42,23 +42,16 @@ const check_body_country = () =>
 
 ////////////////////////////////////////////////////////////////////////
 
+/** @type {import('express-validator').CustomValidator} */
 const once = (value) => {
   if (typeof value === "object")
     throw new Error("The parameter can only appear once in the query string");
   return true;
 };
 
+/** @type {import('express-validator').CustomValidator} */
 const only = (body) => {
-  const validKeys = [
-    "page",
-    "size",
-    "sort",
-    "email",
-    "role",
-    "name",
-    "gender",
-    "country",
-  ];
+  const validKeys = ["page", "size", "sort", "email", "role", "name", "gender", "country"];
   if (Object.keys(body).every((key) => validKeys.includes(key))) return true;
   else throw new Error("Any extra parameter is not allowed");
 };
@@ -67,6 +60,14 @@ const getUsers = [
   body().custom(only),
 
   query("email").custom(once).trim().toLowerCase().optional(),
+
+  query("role")
+    .custom(once)
+    .trim()
+    .toLowerCase()
+    .isIn(roles)
+    .withMessage(`The query param 'role' could be one of ${roles}`)
+    .optional(),
 
   query("name")
     .custom(once)
@@ -89,21 +90,13 @@ const getUsers = [
     .toUpperCase()
     .isLength({ min: 3, max: 3 })
     .withMessage(
-      "The query param 'country' code must be in the form of 3-letter standart country code"
+      "The query param 'country' code must be in the form of 3-letter standart country code",
     )
     .bail()
     .matches(iso_3166_alpha_3)
     .withMessage(
-      "The query param 'country' code must be in the form of 3-letter standart country code"
+      "The query param 'country' code must be in the form of 3-letter standart country code",
     )
-    .optional(),
-
-  query("role")
-    .custom(once)
-    .trim()
-    .toLowerCase()
-    .isIn(roles)
-    .withMessage(`The query param 'role' could be one of ${roles}`)
     .optional(),
 
   query("page")
@@ -127,9 +120,7 @@ const getUsers = [
     .custom(once)
     .trim()
     .matches(/^[a-zA-Z/./|\s]+$/i)
-    .withMessage(
-      "The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter"
-    )
+    .withMessage("The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter")
     .optional(),
 ];
 
@@ -141,9 +132,10 @@ const addUser = [
     .isLength({ min: 24, max: 24 })
     .withMessage("The param id must be a 24-character number")
     .bail()
-    .custom(async (value) => {
-      if (await userService.isExist(value))
+    .custom(async (id) => {
+      if (await userService.isExist(id)) {
         throw new Error("There is another user with the same id");
+      }
 
       return true;
     }),
@@ -158,8 +150,8 @@ const addUser = [
 
   // check if there is no an authenticated user with the email and the id
   body()
-    .custom(async (body, { req }) => {
-      const id = req.params.id;
+    .custom(async (_body, { req }) => {
+      const id = req.params?.id;
       const email = req.body.email;
 
       // I needed to validate id and email again here, since the chains above are isolatated in express-validator
@@ -171,13 +163,13 @@ const addUser = [
       ) {
         if (!(await authuserService.isExist(id, email)))
           throw new Error(
-            "There is no correspondent authenticated user with the same id and email"
+            "There is no correspondent authenticated user with the same id and email",
           );
       }
 
       return true;
     })
-    .custom((body, { req }) => {
+    .custom((_body, { req }) => {
       const validKeys = ["email", "role", "name", "gender", "country"];
       return Object.keys(req.body).every((key) => validKeys.includes(key));
     })
@@ -191,21 +183,8 @@ const updateUser = [
   check_body_gender().optional(),
   check_body_country().optional(),
 
-  oneOf(
-    [
-      check("name").exists(),
-      check("gender").exists(),
-      check("country").exists(),
-    ],
-    {
-      errorType: "flat",
-      message:
-        "The request body should contain at least one of the name, gender, country",
-    }
-  ),
-
   body()
-    .custom((body, { req }) => {
+    .custom((_body, { req }) => {
       const validKeys = ["name", "gender", "country"];
       return Object.keys(req.body).every((key) => validKeys.includes(key));
     })
@@ -217,11 +196,7 @@ const deleteUser = [...check_param_id];
 const changeRole = [
   ...check_param_id,
 
-  body("role")
-    .trim()
-    .toLowerCase()
-    .isIn(roles)
-    .withMessage(`role could be one of ${roles}`),
+  body("role").trim().toLowerCase().isIn(roles).withMessage(`role could be one of ${roles}`),
 
   body()
     .custom((body) => {
@@ -231,6 +206,14 @@ const changeRole = [
     .withMessage("Any extra parameter is not allowed"),
 ];
 
+const oneOfNameGenderCountry = oneOf(
+  [check("name").exists(), check("gender").exists(), check("country").exists()],
+  {
+    errorType: "flat",
+    message: "The request body should contain at least one of the name, gender, country",
+  },
+);
+
 module.exports = {
   getUsers,
   getUser,
@@ -238,4 +221,5 @@ module.exports = {
   updateUser,
   deleteUser,
   changeRole,
+  oneOfNameGenderCountry,
 };

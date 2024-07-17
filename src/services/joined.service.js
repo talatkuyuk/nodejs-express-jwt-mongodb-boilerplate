@@ -1,6 +1,7 @@
+/** @typedef {import('../models/authuser.model')} AuthUser */
+/** @typedef {import("mongodb").WithId<import("mongodb").Document>[]} Documents */
+
 const { traceError } = require("../utils/errorUtils");
-const composeFilter = require("../utils/composeFilter");
-const composeSort = require("../utils/composeSort");
 
 const joinedDbService = require("./joined.db.service");
 const paginaryService = require("./paginary.service");
@@ -10,22 +11,33 @@ const paginaryService = require("./paginary.service");
 
 /**
  * Get AuthUsers Joined with Users in a paginary
- * @param {Object} query
- * @returns {Promise<Object>}
+ * @typedef {Object} AuthuserQuery
+ * @property {string} [email]
+ * @property {string} [isEmailVerified]
+ * @property {string} [isDisabled]
+ * @property {string} [createdAt]
+ * @property {string} page
+ * @property {string} size
+ * @property {string} sort
+ *
+ * @typedef {Object} AuthuserQueryResult
+ * @property {AuthUser[]} authusers
+ * @property {number} totalCount
+ * @property {import('./paginary.service').Pagination} pagination
+ *
+ * @param {AuthuserQuery} query
+ * @returns {Promise<Documents>}
  */
 const getAuthUsersJoined = async (query) => {
   try {
-    const fieldsLeft = {
+    const filterLeft = paginaryService.composeFilter(query, {
       stringFields: ["email"],
       booleanFields: ["isEmailVerified", "isDisabled"],
-    };
+    });
 
-    const fieldsRight = {
+    const filterRight = paginaryService.composeFilter(query, {
       stringFields: ["role", "name", "country", "gender"],
-    };
-
-    const filterLeft = composeFilter(query, fieldsLeft);
-    const filterRight = composeFilter(query, fieldsRight);
+    });
 
     const sortingFields = [
       "email",
@@ -36,15 +48,25 @@ const getAuthUsersJoined = async (query) => {
       "isEmailVerified",
       "isDisabled",
     ];
-    const sort = composeSort(query, sortingFields);
 
-    return await paginaryService.paginaryForJoinQuery(
-      query,
+    const sort = paginaryService.composeSort(query.sort, sortingFields);
+
+    const { page, skip, limit } = paginaryService.composePaginationFactors(
+      query.page,
+      query.size,
+    );
+
+    console.log({ filterLeft, filterRight, sort, page, skip, limit });
+
+    const authusers = await joinedDbService.getAuthUsersJoined(
       filterLeft,
       filterRight,
       sort,
-      joinedDbService.getAuthUsersJoined
+      skip,
+      limit,
     );
+
+    return authusers;
   } catch (error) {
     throw traceError(error, "JoinedService : getAuthUsersJoined");
   }
@@ -52,21 +74,17 @@ const getAuthUsersJoined = async (query) => {
 
 /**
  * Get Users Joined with Authusers in a paginary
- * @param {Object} query
- * @returns {Promise<Object>}
+ * @param {AuthuserQuery} query
+ * @returns {Promise<Documents>}
  */
 const getUsersJoined = async (query) => {
   try {
-    const fieldsLeft = {
+    const filterLeft = paginaryService.composeFilter(query, {
       stringFields: ["email", "role", "name", "country", "gender"],
-    };
-
-    const fieldsRight = {
+    });
+    const filterRight = paginaryService.composeFilter(query, {
       booleanFields: ["isEmailVerified", "isDisabled"],
-    };
-
-    const filterLeft = composeFilter(query, fieldsLeft);
-    const filterRight = composeFilter(query, fieldsRight);
+    });
 
     const sortingFields = [
       "email",
@@ -77,15 +95,24 @@ const getUsersJoined = async (query) => {
       "isEmailVerified",
       "isDisabled",
     ];
-    const sort = composeSort(query, sortingFields);
+    const sort = paginaryService.composeSort(query.sort, sortingFields);
 
-    return await paginaryService.paginaryForJoinQuery(
-      query,
+    const { page, skip, limit } = paginaryService.composePaginationFactors(
+      query.page,
+      query.size,
+    );
+
+    console.log({ filterLeft, filterRight, sort, page, skip, limit });
+
+    const users = await joinedDbService.getUsersJoined(
       filterLeft,
       filterRight,
       sort,
-      joinedDbService.getUsersJoined
+      skip,
+      limit,
     );
+
+    return users;
   } catch (error) {
     throw traceError(error, "JoinedService : getUsersJoined");
   }

@@ -1,13 +1,5 @@
-authController = require("./auth.controller");
-authuserController = require("./authuser.controller");
-userController = require("./user.controller");
-joinedController = require("./joined.controller");
-newslatterController = require("./newslatter.controller");
-
-module.exports = {
-  authController,
-  authuserController,
-  userController,
-  joinedController,
-  newslatterController,
-};
+module.exports.authController = require("./auth.controller");
+module.exports.authuserController = require("./authuser.controller");
+module.exports.userController = require("./user.controller");
+module.exports.joinedController = require("./joined.controller");
+module.exports.newslatterController = require("./newslatter.controller");

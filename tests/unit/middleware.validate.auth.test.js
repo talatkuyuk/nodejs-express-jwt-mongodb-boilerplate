@@ -11,6 +11,7 @@ const TestUtil = require("../testutils/TestUtil");
 describe("Validate Middleware : Auth validation rules", () => {
   describe("signup validation", () => {
     test("signup: should throw error 422, if the body is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {},
       };
@@ -39,6 +40,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("signup: should throw error 422, if the email and password is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "",
@@ -70,6 +72,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("signup: should throw error 422, if the email and password are not in valid form", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail", // invalid email form
@@ -102,6 +105,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("signup: should throw error 422, if the password is not valid and confirmation does not match", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail.com",
@@ -134,7 +138,7 @@ describe("Validate Middleware : Auth validation rules", () => {
 
     // TODO: the test is moved to integration tests auth.signup.test.js
     // test("signup: should throw error 422, if the email is already taken and a password is defined", async () => {
-    //   const request = {
+    // const request = {
     //     body: {
     //       email: "user@gmail.com",
     //       password: "Pass1word!",
@@ -164,6 +168,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     // });
 
     test("signup: should throw error 422, if the body contains any other parameter", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail.com",
@@ -195,6 +200,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("signup: should continue next middleware if the body elements are valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail.com",
@@ -219,6 +225,7 @@ describe("Validate Middleware : Auth validation rules", () => {
 
   describe("login validation", () => {
     test("login: should throw error 422, if the body is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {},
       };
@@ -243,6 +250,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("login: should throw error 422, if the email and password is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "",
@@ -270,6 +278,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("login: should throw error 422, if the email and password are not in valid form", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail", // invalid email form
@@ -296,6 +305,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("login: should throw error 422, if the body contains any other parameter", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail.com",
@@ -323,6 +333,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("login: should continue next middleware if the body elements are valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail.com",
@@ -343,6 +354,7 @@ describe("Validate Middleware : Auth validation rules", () => {
 
   describe("refreshTokens validation", () => {
     test("refreshTokens: should throw error 422, if the body is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {},
       };
@@ -366,6 +378,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("refreshTokens: should throw error 422, if the refresh token is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           refreshToken: "",
@@ -391,6 +404,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("refreshTokens: should continue next middleware if the body elements are valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           refreshToken: "json-web-token-for-refresh-token",
@@ -410,6 +424,7 @@ describe("Validate Middleware : Auth validation rules", () => {
 
   describe("forgotPassword validation", () => {
     test("forgotPassword: should throw error 422, if the body is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {},
       };
@@ -433,6 +448,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("forgotPassword: should throw error 422, if the email is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "",
@@ -458,6 +474,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("forgotPassword: should throw error 422, if the email is not in valid form", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail", // invalid email form
@@ -483,6 +500,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("forgotPassword: should continue next middleware if the body elements are valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           email: "user@gmail.com", // valid email form
@@ -502,6 +520,7 @@ describe("Validate Middleware : Auth validation rules", () => {
 
   describe("resetPassword validation", () => {
     test("resetPassword: should throw error 422, if the body is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {},
       };
@@ -527,6 +546,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("resetPassword: should throw error 422, if the body elements are empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           password: "",
@@ -556,6 +576,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("resetPassword: should throw error 422, if the password is less than 8-length", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           password: "1234", // less than 8 charachters
@@ -584,6 +605,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("resetPassword: should throw error 422, if the password does not contain special character and the confirmation does not match", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           password: "Password", // no number and special char
@@ -612,6 +634,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("resetPassword: should continue next middleware if the body elements are valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           password: "Pass1word+",
@@ -633,6 +656,7 @@ describe("Validate Middleware : Auth validation rules", () => {
 
   describe("verifyEmail validation", () => {
     test("verifyEmail: should throw error 422, if the body is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {},
       };
@@ -656,6 +680,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("verifyEmail: should throw error 422, if the token is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           token: "",
@@ -681,6 +706,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("verifyEmail: should continue next middleware if the body elements are valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           token: "json-web-token-for-refresh-token",
@@ -700,6 +726,7 @@ describe("Validate Middleware : Auth validation rules", () => {
 
   describe("google validation", () => {
     test("google: should throw error 422, if the query param method is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: { method: "" },
       };
@@ -723,6 +750,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("google: should throw error 422, if the query param method is not code or token", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: {
           method: "idToken",
@@ -748,6 +776,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("google: should continue next middleware if the query param method is valid (code)", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: {
           method: "code",
@@ -765,6 +794,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("google: should continue next middleware if the query param method is valid (token)", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: {
           method: "token",
@@ -784,6 +814,7 @@ describe("Validate Middleware : Auth validation rules", () => {
 
   describe("verifySignup validation", () => {
     test("verifySignup: should throw error 422, if the body is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {},
       };
@@ -807,6 +838,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("verifySignup: should throw error 422, if the token is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           token: "",
@@ -832,6 +864,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("verifySignup: should continue next middleware if the body elements are valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         body: {
           token: "json-web-token-for-refresh-token",
@@ -851,6 +884,7 @@ describe("Validate Middleware : Auth validation rules", () => {
 
   describe("unlinkProvider validation", () => {
     test("unlinkProvider: should throw error 422, if the request doesn't contain any query param provider", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {}; // there is no query
 
       const req = httpMocks.createRequest(request);
@@ -872,6 +906,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("unlinkProvider: should throw error 422, if the query param provider is empty", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: { provider: "" }, // it is empty
       };
@@ -895,6 +930,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("unlinkProvider: should throw error 422, if the query param provider is not an auth provider", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: {
           provider: "authprovider", // it is not emailpassword, google, or facebook
@@ -920,6 +956,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("unlinkProvider: should continue next middleware if the query param provider is valid", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: {
           provider: authProvider.EMAILPASSWORD, // valid provider
@@ -937,6 +974,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("unlinkProvider: should continue next middleware if the query param provider is valid (google)", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: {
           provider: authProvider.GOOGLE, // valid provider
@@ -954,6 +992,7 @@ describe("Validate Middleware : Auth validation rules", () => {
     });
 
     test("unlinkProvider: should continue next middleware if the query param provider is valid (facebook)", async () => {
+      /** @type {httpMocks.RequestOptions} */
       const request = {
         query: {
           provider: authProvider.FACEBOOK, // valid provider

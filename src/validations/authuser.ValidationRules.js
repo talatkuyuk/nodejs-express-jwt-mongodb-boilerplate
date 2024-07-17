@@ -10,6 +10,7 @@ const {
 
 ////////////////////////////////////////////////////////////////////////
 
+/** @type {import('express-validator').CustomValidator} */
 const once = (value) => {
   if (typeof value === "object")
     throw new Error("The parameter can only appear once in the query string");
@@ -56,9 +57,7 @@ const getAuthUsers = [
     .custom(once)
     .trim()
     .matches(/^[a-zA-Z/./|\s]+$/i)
-    .withMessage(
-      "The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter"
-    )
+    .withMessage("The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter")
     .optional(),
 ];
 
@@ -71,7 +70,7 @@ const addAuthUser = [
   ...check_body_passwordConfirmation,
 
   body()
-    .custom((body, { req }) => {
+    .custom((_body, { req }) => {
       const validKeys = ["email", "password", "passwordConfirmation"];
       return Object.keys(req.body).every((key) => validKeys.includes(key));
     })

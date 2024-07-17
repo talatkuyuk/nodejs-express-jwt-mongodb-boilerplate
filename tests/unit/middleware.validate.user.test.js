@@ -221,9 +221,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
       TestUtil.validationErrorInMiddleware(err);
       expect(err.errors).toEqual({
-        sort: [
-          "The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter",
-        ],
+        sort: ["The query param 'sort' can contains a-zA-Z letters . dot and | pipedelimeter"],
       });
     });
 
@@ -606,9 +604,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
       TestUtil.validationErrorInMiddleware(err);
       expect(err.errors).toEqual({
-        body: [
-          "There is no correspondent authenticated user with the same id and email",
-        ],
+        body: ["There is no correspondent authenticated user with the same id and email"],
       });
     });
 
@@ -882,7 +878,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
       const res = httpMocks.createResponse();
       const next = jest.fn();
 
-      await validate(userValidation.updateUser)(req, res, next);
+      await validate(userValidation.oneOfNameGenderCountry)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith(expect.any(ApiError));
@@ -892,9 +888,7 @@ describe("Validate Middleware : Athuser validation rules", () => {
 
       TestUtil.validationErrorInMiddleware(err);
       expect(err.errors).toEqual({
-        body: [
-          "The request body should contain at least one of the name, gender, country",
-        ],
+        body: ["The request body should contain at least one of the name, gender, country"],
       });
     });
 

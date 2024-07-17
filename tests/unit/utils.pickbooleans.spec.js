@@ -24,12 +24,24 @@ const querystrings = [
   { input: { isEmailVerified: "Truex", isDisabled: "falsex" }, output: {} },
 ];
 
-const sanitize = (object) =>
-  Object.assign(
-    ...Object.entries(object).map(([k, v]) => ({
-      [k]: typeof v === "string" ? v.trim().toLowerCase() : v,
-    }))
-  );
+/**
+ * simple sanitize function for string values in an object
+ * @template {Record<string, unknown>} T
+ * @param {T} object - The object to sanitize.
+ * @returns {T} - The sanitized object.
+ */
+const sanitize = (object) => {
+  /** @type {T} */
+  const init = /** @type {T} */ ({});
+
+  Object.entries(object).reduce((acc, [k, v]) => {
+    // @ts-ignore
+    acc[k] = typeof v === "string" ? v.trim().toLowerCase() : v;
+    return acc;
+  }, init);
+
+  return init;
+};
 
 describe("Utils pickBooleans function", () => {
   it("picks the booleans from the request query", () => {
@@ -37,9 +49,7 @@ describe("Utils pickBooleans function", () => {
       const received = sanitize(query.input); // like express-validator does
       const expected = query.output;
 
-      expect(
-        Utils.pickBooleans(received, ["isEmailVerified", "isDisabled"])
-      ).toEqual(expected);
+      expect(Utils.pickBooleans(received, ["isEmailVerified", "isDisabled"])).toEqual(expected);
     }
   });
 });

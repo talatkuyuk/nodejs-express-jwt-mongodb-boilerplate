@@ -11,22 +11,16 @@ require("dotenv-safe").config({
 
 const envVarsSchema = Joi.object()
   .keys({
-    NODE_ENV: Joi.string()
-      .valid("production", "development", "test")
-      .default("development"),
+    NODE_ENV: Joi.string().valid("production", "development", "test").default("development"),
     PORT_HTTP: Joi.number().default(3000),
     PORT_HTTPS: Joi.number().default(8443),
     WHICH_SERVER: Joi.string().valid("http", "https", "both").default("http"),
     MONGODB_URL: Joi.string()
       .required()
-      .description(
-        "Mongodb pure url without dbname and query options ending with slash"
-      ),
-    MONGODB_DBNAME: Joi.string()
-      .required()
-      .description("Mongodb database name"),
+      .description("Mongodb pure url without dbname and query options ending with slash"),
+    MONGODB_DBNAME: Joi.string().required().description("Mongodb database name"),
     MONGODB_URL_QUERY_OPTIONS: Joi.string().description(
-      "Mongodb url query options that is going to be added"
+      "Mongodb url query options that is going to be added",
     ),
     REDIS_URL: Joi.string().required().description("Redis url"),
     JWT_SECRET: Joi.string().required().description("JWT secret key"),
@@ -48,33 +42,23 @@ const envVarsSchema = Joi.object()
     JWT_REFRESH_IS_INVALID_NBT: Joi.boolean()
       .default(false)
       .description(
-        "set true if refresh token is not valid not before than access token expires"
+        "set true if refresh token is not valid not before than access token expires",
       ),
-    GOOGLE_OAUTH_CLIENTID: Joi.string().description(
-      "Google ClientID for google-sign-in"
-    ),
+    GOOGLE_OAUTH_CLIENTID: Joi.string().description("Google ClientID for google-sign-in"),
     GOOGLE_OAUTH_CLIENTSECRET: Joi.string().description(
-      "Google ClientSecret for google-sign-in"
+      "Google ClientSecret for google-sign-in",
     ),
     SMTP_HOST: Joi.string().description("server that will send the emails"),
     SMTP_PORT: Joi.number().description("port to connect to the email server"),
     SMTP_USERNAME: Joi.string().description("username for email server"),
     SMTP_PASSWORD: Joi.string().description("password for email server"),
-    EMAIL_FROM: Joi.string().description(
-      "the from field in the emails sent by the app"
-    ),
-    RESET_PASSWORD_URL: Joi.string().description(
-      "reset password url of frontend application"
-    ),
-    VERIFY_EMAIL_URL: Joi.string().description(
-      "verify email url of frontend application"
-    ),
+    EMAIL_FROM: Joi.string().description("the from field in the emails sent by the app"),
+    RESET_PASSWORD_URL: Joi.string().description("reset password url of frontend application"),
+    VERIFY_EMAIL_URL: Joi.string().description("verify email url of frontend application"),
     RAISE_ERROR_WHEN_REDIS_DOWN: Joi.boolean()
       .description("set the behaviour of the app when redis is down")
       .default(false),
-    MAILCHIMP_SERVER_PREFIX: Joi.string().description(
-      "mailchimp server prefix"
-    ),
+    MAILCHIMP_SERVER_PREFIX: Joi.string().description("mailchimp server prefix"),
     MAILCHIMP_APIKEY: Joi.string().description("mailchimp api key"),
     MAILCHIMP_AUDIENCE_ID: Joi.string().description("mailchimp audience id"),
   })
@@ -86,8 +70,12 @@ const { value: envVars, error } = envVarsSchema
 
 if (error) {
   delete error._original;
-  error.errorPath = "Environment variable validation failed in Config";
-  throw error;
+  const details = error.details;
+  if (details.length) {
+    throw new Error(error.details[0].message);
+  } else {
+    throw new Error("Environment variable validation failed in Config");
+  }
 }
 
 module.exports = {
@@ -97,17 +85,14 @@ module.exports = {
   server: envVars.WHICH_SERVER,
   mongodb_url:
     envVars.MONGODB_URL +
-    (envVars.MONGODB_URL.includes("127.0.0.1")
-      ? ""
-      : envVars.MONGODB_URL_QUERY_OPTIONS),
+    (envVars.MONGODB_URL.includes("127.0.0.1") ? "" : envVars.MONGODB_URL_QUERY_OPTIONS),
   mongodb_database: envVars.MONGODB_DBNAME,
   redis_url: envVars.REDIS_URL,
   jwt: {
     secret: envVars.JWT_SECRET,
     accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
     refreshExpirationDays: envVars.JWT_REFRESH_EXPIRATION_DAYS,
-    resetPasswordExpirationMinutes:
-      envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
+    resetPasswordExpirationMinutes: envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
     verifyEmailExpirationMinutes: envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
     verifySignupExpirationMinutes: envVars.JWT_VERIFY_SIGNUP_EXPIRATION_MINUTES,
     isInvalidRefreshNBT: envVars.JWT_REFRESH_IS_INVALID_NBT,

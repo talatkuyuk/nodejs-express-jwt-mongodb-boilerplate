@@ -3,11 +3,7 @@ const httpStatus = require("http-status");
 const { emailService } = require("../../src/services");
 const ApiError = require("../../src/utils/ApiError");
 
-const TestUtil = require("../testutils/TestUtil");
-
 describe("Failed send-verification-email process", () => {
-  TestUtil.MatchErrors();
-
   test("should return status 500, if the email service does not respond", async () => {
     const smtpResponse = {
       code: "EENVELOPE",
@@ -27,12 +23,12 @@ describe("Failed send-verification-email process", () => {
 
     const expectedError = new ApiError(
       httpStatus.INTERNAL_SERVER_ERROR,
-      "SmtpError: SMTP server is out of service"
+      "SmtpError: SMTP server is out of service",
     );
 
-    expect(() =>
-      emailService.sendEmail("t@g.com", "subject", "body-text")
-    ).rejects.toThrow(expect.toBeMatchedWithError(expectedError));
+    expect(() => emailService.sendEmail("t@g.com", "subject", "body-text")).rejects.toThrow(
+      expect.toBeMatchedWithError(expectedError),
+    );
   });
 
   test("should return status 500, if an error occured", async () => {
@@ -49,13 +45,10 @@ describe("Failed send-verification-email process", () => {
       .spyOn(emailService.transporter, "sendMail")
       .mockImplementation(() => Promise.reject(smtpResponse));
 
-    const expectedError = new ApiError(
-      httpStatus.BAD_REQUEST,
-      `SmtpError: ${errorMessage}`
-    );
+    const expectedError = new ApiError(httpStatus.BAD_REQUEST, `SmtpError: ${errorMessage}`);
 
-    expect(() =>
-      emailService.sendEmail("t@g.com", "subject", "body-text")
-    ).rejects.toThrow(expect.toBeMatchedWithError(expectedError));
+    expect(() => emailService.sendEmail("t@g.com", "subject", "body-text")).rejects.toThrow(
+      expect.toBeMatchedWithError(expectedError),
+    );
   });
 });

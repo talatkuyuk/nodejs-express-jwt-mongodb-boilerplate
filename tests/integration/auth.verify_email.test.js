@@ -9,7 +9,6 @@ const {
   tokenService,
   tokenDbService,
 } = require("../../src/services");
-const { AuthUser } = require("../../src/models");
 const { tokenTypes } = require("../../src/config/tokens");
 
 const TestUtil = require("../testutils/TestUtil");
@@ -35,9 +34,7 @@ describe("POST /auth/verify-email", () => {
         token: undefined,
       };
 
-      const response = await request(app)
-        .post("/auth/verify-email")
-        .send(verifyEmailForm);
+      const response = await request(app).post("/auth/verify-email").send(verifyEmailForm);
 
       TestUtil.validationErrorExpectations(response);
       expect(response.body.error.errors.token).toEqual(["token is missing"]);
@@ -50,9 +47,7 @@ describe("POST /auth/verify-email", () => {
         token: testData.VERIFY_EMAIL_TOKEN_EXPIRED,
       };
 
-      const response = await request(app)
-        .post("/auth/verify-email")
-        .send(verifyEmailForm);
+      const response = await request(app).post("/auth/verify-email").send(verifyEmailForm);
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("TokenExpiredError");
@@ -64,9 +59,7 @@ describe("POST /auth/verify-email", () => {
         token: testData.TOKEN_WITH_INVALID_SIGNATURE,
       };
 
-      const response = await request(app)
-        .post("/auth/verify-email")
-        .send(verifyEmailForm);
+      const response = await request(app).post("/auth/verify-email").send(verifyEmailForm);
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("JsonWebTokenError");
@@ -76,9 +69,7 @@ describe("POST /auth/verify-email", () => {
     test("should throw ApiError with code 401 if the token is malformed", async () => {
       const verifyEmailForm = { token: "mal-formed-token" };
 
-      const response = await request(app)
-        .post("/auth/verify-email")
-        .send(verifyEmailForm);
+      const response = await request(app).post("/auth/verify-email").send(verifyEmailForm);
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("JsonWebTokenError");
@@ -91,18 +82,14 @@ describe("POST /auth/verify-email", () => {
       const authuser_id = "123456789012345678901234";
 
       // generate and add valid verify-email token into db
-      const verifyEmailToken = await tokenService.generateVerifyEmailToken(
-        authuser_id
-      );
+      const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser_id);
 
       // delete the token
       await tokenService.removeToken(verifyEmailToken.id);
 
       const verifyEmailForm = { token: verifyEmailToken.token };
 
-      const response = await request(app)
-        .post("/auth/verify-email")
-        .send(verifyEmailForm);
+      const response = await request(app).post("/auth/verify-email").send(verifyEmailForm);
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
@@ -113,18 +100,14 @@ describe("POST /auth/verify-email", () => {
       const authuser_id = "123456789012345678901234";
 
       // generate and add valid verify-email token into db
-      const verifyEmailToken = await tokenService.generateVerifyEmailToken(
-        authuser_id
-      );
+      const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser_id);
 
       // update the token as blacklisted
       await tokenService.updateTokenAsBlacklisted(verifyEmailToken.id);
 
       const verifyEmailForm = { token: verifyEmailToken.token };
 
-      const response = await request(app)
-        .post("/auth/verify-email")
-        .send(verifyEmailForm);
+      const response = await request(app).post("/auth/verify-email").send(verifyEmailForm);
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.name).toEqual("ApiError");
@@ -137,15 +120,11 @@ describe("POST /auth/verify-email", () => {
       const authuser_id = "123456789012345678901234";
 
       // generate and add valid verify-email token into db
-      const verifyEmailToken = await tokenService.generateVerifyEmailToken(
-        authuser_id
-      );
+      const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser_id);
 
       const verifyEmailForm = { token: verifyEmailToken.token };
 
-      const response = await request(app)
-        .post("/auth/verify-email")
-        .send(verifyEmailForm);
+      const response = await request(app).post("/auth/verify-email").send(verifyEmailForm);
 
       TestUtil.errorExpectations(response, httpStatus.NOT_FOUND);
       expect(response.body.error.name).toEqual("ApiError");
@@ -153,56 +132,52 @@ describe("POST /auth/verify-email", () => {
     });
 
     test("should return status 404, if the user is disabled", async () => {
-      const authuserDoc = AuthUser.fromDoc({
+      // add the authuser into db
+      const authuser = await authuserDbService.addAuthUser({
         email: "talat@gmail.com",
         password: "no-matters-for-this-test",
       });
 
-      // add the authuser into db
-      const authuser = await authuserDbService.addAuthUser(authuserDoc);
+      if (!authuser) {
+        throw new Error("Unexpected fail in db operation while adding an authuser");
+      }
 
       // generate and add valid verify-email token into db
-      const verifyEmailToken = await tokenService.generateVerifyEmailToken(
-        authuser.id
-      );
+      const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser.id);
 
       // update the authuser as disabled
       await authuserService.toggleAbility(authuser.id);
 
       const verifyEmailForm = { token: verifyEmailToken.token };
 
-      const response = await request(app)
-        .post("/auth/verify-email")
-        .send(verifyEmailForm);
+      const response = await request(app).post("/auth/verify-email").send(verifyEmailForm);
 
       TestUtil.errorExpectations(response, httpStatus.FORBIDDEN);
       expect(response.body.error.name).toEqual("ApiError");
       expect(response.body.error.message).toEqual(
-        "You are disabled, call the system administrator"
+        "You are disabled, call the system administrator",
       );
     });
   });
 
   describe("Success verify-email process", () => {
     test("should return status 204, delete verify-email tokens of the user", async () => {
-      const authuserDoc = AuthUser.fromDoc({
+      // add the authuser into db
+      const authuser = await authuserDbService.addAuthUser({
         email: "talat@gmail.com",
         password: "no-matters-for-this-test",
       });
 
-      // add the authuser into db
-      const authuser = await authuserDbService.addAuthUser(authuserDoc);
+      if (!authuser) {
+        throw new Error("Unexpected fail in db operation while adding an authuser");
+      }
 
       // generate and add valid verify-email token into db
-      const verifyEmailToken = await tokenService.generateVerifyEmailToken(
-        authuser.id
-      );
+      const verifyEmailToken = await tokenService.generateVerifyEmailToken(authuser.id);
 
       const verifyEmailForm = { token: verifyEmailToken.token };
 
-      const response = await request(app)
-        .post("/auth/verify-email")
-        .send(verifyEmailForm);
+      const response = await request(app).post("/auth/verify-email").send(verifyEmailForm);
 
       expect(response.status).toBe(httpStatus.OK);
       expect(response.body.success).toBe(true);

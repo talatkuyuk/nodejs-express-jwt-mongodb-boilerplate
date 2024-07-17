@@ -12,7 +12,7 @@ router.get(
   authenticate,
   authorize("query-users"),
   validate(userValidation.getUsers),
-  userController.getUsers
+  userController.getUsers,
 );
 
 router.post(
@@ -20,7 +20,7 @@ router.post(
   authenticate,
   authorize("add-user"),
   validate(userValidation.addUser),
-  userController.addUser
+  userController.addUser,
 );
 
 router.get(
@@ -28,7 +28,7 @@ router.get(
   authenticate,
   authorize("get-user"),
   validate(userValidation.getUser),
-  userController.getUser
+  userController.getUser,
 );
 
 router.put(
@@ -36,7 +36,8 @@ router.put(
   authenticate,
   authorize("update-user"),
   validate(userValidation.updateUser),
-  userController.updateUser
+  validate(userValidation.oneOfNameGenderCountry), // it is middleware not ValidationChain[]
+  userController.updateUser,
 );
 
 router.patch(
@@ -44,7 +45,7 @@ router.patch(
   authenticate,
   authorize("change-role"),
   validate(userValidation.changeRole),
-  userController.changeRole
+  userController.changeRole,
 );
 
 router.delete(
@@ -52,7 +53,7 @@ router.delete(
   authenticate,
   authorize("delete-user"),
   validate(userValidation.deleteUser),
-  userController.deleteUser
+  userController.deleteUser,
 );
 
 module.exports = router;

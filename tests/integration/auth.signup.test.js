@@ -5,7 +5,6 @@ const bcrypt = require("bcryptjs");
 const app = require("../../src/core/express");
 
 const { authuserDbService } = require("../../src/services");
-const { AuthUser } = require("../../src/models");
 
 const TestUtil = require("../testutils/TestUtil");
 
@@ -99,7 +98,9 @@ describe("POST /auth/signup", () => {
       TestUtil.validationErrorExpectations(response);
       expect(response.body.error.errors).not.toHaveProperty("email");
       expect(response.body.error.errors).not.toHaveProperty("password");
-      expect(response.body.error.errors.passwordConfirmation).toEqual(["should match with the password"]);
+      expect(response.body.error.errors.passwordConfirmation).toEqual([
+        "should match with the password",
+      ]);
     });
 
     test("should return 422 Validation Error if occurs all email, password, confirmation password validation errors", async () => {
@@ -121,12 +122,10 @@ describe("POST /auth/signup", () => {
 
   describe("Failed signups", () => {
     test("should return 401 Unauthorized Error if there is an authuser with the same email and the user's password is not null, meaningly the user is registered with the email/password before", async () => {
-      const authuser = AuthUser.fromDoc({
+      await authuserDbService.addAuthUser({
         email: "talat@google.com",
         password: "HashedPass1word.HashedString.HashedPass1word",
       });
-
-      await authuserDbService.addAuthUser(authuser);
 
       const registerform = {
         email: "talat@google.com",
@@ -138,6 +137,9 @@ describe("POST /auth/signup", () => {
 
       TestUtil.errorExpectations(response, httpStatus.UNAUTHORIZED);
       expect(response.body.error.message).toEqual("email is already taken");
+      expect(response.body.error.errorPath).toEqual(
+        "failed in AuthService [signupWithEmailAndPassword]  --->  AuthController [signup]",
+      );
     });
   });
 
@@ -146,7 +148,7 @@ describe("POST /auth/signup", () => {
       const google_id = "365487263597623948576";
       const google_email = "talat@gmail.com";
 
-      const existingAuthuserDoc = AuthUser.fromDoc({
+      await authuserDbService.addAuthUser({
         email: google_email,
         password: null, // the user registered with an auth provider
         isEmailVerified: true,
@@ -154,8 +156,6 @@ describe("POST /auth/signup", () => {
           google: google_id,
         },
       });
-
-      await authuserDbService.addAuthUser(existingAuthuserDoc);
 
       const registerform = {
         email: google_email,
@@ -199,19 +199,26 @@ describe("POST /auth/signup", () => {
         email: response.body.data.authuser.email,
       });
 
-      expect(authuser.providers["google"]).toBe(google_id);
+      if (!authuser) {
+        throw new Error("Unexpected fail in db operation while adding an authuser");
+      }
+
+      expect(authuser.providers?.["google"]).toBe(google_id);
 
       expect(authuser).toEqual(
         expect.objectContaining({
           id: response.body.data.authuser.id,
-        })
+        }),
       );
 
       // check the authuser's password is setted and hashed in the database
       expect(authuser.password).not.toBeNull(); // before it was null
       expect(authuser.password).not.toEqual(registerform.password);
-      const data = await bcrypt.compare(registerform.password, authuser.password);
-      expect(data).toBeTruthy();
+
+      if (authuser.password !== null) {
+        const data = await bcrypt.compare(registerform.password, authuser.password);
+        expect(data).toBeTruthy();
+      }
     });
 
     test("should return status 201, the authuser and the valid tokens in json form; successfully register the user if there is no authuser with the same email", async () => {
@@ -256,16 +263,24 @@ describe("POST /auth/signup", () => {
         id: response.body.data.authuser.id,
         email: response.body.data.authuser.email,
       });
+
+      if (!authuser) {
+        throw new Error("Unexpected fail in db operation while adding an authuser");
+      }
+
       expect(authuser).toEqual(
         expect.objectContaining({
           id: expect.any(String),
-        })
+        }),
       );
 
       // check the new authuser password is hashed in the database
       expect(authuser.password).not.toEqual(registerform.password);
-      const data = await bcrypt.compare(registerform.password, authuser.password);
-      expect(data).toBeTruthy();
+
+      if (authuser.password !== null) {
+        const data = await bcrypt.compare(registerform.password, authuser.password);
+        expect(data).toBeTruthy();
+      }
     });
   });
 });

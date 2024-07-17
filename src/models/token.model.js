@@ -1,59 +1,78 @@
 class Token {
-  constructor(
-    token,
-    user,
-    expires,
-    type,
-    jti = "n/a",
-    family = "n/a",
-    blacklisted = false,
-    createdAt = Date.now()
-  ) {
+  /**
+   * @param {string} token
+   * @param {string} user
+   * @param {Date} expires
+   * @param {string} type
+   * @param {string} [jti]
+   * @param {string} [family]
+   * @param {boolean} [blacklisted]
+   */
+  constructor(token, user, expires, type, jti = "n/a", family = "n/a", blacklisted = false) {
+    /** @type {string} */
+    this.id;
+
+    /** @type {string} */
     this.token = token;
+
+    /** @type {string} */
     this.user = user;
+
+    /** @type {Date} */
     this.expires = expires;
+
+    /** @type {string} */
     this.type = type;
+
+    /** @type {string} */
     this.jti = jti;
+
+    /** @type {string} */
     this.family = family;
+
+    /** @type {boolean} */
     this.blacklisted = blacklisted;
-    this.createdAt = createdAt;
+
+    /** @type {number} */
+    this.createdAt = Date.now();
+
+    /** @type {number|null} */
+    this.updatedAt = null;
   }
 
-  transformId(id) {
-    this.id = id.toString();
-    delete this._id;
-  }
-
+  /**
+   * @param {import("mongodb").WithId<import("mongodb").Document>} doc
+   * @returns {Token}
+   */
   static fromDoc(doc) {
-    if (!doc) return null;
-    const tokenDoc = new Token(
+    const token = new Token(
       doc.token,
-      doc.user.toString(),
+      doc.user.toString(), // it is ObjectId in doc
       doc.expires,
       doc.type,
       doc.jti,
       doc.family,
       doc.blacklisted,
-      doc.createdAt
     );
-    doc._id && tokenDoc.transformId(doc._id);
-    return tokenDoc;
+
+    token.id = doc._id.toString();
+    token.createdAt = doc.createdAt;
+
+    if (doc.updatedAt) {
+      token.updatedAt = doc.updatedAt;
+    }
+
+    return token;
   }
 
-  // eleminates private keys
+  // eleminates private keys, immutable function
   filter() {
+    /** @type {Token} */
     const token = Object.assign({}, this);
-    const notAllowedKeys = [
-      "id",
-      "user",
-      "type",
-      "jti",
-      "family",
-      "blacklisted",
-      "createdAt",
-    ];
+    /** @type {string[]} */
+    const allowedKeys = ["token", "expires"];
     for (const key of Object.keys(token)) {
-      if (notAllowedKeys.includes(key)) delete token[key];
+      if (!allowedKeys.includes(key)) delete token[/** @type {keyof Token} */ (key)];
     }
     return token;
   }

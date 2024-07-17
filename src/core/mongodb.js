@@ -1,10 +1,11 @@
 const { MongoClient, Db } = require("mongodb");
+
 const config = require("../config");
 const logger = require("../core/logger");
 
-const { userSchema } = require("../schemas/user.schema");
-const { authuserSchema } = require("../schemas/authuser.schema");
-const { tokenSchema } = require("../schemas/token.schema");
+// const { userSchema } = require("../schemas/user.schema");
+// const { authuserSchema } = require("../schemas/authuser.schema");
+// const { tokenSchema } = require("../schemas/token.schema");
 
 const uri = config.mongodb_url;
 const options = {
@@ -46,14 +47,25 @@ const connect = async function () {
   }
 };
 
+/**
+ * @returns {Db}
+ */
 const getDatabase = function () {
   return db;
 };
 
+/**
+ * @callback Callback
+ */
+
+/**
+ * @param {Callback} [callback]
+ * @returns {Promise<void>}
+ */
 const disconnect = async function (callback) {
   try {
     await client.close();
-    callback("OK");
+    callback?.();
   } catch (error) {
     logger.error("MongoClient connection error while disconnecting.tk.");
     throw error;

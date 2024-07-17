@@ -1,6 +1,6 @@
 module.exports.authuserSchema = {
   bsonType: "object",
-  required: ["email", "password", "role", "isEmailVerified"],
+  required: ["email", "password", "isEmailVerified"],
   properties: {
     email: { bsonType: "string" /* pattern: */ },
     password: { bsonType: "string" /* pattern: */ },

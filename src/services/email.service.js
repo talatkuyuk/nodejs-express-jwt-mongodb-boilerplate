@@ -12,9 +12,7 @@ if (config.env !== "test") {
   transporter
     .verify()
     .then(() => logger.info("Connected to email server"))
-    .catch(() =>
-      logger.warn("Unable to connect to email server. Check the SMTP options.")
-    );
+    .catch(() => logger.warn("Unable to connect to email server. Check the SMTP options."));
 }
 
 /**
@@ -22,7 +20,7 @@ if (config.env !== "test") {
  * @param {string} to
  * @param {string} subject
  * @param {string} text
- * @returns {Promise}
+ * @returns {Promise<void>}
  */
 const sendEmail = async (to, subject, text) => {
   const message = { from: config.email.from, to, subject, text };
@@ -30,6 +28,7 @@ const sendEmail = async (to, subject, text) => {
   try {
     await transporter.sendMail(message).then(console.log);
   } catch (error) {
+    // @ts-ignore SMTP server specific error structure
     const { code, command, name, message, response, responseCode } = error;
     console.log({ code, command, name, message, response, responseCode });
 
@@ -37,14 +36,14 @@ const sendEmail = async (to, subject, text) => {
       throw traceError(
         new ApiError(
           httpStatus.INTERNAL_SERVER_ERROR,
-          "SmtpError : SMTP server is out of service"
+          "SmtpError : SMTP server is out of service",
         ),
-        "EmailService : sendEmail"
+        "EmailService : sendEmail",
       );
     else
       throw traceError(
         new ApiError(httpStatus.BAD_REQUEST, `SmtpError : ${message}`),
-        "EmailService : sendEmail"
+        "EmailService : sendEmail",
       );
   }
 };
@@ -53,7 +52,7 @@ const sendEmail = async (to, subject, text) => {
  * Send reset password email
  * @param {string} to
  * @param {string} token
- * @returns {Promise}
+ * @returns {Promise<void>}
  */
 const sendResetPasswordEmail = async (to, token) => {
   const subject = "Reset password";
@@ -71,7 +70,7 @@ const sendResetPasswordEmail = async (to, token) => {
  * Send verification email
  * @param {string} to
  * @param {string} token
- * @returns {Promise}
+ * @returns {Promise<void>}
  */
 const sendVerificationEmail = async (to, token) => {
   const subject = "Email Verification";
@@ -89,7 +88,7 @@ const sendVerificationEmail = async (to, token) => {
  * Send signup verification email
  * @param {string} to
  * @param {string} token
- * @returns {Promise}
+ * @returns {Promise<void>}
  */
 const sendSignupVerificationEmail = async (to, token) => {
   const subject = "Signup with email-password Verification";
