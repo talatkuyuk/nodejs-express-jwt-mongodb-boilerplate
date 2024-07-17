@@ -5,8 +5,7 @@
   "testTimeout": 50000,
   "restoreMocks": true,
   "resetModules": true,
-  "transformIgnorePatterns": [
-    "/node_modules/(?!${['serialize-error'].join('|')})"
-  ],
-  "transform": {}
+  "transformIgnorePatterns": ["/node_modules/(?!${['serialize-error'].join('|')})"],
+  "transform": {},
+  "setupFilesAfterEnv": ["jest-extended/all", "<rootDir>/jest.setup.js"]
 }
