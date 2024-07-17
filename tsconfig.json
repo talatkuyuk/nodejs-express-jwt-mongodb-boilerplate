@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "target": "ES5",
+    "checkJs": true,
+    "allowJs": true,
+    "strict": true,
+    "noEmit": true,
+    "module": "commonjs",
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "typeRoots": ["./node_modules/@types", "./types"]
+  },
+  "exclude": ["node_modules"],
+  "include": ["**/*.js", "./types/*.d.ts"]
+}
