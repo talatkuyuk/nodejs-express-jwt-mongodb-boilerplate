@@ -1,3 +1,11 @@
+add validation cratedAt --> string for get Authusers and get Users
+req.user yerine req.role
+req.authuser yerine req.user
+errorutils'i error class'a ekle
+authentication passportta joined query yapma, authorize'da yap, ama authorize olmayan authenticate olan route'larda ne olacak?
+redis down et ondan sonra test olan iki tane testi ayır...
+// @ts-ignore olanlara bak
+
 //TODO: according to changes in the error message texts, update the swagger docs
 //TODO: if the authuser is not verified or restricted do not retun tokens but authuser self
 //TODO: users can be recorded multiple times it is a bug
