@@ -1,4 +1,4 @@
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const asyncHandler = require("express-async-handler");
 
 const { traceError } = require("../utils/errorUtils");
@@ -24,12 +24,7 @@ const addUser = asyncHandler(
       const user = await userService.addUser(id, addBody);
 
       res.location(`${req.protocol}://${req.get("host")}/users/${user.id}`);
-      res.status(httpStatus.CREATED).send({
-        success: true,
-        data: {
-          user: user.filter(),
-        },
-      });
+      res.status(httpStatus.CREATED).send({ success: true, data: { user: user.filter() } });
     } catch (error) {
       throw traceError(error, "UserController : addUser");
     }
@@ -46,12 +41,7 @@ const getUser = asyncHandler(async (req, res) => {
     // the service checks the param id refers any valid user
     const user = await userService.getUserById(myid);
 
-    res.status(httpStatus.OK).send({
-      success: true,
-      data: {
-        user: user.filter(),
-      },
-    });
+    res.status(httpStatus.OK).send({ success: true, data: { user: user.filter() } });
   } catch (error) {
     throw traceError(error, "UserController : getUser");
   }
@@ -74,14 +64,16 @@ const getUsers = asyncHandler(
 
       const result = await userService.getUsers(query);
 
-      res.status(httpStatus.OK).send({
-        success: true,
-        data: {
-          users: result.users.map((a) => a.filter()),
-          pagination: result.pagination,
-          totalCount: result.totalCount,
-        },
-      });
+      res
+        .status(httpStatus.OK)
+        .send({
+          success: true,
+          data: {
+            users: result.users.map((a) => a.filter()),
+            pagination: result.pagination,
+            totalCount: result.totalCount,
+          },
+        });
     } catch (error) {
       throw traceError(error, "UserController : getUsers");
     }
@@ -103,12 +95,7 @@ const updateUser = asyncHandler(
 
       const user = await userService.updateUser(id, updateBody);
 
-      res.status(httpStatus.OK).send({
-        success: true,
-        data: {
-          user: user.filter(),
-        },
-      });
+      res.status(httpStatus.OK).send({ success: true, data: { user: user.filter() } });
     } catch (error) {
       throw traceError(error, "UserController : updateUser");
     }
@@ -151,11 +138,4 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = {
-  addUser,
-  getUser,
-  getUsers,
-  updateUser,
-  changeRole,
-  deleteUser,
-};
+module.exports = { addUser, getUser, getUsers, updateUser, changeRole, deleteUser };

@@ -1,5 +1,5 @@
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 
 const app = require("../../src/core/express");
 
@@ -83,9 +83,7 @@ describe("POST /auth/unlink", () => {
 
     test("should return status 400, if one auth provider is left", async () => {
       await authuserDbService.updateAuthUser(authuserId, {
-        providers: {
-          google: "google-id-for-the-authuser",
-        },
+        providers: { google: "google-id-for-the-authuser" },
       });
 
       const response = await request(app)
@@ -103,10 +101,7 @@ describe("POST /auth/unlink", () => {
   describe("Success Unlink Auth Provider", () => {
     test("should return status 200, and return authuser after the auth provider is unlinked (emailpassword)", async () => {
       await authuserDbService.updateAuthUser(authuserId, {
-        providers: {
-          emailpassword: true,
-          google: "google-id-for-the-authuser",
-        },
+        providers: { emailpassword: true, google: "google-id-for-the-authuser" },
       });
 
       const response = await request(app)
@@ -134,9 +129,7 @@ describe("POST /auth/unlink", () => {
       });
 
       // check the authuser's password turns to null
-      const authuser = await authuserDbService.getAuthUser({
-        id: authuserId,
-      });
+      const authuser = await authuserDbService.getAuthUser({ id: authuserId });
 
       if (!authuser) {
         throw new Error("Unexpected fail in db operation while getting an authuser");
@@ -147,10 +140,7 @@ describe("POST /auth/unlink", () => {
 
     test("should return status 200, and return authuser after the auth provider is unlinked (google)", async () => {
       await authuserDbService.updateAuthUser(authuserId, {
-        providers: {
-          emailpassword: true,
-          google: "google-id-for-the-authuser",
-        },
+        providers: { emailpassword: true, google: "google-id-for-the-authuser" },
       });
 
       const response = await request(app)

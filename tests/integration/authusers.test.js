@@ -1,5 +1,5 @@
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const bcrypt = require("bcryptjs");
 
 const app = require("../../src/core/express");
@@ -45,11 +45,14 @@ describe("PATH /authusers", () => {
 
   beforeEach(async () => {
     // create an authuser
-    const response = await request(app).post("/auth/signup").set("User-Agent", userAgent).send({
-      email: "admin@gmail.com",
-      password: "Pass1word!",
-      passwordConfirmation: "Pass1word!",
-    });
+    const response = await request(app)
+      .post("/auth/signup")
+      .set("User-Agent", userAgent)
+      .send({
+        email: "admin@gmail.com",
+        password: "Pass1word!",
+        passwordConfirmation: "Pass1word!",
+      });
 
     expect(response.body.error).toBeUndefined();
 
@@ -139,9 +142,7 @@ describe("PATH /authusers", () => {
       });
 
       // check the test authuser's password is hashed
-      authuserInstance = await authuserDbService.getAuthUser({
-        id: testAuthuser.id,
-      });
+      authuserInstance = await authuserDbService.getAuthUser({ id: testAuthuser.id });
 
       if (!authuserInstance) {
         throw new Error("Unexpected fail in db operation while gettitng test authuser");
@@ -409,12 +410,7 @@ describe("PATH /authusers", () => {
         .get("/authusers")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
-        .query({
-          isDisabled: false,
-          isEmailVerified: false,
-          sort: "email",
-          size: 2,
-        })
+        .query({ isDisabled: false, isEmailVerified: false, sort: "email", size: 2 })
         .send();
 
       expect(response.body.error).toBeUndefined();
@@ -439,13 +435,7 @@ describe("PATH /authusers", () => {
         .get("/authusers")
         .set("User-Agent", userAgent)
         .set("Authorization", `Bearer ${adminAccessToken}`)
-        .query({
-          isDisabled: false,
-          isEmailVerified: false,
-          sort: "email",
-          size: 2,
-          page: 2,
-        })
+        .query({ isDisabled: false, isEmailVerified: false, sort: "email", size: 2, page: 2 })
         .send();
 
       expect(response.body.error).toBeUndefined();
@@ -483,9 +473,7 @@ describe("PATH /authusers", () => {
       expect(response.body.success).toBe(true);
 
       // check the admin authuser's new password is hashed
-      authuserInstance = await authuserDbService.getAuthUser({
-        id: adminAuthuserId,
-      });
+      authuserInstance = await authuserDbService.getAuthUser({ id: adminAuthuserId });
 
       if (!authuserInstance) {
         throw new Error("Unexpected fail in db operation while gettitng test authuser");
@@ -547,9 +535,7 @@ describe("PATH /authusers", () => {
         .send(addForm);
 
       TestUtil.validationErrorExpectations(response);
-      expect(response.body.error.errors).toEqual({
-        email: ["email is already taken"],
-      });
+      expect(response.body.error.errors).toEqual({ email: ["email is already taken"] });
 
       // try to get an authuser with invalid id
       response = await request(app)

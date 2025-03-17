@@ -1,5 +1,5 @@
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 
 const app = require("../../src/core/express");
 
@@ -30,9 +30,7 @@ describe("POST /auth/verify-email", () => {
     });
 
     test("should return 422 Validation Error if the token is undefined", async () => {
-      const verifyEmailForm = {
-        token: undefined,
-      };
+      const verifyEmailForm = { token: undefined };
 
       const response = await request(app).post("/auth/verify-email").send(verifyEmailForm);
 
@@ -43,9 +41,7 @@ describe("POST /auth/verify-email", () => {
 
   describe("Verify-Email Token Errors", () => {
     test("should throw ApiError with code 401 if the verify-email token is expired", async () => {
-      const verifyEmailForm = {
-        token: testData.VERIFY_EMAIL_TOKEN_EXPIRED,
-      };
+      const verifyEmailForm = { token: testData.VERIFY_EMAIL_TOKEN_EXPIRED };
 
       const response = await request(app).post("/auth/verify-email").send(verifyEmailForm);
 
@@ -55,9 +51,7 @@ describe("POST /auth/verify-email", () => {
     });
 
     test("should throw ApiError with code 401 if the verify-email token has wrong signature", async () => {
-      const verifyEmailForm = {
-        token: testData.TOKEN_WITH_INVALID_SIGNATURE,
-      };
+      const verifyEmailForm = { token: testData.TOKEN_WITH_INVALID_SIGNATURE };
 
       const response = await request(app).post("/auth/verify-email").send(verifyEmailForm);
 

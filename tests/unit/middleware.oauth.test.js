@@ -1,5 +1,5 @@
 const httpMocks = require("node-mocks-http");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 
 // without this statement, which is actually not necessary, the tests stucks, I don't know the reason
 require("../../src/core/express");
@@ -64,9 +64,7 @@ describe("oAuth Middleware", () => {
       /** @type {httpMocks.RequestOptions} */
       const request = {
         query: { method: "token" },
-        headers: {
-          Authorization: `Bearer ${google_id_token}`,
-        },
+        headers: { Authorization: `Bearer ${google_id_token}` },
       };
 
       const req = httpMocks.createRequest(request);
@@ -96,9 +94,7 @@ describe("oAuth Middleware", () => {
       /** @type {httpMocks.RequestOptions} */
       const request = {
         query: { method: "code" },
-        headers: {
-          Authorization: `Bearer ${google_auth_code}`,
-        },
+        headers: { Authorization: `Bearer ${google_auth_code}` },
       };
 
       const req = httpMocks.createRequest(request);
@@ -126,9 +122,7 @@ describe("oAuth Middleware", () => {
       const facebook_access_token = "the-access-token-came-from-facebook"; // invalid token
 
       /** @type {httpMocks.RequestOptions} */
-      const request = {
-        headers: { Authorization: `Bearer ${facebook_access_token}` },
-      };
+      const request = { headers: { Authorization: `Bearer ${facebook_access_token}` } };
 
       const req = httpMocks.createRequest(request);
       const res = httpMocks.createResponse();
@@ -183,9 +177,7 @@ describe("oAuth Middleware", () => {
       /** @type {httpMocks.RequestOptions} */
       const request = {
         query: { method: "token" },
-        headers: {
-          Authorization: `Bearer ${google_id_token}`,
-        },
+        headers: { Authorization: `Bearer ${google_id_token}` },
       };
 
       const req = httpMocks.createRequest(request);
@@ -230,11 +222,7 @@ describe("oAuth Middleware", () => {
         .mockImplementation(customImplementation);
 
       /** @type {httpMocks.RequestOptions} */
-      const request = {
-        headers: {
-          Authorization: `Bearer ${facebook_access_token}`,
-        },
-      };
+      const request = { headers: { Authorization: `Bearer ${facebook_access_token}` } };
 
       const req = httpMocks.createRequest(request);
       const res = httpMocks.createResponse();
@@ -265,22 +253,14 @@ describe("oAuth Middleware", () => {
     });
 
     test("should continue next middleware with oAuth id_token attached to the request (google)", async () => {
-      const identity = {
-        id: "123456789012345678901234",
-        email: "talat@gmail.com",
-      };
+      const identity = { id: "123456789012345678901234", email: "talat@gmail.com" };
 
       /** @type {import("../../src/services/authProviders").AuthProvider} */
       const provider = "google";
       const google_id_token = "the-id-token-came-from-google";
 
       /** @type {import("../../src/services/authProviders").AuthProviderResult} */
-      const provider_response = {
-        provider,
-        token: google_id_token,
-        expiresIn: 60,
-        identity,
-      };
+      const provider_response = { provider, token: google_id_token, expiresIn: 60, identity };
 
       const spyOnGoogle = jest
         .spyOn(authProviders, "google")
@@ -317,10 +297,7 @@ describe("oAuth Middleware", () => {
     });
 
     test("should continue next middleware with oAuth authorization code attached to the request (google)", async () => {
-      const identity = {
-        id: "123456789012345678901234",
-        email: "talat@gmail.com",
-      };
+      const identity = { id: "123456789012345678901234", email: "talat@gmail.com" };
 
       /** @type {import("../../src/services/authProviders").AuthProvider} */
       const provider = "google";
@@ -328,12 +305,7 @@ describe("oAuth Middleware", () => {
       const google_id_token = "the-id-token-came-from-google";
 
       /** @type {import("../../src/services/authProviders").AuthProviderResult} */
-      const provider_response = {
-        provider,
-        token: google_id_token,
-        expiresIn: 60,
-        identity,
-      };
+      const provider_response = { provider, token: google_id_token, expiresIn: 60, identity };
 
       const spyOnGoogle = jest
         .spyOn(authProviders, "google")
@@ -370,10 +342,7 @@ describe("oAuth Middleware", () => {
     });
 
     test("should continue next middleware with oAuth attached to the request (facebook)", async () => {
-      const identity = {
-        id: "123456789012345678901234",
-        email: "talat@gmail.com",
-      };
+      const identity = { id: "123456789012345678901234", email: "talat@gmail.com" };
 
       /** @type {import("../../src/services/authProviders").AuthProvider} */
       const provider = "facebook";
@@ -400,9 +369,7 @@ describe("oAuth Middleware", () => {
         .mockImplementation(() => Promise.resolve(true));
 
       /** @type {httpMocks.RequestOptions} */
-      const request = {
-        headers: { Authorization: `Bearer ${facebook_access_token}` },
-      };
+      const request = { headers: { Authorization: `Bearer ${facebook_access_token}` } };
 
       const req = httpMocks.createRequest(request);
       const res = httpMocks.createResponse();

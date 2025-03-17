@@ -1,5 +1,5 @@
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 
 const app = require("../../src/core/express");
 
@@ -87,10 +87,7 @@ describe("POST /auth/reset-password", () => {
     });
 
     test("should return 422 Validation Error if there is no token", async () => {
-      const resetPasswordForm = {
-        password: "11aaAA88$",
-        passwordConfirmation: "11aaAA88$",
-      };
+      const resetPasswordForm = { password: "11aaAA88$", passwordConfirmation: "11aaAA88$" };
 
       const response = await request(app).post("/auth/reset-password").send(resetPasswordForm);
 

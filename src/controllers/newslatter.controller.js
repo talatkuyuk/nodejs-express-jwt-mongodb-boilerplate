@@ -1,4 +1,4 @@
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const asyncHandler = require("express-async-handler");
 
 const { traceError } = require("../utils/errorUtils");
@@ -29,6 +29,4 @@ const subscribe = asyncHandler(
   },
 );
 
-module.exports = {
-  subscribe,
-};
+module.exports = { subscribe };

@@ -5,7 +5,7 @@
 /** @typedef {import('express').RequestHandler} RequestHandler */
 /** @typedef {Object.<string, string[]>} Errors */
 
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 
 const { validationResult, matchedData } = require("express-validator");
 const { traceError } = require("../utils/errorUtils");
@@ -44,12 +44,7 @@ const validate = (rules) => async (req, _res, next) => {
     }
 
     // debug the data validated or sanitized from the request
-    console.log(
-      matchedData(req, {
-        includeOptionals: false,
-        onlyValidData: false,
-      }),
-    );
+    console.log(matchedData(req, { includeOptionals: false, onlyValidData: false }));
 
     const validationErrors = validationResult(req);
 

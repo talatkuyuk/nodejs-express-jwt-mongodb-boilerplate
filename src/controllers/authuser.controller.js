@@ -1,4 +1,4 @@
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const asyncHandler = require("express-async-handler");
 
 const { traceError } = require("../utils/errorUtils");
@@ -27,12 +27,9 @@ const addAuthUser = asyncHandler(
       // no need to generate tokens since the user is going to login self
 
       res.location(`${req.protocol}://${req.get("host")}/authusers/${authuser.id}`);
-      res.status(httpStatus.CREATED).send({
-        success: true,
-        data: {
-          authuser: authuser.filter(),
-        },
-      });
+      res
+        .status(httpStatus.CREATED)
+        .send({ success: true, data: { authuser: authuser.filter() } });
     } catch (error) {
       throw traceError(error, "AuthUserController : addAuthUser");
     }
@@ -50,12 +47,7 @@ const getAuthUser = asyncHandler(async (req, res) => {
 
     const authuser = await authuserService.getAuthUserById(myid);
 
-    res.status(httpStatus.OK).send({
-      success: true,
-      data: {
-        authuser: authuser.filter(),
-      },
-    });
+    res.status(httpStatus.OK).send({ success: true, data: { authuser: authuser.filter() } });
   } catch (error) {
     throw traceError(error, "AuthUserController : getAuthUser");
   }
@@ -78,14 +70,16 @@ const getAuthUsers = asyncHandler(
 
       const result = await authuserService.getAuthUsers(query);
 
-      res.status(httpStatus.OK).send({
-        success: true,
-        data: {
-          authusers: result.authusers.map((a) => a.filter()),
-          pagination: result.pagination,
-          totalCount: result.totalCount,
-        },
-      });
+      res
+        .status(httpStatus.OK)
+        .send({
+          success: true,
+          data: {
+            authusers: result.authusers.map((a) => a.filter()),
+            pagination: result.pagination,
+            totalCount: result.totalCount,
+          },
+        });
     } catch (error) {
       throw traceError(error, "AuthUserController : getAuthUsers");
     }
@@ -157,12 +151,7 @@ const unlinkProvider = asyncHandler(
 
       const authuser = await authuserService.unlinkProvider(id, provider);
 
-      res.status(httpStatus.OK).send({
-        success: true,
-        data: {
-          authuser: authuser.filter(),
-        },
-      });
+      res.status(httpStatus.OK).send({ success: true, data: { authuser: authuser.filter() } });
     } catch (error) {
       throw traceError(error, "AuthUserController : unlinkProvider");
     }

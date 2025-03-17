@@ -1,5 +1,5 @@
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
@@ -323,9 +323,7 @@ describe("POST /auth/google & auth/facebook", () => {
         "You are disabled, call the system administrator",
       );
 
-      const authuser_in_db = await authuserDbService.getAuthUser({
-        id: authuser.id,
-      });
+      const authuser_in_db = await authuserDbService.getAuthUser({ id: authuser.id });
 
       expect(authuser_in_db?.providers?.[provider]).toBeUndefined();
     });
@@ -381,9 +379,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number), // 1631868212022
             updatedAt: null,
-            providers: {
-              [provider]: google_id,
-            },
+            providers: { [provider]: google_id },
           },
           tokens: TestUtil.ExpectedTokens,
         },
@@ -398,9 +394,7 @@ describe("POST /auth/google & auth/facebook", () => {
         email: "talat@gmail.com",
         password: await bcrypt.hash("Pass1word.", 8),
         isEmailVerified: false,
-        providers: {
-          emailpassword: true,
-        },
+        providers: { emailpassword: true },
       });
 
       if (!authuser) {
@@ -435,9 +429,7 @@ describe("POST /auth/google & auth/facebook", () => {
       expect(response.status).toBe(httpStatus.OK);
       expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
-      const authuser_in_db = await authuserDbService.getAuthUser({
-        id: authuser.id,
-      });
+      const authuser_in_db = await authuserDbService.getAuthUser({ id: authuser.id });
 
       expect(authuser_in_db?.providers?.["emailpassword"]).toBe(true);
       expect(authuser_in_db?.providers?.[provider]).toBeDefined();
@@ -455,10 +447,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number), // 1631868212022
             updatedAt: expect.any(Number),
-            providers: {
-              emailpassword: true,
-              [provider]: facebook_id,
-            },
+            providers: { emailpassword: true, [provider]: facebook_id },
           },
           tokens: TestUtil.ExpectedTokens,
         },
@@ -478,9 +467,7 @@ describe("POST /auth/google & auth/facebook", () => {
         password: null,
         isEmailVerified: true,
         updatedAt,
-        providers: {
-          google: google_id,
-        },
+        providers: { google: google_id },
       });
 
       if (!authuser) {
@@ -513,9 +500,7 @@ describe("POST /auth/google & auth/facebook", () => {
       expect(response.status).toBe(httpStatus.OK);
       expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
-      const authuser_in_db = await authuserDbService.getAuthUser({
-        id: authuser.id,
-      });
+      const authuser_in_db = await authuserDbService.getAuthUser({ id: authuser.id });
 
       expect(authuser_in_db?.providers?.["emailpassword"]).toBeUndefined();
       expect(authuser_in_db?.providers?.[provider]).toBeDefined();
@@ -533,9 +518,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number),
             updatedAt: updatedAt, // id did not change
-            providers: {
-              [provider]: google_id,
-            },
+            providers: { [provider]: google_id },
           },
           tokens: TestUtil.ExpectedTokens,
         },
@@ -554,9 +537,7 @@ describe("POST /auth/google & auth/facebook", () => {
         email: google_email,
         password: null,
         isEmailVerified: true,
-        providers: {
-          facebook: facebook_id,
-        },
+        providers: { facebook: facebook_id },
       });
 
       if (!authuser) {
@@ -589,9 +570,7 @@ describe("POST /auth/google & auth/facebook", () => {
       expect(response.status).toBe(httpStatus.OK);
       expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
-      const authuser_in_db = await authuserDbService.getAuthUser({
-        id: authuser.id,
-      });
+      const authuser_in_db = await authuserDbService.getAuthUser({ id: authuser.id });
 
       expect(authuser_in_db?.providers?.["emailpassword"]).toBeUndefined();
       expect(authuser_in_db?.providers?.["facebook"]).toBe(facebook_id);
@@ -610,10 +589,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number),
             updatedAt: expect.any(Number),
-            providers: {
-              facebook: facebook_id,
-              [provider]: google_id,
-            },
+            providers: { facebook: facebook_id, [provider]: google_id },
           },
           tokens: TestUtil.ExpectedTokens,
         },
@@ -632,10 +608,7 @@ describe("POST /auth/google & auth/facebook", () => {
         email: google_email,
         password: await bcrypt.hash("Pass1word.", 8),
         isEmailVerified: true,
-        providers: {
-          emailpassword: true,
-          facebook: facebook_id,
-        },
+        providers: { emailpassword: true, facebook: facebook_id },
       });
 
       if (!authuser) {
@@ -668,9 +641,7 @@ describe("POST /auth/google & auth/facebook", () => {
       expect(response.status).toBe(httpStatus.OK);
       expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
-      const authuser_in_db = await authuserDbService.getAuthUser({
-        id: authuser.id,
-      });
+      const authuser_in_db = await authuserDbService.getAuthUser({ id: authuser.id });
 
       expect(authuser_in_db?.providers?.["emailpassword"]).toBe(true);
       expect(authuser_in_db?.providers?.["facebook"]).toBe(facebook_id);
@@ -689,11 +660,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number),
             updatedAt: expect.any(Number),
-            providers: {
-              emailpassword: true,
-              facebook: facebook_id,
-              [provider]: google_id,
-            },
+            providers: { emailpassword: true, facebook: facebook_id, [provider]: google_id },
           },
           tokens: TestUtil.ExpectedTokens,
         },
@@ -713,10 +680,7 @@ describe("POST /auth/google & auth/facebook", () => {
         password: await bcrypt.hash("Pass1word.", 8),
         isEmailVerified: true,
         updatedAt,
-        providers: {
-          emailpassword: true,
-          google: google_id,
-        },
+        providers: { emailpassword: true, google: google_id },
       });
 
       if (!authuser) {
@@ -749,9 +713,7 @@ describe("POST /auth/google & auth/facebook", () => {
       expect(response.status).toBe(httpStatus.OK);
       expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
-      const authuser_in_db = await authuserDbService.getAuthUser({
-        id: authuser.id,
-      });
+      const authuser_in_db = await authuserDbService.getAuthUser({ id: authuser.id });
 
       expect(authuser_in_db?.providers?.["emailpassword"]).toBe(true);
       expect(authuser_in_db?.providers?.[provider]).toBeDefined();
@@ -769,10 +731,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number),
             updatedAt: updatedAt, // id did not change
-            providers: {
-              emailpassword: true,
-              [provider]: google_id,
-            },
+            providers: { emailpassword: true, [provider]: google_id },
           },
           tokens: TestUtil.ExpectedTokens,
         },
@@ -793,10 +752,7 @@ describe("POST /auth/google & auth/facebook", () => {
         password: await bcrypt.hash("Pass1word.", 8),
         isEmailVerified: true,
         updatedAt,
-        providers: {
-          google: google_id,
-          facebook: facebook_id,
-        },
+        providers: { google: google_id, facebook: facebook_id },
       });
 
       if (!authuser) {
@@ -829,9 +785,7 @@ describe("POST /auth/google & auth/facebook", () => {
       expect(response.status).toBe(httpStatus.OK);
       expect(response.headers["content-type"]).toEqual(expect.stringContaining("json"));
 
-      const authuser_in_db = await authuserDbService.getAuthUser({
-        id: authuser.id,
-      });
+      const authuser_in_db = await authuserDbService.getAuthUser({ id: authuser.id });
 
       expect(authuser_in_db?.providers?.["emailpassword"]).toBeUndefined();
       expect(authuser_in_db?.providers?.["google"]).toBe(google_id);
@@ -850,10 +804,7 @@ describe("POST /auth/google & auth/facebook", () => {
             isDisabled: false,
             createdAt: expect.any(Number),
             updatedAt: updatedAt, // id did not change
-            providers: {
-              google: google_id,
-              facebook: facebook_id,
-            },
+            providers: { google: google_id, facebook: facebook_id },
           },
           tokens: TestUtil.ExpectedTokens,
         },

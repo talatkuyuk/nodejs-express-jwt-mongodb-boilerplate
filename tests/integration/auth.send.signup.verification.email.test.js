@@ -1,5 +1,5 @@
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const jwt = require("jsonwebtoken");
 
 const app = require("../../src/core/express");
@@ -43,9 +43,7 @@ describe("POST /auth/send-signup-verification-email", () => {
     test("should return status 400, if the email is already verified", async () => {
       // update the authuser with isEmailVerifid true
       await authuserDbService.updateAuthUser(authuserId, {
-        providers: {
-          emailpassword: true,
-        },
+        providers: { emailpassword: true },
       });
 
       const response = await request(app)
@@ -115,16 +113,18 @@ describe("POST /auth/send-signup-verification-email", () => {
   describe("Success send-signup-verification-email process", () => {
     test("should return status 204, generate and store verify-signup token in db", async () => {
       // spy on transporter and resolve interface SentMessageInfo
-      jest.spyOn(emailService.transporter, "sendMail").mockResolvedValue(
-        Promise.resolve({
-          envelope: { from: "from@xxx.com", to: ["to@xxx.com"] },
-          messageId: "fake-message-id",
-          accepted: ["to@xxx.com"],
-          rejected: [],
-          pending: [],
-          response: "The verification email is sent.",
-        }),
-      );
+      jest
+        .spyOn(emailService.transporter, "sendMail")
+        .mockResolvedValue(
+          Promise.resolve({
+            envelope: { from: "from@xxx.com", to: ["to@xxx.com"] },
+            messageId: "fake-message-id",
+            accepted: ["to@xxx.com"],
+            rejected: [],
+            pending: [],
+            response: "The verification email is sent.",
+          }),
+        );
 
       // spy on sendSignupVerificationEmail of the emailService
       const spyOnSendSignupVerificationEmail = jest.spyOn(

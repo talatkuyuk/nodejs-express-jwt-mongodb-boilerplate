@@ -1,6 +1,6 @@
 /** @typedef {import('../models/authuser.model')} AuthUser */
 
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const bcrypt = require("bcryptjs");
 
 const ApiError = require("../utils/ApiError");
@@ -155,11 +155,7 @@ const getAuthUsers = async (query) => {
 
     const pagination = paginaryService.composePagination(totalCount, page, limit);
 
-    return {
-      authusers,
-      totalCount,
-      pagination,
-    };
+    return { authusers, totalCount, pagination };
   } catch (error) {
     throw traceError(error, "AuthUserService : getAuthUsers");
   }
@@ -175,9 +171,7 @@ const toggleAbility = async (id) => {
     // get authuser first, it is necessary to toggle ability
     const authuser = await getAuthUserById(id);
 
-    await authuserDbService.updateAuthUser(id, {
-      isDisabled: !authuser.isDisabled,
-    });
+    await authuserDbService.updateAuthUser(id, { isDisabled: !authuser.isDisabled });
   } catch (error) {
     throw traceError(error, "AuthUserService : toggleAbility");
   }
@@ -193,9 +187,7 @@ const toggleVerification = async (id) => {
     // get authuser first, it is necessary to toggle verification
     const authuser = await getAuthUserById(id);
 
-    await authuserDbService.updateAuthUser(id, {
-      isEmailVerified: !authuser.isEmailVerified,
-    });
+    await authuserDbService.updateAuthUser(id, { isEmailVerified: !authuser.isEmailVerified });
   } catch (error) {
     throw traceError(error, "AuthUserService : toggleVerification");
   }

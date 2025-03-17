@@ -1,6 +1,6 @@
 /** @typedef {import('../models/authuser.model')} AuthUser */
 
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const bcrypt = require("bcryptjs");
 
 const ApiError = require("../utils/ApiError");
@@ -108,9 +108,7 @@ const signupWithEmailAndPassword = async (email, password) => {
     const newAuthuser = await authuserDbService.addAuthUser({
       email,
       password: hashedPassword,
-      providers: {
-        emailpassword: true,
-      },
+      providers: { emailpassword: true },
     });
 
     if (!newAuthuser) {
@@ -231,9 +229,7 @@ const unlinkAuthProvider = async (id, providers, provider) => {
     delete newAuthProviders[provider];
 
     /** @type {import('./authuser.db.service.js').AuthuserFieldsForUpdate} */
-    const updateBody = {
-      providers: newAuthProviders,
-    };
+    const updateBody = { providers: newAuthProviders };
 
     if (provider === authProvider.EMAILPASSWORD) {
       updateBody["password"] = null;

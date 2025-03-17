@@ -1,4 +1,4 @@
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const httpMocks = require("node-mocks-http");
 
 const { authorize } = require("../../src/middlewares");
@@ -13,21 +13,15 @@ describe("Authorization Middleware: Check the user right(s)", () => {
 
   test("should throw ApiError with code 403 if the user has the right but for only himself", async () => {
     // lets assume that the auth middleware does not use the joined query, and the role is not attached to the authuser
-    const myuser = {
-      id: "111111111111111111111111",
-    };
+    const myuser = { id: "111111111111111111111111" };
 
-    const otheruser = {
-      id: "999999999999999999999999",
-    };
+    const otheruser = { id: "999999999999999999999999" };
 
     // The authorize middleware process the req.params and the req.authuser (attached in auth middleware) in its logic,
     // so it is enough to have the request object like below
 
     /** @type {httpMocks.RequestOptions} */
-    const request = {
-      params: { id: otheruser.id },
-    };
+    const request = { params: { id: otheruser.id } };
 
     request.authuser = myuser; // it is attached in authentication middleware
 
@@ -52,18 +46,12 @@ describe("Authorization Middleware: Check the user right(s)", () => {
 
   test("should throw ApiError with code 403 even if the admin tries to change password belongs to another user", async () => {
     // lets assume that the auth middleware does not use the joined query, and the role is not attached to the authuser
-    const myuser = {
-      id: "111111111111111111111111",
-    };
+    const myuser = { id: "111111111111111111111111" };
 
-    const otheruser = {
-      id: "999999999999999999999999",
-    };
+    const otheruser = { id: "999999999999999999999999" };
 
     /** @type {httpMocks.RequestOptions} */
-    const request = {
-      params: { id: otheruser.id },
-    };
+    const request = { params: { id: otheruser.id } };
 
     request.authuser = myuser; // it is attached in authentication middleware
 
@@ -90,9 +78,7 @@ describe("Authorization Middleware: Check the user right(s)", () => {
     /** @type {httpMocks.RequestOptions} */
     const request = {};
 
-    request.authuser = {
-      id: "111111111111111111111111",
-    }; // it is attached in authentication middleware
+    request.authuser = { id: "111111111111111111111111" }; // it is attached in authentication middleware
 
     const req = httpMocks.createRequest(request);
     const res = httpMocks.createResponse();
@@ -115,14 +101,10 @@ describe("Authorization Middleware: Check the user right(s)", () => {
 
   test("should continue next middleware if the user has appropriate right related himself", async () => {
     // lets assume that the auth middleware does not use the joined query, and the role is not attached to the authuser
-    const myuser = {
-      id: "111111111111111111111111",
-    };
+    const myuser = { id: "111111111111111111111111" };
 
     /** @type {httpMocks.RequestOptions} */
-    const request = {
-      params: { id: myuser.id },
-    };
+    const request = { params: { id: myuser.id } };
 
     request.authuser = myuser; // it is attached in authentication middleware
 
@@ -168,9 +150,7 @@ describe("Authorization Middleware: Check the user right(s)", () => {
     /** @type {httpMocks.RequestOptions} */
     const request = {};
 
-    request.authuser = {
-      id: "111111111111111111111111",
-    };
+    request.authuser = { id: "111111111111111111111111" };
 
     const req = httpMocks.createRequest(request);
     const res = httpMocks.createResponse();

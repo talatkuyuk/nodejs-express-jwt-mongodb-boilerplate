@@ -1,5 +1,5 @@
 const MongoError = require("mongodb").MongoError;
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const config = require("../config");
 const logger = require("../core/logger");
 const ApiError = require("../utils/ApiError");
@@ -74,8 +74,4 @@ const handler = (err, _req, res, _next) => {
   res.status(statusCode).send(response);
 };
 
-module.exports = {
-  notFound,
-  converter,
-  handler,
-};
+module.exports = { notFound, converter, handler };

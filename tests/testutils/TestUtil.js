@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const moment = require("moment");
 
 const { tokenService, tokenDbService, authuserDbService } = require("../../src/services");
@@ -57,10 +57,7 @@ class TestUtil {
       token: expect.any(String),
       expires: expect.any(String), // ex. "2021-10-17T09:49:26.735Z"
     },
-    refresh: {
-      token: expect.any(String),
-      expires: expect.any(String),
-    },
+    refresh: { token: expect.any(String), expires: expect.any(String) },
   };
 
   /**

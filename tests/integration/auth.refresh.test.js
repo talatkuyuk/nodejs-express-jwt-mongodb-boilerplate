@@ -1,5 +1,5 @@
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const moment = require("moment");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
@@ -121,9 +121,7 @@ describe("POST /auth/refresh-tokens", () => {
       expect(response.body.error.message).toEqual("The refresh token is blacklisted");
 
       // check the whole refresh token's family are in db // up to now, 3 refresh tokens would be added above
-      const data = await tokenDbService.getTokens({
-        family: refreshTokenFamily,
-      });
+      const data = await tokenDbService.getTokens({ family: refreshTokenFamily });
       expect(data.length).toBe(3);
 
       // check the all refresh tokens that belong to the family are blacklisted
@@ -175,9 +173,7 @@ describe("POST /auth/refresh-tokens", () => {
       expect(response.body.error.message).toEqual("The refresh token is blacklisted");
 
       // check the whole refresh token's family are removed from db // up to now, 3 refresh tokens would be added above
-      const data = await tokenDbService.getTokens({
-        family: refreshTokenFamily,
-      });
+      const data = await tokenDbService.getTokens({ family: refreshTokenFamily });
       expect(data.length).toBe(0);
 
       // no need to check cache, since access tokens' jtis are already in the blacklist, see the test above
@@ -223,9 +219,7 @@ describe("POST /auth/refresh-tokens", () => {
       );
 
       // check the whole refresh token's family are removed from db
-      const data = await tokenDbService.getTokens({
-        family: "i-am-supposed-to-be-deleted",
-      });
+      const data = await tokenDbService.getTokens({ family: "i-am-supposed-to-be-deleted" });
       expect(data.length).toBe(0);
     });
 
@@ -371,9 +365,7 @@ describe("POST /auth/refresh-tokens", () => {
 
       expect(response.body).toEqual({
         success: true,
-        data: {
-          tokens: TestUtil.ExpectedTokens,
-        },
+        data: { tokens: TestUtil.ExpectedTokens },
       });
     });
   });

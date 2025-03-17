@@ -1,5 +1,5 @@
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const bcrypt = require("bcryptjs");
 
 const app = require("../../src/core/express");
@@ -17,9 +17,7 @@ setupRedis();
 describe("POST /auth/login", () => {
   describe("Request Validation Errors", () => {
     test("should return 422 Validation Error if email is empty", async () => {
-      const loginForm = {
-        password: "Pass1word.",
-      };
+      const loginForm = { password: "Pass1word." };
 
       const response = await request(app).post("/auth/login").send(loginForm);
 
@@ -29,10 +27,7 @@ describe("POST /auth/login", () => {
     });
 
     test("should return 422 Validation Error if email is invalid form", async () => {
-      const loginForm = {
-        email: "talat1@com",
-        password: "Pass1word.",
-      };
+      const loginForm = { email: "talat1@com", password: "Pass1word." };
 
       const response = await request(app).post("/auth/login").send(loginForm);
 
@@ -42,9 +37,7 @@ describe("POST /auth/login", () => {
     });
 
     test("should return 422 Validation Error if password is empty", async () => {
-      const loginForm = {
-        email: "talat@gmail.com",
-      };
+      const loginForm = { email: "talat@gmail.com" };
 
       const response = await request(app).post("/auth/login").send(loginForm);
 
@@ -54,10 +47,7 @@ describe("POST /auth/login", () => {
     });
 
     test("should return 422 Validation Error if occurs both email, password validation errors", async () => {
-      const loginForm = {
-        email: "talat@gmail",
-        password: "",
-      };
+      const loginForm = { email: "talat@gmail", password: "" };
 
       const response = await request(app).post("/auth/login").send(loginForm);
 
@@ -71,10 +61,7 @@ describe("POST /auth/login", () => {
 
   describe("Failed logins", () => {
     test("should return status 404, if the user is not registered", async () => {
-      const loginForm = {
-        email: "talat@gmail.com",
-        password: "Pass1word.",
-      };
+      const loginForm = { email: "talat@gmail.com", password: "Pass1word." };
 
       const response = await request(app).post("/auth/login").send(loginForm);
 
@@ -92,10 +79,7 @@ describe("POST /auth/login", () => {
         isDisabled: true,
       });
 
-      const loginForm = {
-        email: "talat@gmail.com",
-        password: "Pass1word.",
-      };
+      const loginForm = { email: "talat@gmail.com", password: "Pass1word." };
 
       const response = await request(app).post("/auth/login").send(loginForm);
 
@@ -115,10 +99,7 @@ describe("POST /auth/login", () => {
         isDisabled: false,
       });
 
-      const loginForm = {
-        email: "talat@gmail.com",
-        password: "Pass1word",
-      };
+      const loginForm = { email: "talat@gmail.com", password: "Pass1word" };
 
       const response = await request(app).post("/auth/login").send(loginForm);
 
@@ -143,10 +124,7 @@ describe("POST /auth/login", () => {
         throw new Error("Unexpected db error while adding a document!");
       }
 
-      const loginForm = {
-        email: authuser.email,
-        password: "Pass1word.",
-      };
+      const loginForm = { email: authuser.email, password: "Pass1word." };
 
       const response = await request(app).post("/auth/login").send(loginForm);
 
@@ -166,9 +144,7 @@ describe("POST /auth/login", () => {
             isDisabled: false,
             createdAt: expect.any(Number), // 1631868212022
             updatedAt: null,
-            providers: {
-              emailpassword: true,
-            },
+            providers: { emailpassword: true },
           },
           tokens: TestUtil.ExpectedTokens,
         },

@@ -1,4 +1,4 @@
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const moment = require("moment");
 const jwt = require("jsonwebtoken");
 const httpMocks = require("node-mocks-http");
@@ -55,9 +55,7 @@ describe("Auth Middleware", () => {
 
     test("should throw ApiError with code 401, if Authorization Header is bad formed without Bearer", async () => {
       /** @type {httpMocks.RequestOptions} */
-      const request = {
-        headers: { Authorization: testData.ACCESS_TOKEN_EXPIRED },
-      };
+      const request = { headers: { Authorization: testData.ACCESS_TOKEN_EXPIRED } };
 
       const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "No auth token");
       await commonFailedAuthenticateTestProcess(request, expectedError);
@@ -65,9 +63,7 @@ describe("Auth Middleware", () => {
 
     test("should throw ApiError with code 401, if Authorization Header is bad formed mistyping Baerer", async () => {
       /** @type {httpMocks.RequestOptions} */
-      const request = {
-        headers: { Authorization: `Baerer ${testData.ACCESS_TOKEN_EXPIRED}` },
-      };
+      const request = { headers: { Authorization: `Baerer ${testData.ACCESS_TOKEN_EXPIRED}` } };
 
       const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "No auth token");
       await commonFailedAuthenticateTestProcess(request, expectedError);
@@ -75,9 +71,7 @@ describe("Auth Middleware", () => {
 
     test("should throw ApiError with code 401, if Authorization Header is bad formed with no space between Bearer and Token", async () => {
       /** @type {httpMocks.RequestOptions} */
-      const request = {
-        headers: { Authorization: `Bearer${testData.ACCESS_TOKEN_EXPIRED}` },
-      };
+      const request = { headers: { Authorization: `Bearer${testData.ACCESS_TOKEN_EXPIRED}` } };
 
       const expectedError = new ApiError(httpStatus.UNAUTHORIZED, "No auth token");
       await commonFailedAuthenticateTestProcess(request, expectedError);
@@ -92,9 +86,7 @@ describe("Auth Middleware", () => {
 
     test("should throw ApiError with code 401, if access token is expired", async () => {
       /** @type {httpMocks.RequestOptions} */
-      const request = {
-        headers: { Authorization: `Bearer ${testData.ACCESS_TOKEN_EXPIRED}` },
-      };
+      const request = { headers: { Authorization: `Bearer ${testData.ACCESS_TOKEN_EXPIRED}` } };
 
       const expectedError = new ApiError(
         httpStatus.UNAUTHORIZED,
@@ -106,9 +98,7 @@ describe("Auth Middleware", () => {
     test("should throw ApiError with code 401, if access token has invalid signature", async () => {
       /** @type {httpMocks.RequestOptions} */
       const request = {
-        headers: {
-          Authorization: `Bearer ${testData.ACCESS_TOKEN_WITH_INVALID_SIGNATURE}`,
-        },
+        headers: { Authorization: `Bearer ${testData.ACCESS_TOKEN_WITH_INVALID_SIGNATURE}` },
       };
 
       const expectedError = new ApiError(

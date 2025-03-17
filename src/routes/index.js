@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 //const router = express.Router({ strict: true });
 
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const asyncHandler = require("express-async-handler");
 
 const authRoute = require("./auth.route");

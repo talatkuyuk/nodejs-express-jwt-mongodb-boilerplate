@@ -3,7 +3,7 @@
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
 const crypto = require("crypto");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 
 const config = require("../config");
 
@@ -46,14 +46,7 @@ const generateToken = (
 ) => {
   try {
     const now = moment().unix();
-    const payload = {
-      sub: userId,
-      iat: now,
-      exp: expires.unix(),
-      jti,
-      ua: userAgent,
-      type,
-    };
+    const payload = { sub: userId, iat: now, exp: expires.unix(), jti, ua: userAgent, type };
     return jwt.sign(payload, secret, { notBefore: notValidBefore });
   } catch (error) {
     throw traceError(error, "TokenService : generateToken");
@@ -75,11 +68,7 @@ const verifyToken = async (token, type) => {
       throw new ApiError(httpStatus.UNAUTHORIZED, "The token is valid but couldn't verified");
     }
 
-    const tokenInstance = await tokenDbService.getToken({
-      token,
-      user: payload.sub,
-      type,
-    });
+    const tokenInstance = await tokenDbService.getToken({ token, user: payload.sub, type });
 
     if (!tokenInstance) {
       throw new ApiError(httpStatus.UNAUTHORIZED, "The token is not valid");
@@ -302,14 +291,8 @@ const generateAuthTokens = async (userId, userAgent, family) => {
     const refreshToken = await generateRefreshToken(userId, userAgent, jti, family);
 
     return {
-      access: {
-        token: accessToken.token,
-        expires: accessToken.expires,
-      },
-      refresh: {
-        token: refreshToken.token,
-        expires: refreshToken.expires.toISOString(),
-      },
+      access: { token: accessToken.token, expires: accessToken.expires },
+      refresh: { token: refreshToken.token, expires: refreshToken.expires.toISOString() },
     };
   } catch (error) {
     throw traceError(error, "TokenService : generateAuthTokens");

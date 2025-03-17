@@ -1,5 +1,5 @@
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 
 const app = require("../../src/core/express");
 
@@ -30,9 +30,7 @@ describe("POST /auth/verify-signup", () => {
     });
 
     test("should return 422 Validation Error if the token is undefined", async () => {
-      const verifySignupForm = {
-        token: undefined,
-      };
+      const verifySignupForm = { token: undefined };
 
       const response = await request(app).post("/auth/verify-signup").send(verifySignupForm);
 
@@ -55,9 +53,7 @@ describe("POST /auth/verify-signup", () => {
     });
 
     test("should throw ApiError with code 401 if the verify-signup token has wrong signature", async () => {
-      const verifySignupForm = {
-        token: testData.TOKEN_WITH_INVALID_SIGNATURE,
-      };
+      const verifySignupForm = { token: testData.TOKEN_WITH_INVALID_SIGNATURE };
 
       const response = await request(app).post("/auth/verify-signup").send(verifySignupForm);
 
@@ -67,9 +63,7 @@ describe("POST /auth/verify-signup", () => {
     });
 
     test("should throw ApiError with code 401 if the token is malformed", async () => {
-      const verifySignupForm = {
-        token: "mal-formed-token",
-      };
+      const verifySignupForm = { token: "mal-formed-token" };
 
       const response = await request(app).post("/auth/verify-signup").send(verifySignupForm);
 

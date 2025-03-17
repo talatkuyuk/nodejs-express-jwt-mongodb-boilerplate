@@ -1,7 +1,7 @@
 /** @typedef {import('express').RequestHandler} RequestHandler */
 /** @typedef {import('../models/user.model')} User */
 
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 
 const ApiError = require("../utils/ApiError");
 const { traceError } = require("../utils/errorUtils");

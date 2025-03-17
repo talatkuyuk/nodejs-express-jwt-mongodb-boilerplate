@@ -1,5 +1,5 @@
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
@@ -136,16 +136,18 @@ describe("POST /auth/forgot-password", () => {
       }
 
       // spy on transporter and resolve interface SentMessageInfo
-      jest.spyOn(emailService.transporter, "sendMail").mockResolvedValue(
-        Promise.resolve({
-          envelope: { from: "from@xxx.com", to: ["to@xxx.com"] },
-          messageId: "fake-message-id",
-          accepted: ["to@xxx.com"],
-          rejected: [],
-          pending: [],
-          response: "The reset password email is sent.",
-        }),
-      );
+      jest
+        .spyOn(emailService.transporter, "sendMail")
+        .mockResolvedValue(
+          Promise.resolve({
+            envelope: { from: "from@xxx.com", to: ["to@xxx.com"] },
+            messageId: "fake-message-id",
+            accepted: ["to@xxx.com"],
+            rejected: [],
+            pending: [],
+            response: "The reset password email is sent.",
+          }),
+        );
 
       // spy on sendResetPasswordEmail of the emailService
       const spyOnSendResetPasswordEmail = jest.spyOn(emailService, "sendResetPasswordEmail");

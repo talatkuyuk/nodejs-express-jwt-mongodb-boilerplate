@@ -1,4 +1,4 @@
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const asyncHandler = require("express-async-handler");
 
 const { traceError } = require("../utils/errorUtils");
@@ -41,13 +41,9 @@ const signup = asyncHandler(
       // TODO: control if it necessary, can a user get own info using this path ???
       res.location(`${req.protocol}://${req.get("host")}/authusers/${authuser.id}`);
 
-      res.status(isNewAuthuserCreated ? httpStatus.CREATED : httpStatus.OK).send({
-        success: true,
-        data: {
-          authuser: authuser.filter(),
-          tokens,
-        },
-      });
+      res
+        .status(isNewAuthuserCreated ? httpStatus.CREATED : httpStatus.OK)
+        .send({ success: true, data: { authuser: authuser.filter(), tokens } });
     } catch (error) {
       throw traceError(error, "AuthController : signup");
     }
@@ -76,13 +72,9 @@ const login = asyncHandler(
 
       req.authuser = authuser; // for morgan logger to tokenize it as user
 
-      res.status(httpStatus.OK).send({
-        success: true,
-        data: {
-          authuser: authuser.filter(),
-          tokens,
-        },
-      });
+      res
+        .status(httpStatus.OK)
+        .send({ success: true, data: { authuser: authuser.filter(), tokens } });
     } catch (error) {
       throw traceError(error, "AuthController : login");
     }
@@ -108,13 +100,9 @@ const continueWithAuthProvider = asyncHandler(async (req, res) => {
     res.set("X-New-Authuser", String(isNewAuthuserCreated));
     res.set("Access-Control-Expose-Headers", "X-New-Authuser");
 
-    res.status(isNewAuthuserCreated ? httpStatus.CREATED : httpStatus.OK).send({
-      success: true,
-      data: {
-        authuser: authuser.filter(),
-        tokens,
-      },
-    });
+    res
+      .status(isNewAuthuserCreated ? httpStatus.CREATED : httpStatus.OK)
+      .send({ success: true, data: { authuser: authuser.filter(), tokens } });
   } catch (error) {
     throw traceError(error, "AuthController : continueWithAuthProvider");
   }
@@ -136,12 +124,7 @@ const unlinkAuthProvider = asyncHandler(
 
       const authuser = await authService.unlinkAuthProvider(id, providers, provider);
 
-      res.status(httpStatus.OK).send({
-        success: true,
-        data: {
-          authuser: authuser.filter(),
-        },
-      });
+      res.status(httpStatus.OK).send({ success: true, data: { authuser: authuser.filter() } });
     } catch (error) {
       throw traceError(error, "AuthController : unlinkAuthProvider");
     }
@@ -208,10 +191,7 @@ const refreshTokens = asyncHandler(
         refreshTokenInstance.family,
       );
 
-      res.status(httpStatus.OK).send({
-        success: true,
-        data: { tokens },
-      });
+      res.status(httpStatus.OK).send({ success: true, data: { tokens } });
     } catch (error) {
       throw traceError(error, "AuthController : refreshTokens");
     }
@@ -265,10 +245,7 @@ const resetPassword = asyncHandler(
       const authuser = await authService.checkAuthuserById(id);
       const updatedAuthuser = await authService.resetPassword(authuser, password);
 
-      await tokenService.removeTokens({
-        user: id,
-        type: tokenTypes.RESET_PASSWORD,
-      });
+      await tokenService.removeTokens({ user: id, type: tokenTypes.RESET_PASSWORD });
 
       req.authuser = updatedAuthuser; // for morgan logger to tokenize it as user
 
@@ -313,10 +290,7 @@ const verifyEmail = asyncHandler(
       const authuser = await authService.checkAuthuserById(id);
       const updatedAuthuser = await authService.verifyEmail(authuser);
 
-      await tokenService.removeTokens({
-        user: authuser.id,
-        type: tokenTypes.VERIFY_EMAIL,
-      });
+      await tokenService.removeTokens({ user: authuser.id, type: tokenTypes.VERIFY_EMAIL });
 
       req.authuser = updatedAuthuser; // for morgan logger to tokenize it as user
 
@@ -361,10 +335,7 @@ const verifySignup = asyncHandler(
       const authuser = await authService.checkAuthuserById(id);
       const updatedAuthuser = await authService.verifySignup(authuser);
 
-      await tokenService.removeTokens({
-        user: authuser.id,
-        type: tokenTypes.VERIFY_SIGNUP,
-      });
+      await tokenService.removeTokens({ user: authuser.id, type: tokenTypes.VERIFY_SIGNUP });
 
       req.authuser = updatedAuthuser; // for morgan logger to tokenize it as user
 

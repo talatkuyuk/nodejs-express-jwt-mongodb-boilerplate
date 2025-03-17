@@ -1,5 +1,5 @@
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const jwt = require("jsonwebtoken");
 
 const app = require("../../src/core/express");
@@ -75,9 +75,7 @@ describe("POST /auth/signout", () => {
       expect(data1).toBeNull();
 
       // check the authuser is moved to deleted authuser collection in db
-      const data2 = await authuserDbService.getDeletedAuthUser({
-        id: authuserId,
-      });
+      const data2 = await authuserDbService.getDeletedAuthUser({ id: authuserId });
 
       expect(data2).not.toBeNull();
 

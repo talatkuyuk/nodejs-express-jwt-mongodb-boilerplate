@@ -1,4 +1,4 @@
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 
 const { emailService } = require("../../src/services");
 const ApiError = require("../../src/utils/ApiError");
@@ -34,11 +34,7 @@ describe("Failed send-verification-email process", () => {
   test("should return status 500, if an error occured", async () => {
     const errorMessage = "the error message";
 
-    const smtpResponse = {
-      code: "EENVELOPE",
-      name: "Error",
-      message: errorMessage,
-    };
+    const smtpResponse = { code: "EENVELOPE", name: "Error", message: errorMessage };
 
     // spy on transporter to produce error
     jest

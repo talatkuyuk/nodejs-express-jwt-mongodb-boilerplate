@@ -1,6 +1,6 @@
 /** @typedef {import('../models/user.model')} User */
 
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 
 const ApiError = require("../utils/ApiError");
 const { traceError } = require("../utils/errorUtils");
@@ -135,11 +135,7 @@ const getUsers = async (query) => {
 
     const pagination = paginaryService.composePagination(totalCount, page, limit);
 
-    return {
-      users,
-      totalCount,
-      pagination,
-    };
+    return { users, totalCount, pagination };
   } catch (error) {
     throw traceError(error, "UserService : getUsers");
   }

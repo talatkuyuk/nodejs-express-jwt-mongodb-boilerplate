@@ -1,4 +1,4 @@
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 
 const config = require("../config");
 const logger = require("../core/logger");
@@ -107,8 +107,4 @@ const check_in_blacklist = async (check) => {
   }
 };
 
-module.exports = {
-  put_token_into_blacklist,
-  put_jti_into_blacklist,
-  check_in_blacklist,
-};
+module.exports = { put_token_into_blacklist, put_jti_into_blacklist, check_in_blacklist };

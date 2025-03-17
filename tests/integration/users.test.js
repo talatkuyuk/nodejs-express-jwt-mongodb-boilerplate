@@ -1,7 +1,7 @@
 /** @typedef {import("./authusers.test").AuthuserInResponse} AuthuserInResponse */
 
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 
 const app = require("../../src/core/express");
 
@@ -39,11 +39,14 @@ describe("PATH /users", () => {
 
   beforeEach(async () => {
     // create an authuser
-    const response = await request(app).post("/auth/signup").set("User-Agent", userAgent).send({
-      email: "admin@gmail.com",
-      password: "Pass1word!",
-      passwordConfirmation: "Pass1word!",
-    });
+    const response = await request(app)
+      .post("/auth/signup")
+      .set("User-Agent", userAgent)
+      .send({
+        email: "admin@gmail.com",
+        password: "Pass1word!",
+        passwordConfirmation: "Pass1word!",
+      });
 
     expect(response.body.error).toBeUndefined();
 
@@ -121,11 +124,7 @@ describe("PATH /users", () => {
       /** @type {AuthuserInResponse} */
       const testAuthuser = response.body.data.authuser;
 
-      const addFormForTestUser = {
-        email: testAuthuser.email,
-        role: "user",
-        name: "Mr.Test",
-      };
+      const addFormForTestUser = { email: testAuthuser.email, role: "user", name: "Mr.Test" };
 
       // add an user correspondent
       response = await request(app)
@@ -516,13 +515,7 @@ describe("PATH /users", () => {
       /** @type {AuthuserInResponse} */
       const testAuthuser = response.body.data.authuser;
 
-      const addForm1 = {
-        email: "",
-        role: "",
-        name: "",
-        gender: "",
-        country: "",
-      };
+      const addForm1 = { email: "", role: "", name: "", gender: "", country: "" };
 
       // try to add an user correspondent with the authuser but having the validation errors
       response = await request(app)
@@ -540,11 +533,7 @@ describe("PATH /users", () => {
         country: ["must not be empty"],
       });
 
-      const addForm2 = {
-        email: testAuthuser.email,
-        role: "user",
-        name: "Mr.Test",
-      };
+      const addForm2 = { email: testAuthuser.email, role: "user", name: "Mr.Test" };
 
       // add a valid user correspondent
       await request(app)

@@ -1,5 +1,5 @@
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const bcrypt = require("bcryptjs");
 
 const app = require("../../src/core/express");
@@ -17,10 +17,7 @@ setupRedis();
 describe("POST /auth/signup", () => {
   describe("Request Validation Errors", () => {
     test("should return 422 Validation Error if email is empty", async () => {
-      const registerform = {
-        password: "Pass1word.",
-        passwordConfirmation: "Pass1word.",
-      };
+      const registerform = { password: "Pass1word.", passwordConfirmation: "Pass1word." };
       const response = await request(app).post("/auth/signup").send(registerform);
 
       TestUtil.validationErrorExpectations(response);
@@ -152,9 +149,7 @@ describe("POST /auth/signup", () => {
         email: google_email,
         password: null, // the user registered with an auth provider
         isEmailVerified: true,
-        providers: {
-          google: google_id,
-        },
+        providers: { google: google_id },
       });
 
       const registerform = {
@@ -205,11 +200,7 @@ describe("POST /auth/signup", () => {
 
       expect(authuser.providers?.["google"]).toBe(google_id);
 
-      expect(authuser).toEqual(
-        expect.objectContaining({
-          id: response.body.data.authuser.id,
-        }),
-      );
+      expect(authuser).toEqual(expect.objectContaining({ id: response.body.data.authuser.id }));
 
       // check the authuser's password is setted and hashed in the database
       expect(authuser.password).not.toBeNull(); // before it was null
@@ -247,9 +238,7 @@ describe("POST /auth/signup", () => {
             isDisabled: false,
             createdAt: expect.any(Number), // 1631868212022
             updatedAt: null,
-            providers: {
-              emailpassword: true,
-            },
+            providers: { emailpassword: true },
           },
           tokens: TestUtil.ExpectedTokens,
         },
@@ -268,11 +257,7 @@ describe("POST /auth/signup", () => {
         throw new Error("Unexpected fail in db operation while adding an authuser");
       }
 
-      expect(authuser).toEqual(
-        expect.objectContaining({
-          id: expect.any(String),
-        }),
-      );
+      expect(authuser).toEqual(expect.objectContaining({ id: expect.any(String) }));
 
       // check the new authuser password is hashed in the database
       expect(authuser.password).not.toEqual(registerform.password);

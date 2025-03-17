@@ -1,5 +1,5 @@
 const request = require("supertest");
-const httpStatus = require("http-status");
+const { status: httpStatus } = require("http-status");
 const shell = require("shelljs"); // in order to shotdown and restart redis to test behavior
 
 const app = require("../../src/core/express");
@@ -166,9 +166,7 @@ describe("POST /auth/logout", () => {
       expect(result).toBe(true);
 
       // check whether there is any refresh token with refresToken's family in the db
-      const data = await tokenDbService.getTokens({
-        family: refreshTokenFamily,
-      });
+      const data = await tokenDbService.getTokens({ family: refreshTokenFamily });
       expect(data.length).toBe(0);
     });
   });
