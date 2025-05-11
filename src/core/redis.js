@@ -59,15 +59,15 @@ const connect = async () => {
  * @param {Callback} [callback]
  * @returns {Promise<void>}
  */
-const quit = async function (callback) {
+const close = async function (callback) {
   try {
-    await redisClient.quit();
+    await redisClient.close();
     callback?.();
-    // redis.quit() creates a thread to close the connection.
+    // redis.close() creates a thread to close the connection.
     // We wait until all threads have been run once to ensure the connection closes.
     // await new Promise((resolve) => setImmediate(resolve));
   } catch (err) {
-    console.log("Error while redis quiting", err);
+    console.log("Error while redis closing client", err);
   }
 };
 
@@ -75,18 +75,18 @@ const quit = async function (callback) {
  * @param {Callback} [callback]
  * @returns {Promise<void>}
  */
-const disconnect = async function (callback) {
+const destroy = async function (callback) {
   try {
-    await redisClient.disconnect();
+    await redisClient.destroy();
     callback?.();
   } catch (err) {
-    console.log("Error while redis quiting", err);
+    console.log("Error while redis destroying client", err);
   }
 };
 
 module.exports = {
   connect,
-  quit,
-  disconnect,
+  close,
+  destroy,
   getRedisClient,
 };

@@ -76,7 +76,7 @@ const exitHandler = async (code) => {
       logger.info(`exithandler: Mongodb connection is closed.tk`);
     });
 
-    await redis.disconnect(() => {
+    await redis.destroy(() => {
       logger.info(`exithandler: Redis client quit.tk`);
     });
 

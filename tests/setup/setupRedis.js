@@ -16,7 +16,7 @@ const setupRedis = () => {
     const redisClient = redis.getRedisClient();
 
     if (redisClient.isOpen) {
-      await redis.disconnect();
+      await redis.destroy();
       // await new Promise((resolve) => setImmediate(resolve));
       if (!redisClient.isOpen) {
         console.log("redis is disconnected for the tests");
