@@ -1,3 +1,4 @@
+/** @typedef {import('jsonwebtoken').SignOptions} SignOptions */
 /** @typedef {import('../models/token.model')} Token */
 
 const jwt = require("jsonwebtoken");
@@ -31,7 +32,7 @@ const redisService = require("./redis.service");
  * @param {import('../config/tokens').TokenType} type
  * @param {string} [jti]
  * @param {string} [userAgent]
- * @param {string|number} [notValidBefore]
+ * @param {SignOptions["notBefore"]} [notValidBefore]
  * @param {string} [secret]
  * @returns {string}
  */
