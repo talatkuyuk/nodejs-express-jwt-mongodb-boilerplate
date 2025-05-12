@@ -17,6 +17,6 @@
     "esModuleInterop": true,
     "typeRoots": ["./node_modules/@types", "./types"]
   },
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules", "src/public/custom.js"],
   "include": ["**/*.js", "./types/*.d.ts"]
 }
