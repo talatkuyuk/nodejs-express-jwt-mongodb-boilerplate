@@ -1,12 +1,11 @@
 const { status: httpStatus } = require("http-status");
-const asyncHandler = require("express-async-handler");
 
 const { traceError } = require("../utils/errorUtils");
 
 // SERVICE DEPENDENCIES
 const { joinedService } = require("../services");
 
-const getAuthUsersJoined = asyncHandler(
+const getAuthUsersJoined =
   /**
    * @typedef {import("../services/authuser.service").AuthuserQuery} AuthuserQuery
    *
@@ -24,10 +23,9 @@ const getAuthUsersJoined = asyncHandler(
     } catch (error) {
       throw traceError(error, "JoinedController : getAuthUsersJoined");
     }
-  },
-);
+  };
 
-const getUsersJoined = asyncHandler(
+const getUsersJoined =
   /**
    * @typedef {import("../services/user.service").UserQuery} UserQuery
    *
@@ -45,7 +43,6 @@ const getUsersJoined = asyncHandler(
     } catch (error) {
       throw traceError(error, "UserController : getUsersJoined");
     }
-  },
-);
+  };
 
 module.exports = { getAuthUsersJoined, getUsersJoined };

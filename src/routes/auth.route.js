@@ -1,6 +1,3 @@
-/** @typedef {import('express').Request} ExpressRequest */
-/** @typedef {import('express').Response} ExpressResponse */
-
 const express = require("express");
 const router = express.Router();
 
@@ -29,63 +26,51 @@ router.post("/signout", authenticate, authController.signout);
 router.post(
   "/refresh-tokens",
   validate(refreshTokensValidationRules),
-  authController.refreshTokens
+  authController.refreshTokens,
 );
 
 router.post(
   "/forgot-password",
   validate(forgotPasswordValidationRules),
-  authController.forgotPassword
+  authController.forgotPassword,
 );
 
 router.post(
   "/reset-password",
   validate(resetPasswordValidationRules),
-  authController.resetPassword
+  authController.resetPassword,
 );
 
-router.post(
-  "/send-verification-email",
-  authenticate,
-  authController.sendVerificationEmail
-);
+router.post("/send-verification-email", authenticate, authController.sendVerificationEmail);
 
-router.post(
-  "/verify-email",
-  validate(verifyEmailValidationRules),
-  authController.verifyEmail
-);
+router.post("/verify-email", validate(verifyEmailValidationRules), authController.verifyEmail);
 
 router.post(
   "/google",
   validate(googleValidationRules),
   oAuth("google"),
-  authController.continueWithAuthProvider
+  authController.continueWithAuthProvider,
 );
 
-router.post(
-  "/facebook",
-  oAuth("facebook"),
-  authController.continueWithAuthProvider
-);
+router.post("/facebook", oAuth("facebook"), authController.continueWithAuthProvider);
 
 router.post(
   "/send-signup-verification-email",
   authenticate,
-  authController.sendSignupVerificationEmail
+  authController.sendSignupVerificationEmail,
 );
 
 router.post(
   "/verify-signup",
   validate(verifySignupValidationRules),
-  authController.verifySignup
+  authController.verifySignup,
 );
 
 router.post(
   "/unlink",
   authenticate,
   validate(unlinkProviderValidationRules),
-  authController.unlinkAuthProvider
+  authController.unlinkAuthProvider,
 );
 
 module.exports = router;

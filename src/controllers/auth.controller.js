@@ -1,5 +1,4 @@
 const { status: httpStatus } = require("http-status");
-const asyncHandler = require("express-async-handler");
 
 const { traceError } = require("../utils/errorUtils");
 const { tokenTypes } = require("../config/tokens");
@@ -9,7 +8,7 @@ const { authService, tokenService, emailService } = require("../services");
 
 const success = { success: true };
 
-const signup = asyncHandler(
+const signup =
   /**
    * @typedef {Object} SignupBody
    * @property {string} email
@@ -47,10 +46,9 @@ const signup = asyncHandler(
     } catch (error) {
       throw traceError(error, "AuthController : signup");
     }
-  },
-);
+  };
 
-const login = asyncHandler(
+const login =
   /**
    * @typedef {Object} LoginBody
    * @property {string} email
@@ -78,37 +76,41 @@ const login = asyncHandler(
     } catch (error) {
       throw traceError(error, "AuthController : login");
     }
-  },
-);
+  };
 
-const continueWithAuthProvider = asyncHandler(async (req, res) => {
-  try {
-    const { id, email } = req.oAuth.identity;
-    const authProvider = req.oAuth.provider;
-    const userAgent = req.useragent?.source;
+const continueWithAuthProvider =
+  /**
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  async (req, res) => {
+    try {
+      const { id, email } = req.oAuth.identity;
+      const authProvider = req.oAuth.provider;
+      const userAgent = req.useragent?.source;
 
-    const { authuser, isNewAuthuserCreated } = await authService.continueWithAuthProvider(
-      authProvider,
-      id,
-      email,
-    );
+      const { authuser, isNewAuthuserCreated } = await authService.continueWithAuthProvider(
+        authProvider,
+        id,
+        email,
+      );
 
-    console.log("isNewAuthuserCreated: ", isNewAuthuserCreated);
+      console.log("isNewAuthuserCreated: ", isNewAuthuserCreated);
 
-    const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
+      const tokens = await tokenService.generateAuthTokens(authuser.id, userAgent);
 
-    res.set("X-New-Authuser", String(isNewAuthuserCreated));
-    res.set("Access-Control-Expose-Headers", "X-New-Authuser");
+      res.set("X-New-Authuser", String(isNewAuthuserCreated));
+      res.set("Access-Control-Expose-Headers", "X-New-Authuser");
 
-    res
-      .status(isNewAuthuserCreated ? httpStatus.CREATED : httpStatus.OK)
-      .send({ success: true, data: { authuser: authuser.filter(), tokens } });
-  } catch (error) {
-    throw traceError(error, "AuthController : continueWithAuthProvider");
-  }
-});
+      res
+        .status(isNewAuthuserCreated ? httpStatus.CREATED : httpStatus.OK)
+        .send({ success: true, data: { authuser: authuser.filter(), tokens } });
+    } catch (error) {
+      throw traceError(error, "AuthController : continueWithAuthProvider");
+    }
+  };
 
-const unlinkAuthProvider = asyncHandler(
+const unlinkAuthProvider =
   /**
    * @typedef {Object} RequestQuery
    * @property {import("../services/authProviders").AuthProvider} provider
@@ -128,42 +130,51 @@ const unlinkAuthProvider = asyncHandler(
     } catch (error) {
       throw traceError(error, "AuthController : unlinkAuthProvider");
     }
-  },
-);
+  };
 
-const logout = asyncHandler(async (req, res) => {
-  try {
-    const id = req.authuser.id; // added in the authenticate middleware
-    const jti = req.jti; // added in the authenticate middleware
+const logout =
+  /**
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  async (req, res) => {
+    try {
+      const id = req.authuser.id; // added in the authenticate middleware
+      const jti = req.jti; // added in the authenticate middleware
 
-    // delete the refresh token family from db
-    await tokenService.findTokenAndRemoveFamily({ user: id, jti }, "family");
+      // delete the refresh token family from db
+      await tokenService.findTokenAndRemoveFamily({ user: id, jti }, "family");
 
-    await authService.logout(id, jti);
+      await authService.logout(id, jti);
 
-    res.status(httpStatus.OK).send(success);
-  } catch (error) {
-    throw traceError(error, "AuthController : logout");
-  }
-});
+      res.status(httpStatus.OK).send(success);
+    } catch (error) {
+      throw traceError(error, "AuthController : logout");
+    }
+  };
 
-const signout = asyncHandler(async (req, res) => {
-  try {
-    const id = req.authuser.id; // added in the authenticate middleware
-    const jti = req.jti; // added in the authenticate middleware
+const signout =
+  /**
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  async (req, res) => {
+    try {
+      const id = req.authuser.id; // added in the authenticate middleware
+      const jti = req.jti; // added in the authenticate middleware
 
-    // delete the whole tokens of the user from db
-    await tokenService.findTokenAndRemoveFamily({ user: id, jti }, "user");
+      // delete the whole tokens of the user from db
+      await tokenService.findTokenAndRemoveFamily({ user: id, jti }, "user");
 
-    await authService.signout(id, jti);
+      await authService.signout(id, jti);
 
-    res.status(httpStatus.OK).send(success);
-  } catch (error) {
-    throw traceError(error, "AuthController : signout");
-  }
-});
+      res.status(httpStatus.OK).send(success);
+    } catch (error) {
+      throw traceError(error, "AuthController : signout");
+    }
+  };
 
-const refreshTokens = asyncHandler(
+const refreshTokens =
   /**
    * @typedef {Object} RefreshTokenBody
    * @property {string} refreshToken
@@ -195,10 +206,9 @@ const refreshTokens = asyncHandler(
     } catch (error) {
       throw traceError(error, "AuthController : refreshTokens");
     }
-  },
-);
+  };
 
-const forgotPassword = asyncHandler(
+const forgotPassword =
   /**
    * @typedef {Object} ForgotPasswordBody
    * @property {string} email
@@ -223,10 +233,9 @@ const forgotPassword = asyncHandler(
     } catch (error) {
       throw traceError(error, "AuthController : forgotPassword");
     }
-  },
-);
+  };
 
-const resetPassword = asyncHandler(
+const resetPassword =
   /**
    * @typedef {Object} ResetPasswordBody
    * @property {string} token
@@ -253,26 +262,30 @@ const resetPassword = asyncHandler(
     } catch (error) {
       throw traceError(error, "AuthController : resetPassword");
     }
-  },
-);
+  };
 
-const sendVerificationEmail = asyncHandler(async (req, res) => {
-  try {
-    const { id, email, isEmailVerified } = req.authuser;
+const sendVerificationEmail =
+  /**
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  async (req, res) => {
+    try {
+      const { id, email, isEmailVerified } = req.authuser;
 
-    authService.handleEmailIsVerified(isEmailVerified);
+      authService.handleEmailIsVerified(isEmailVerified);
 
-    const verifyEmailToken = await tokenService.generateVerifyEmailToken(id);
+      const verifyEmailToken = await tokenService.generateVerifyEmailToken(id);
 
-    await emailService.sendVerificationEmail(email, verifyEmailToken.token);
+      await emailService.sendVerificationEmail(email, verifyEmailToken.token);
 
-    res.status(httpStatus.OK).send(success);
-  } catch (error) {
-    throw traceError(error, "AuthController : sendVerificationEmail");
-  }
-});
+      res.status(httpStatus.OK).send(success);
+    } catch (error) {
+      throw traceError(error, "AuthController : sendVerificationEmail");
+    }
+  };
 
-const verifyEmail = asyncHandler(
+const verifyEmail =
   /**
    * @typedef {Object} VerifyEmailBody
    * @property {string} token
@@ -298,26 +311,30 @@ const verifyEmail = asyncHandler(
     } catch (error) {
       throw traceError(error, "AuthController : verifyEmail");
     }
-  },
-);
+  };
 
-const sendSignupVerificationEmail = asyncHandler(async (req, res) => {
-  try {
-    const { id, email, providers } = req.authuser;
+const sendSignupVerificationEmail =
+  /**
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  async (req, res) => {
+    try {
+      const { id, email, providers } = req.authuser;
 
-    authService.handleSignupIsVerified(providers?.emailpassword);
+      authService.handleSignupIsVerified(providers?.emailpassword);
 
-    const verifySignupToken = await tokenService.generateVerifySignupToken(id);
+      const verifySignupToken = await tokenService.generateVerifySignupToken(id);
 
-    await emailService.sendSignupVerificationEmail(email, verifySignupToken.token);
+      await emailService.sendSignupVerificationEmail(email, verifySignupToken.token);
 
-    res.status(httpStatus.OK).send(success);
-  } catch (error) {
-    throw traceError(error, "AuthController : sendSignupVerificationEmail");
-  }
-});
+      res.status(httpStatus.OK).send(success);
+    } catch (error) {
+      throw traceError(error, "AuthController : sendSignupVerificationEmail");
+    }
+  };
 
-const verifySignup = asyncHandler(
+const verifySignup =
   /**
    * @typedef {Object} VerifySignupBody
    * @property {string} token
@@ -343,8 +360,7 @@ const verifySignup = asyncHandler(
     } catch (error) {
       throw traceError(error, "AuthController : verifySignup");
     }
-  },
-);
+  };
 
 module.exports = {
   signup,

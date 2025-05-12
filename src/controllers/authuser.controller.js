@@ -1,5 +1,4 @@
 const { status: httpStatus } = require("http-status");
-const asyncHandler = require("express-async-handler");
 
 const { traceError } = require("../utils/errorUtils");
 
@@ -8,7 +7,7 @@ const { authuserService, tokenService } = require("../services");
 
 const success = { success: true };
 
-const addAuthUser = asyncHandler(
+const addAuthUser =
   /**
    * @typedef {Object} AddAuthuserBody
    * @property {string} email
@@ -33,30 +32,34 @@ const addAuthUser = asyncHandler(
     } catch (error) {
       throw traceError(error, "AuthUserController : addAuthUser");
     }
-  },
-);
+  };
 
-const getAuthUser = asyncHandler(async (req, res) => {
-  try {
-    const id = req.params.id;
+const getAuthUser =
+  /**
+   * @param {import('express').Request<{id: string}>} req
+   * @param {import('express').Response} res
+   */
+  async (req, res) => {
+    try {
+      const id = req.params.id;
 
-    console.log({ id, req: req.authuser.id });
+      console.log({ id, req: req.authuser.id });
 
-    // it is an option to get authuser self by the client
-    const myid = id === "self" ? req.authuser.id : id;
+      // it is an option to get authuser self by the client
+      const myid = id === "self" ? req.authuser.id : id;
 
-    const authuser = await authuserService.getAuthUserById(myid);
+      const authuser = await authuserService.getAuthUserById(myid);
 
-    res.status(httpStatus.OK).send({ success: true, data: { authuser: authuser.filter() } });
-  } catch (error) {
-    throw traceError(error, "AuthUserController : getAuthUser");
-  }
-});
+      res.status(httpStatus.OK).send({ success: true, data: { authuser: authuser.filter() } });
+    } catch (error) {
+      throw traceError(error, "AuthUserController : getAuthUser");
+    }
+  };
 
 /**
  * Controller to get authenticated users.
  */
-const getAuthUsers = asyncHandler(
+const getAuthUsers =
   /**
    * @typedef {import("../services/authuser.service").AuthuserQuery} AuthuserQuery
    *
@@ -70,23 +73,20 @@ const getAuthUsers = asyncHandler(
 
       const result = await authuserService.getAuthUsers(query);
 
-      res
-        .status(httpStatus.OK)
-        .send({
-          success: true,
-          data: {
-            authusers: result.authusers.map((a) => a.filter()),
-            pagination: result.pagination,
-            totalCount: result.totalCount,
-          },
-        });
+      res.status(httpStatus.OK).send({
+        success: true,
+        data: {
+          authusers: result.authusers.map((a) => a.filter()),
+          pagination: result.pagination,
+          totalCount: result.totalCount,
+        },
+      });
     } catch (error) {
       throw traceError(error, "AuthUserController : getAuthUsers");
     }
-  },
-);
+  };
 
-const changePassword = asyncHandler(
+const changePassword =
   /**
    * @typedef {Object} ChangePasswordBody
    * @property {string} password
@@ -106,36 +106,45 @@ const changePassword = asyncHandler(
     } catch (error) {
       throw traceError(error, "AuthUserController : changePassword");
     }
-  },
-);
+  };
 
-const toggleAbility = asyncHandler(async (req, res) => {
-  try {
-    const id = req.params.id;
+const toggleAbility =
+  /**
+   * @param {import('express').Request<{id: string}>} req
+   * @param {import('express').Response} res
+   */
+  async (req, res) => {
+    try {
+      const id = req.params.id;
 
-    await authuserService.toggleAbility(id);
+      await authuserService.toggleAbility(id);
 
-    // TODO: consider deleting the all tokens of the authuser after disabling
+      // TODO: consider deleting the all tokens of the authuser after disabling
 
-    res.status(httpStatus.OK).send(success);
-  } catch (error) {
-    throw traceError(error, "AuthUserController : toggleAbility");
-  }
-});
+      res.status(httpStatus.OK).send(success);
+    } catch (error) {
+      throw traceError(error, "AuthUserController : toggleAbility");
+    }
+  };
 
-const toggleVerification = asyncHandler(async (req, res) => {
-  try {
-    const id = req.params.id;
+const toggleVerification =
+  /**
+   * @param {import('express').Request<{id: string}>} req
+   * @param {import('express').Response} res
+   */
+  async (req, res) => {
+    try {
+      const id = req.params.id;
 
-    await authuserService.toggleVerification(id);
+      await authuserService.toggleVerification(id);
 
-    res.status(httpStatus.OK).send(success);
-  } catch (error) {
-    throw traceError(error, "AuthUserController : toggleVerification");
-  }
-});
+      res.status(httpStatus.OK).send(success);
+    } catch (error) {
+      throw traceError(error, "AuthUserController : toggleVerification");
+    }
+  };
 
-const unlinkProvider = asyncHandler(
+const unlinkProvider =
   /**
    * @typedef {Object} RequestQuery
    * @property {import("../services/authProviders").AuthProvider} provider
@@ -155,22 +164,26 @@ const unlinkProvider = asyncHandler(
     } catch (error) {
       throw traceError(error, "AuthUserController : unlinkProvider");
     }
-  },
-);
+  };
 
-const deleteAuthUser = asyncHandler(async (req, res) => {
-  try {
-    const id = req.params.id;
+const deleteAuthUser =
+  /**
+   * @param {import('express').Request<{id: string}>} req
+   * @param {import('express').Response} res
+   */
+  async (req, res) => {
+    try {
+      const id = req.params.id;
 
-    await authuserService.deleteAuthUser(id);
+      await authuserService.deleteAuthUser(id);
 
-    await tokenService.removeTokens({ user: id });
+      await tokenService.removeTokens({ user: id });
 
-    res.status(httpStatus.OK).send(success);
-  } catch (error) {
-    throw traceError(error, "AuthUserController : deleteAuthUser");
-  }
-});
+      res.status(httpStatus.OK).send(success);
+    } catch (error) {
+      throw traceError(error, "AuthUserController : deleteAuthUser");
+    }
+  };
 
 module.exports = {
   addAuthUser,

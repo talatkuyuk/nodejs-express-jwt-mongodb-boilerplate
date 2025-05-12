@@ -3,7 +3,6 @@ const router = express.Router();
 //const router = express.Router({ strict: true });
 
 const { status: httpStatus } = require("http-status");
-const asyncHandler = require("express-async-handler");
 
 const authRoute = require("./auth.route");
 const authuserRoute = require("./authuser.route");
@@ -20,7 +19,11 @@ const { traceError } = require("../utils/errorUtils");
 // for testing purpose in development environment
 router.get(
   "/list",
-  asyncHandler(async (_req, res) => {
+  /**
+   * @param {import('express').Request} _req
+   * @param {import('express').Response} res
+   */
+  async (_req, res) => {
     try {
       if (config.env === "development") {
         var database = mongodb.getDatabase();
@@ -40,49 +43,60 @@ router.get(
     } catch (error) {
       throw traceError(error, "RouteIndex : getList");
     }
-  }),
+  },
 );
 
 // for testing purpose in development environment
-router.get("/console", (_req, res) => {
-  try {
-    if (config.env !== "development") return;
+router.get(
+  "/console",
+  /**
+   * @param {import('express').Request} _req
+   * @param {import('express').Response} res
+   */
+  (_req, res) => {
+    try {
+      if (config.env !== "development") return;
 
-    var database = mongodb.getDatabase();
-    const collection = "authusers";
+      var database = mongodb.getDatabase();
+      const collection = "authusers";
 
-    // get the first document matched with query
-    const query = { email: new RegExp("[^tk]", "i") };
-    database
-      .collection(collection)
-      .findOne(query)
-      .then((doc) => {
-        if (doc) {
-          console.log("Query result for the email contains tk : ", doc.email);
-        } else {
-          console.log("There is no email contains tk");
-        }
+      // get the first document matched with query
+      const query = { email: new RegExp("[^tk]", "i") };
+      database
+        .collection(collection)
+        .findOne(query)
+        .then((doc) => {
+          if (doc) {
+            console.log("Query result for the email contains tk : ", doc.email);
+          } else {
+            console.log("There is no email contains tk");
+          }
+        });
+
+      // get the first document
+      database.collection(collection).findOne().then(console.log);
+
+      // get all documents
+      var cursor = database.collection(collection).find();
+      cursor.toArray().then((docs) => {
+        docs.forEach(console.log);
       });
 
-    // get the first document
-    database.collection(collection).findOne().then(console.log);
-
-    // get all documents
-    var cursor = database.collection(collection).find();
-    cursor.toArray().then((docs) => {
-      docs.forEach(console.log);
-    });
-
-    res.status(httpStatus.OK).json("OK");
-  } catch (error) {
-    throw traceError(error, "RouteIndex : getConsole");
-  }
-});
+      res.status(httpStatus.OK).json("OK");
+    } catch (error) {
+      throw traceError(error, "RouteIndex : getConsole");
+    }
+  },
+);
 
 // see the mongodb and redis client status
 router.get(
   "/status",
-  asyncHandler(async (req, res) => {
+  /**
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  async (req, res) => {
     var database = mongodb.getDatabase();
 
     let mongoStatus, redisStatus, environment, port;
@@ -103,13 +117,18 @@ router.get(
       //throw traceError(error, "RouteIndex : getStatus");
       console.log(traceError(error, "RouteIndex : getStatus"));
     }
-  }),
+  },
 );
 
 // see the mongodb and redis client status
 router.get(
   "/test",
-  asyncHandler(async (req, res, next) => {
+  /**
+   * @param {import('express').Request<{}, any, any, {error: string}>} req
+   * @param {import('express').Response} res
+   * @param {import('express').NextFunction} next
+   */
+  async (req, res, next) => {
     const errorType = req.query.error;
 
     // uncaughtException
@@ -133,7 +152,7 @@ router.get(
       Promise.reject("Invalid password"); // unhandledRejection event is emitted, the process craches
       res.json("unhandledRejection");
     } else res.json("OK");
-  }),
+  },
 );
 
 router.use("/docs", docsRoute);

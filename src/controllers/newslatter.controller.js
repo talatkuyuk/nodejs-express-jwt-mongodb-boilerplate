@@ -1,12 +1,11 @@
 const { status: httpStatus } = require("http-status");
-const asyncHandler = require("express-async-handler");
 
 const { traceError } = require("../utils/errorUtils");
 
 // SERVICE DEPENDENCIES
 const { mailchimp } = require("../services");
 
-const subscribe = asyncHandler(
+const subscribe =
   /**
    * @typedef {Object} SubscribeNewslatterBody
    * @property {string} email
@@ -26,7 +25,6 @@ const subscribe = asyncHandler(
     } catch (error) {
       throw traceError(error, "NewslatterController : subscribe");
     }
-  },
-);
+  };
 
 module.exports = { subscribe };
