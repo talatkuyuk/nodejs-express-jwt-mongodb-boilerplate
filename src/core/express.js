@@ -88,7 +88,7 @@ var corsOptions = {
   credentials: true, // allow session cookie from browser to pass through
 };
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+app.options(/^\/.*$/, cors(corsOptions));
 
 app.set("strict routing", true);
 
