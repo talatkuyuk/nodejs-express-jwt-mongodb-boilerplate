@@ -70,7 +70,8 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 app.use(express.json());
 
 // parse urlencoded bodies (application/x-www-form-urlencoded)
-app.use(express.urlencoded({ extended: true }));
+// the option { extended: false } by default in express@5
+app.use(express.urlencoded());
 
 // enable cors
 var corsOptions = {
