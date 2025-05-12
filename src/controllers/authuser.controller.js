@@ -19,7 +19,7 @@ const addAuthUser =
    */
   async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email, password } = req.body || {};
 
       const authuser = await authuserService.addAuthUser(email, password);
 
@@ -97,7 +97,7 @@ const changePassword =
    */
   async (req, res) => {
     try {
-      const { password: newPassword } = req.body;
+      const { password: newPassword } = req.body || {};
       const authuser = req.authuser;
 
       await authuserService.changePassword(authuser.id, newPassword);

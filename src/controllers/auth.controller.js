@@ -20,7 +20,7 @@ const signup =
    */
   async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email, password } = req.body || {};
       const userAgent = req.useragent?.source;
 
       const { authuser, isNewAuthuserCreated } = await authService.signupWithEmailAndPassword(
@@ -60,7 +60,7 @@ const login =
    */
   async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email, password } = req.body || {};
       const userAgent = req.useragent?.source;
 
       const authuser = await authService.checkAuthuserByEmail(email);
@@ -185,7 +185,7 @@ const refreshTokens =
    */
   async (req, res) => {
     try {
-      const { refreshToken } = req.body;
+      const { refreshToken } = req.body || {};
       const userAgent = req.useragent?.source;
 
       const refreshTokenInstance = await tokenService.getRefreshToken(refreshToken);
@@ -219,7 +219,7 @@ const forgotPassword =
    */
   async (req, res) => {
     try {
-      const { email } = req.body;
+      const { email } = req.body || {};
 
       const authuser = await authService.checkAuthuserByEmail(email);
 
@@ -247,7 +247,7 @@ const resetPassword =
    */
   async (req, res) => {
     try {
-      const { token, password } = req.body;
+      const { token, password } = req.body || {};
 
       const { user: id } = await tokenService.verifyToken(token, tokenTypes.RESET_PASSWORD);
 
@@ -296,7 +296,7 @@ const verifyEmail =
    */
   async (req, res) => {
     try {
-      const { token } = req.body;
+      const { token } = req.body || {};
 
       const { user: id } = await tokenService.verifyToken(token, tokenTypes.VERIFY_EMAIL);
 
@@ -345,7 +345,7 @@ const verifySignup =
    */
   async (req, res) => {
     try {
-      const { token } = req.body;
+      const { token } = req.body || {};
 
       const { user: id } = await tokenService.verifyToken(token, tokenTypes.VERIFY_SIGNUP);
 

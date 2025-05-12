@@ -17,7 +17,7 @@ const addUser =
    */
   async (req, res) => {
     try {
-      const addBody = req.body;
+      const addBody = structuredClone(req.body);
       const id = req.params.id;
 
       const user = await userService.addUser(id, addBody);
@@ -91,7 +91,7 @@ const updateUser =
   async (req, res) => {
     try {
       const id = req.params.id;
-      const updateBody = req.body;
+      const updateBody = structuredClone(req.body);
 
       const user = await userService.updateUser(id, updateBody);
 
@@ -114,7 +114,7 @@ const changeRole =
   async (req, res) => {
     try {
       const id = req.params.id;
-      const { role } = req.body;
+      const { role } = req.body || {};
 
       await userService.updateUser(id, { role });
 

@@ -152,7 +152,7 @@ const addUser = [
   body()
     .custom(async (_body, { req }) => {
       const id = req.params?.id;
-      const email = req.body.email;
+      const email = req.body?.email;
 
       // I needed to validate id and email again here, since the chains above are isolatated in express-validator
       if (

@@ -17,7 +17,7 @@ const subscribe =
    */
   async (req, res) => {
     try {
-      const { email, name } = req.body;
+      const { email, name } = req.body || {};
 
       await mailchimp.subscribe(email, name);
 

@@ -59,7 +59,7 @@ const check_body_passwordConfirmation = [
     .withMessage("must not be empty")
     .bail()
     .custom((value, { req }) => {
-      if (!Object.is(value, req.body.password)) {
+      if (!Object.is(value, req.body?.password)) {
         throw new Error("should match with the password");
       }
       return true; // Indicates the success
