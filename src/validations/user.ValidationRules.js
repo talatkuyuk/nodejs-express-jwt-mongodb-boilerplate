@@ -50,7 +50,7 @@ const once = (value) => {
 };
 
 /** @type {import('express-validator').CustomValidator} */
-const only = (body) => {
+const only = (body = {}) => {
   const validKeys = ["page", "size", "sort", "email", "role", "name", "gender", "country"];
   if (Object.keys(body).every((key) => validKeys.includes(key))) return true;
   else throw new Error("Any extra parameter is not allowed");
