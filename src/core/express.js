@@ -7,7 +7,7 @@ let cors = require("cors");
 const passport = require("passport");
 var { xss } = require("express-xss-sanitizer");
 const useragent = require("express-useragent");
-const expressMongoSanitize = require("express-mongo-sanitize");
+// const expressMongoSanitize = require("express-mongo-sanitize");
 
 const routes = require("../routes");
 const config = require("../config");
@@ -108,14 +108,14 @@ if (config.env === "production") {
 }
 
 // remove dollar sign, and dot operators from the request against malicious mongoDB operations
-app.use(
-  expressMongoSanitize({
-    replaceWith: "_",
-    onSanitize: ({ key }) => {
-      console.warn(`The request[${key}] is sanitized.`);
-    },
-  }),
-);
+// app.use(
+//   expressMongoSanitize({
+//     replaceWith: "_",
+//     onSanitize: ({ key }) => {
+//       console.warn(`The request[${key}] is sanitized.`);
+//     },
+//   }),
+// );
 
 // sanitize the requests against XSS attacks
 app.use(xss());
