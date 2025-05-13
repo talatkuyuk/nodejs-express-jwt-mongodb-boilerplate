@@ -6,8 +6,8 @@
 /** @typedef {Object.<string, string[]>} Errors */
 
 const { status: httpStatus } = require("http-status");
-
 const { validationResult, matchedData } = require("express-validator");
+
 const { traceError } = require("../utils/errorUtils");
 const ApiError = require("../utils/ApiError");
 
