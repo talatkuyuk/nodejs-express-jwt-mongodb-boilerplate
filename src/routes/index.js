@@ -129,12 +129,12 @@ router.get(
    * @param {import('express').NextFunction} next
    */
   async (req, res, next) => {
-    const errorType = req.query.error;
+    const { error } = req.query;
 
     // uncaughtException
-    if (errorType === "e") {
+    if (error === "e") {
       throw new Error("BROKEN"); // express catches syncronous errors
-    } else if (errorType === "x") {
+    } else if (error === "x") {
       setTimeout(function () {
         try {
           throw new Error("BROKEN");
@@ -142,13 +142,13 @@ router.get(
           next(err); // express catches errors passed with next function
         }
       }, 100);
-    } else if (errorType === "z") {
+    } else if (error === "z") {
       setTimeout(function () {
         throw new Error("BROKEN"); // express does not catch asyncronous errors, the process craches
       }, 100);
 
       // unhandledRejection
-    } else if (errorType === "r") {
+    } else if (error === "r") {
       Promise.reject("Invalid password"); // unhandledRejection event is emitted, the process craches
       res.json("unhandledRejection");
     } else res.json("OK");

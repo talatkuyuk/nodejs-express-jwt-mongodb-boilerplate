@@ -15,7 +15,7 @@ const getAuthUsersJoined =
    */
   async (req, res) => {
     try {
-      const query = req.query;
+      const query = structuredClone(req.query);
 
       const result = await joinedService.getAuthUsersJoined(query);
 
@@ -35,7 +35,7 @@ const getUsersJoined =
    */
   async (req, res) => {
     try {
-      const query = req.query;
+      const query = structuredClone(req.query);
 
       const result = await joinedService.getUsersJoined(query);
 

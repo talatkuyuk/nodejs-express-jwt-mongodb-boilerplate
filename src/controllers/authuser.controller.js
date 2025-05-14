@@ -69,7 +69,7 @@ const getAuthUsers =
    */
   async (req, res) => {
     try {
-      const query = req.query;
+      const query = structuredClone(req.query);
 
       const result = await authuserService.getAuthUsers(query);
 

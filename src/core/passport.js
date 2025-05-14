@@ -59,7 +59,7 @@ const jwtStrategy = new JwtStrategy(
  */
 const oAuthVerifyCallback = (provider) => async (req, token, done) => {
   try {
-    const method = req.query.method; // for google --> "token" (idToken) | "code" (authorization code)
+    const { method } = req.query; // for google --> "token" (idToken) | "code" (authorization code)
 
     /** @type {import("../services/authProviders").AuthProviderResult} */
     const oAuth = await authProviders[provider](token, method);
