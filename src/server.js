@@ -28,8 +28,8 @@ async function start() {
 
     if (config.server === "https" || config.server === "both") {
       const port = process.env.PORT || config.porthttps;
-      const key = fs.readFileSync(SSLdirectory + "localhost-key.pem", "utf8");
-      const cert = fs.readFileSync(SSLdirectory + "localhost.pem", "utf8");
+      const key = fs.readFileSync(SSLdirectory + "localhost.key", "utf8");
+      const cert = fs.readFileSync(SSLdirectory + "localhost.crt", "utf8");
       const credentials = { key, cert };
 
       const httpsServer = https.createServer(credentials, app);
