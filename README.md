@@ -2,8 +2,9 @@
 
 ## The Aim
 
-This project is aimed to provide a boilerplate for a typical backend REST API application.
+This project is aimed to provide a boilerplate for a standard backend REST API application.
 
+It uses `express@5`
 I created **model-controller-service** structure.  
 I use **joi** to validate Environment Variables.  
 I use **express-validator** to validate requests.  
