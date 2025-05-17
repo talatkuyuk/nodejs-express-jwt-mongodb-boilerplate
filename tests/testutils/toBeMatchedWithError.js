@@ -1,6 +1,5 @@
-const { serializeError } = require("serialize-error");
-
 const ApiError = require("../../src/utils/ApiError");
+const { getSerializeError } = require("./serializeErrorProvider");
 
 /**
  * A CustomMatcher function
@@ -9,6 +8,8 @@ const ApiError = require("../../src/utils/ApiError");
  * @returns {jest.CustomMatcherResult}
  */
 function toBeMatchedWithError(received, expected) {
+  const serializeError = getSerializeError();
+
   // if the received error is not ApiError, convert it, since I set the expected to be ApiError for simplicity
   if (!(received instanceof ApiError)) received = new ApiError(expected.statusCode, received);
 

@@ -8,7 +8,7 @@
     "start": "node src/server.js",
     "dev": "cross-env NODE_ENV=development nodemon src/server.js",
     "prod": "cross-env NODE_ENV=production nodemon src/server.js",
-    "test": "cross-env NODE_ENV=test jest --runInBand --detectOpenHandles --config ./jest.config.json",
+    "test": "cross-env NODE_ENV=test node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --detectOpenHandles --config ./jest.config.json",
     "test:file": "cross-env NODE_ENV=test jest --runInBand --detectOpenHandles --config ./jest.config.json users.test.js",
     "test:coverage": "cross-env NODE_ENV=test jest --coverage --runInBand --config ./jest.config.json",
     "node:kill": "pkill node",
@@ -86,7 +86,7 @@
     "node-mocks-http": "^1.17.2",
     "nodemon": "^3.1.10",
     "prettier": "^3.5.3",
-    "serialize-error": "^8.1.0",
+    "serialize-error": "^12.0.0",
     "shelljs": "^0.10.0",
     "supertest": "^7.1.1",
     "typescript": "^5.8.3"
