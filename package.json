@@ -70,7 +70,7 @@
     "@types/jest": "^30.0.0",
     "@types/mailchimp__mailchimp_marketing": "^3.0.21",
     "@types/morgan": "^1.9.10",
-    "@types/nodemailer": "^7.0.1",
+    "@types/nodemailer": "^7.0.2",
     "@types/passport": "^1.0.17",
     "@types/passport-http-bearer": "^1.0.42",
     "@types/passport-jwt": "^4.0.1",
