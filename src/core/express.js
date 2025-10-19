@@ -60,19 +60,37 @@ initViewEngine(app);
 // if need to sent any static file to client (needs "public" directory in "src" folder; it is optional)
 app.use(express.static(path.join(__dirname, "..", "public")));
 
+/**
+ * @type {string[]} list of allowed origins for CORS requests.
+ */
+const allowedOrigins = [
+  "http://localhost:5500",
+  "https://localhost:5500",
+  "https://safemeals.netlify.app",
+  "https://amazon-ht-web.vercel.app",
+  "http://localhost:3000",
+  "https://localhost:3000",
+  "http://localhost:3001",
+  "https://localhost:3001",
+  "chrome-extension://",
+];
+
 // enable cors
+
 var corsOptions = {
-  origin: [
-    "http://localhost:5500",
-    "https://localhost:5500",
-    "https://safemeals.netlify.app",
-    "https://amazon-ht-web.vercel.app",
-    "http://localhost:3000",
-    "https://localhost:3000",
-    "http://localhost:3001",
-    "https://localhost:3001",
-    "chrome-extension://",
-  ],
+  /**
+   * Validate the request origin dynamically.
+   *
+   * @param {string | undefined} origin origin header from the request.
+   * @param {(err: Error | null, allow?: boolean) => void} callback callback to control CORS access.
+   */
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
   credentials: true, // allow session cookie from browser to pass through
