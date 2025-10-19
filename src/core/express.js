@@ -54,24 +54,11 @@ if (config.env !== "test") {
   app.use(morgan.errorHandler);
 }
 
-// set security HTTP headers
-app.use(helmet.default());
-
-// Sets X-Permitted-Cross-Domain-Policies: none
-app.use(crossdomain());
-
 // if need to server side rendering (optional)
 initViewEngine(app);
 
 // if need to sent any static file to client (needs "public" directory in "src" folder; it is optional)
 app.use(express.static(path.join(__dirname, "..", "public")));
-
-// parse JSON bodies (application/json)
-app.use(express.json());
-
-// parse urlencoded bodies (application/x-www-form-urlencoded)
-// the option { extended: false } by default in express@5
-app.use(express.urlencoded());
 
 // enable cors
 var corsOptions = {
@@ -87,11 +74,24 @@ var corsOptions = {
     "chrome-extension://",
   ],
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
   credentials: true, // allow session cookie from browser to pass through
 };
 
 app.use(cors(corsOptions));
+
+// set security HTTP headers
+app.use(helmet.default());
+
+// Sets X-Permitted-Cross-Domain-Policies: none
+app.use(crossdomain());
+
+// parse JSON bodies (application/json)
+app.use(express.json());
+
+// parse urlencoded bodies (application/x-www-form-urlencoded)
+// the option { extended: false } by default in express@5
+app.use(express.urlencoded());
 
 app.set("strict routing", true);
 
