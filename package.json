@@ -32,7 +32,7 @@
   "dependencies": {
     "@mailchimp/mailchimp_marketing": "^3.0.80",
     "axios": "^1.13.1",
-    "bcryptjs": "^3.0.2",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv-safe": "^9.1.0",
