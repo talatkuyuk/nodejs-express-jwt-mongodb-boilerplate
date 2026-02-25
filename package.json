@@ -74,7 +74,7 @@
     "@types/passport": "^1.0.17",
     "@types/passport-http-bearer": "^1.0.42",
     "@types/passport-jwt": "^4.0.1",
-    "@types/shelljs": "^0.8.17",
+    "@types/shelljs": "^0.10.0",
     "@types/supertest": "^6.0.3",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
@@ -84,11 +84,11 @@
     "jest-extended": "^7.0.0",
     "mongodb": "^7.0.0",
     "node-mocks-http": "^1.17.2",
-    "nodemon": "^3.1.11",
-    "prettier": "^3.6.2",
-    "serialize-error": "^12.0.0",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.8.1",
+    "serialize-error": "^13.0.1",
     "shelljs": "^0.10.0",
-    "supertest": "^7.1.4",
+    "supertest": "^7.2.2",
     "typescript": "^5.9.3"
   }
 }
